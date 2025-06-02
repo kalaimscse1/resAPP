@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">Resb</string>
+    <string name="login_title">Login To RESB</string>
+    <string name="login_company_code">Company Code</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_error">Invalid username or password</string>
+
+    <!-- Tables -->
+    <string name="tables_title">Tables</string>
+    <string name="table_available">Available</string>
+    <string name="table_occupied">Occupied</string>
+    <string name="table_reserved">Reserved</string>
+    <string name="table_number">Table %d</string>
+
+    <!-- Menu -->
+    <string name="menu_title">Menu</string>
+    <string name="menu_add_item">Add Item</string>
+    <string name="menu_item_quantity">Quantity: %d</string>
+    <string name="menu_category_starters">Starters</string>
+    <string name="menu_category_main_course">Main Course</string>
+    <string name="menu_category_desserts">Desserts</string>
+    <string name="menu_category_beverages">Beverages</string>
+
+    <!-- Orders -->
+    <string name="order_title">Order #%d</string>
+    <string name="order_print_kot">Print KOT</string>
+    <string name="order_history">Order History</string>
+    <string name="order_table">Table: %d</string>
+    <string name="order_status">Status: %s</string>
+    <string name="order_date">Date: %s</string>
+    <string name="order_total">Total: ₹%.2f</string>
+    <string name="order_items">Items</string>
+    <string name="order_item_name">%s</string>
+    <string name="order_item_price">₹%.2f</string>
+    <string name="order_item_quantity">x%d</string>
+
+    <!-- Billing -->
+    <string name="billing_title">Bill for Table %d</string>
+    <string name="billing_subtotal">Subtotal</string>
+    <string name="billing_tax">Tax (18%%)</string>
+    <string name="billing_total">Total</string>
+    <string name="billing_payment_method">Payment Method</string>
+    <string name="billing_cash">Cash</string>
+    <string name="billing_card">Card</string>
+    <string name="billing_upi">UPI</string>
+    <string name="billing_process_payment">Process Payment</string>
+    <string name="billing_print_bill">Print Bill</string>
+
+    <!-- Common -->
+    <string name="loading">Loading…</string>
+    <string name="error_message">Something went wrong</string>
+    <string name="retry">Retry</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="print">Print</string>
+</resources>

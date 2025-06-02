@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    
+    <!-- Background circle -->
+    <path
+        android:fillColor="#0F4C81"
+        android:pathData="M60,60m-60,0a60,60 0,1 1,120 0a60,60 0,1 1,-120 0"/>
+    
+    <!-- Plate -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,60m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    
+    <path
+        android:fillColor="#0F4C81"
+        android:pathData="M60,60m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"/>
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,60m-30,0a30,30 0,1 1,60 0a30,30 0,1 1,-60 0"/>
+    
+    <!-- Fork -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M40,30L40,90L35,90L35,30L30,30L30,90L25,90L25,30L20,30L20,30L20,25L45,25L45,30L40,30z"/>
+    
+    <!-- Knife -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M85,25L100,25A5,5 0,0 1,100 40L85,40L85,90L75,90L75,25"/>
+    
+    <!-- KOT text -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,60L72,60L72,65L48,65z"/>
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,55L55,75L50,75L50,55z"/>
+    
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,55L70,75L65,75L65,55z"/>
+</vector>
