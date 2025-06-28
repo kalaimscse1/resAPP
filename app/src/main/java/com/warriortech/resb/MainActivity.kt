@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -79,8 +80,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
+import com.warriortech.resb.screens.OrderScreen
 
 
 @AndroidEntryPoint
@@ -112,10 +115,21 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val connectionState by networkMonitor.isOnline.collectAsState(initial = ConnectionState.Available)
-                val screenWidth = LocalConfiguration.current.screenWidthDp
+                val configuration = LocalConfiguration.current
+                val screenWidth = configuration.screenWidthDp
+                val screenHeight = configuration.screenHeightDp
                 val isLargeScreen = screenWidth >= 600
-                val isCollapsed = remember { mutableStateOf(false) }
-                val animatedDrawerWidth by animateDpAsState(targetValue = if (isCollapsed.value) 72.dp else 280.dp)
+                val isTablet = screenWidth >= 600 && screenHeight >= 960
+                val isLandscape = screenWidth > screenHeight
+                val isCollapsed = remember { mutableStateOf(!isLargeScreen) }
+                
+                // Responsive drawer width based on screen size
+                val drawerWidth = when {
+                    isTablet -> if (isCollapsed.value) 80.dp else 320.dp
+                    isLargeScreen -> if (isCollapsed.value) 72.dp else 280.dp
+                    else -> if (isCollapsed.value) 0.dp else (screenWidth * 0.75f).dp
+                }
+                val animatedDrawerWidth by animateDpAsState(targetValue = drawerWidth)
 
                 val drawerContent = @Composable {
                     DrawerContent(
@@ -188,7 +202,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
-    val selectedItems by remember { mutableStateOf(mapOf<Long, Int>()) }
+    val selectedItems by remember { mutableStateOf(mapOf<MenuItem, Int>()) }
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
@@ -238,14 +252,20 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         composable("billing_screen") {
             BillingScreen(
                 navController = navController,
-                initialItems = TODO(),
-                tableStatus = TODO() // Use the shared ViewModel
+                initialItems = selectedItems,
+                tableStatus = selectedTable?.table_status ?: "AVAILABLE"
             )
         }
 
         composable("payment_screen") {
             PaymentScreen(
-                navController = navController// Use the shared ViewModel
+                navController = navController
+            )
+        }
+
+        composable("orders") {
+            OrderScreen(
+                drawerState = drawerState
             )
         }
     }
@@ -322,6 +342,14 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
                 selected = false,
                 onClick = { onDestinationClicked("menu") },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("Orders") else Text("") },
+                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                selected = false,
+                onClick = { onDestinationClicked("orders") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 

@@ -2,7 +2,6 @@ package com.warriortech.resb.data.sync
 
 import android.content.Context
 import androidx.work.*
-import com.warriortech.resb.data.remote.RestaurantApiService
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor

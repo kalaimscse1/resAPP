@@ -1,0 +1,18 @@
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Android Build"
+
+[[workflows.workflow]]
+name = "Android Build"
+author = 44351760
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x gradlew"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./gradlew assembleDebug"

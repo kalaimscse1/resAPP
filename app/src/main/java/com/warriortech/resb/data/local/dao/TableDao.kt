@@ -14,7 +14,7 @@ interface TableDao {
     @Query("SELECT * FROM tables WHERE table_id = :id")
     suspend fun getTableById(id: Long): TableEntity?
     
-    @Query("SELECT * FROM tables WHERE is_ac = :section")
+    @Query("SELECT * FROM tables WHERE area_id = :section")
     fun getTablesBySection(section: Long): Flow<List<TableEntity>>
     
     @Query("SELECT * FROM tables WHERE table_status = :status")
@@ -43,4 +43,6 @@ interface TableDao {
     
     @Query("UPDATE tables SET syncStatus = :newStatus WHERE table_id = :id")
     suspend fun updateTableSyncStatus(id: Long, newStatus: SyncStatus)
+    
 }
+

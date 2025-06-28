@@ -79,8 +79,8 @@ interface ApiService {
 
     @GET("order/orderDetails/getKotNO")
     suspend fun getKotNo(): Map<String, Int>
-    @GET("orders")
-    suspend fun getAllOrders(): Response<List<Order>>
+    @GET("order/getOrdersByRunning")
+    suspend fun getAllOrders(): Response<List<TblOrderResponse>>
 
     @GET("order/getOrderNoForEdit/{table_id}")
     suspend fun getOpenOrderItemsForTable(@Path("table_id") tableId: Long):Response<Map<String, Int>>

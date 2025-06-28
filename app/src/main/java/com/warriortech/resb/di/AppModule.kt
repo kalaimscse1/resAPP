@@ -108,9 +108,14 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMenuItemRepository(
+        menuItemDao: MenuItemDao,
         apiService: ApiService,
+        networkMonitor: NetworkMonitor
     ): MenuItemRepository {
-        return MenuItemRepository( apiService)
+        return MenuItemRepository(
+            menuItemDao, apiService,
+            networkMonitor
+        )
     }
 
     @Provides

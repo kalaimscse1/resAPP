@@ -1,0 +1,77 @@
+
+package com.warriortech.resb.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.OrderRepository
+import com.warriortech.resb.screens.OrderDisplayItem
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
+import javax.inject.Inject
+
+@HiltViewModel
+class OrderScreenViewModel @Inject constructor(
+    private val orderRepository: OrderRepository
+) : ViewModel() {
+
+    private val _dineInOrders = MutableStateFlow<List<OrderDisplayItem>>(emptyList())
+    val dineInOrders: StateFlow<List<OrderDisplayItem>> = _dineInOrders.asStateFlow()
+
+    private val _takeawayOrders = MutableStateFlow<List<OrderDisplayItem>>(emptyList())
+    val takeawayOrders: StateFlow<List<OrderDisplayItem>> = _takeawayOrders.asStateFlow()
+
+    private val _deliveryOrders = MutableStateFlow<List<OrderDisplayItem>>(emptyList())
+    val deliveryOrders: StateFlow<List<OrderDisplayItem>> = _deliveryOrders.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    fun loadOrders() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val orders = orderRepository.getAllOrders()
+                val orderDisplayItems = orders.map { order ->
+                    OrderDisplayItem(
+                        orderId = order.order_master_id?.toLong() ?: 0,
+                        tableNumber = if (order.table_id > 0) order.table_id.toInt() else null,
+                        totalAmount = 0.0,
+                        status = order.order_status,
+                        timestamp = formatTimestamp(order.order_date),
+                        orderType = when {
+                            order.table_id == 0L -> "TAKEAWAY"
+                            order.table_id == 1L -> "DELIVERY"
+                            order.table_id > 1L -> "DINE_IN"
+                            else -> "UNKNOWN"
+                        }
+                    )
+                }
+
+                _dineInOrders.value = orderDisplayItems.filter { it.orderType == "DINE_IN" }
+                _takeawayOrders.value = orderDisplayItems.filter { it.orderType == "TAKEAWAY" }
+                _deliveryOrders.value = orderDisplayItems.filter { it.orderType == "DELIVERY" }
+            } catch (e: Exception) {
+                // Handle error
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun formatTimestamp(timestamp: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
+            val date = inputFormat.parse(timestamp)
+            date?.let { outputFormat.format(it) } ?: timestamp
+        } catch (e: Exception) {
+            timestamp
+        }
+    }
+}

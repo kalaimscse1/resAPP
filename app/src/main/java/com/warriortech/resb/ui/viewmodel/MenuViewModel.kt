@@ -4,7 +4,6 @@ package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +11,6 @@ import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Order
 import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.data.repository.MenuItemRepository
-import com.warriortech.resb.data.repository.OrderRep
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.KOTItem
@@ -30,8 +28,7 @@ import javax.inject.Inject
 class MenuViewModel @Inject constructor(
     private val menuRepository: MenuItemRepository,
     private val orderRepository: OrderRepository,
-    private val tableRepository: TableRepository,
-    private val orderRep:OrderRep
+    private val tableRepository: TableRepository
 ) : ViewModel() {
 
     sealed class MenuUiState {
@@ -70,7 +67,7 @@ class MenuViewModel @Inject constructor(
             if (isTableOrder) {
                 // Attempt to load existing items for this table
                 // This is a placeholder for your actual data fetching logic
-                val existingItemsForTable = orderRep.getOpenOrderItemsForTable(currentTableId) // Or from local cache
+                val existingItemsForTable = orderRepository.getOpenOrderItemsForTable(currentTableId) // Or from local cache
 
                 if (existingItemsForTable.isNotEmpty()) {
                     // If you clear items by default on init, you might need to reconsider
@@ -125,7 +122,7 @@ class MenuViewModel @Inject constructor(
         viewModelScope.launch {
             _menuState.value = MenuUiState.Loading
             tableStatus.value= _selectedTableId.value?.let { tableRepository.getstatus(it) }
-            menuRepository.getMenuItems(category).collect { result ->
+            menuRepository.getMenuItemsByCategory(category).collect { result ->
                 result.fold(
                     onSuccess = { menuItems ->
                         _menuState.value = MenuUiState.Success(menuItems)
@@ -212,7 +209,7 @@ class MenuViewModel @Inject constructor(
                         menuItem = menuItem,
                     )
                 }
-                orderRep.placeOrUpdateOrder(
+                orderRepository.placeOrUpdateOrder(
                     tableId, orderItems,
                     tableStatus1.toString(),existingOrderId.value
                 ).collect { result ->
@@ -252,7 +249,7 @@ class MenuViewModel @Inject constructor(
                         menuItem = menuItem,
                     )
                 }
-                orderRep.placeOrUpdateOrder(
+                orderRepository.placeOrUpdateOrder(
                     tableId, orderItems,
                     tableStatus1.toString()
                 ).collect { result ->
