@@ -14,7 +14,7 @@ buildscript {
 
 //    val hiltVersion = "2.48" // Ensure this is defined
     dependencies {
-        classpath(libs.dagger.hilt.android.gradle.plugin)
+        classpath(libs.hilt.android.gradlePlugin)
         // ... other classpaths
 //        dagger-hilt-android-gradle-plugin
     }

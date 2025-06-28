@@ -1,12 +1,21 @@
 package com.warriortech.resb.data.repository
 
 
-import com.warriortech.resb.model.CreateOrderRequest
+import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.Order
+import com.warriortech.resb.model.OrderDetails
 import com.warriortech.resb.model.OrderItem
+import com.warriortech.resb.model.OrderMaster
 import com.warriortech.resb.model.OrderStatus
-import com.warriortech.resb.model.PrintResponse
+import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.model.TblOrderResponse
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.util.getCurrentDateModern
+import com.warriortech.resb.util.getCurrentTimeModern
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,20 +33,77 @@ class OrderRepository @Inject constructor(
      * @param tableId The table ID
      * @param items List of order items
      */
-    suspend fun createOrder(tableId: Int, items: List<OrderItem>): Flow<Result<Order>> = flow {
+    @SuppressLint("SuspiciousIndentation")
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun createOrder(tableId: Long, items: List<OrderItem>,tableStatus:String): Flow<Result<TblOrderResponse>> = flow {
         try {
-            val orderRequest = CreateOrderRequest(tableId, items)
+            val table= apiService.getTablesByStatus(tableId)
+            val order_master_id= apiService.getOrderNo()
+            val orderRequest = OrderMaster(
+                order_date = getCurrentDateModern(),
+                order_create_time = getCurrentTimeModern(),
+                order_completed_time = "",
+                staff_id = SessionManager.getUser()?.staff_id ?: 1,
+                is_dine_in = tableStatus != "TAKEAWAY",
+                is_take_away = tableStatus == "TAKEAWAY",
+                is_delivery = tableStatus == "DELIVERY",
+                table_id = tableId,
+                no_of_person = table.seating_capacity,
+                waiter_request_status = true,
+                kitchen_response_status = true,
+                order_status = "RUNNING",
+                is_merge = false,
+                is_active = 1,
+                order_master_id = order_master_id["order_master_id"],
+                is_delivered = false
+            )
+            val kot_number=apiService.getKotNo()
             val response = apiService.createOrder(orderRequest)
 
             if (response.isSuccessful) {
                 val order = response.body()
+                val orderDetails=items.map {
+                    val taxAmount=calculateGst(if (tableStatus=="AC")
+                        it.menuItem.ac_rate * it.quantity
+                    else if (tableStatus=="PARCEL"||tableStatus=="DELIVERY")
+                        it.menuItem.parcel_rate * it.quantity
+                    else
+                        it.menuItem.rate * it.quantity,it.menuItem.tax_percentage.toDouble(),true)
+                    OrderDetails(
+                        order_master_id = response.body()?.order_master_id,
+                        order_details_id = 1,
+                        kot_number = kot_number["kot_number"],
+                        menu_item_id = it.menuItem.menu_item_id,
+                        rate = taxAmount.basePrice,
+                        qty = it.quantity,
+                        total = taxAmount.basePrice * it.quantity,
+                        tax_id = it.menuItem.tax_id ,
+                        tax_amount = taxAmount.gstAmount,
+                        sgst = 1.0,
+                        cgst = 1.0,
+                        grand_total = taxAmount.totalPrice,
+                        prepare_status = true,
+                        item_add_mode = false,
+                        is_flag = false,
+                        merge_order_nos = "",
+                        merge_order_tables = table.table_name,
+                        merge_pax = 2,
+                        is_active = 1,
+                    )
+                }
+                apiService.createOrderDetails(orderDetails)
+
+                apiService.updateTableAvailability(tableId,"OCCUPIED")
+
+
                 if (order != null) {
+                    order.kot_number=kot_number["kot_number"]
                     emit(Result.success(order))
                 } else {
                     emit(Result.failure(Exception("Failed to create order - empty response")))
                 }
             } else {
-                emit(Result.failure(Exception("Error creating order: ${response.code()}")))
+                emit(Result.failure(Exception("Error creating order: ${response.code()}, ${response.errorBody()?.string()}")))
             }
         } catch (e: Exception) {
             emit(Result.failure(e))
@@ -55,6 +121,7 @@ class OrderRepository @Inject constructor(
             if (response.isSuccessful) {
                 val orders = response.body()
                 if (orders != null) {
+
                     emit(Result.success(orders))
                 } else {
                     emit(Result.failure(Exception("No orders data received")))
@@ -71,25 +138,25 @@ class OrderRepository @Inject constructor(
      * Get orders for a specific table
      * Filters orders client-side
      */
-    suspend fun getOrdersByTable(tableId: Int): Flow<Result<List<Order>>> = flow {
-        try {
-            val response = apiService.getAllOrders()
+    suspend fun getOrdersByTable(tableId: Long): List<TblOrderDetailsResponse> {
+
+            val response = apiService.getOpenOrderItemsForTable(tableId)
+            var order=0
 
             if (response.isSuccessful) {
                 val allOrders = response.body()
-                if (allOrders != null) {
-                    // Filter orders for this table
-                    val tableOrders = allOrders.filter { it.tableId == tableId }
-                    emit(Result.success(tableOrders))
-                } else {
-                    emit(Result.failure(Exception("No orders data received")))
+                val orderno = allOrders?.get("order_master_id")
+                if (allOrders != null && orderno != null) {
+                    order=orderno
+// Filter orders for this table
+//                    val tableOrders = allOrders.filter { it.tableId == tableId }
                 }
-            } else {
-                emit(Result.failure(Exception("Error fetching orders: ${response.code()}")))
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
-        }
+            val orderDetails = apiService.getOpenOrderDetailsForTable(order)
+            if(orderDetails.isSuccessful){
+                return orderDetails.body()!!
+            }
+        return emptyList()
     }
 
     /**
@@ -124,23 +191,34 @@ class OrderRepository @Inject constructor(
     /**
      * Print a KOT for an order
      */
-    suspend fun printKOT(orderId: Long): Flow<Result<
-            PrintResponse>> = flow {
+// Assuming KOTRequest, ApiService, and PrintResponse are defined elsewhere
+// data class KOTRequest(val id: String) // Placeholder
+// interface ApiService { // Placeholder
+//    suspend fun printKOT(orderId: KOTRequest): retrofit2.Response<PrintResponse>
+// }
+// data class PrintResponse(val message: String, val status: String) // Placeholder
+
+    suspend fun printKOT(orderId: KOTRequest): Flow<Result<String>> = flow { // Changed Flow type to Flow<Result<PrintResponse>>
         try {
             val response = apiService.printKOT(orderId)
 
             if (response.isSuccessful) {
                 val printResponse = response.body()
+                val message = printResponse?.get("message")
                 if (printResponse != null) {
-                    emit(Result.success(printResponse))
+                    emit(Result.success(message.toString())) // Emit the successful PrintResponse object
                 } else {
-                    emit(Result.failure(Exception("Failed to print KOT - empty response")))
+                    // Successful response but empty body - this might be an error case depending on your API
+                    emit(Result.failure(Exception("KOT print successful but response body was empty.")))
                 }
             } else {
-                emit(Result.failure(Exception("Error printing KOT: ${response.code()}")))
+                // API call failed (e.g., 4xx, 5xx error)
+                val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                emit(Result.failure(Exception("Failed to print KOT. Code: ${response.code()}, Error: $errorBody")))
             }
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            // Catch any other exceptions (network issues, etc.)
+            emit(Result.failure(Exception("Error printing KOT: ${e.message}", e)))
         }
     }
 
@@ -165,5 +243,20 @@ class OrderRepository @Inject constructor(
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
+    }
+
+    suspend fun getOpenOrderItemsForTable(orderId: Long) {}
+}
+data class GstResult(val basePrice: Double, val gstAmount: Double, val totalPrice: Double)
+
+fun calculateGst(amount: Double, gstRate: Double, isInclusive: Boolean): GstResult {
+    return if (isInclusive) {
+        val gstAmount = amount * gstRate / (100 + gstRate)
+        val basePrice = amount - gstAmount
+        GstResult(basePrice, gstAmount, amount)
+    } else {
+        val gstAmount = amount * gstRate / 100
+        val totalPrice = amount + gstAmount
+        GstResult(amount, gstAmount, totalPrice)
     }
 }

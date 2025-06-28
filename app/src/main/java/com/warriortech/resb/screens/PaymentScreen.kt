@@ -1,0 +1,251 @@
+package com.warriortech.resb.screens
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import com.warriortech.resb.ui.viewmodel.BillingViewModel
+import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
+import com.warriortech.resb.ui.viewmodel.PaymentMethod
+import com.warriortech.resb.ui.viewmodel.PaymentProcessingState
+import java.text.NumberFormat
+import java.util.Locale
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PaymentScreen(
+    navController: NavHostController,
+    viewModel: BillingViewModel = hiltViewModel() // Shared ViewModel
+    // amountToPayFromRoute: Float? = null // If passing amount via route
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // If amount was passed via route, you might set it in the ViewModel once
+    // LaunchedEffect(key1 = amountToPayFromRoute) {
+    //     amountToPayFromRoute?.let { viewModel.updateAmountToPay(it.toDouble()) }
+    // }
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearErrorMessage() // Clear after showing
+        }
+    }
+
+    LaunchedEffect(uiState.paymentProcessingState) {
+        if (uiState.paymentProcessingState is PaymentProcessingState.Success) {
+            // Navigate to an order success/confirmation screen or back
+            val successState = uiState.paymentProcessingState as PaymentProcessingState.Success
+            // navController.navigate("order_success/${successState.transactionId}") {
+            //     popUpTo("billing_screen_route_or_graph_start") { inclusive = true } // Clear back stack
+            // }
+            // For now, just show a snackbar and allow manual dismissal or pop back
+            snackbarHostState.showSnackbar("Payment Successful! TXN ID: ${successState.transactionId}")
+            // viewModel.resetPaymentState() // Reset for next payment
+        } else if (uiState.paymentProcessingState is PaymentProcessingState.Error) {
+            val errorState = uiState.paymentProcessingState as PaymentProcessingState.Error
+            snackbarHostState.showSnackbar("Payment Failed: ${errorState.message}")
+            // viewModel.resetPaymentState() // Allow retry
+        }
+    }
+
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Complete Payment") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        if (uiState.paymentProcessingState !is PaymentProcessingState.Processing) {
+                            navController.popBackStack()
+                        }
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            PaymentBottomBar(
+                uiState = uiState,
+                onConfirmPayment = { viewModel.processPayment() }
+            )
+        }
+    ) { paddingValues ->
+        if (uiState.paymentProcessingState is PaymentProcessingState.Processing) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(Modifier.height(16.dp))
+                    Text("Processing Payment...")
+                }
+            }
+        } else if (uiState.paymentProcessingState is PaymentProcessingState.Success) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Filled.CheckCircle, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
+                    Spacer(Modifier.height(16.dp))
+                    Text("Payment Successful!", style = MaterialTheme.typography.headlineSmall)
+                    val successState = uiState.paymentProcessingState as PaymentProcessingState.Success
+                    Text("Transaction ID: ${successState.transactionId}", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(24.dp))
+                    Button(onClick = {
+                        viewModel.resetPaymentState()
+                        // TODO: Navigate to a new order screen or main screen
+                        // navController.popBackStack(navController.graph.startDestinationId, false)
+                        navController.popBackStack() // Or navigate to a new order/home
+                    }) {
+                        Text("New Bill / Done")
+                    }
+                }
+            }
+        }
+        else {
+            PaymentContent(
+                modifier = Modifier.padding(paddingValues),
+                uiState = uiState,
+                onSelectPaymentMethod = { viewModel.selectPaymentMethod(it) },
+                onAmountChange = { viewModel.updateAmountToPay(it) }
+            )
+        }
+    }
+}
+
+@Composable
+fun PaymentContent(
+    modifier: Modifier = Modifier,
+    uiState: BillingPaymentUiState,
+    onSelectPaymentMethod: (PaymentMethod) -> Unit,
+    onAmountChange: (Double) -> Unit
+) {
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    var amountText by remember(uiState.amountToPay) { mutableStateOf(uiState.amountToPay.format(2)) }
+
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            Text(
+                "Amount Due: ${currencyFormatter.format(uiState.totalAmount)}",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = amountText,
+                onValueChange = {
+                    amountText = it
+                    it.toDoubleOrNull()?.let { numVal -> onAmountChange(numVal) }
+                },
+                label = { Text("Amount to Pay") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                leadingIcon = { Text(currencyFormatter.currency?.symbol ?: "₹") }
+            )
+        }
+
+        item {
+            Text("Select Payment Method", style = MaterialTheme.typography.titleMedium)
+        }
+
+        if (uiState.availablePaymentMethods.isEmpty()) {
+            item { Text("No payment methods available.") }
+        } else {
+            items(uiState.availablePaymentMethods) { method ->
+                PaymentMethodItem(
+                    method = method,
+                    isSelected = uiState.selectedPaymentMethod?.id == method.id,
+                    onClick = { onSelectPaymentMethod(method) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PaymentMethodItem(
+    method: PaymentMethod,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(method.name, style = MaterialTheme.typography.bodyLarge)
+            if (isSelected) {
+                Icon(Icons.Filled.CheckCircle, contentDescription = "Selected", tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+fun PaymentBottomBar(
+    uiState: BillingPaymentUiState,
+    onConfirmPayment: () -> Unit
+) {
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    BottomAppBar(
+        containerColor = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Paying: ${currencyFormatter.format(uiState.amountToPay)}",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Button(
+                onClick = onConfirmPayment,
+                enabled = uiState.selectedPaymentMethod != null &&
+                        uiState.amountToPay > 0 &&
+                        uiState.paymentProcessingState == PaymentProcessingState.Idle
+            ) {
+                Text("Confirm Payment")
+            }
+        }
+    }
+}
+// Helper from BillingScreen (can be moved to a common util file)
+// fun Double.format(digits: Int) = "%.${digits}f".format(this)

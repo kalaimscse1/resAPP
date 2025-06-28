@@ -23,6 +23,7 @@ data class TblStaff(
     var is_active:Boolean
 )
 data class LoginRequest(
+    val companyCode: String,
     val user_name: String,
     val password: String
 )

@@ -41,7 +41,7 @@ class TableViewModel @Inject constructor(
     // Selected section
     private val _selectedSection = MutableStateFlow<Long?>(null)
 
-    init {
+    fun loadTables(){
         // Load tables when section changes or just all tables if no section selected
         viewModelScope.launch {
             _area.value=tableRepository.getAllAreas()

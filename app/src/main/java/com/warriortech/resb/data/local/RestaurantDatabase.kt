@@ -4,27 +4,25 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-//import com.warriortech.resb.data.local.dao.MenuItemDao
-//import com.warriortech.resb.data.local.dao.OrderDao
-//import com.warriortech.resb.data.local.dao.OrderItemDao
+import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.dao.TableDao
-//import com.warriortech.resb.data.local.entity.MenuItemEntity
-//import com.warriortech.resb.data.local.entity.OrderEntity
-//import com.warriortech.resb.data.local.entity.OrderItemEntity
+import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.data.local.entity.TableEntity
 
 @Database(
     entities = [
         TableEntity::class,
+        MenuItemEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class RestaurantDatabase : RoomDatabase() {
     
     abstract fun tableDao(): TableDao
-//    abstract fun menuItemDao(): MenuItemDao
-//    abstract fun orderDao(): OrderDao
+    abstract fun menuItemDao(): MenuItemDao
+
+    //    abstract fun orderDao(): OrderDao
 //    abstract fun orderItemDao(): OrderItemDao
     
     companion object {
@@ -36,7 +34,7 @@ abstract class RestaurantDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     RestaurantDatabase::class.java,
-                    "restaurant_database"
+                    "KTS_RESB"
                 )
                 .fallbackToDestructiveMigration()
                 .build()

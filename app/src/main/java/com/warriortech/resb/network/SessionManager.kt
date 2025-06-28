@@ -16,7 +16,7 @@ import androidx.core.content.edit
  */
 object SessionManager {
     private const val TAG = "SessionManager"
-    private const val PREF_NAME = "RestaurantKotPrefs"
+    private const val PREF_NAME = "ResbPrefs"
     private const val KEY_AUTH_TOKEN = "auth_token"
     private const val KEY_USER = "user"
     private const val KEY_COMPANY_CODE = "company_code"
@@ -58,7 +58,7 @@ object SessionManager {
      */
     fun saveAuthToken(token: String) {
         checkInitialization()
-        prefs.edit().putString(KEY_AUTH_TOKEN, token).apply()
+        prefs.edit { putString(KEY_AUTH_TOKEN, token) }
     }
     
     /**
@@ -101,7 +101,7 @@ object SessionManager {
      */
     fun saveCompanyCode(companyCode: String) {
         checkInitialization()
-        prefs.edit().putString(KEY_COMPANY_CODE, companyCode).apply()
+        prefs.edit { putString(KEY_COMPANY_CODE, companyCode) }
     }
     
     /**
@@ -117,7 +117,7 @@ object SessionManager {
      */
     fun updateLastSyncTimestamp() {
         checkInitialization()
-        prefs.edit().putLong(KEY_LAST_SYNC, System.currentTimeMillis()).apply()
+        prefs.edit { putLong(KEY_LAST_SYNC, System.currentTimeMillis()) }
     }
     
     /**
@@ -133,7 +133,7 @@ object SessionManager {
      */
     fun clearSession() {
         checkInitialization()
-        prefs.edit().clear().apply()
+        prefs.edit { clear() }
     }
     
     /**

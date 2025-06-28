@@ -26,14 +26,26 @@ interface ApiService {
     @GET("table/table/getTablesByIsActive")
     suspend fun getAllTables(): List<Table>
 
-    @GET("table/table/section/{area_id}")
+    @GET("table/table/getTableByAreaId/{area_id}")
     suspend fun getTablesBySection(@Path("area_id") section: Long): List<Table>
+
+    @GET("table/table/getTable/{table_id}")
+    suspend fun getTablesByStatus(@Path("table_id") tableId: Long): Table
 
     @PUT("tables/{id}/status")
     suspend fun updateTableStatus(
         @Path("id") tableId: Long,
         @Query("status") status: String
     ): Response<Void>
+
+    @GET("settings/tax/getTaxSplitByTaxId/{tax_id}")
+    suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
+
+    @GET("table/table/updateTableAvailabilityByTableId/{table_id}")
+    suspend fun updateTableAvailability(
+        @Path("table_id") tableId: Long,
+        @Query("table_availability") status: String
+    ): Int
 
     @GET("table/area/getAreasByIsActive")
     suspend fun getAllAreas(): List<Area>
@@ -47,55 +59,44 @@ interface ApiService {
     suspend fun getMenuItems(): Response<List<MenuItem>>
 
     // Order endpoints
-    @POST("api/orders")
-    suspend fun createOrder(@Body orderRequest: CreateOrderRequest): Response<Order>
+    @POST("order/addOrder")
+    suspend fun createOrder(@Body orderRequest: OrderMaster): Response<TblOrderResponse>
 
-    @GET("api/orders")
+    @GET("order/getOrder/{table_id}")
+    suspend fun getOrder(@Path("table_id") tableId: Long): Response<TblOrderResponse>
+
+    @GET("order/getOrder/{order_master_id}")
+    suspend fun getOrderMasterById(@Path("order_master_id") orderId: Long): Response<TblOrderResponse>
+
+    @POST("order/orderDetails/addAllOrderDetails")
+    suspend fun createOrderDetails(@Body orderRequest: List<OrderDetails>): Response<List<OrderDetails>>
+    
+    @GET("order/getOrderByTableId/{table_id}")
+     suspend fun getOpenOrderMasterForTable(@Path("table_id") tableId: Long): Response<TblOrderResponse>
+
+    @GET("order/getOrderNO")
+    suspend fun getOrderNo(): Map<String, Int>
+
+    @GET("order/orderDetails/getKotNO")
+    suspend fun getKotNo(): Map<String, Int>
+    @GET("orders")
     suspend fun getAllOrders(): Response<List<Order>>
 
-    @POST("api/orders/{orderId}/print")
-    suspend fun printKOT(@Path("orderId") orderId: Long): Response<PrintResponse>
+    @GET("order/getOrderNoForEdit/{table_id}")
+    suspend fun getOpenOrderItemsForTable(@Path("table_id") tableId: Long):Response<Map<String, Int>>
 
-    @PUT("api/orders/{orderId}")
+    @GET("order/orderDetails/getOrdersDetailsByOrderIdApp/{order_master_id}")
+    suspend fun getOpenOrderDetailsForTable(@Path("order_master_id") tableId: Int?):Response<List<TblOrderDetailsResponse>>
+
+    @POST("print/kot")
+    suspend fun printKOT(@Body orderRequest: KOTRequest): Response<Map<String, String>>
+
+    @PUT("orders/{orderId}")
     suspend fun updateOrderStatus(
         @Path("orderId") orderId: Int,
         @Body statusUpdate: Map<String, String>
     ): Response<Order>
 
-
-    @GET("orders/table/{tableId}")
-    suspend fun getOrdersByTableId(@Path("tableId") tableId: Long): List<Order>
-
-    @GET("orders/table/{tableId}/active")
-    suspend fun getActiveOrderByTableId(@Path("tableId") tableId: Long): Order?
-
-    @POST("orders")
-    suspend fun createOrder(
-        @Body order: Order,
-        @Body items: List<OrderItem>
-    ): Response<Order>
-
-    @PUT("orders/{id}")
-    suspend fun updateOrder(
-        @Path("id") orderId: Long,
-        @Body order: Order
-    ): Response<Void>
-
-    @PUT("orders/{id}/status")
-    suspend fun updateOrderStatus(
-        @Path("id") orderId: Long,
-        @Query("status") status: String
-    ): Response<Void>
-
-    // Order item endpoints
-    @GET("order-items/order/{orderId}")
-    suspend fun getOrderItemsByOrderId(@Path("orderId") orderId: Long): List<OrderItem>
-
-    @PUT("order-items/{id}")
-    suspend fun updateOrderItem(
-        @Path("id") orderItemId: Long,
-        @Body orderItem: OrderItem
-    ): Response<Void>
     /**
      * Analytics
      */

@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+//    implementation(libs.esc.pos.usb.net.android)
 
     // WorkManager for synchronization
     implementation (libs.androidx.work.runtime.ktx)
@@ -77,8 +78,8 @@ dependencies {
     implementation(libs.androidx.security.crypto.ktx)
 
     ksp(libs.room.compiler.v252)
-    ksp(libs.dagger.hilt.compiler)
-    implementation(libs.dagger.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.android.core)
     implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.v181)
@@ -88,7 +89,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    testImplementation(libs.dagger.hilt.android.testing)
+    testImplementation(libs.hilt.android.testing)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

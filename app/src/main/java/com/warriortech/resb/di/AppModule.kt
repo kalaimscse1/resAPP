@@ -4,6 +4,7 @@ package com.warriortech.resb.di
 import android.content.Context
 import androidx.room.Room
 import com.warriortech.resb.data.local.RestaurantDatabase
+import com.warriortech.resb.data.local.dao.MenuItemDao
 //import com.warriortech.resb.data.local.dao.MenuItemDao
 //import com.warriortech.resb.data.local.dao.OrderDao
 //import com.warriortech.resb.data.local.dao.OrderItemDao
@@ -35,7 +36,7 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             RestaurantDatabase::class.java,
-            "restaurant_database"
+            "kts-resb"
         )
             .fallbackToDestructiveMigration()
             .build()
@@ -47,11 +48,11 @@ object AppModule {
         return database.tableDao()
     }
 //
-//    @Provides
-//    @Singleton
-//    fun provideMenuItemDao(database: RestaurantDatabase): MenuItemDao {
-//        return database.menuItemDao()
-//    }
+    @Provides
+    @Singleton
+    fun provideMenuItemDao(database: RestaurantDatabase): MenuItemDao {
+        return database.menuItemDao()
+    }
 
 //    @Provides
 //    @Singleton
@@ -87,7 +88,7 @@ object AppModule {
     @Singleton
     fun provideRestaurantApiService(okHttpClient: OkHttpClient): ApiService {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.5:5050/api/") // Replace with your actual API base URL
+            .baseUrl("http://192.168.1.6:5050/api/") // Replace with your actual API base URL
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

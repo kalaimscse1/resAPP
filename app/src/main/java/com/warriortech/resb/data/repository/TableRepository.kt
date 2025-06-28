@@ -56,6 +56,11 @@ class TableRepository(
     suspend fun getAllAreas():List<Area>{
         return apiService.getAllAreas()
     }
+
+    suspend fun getstatus(tableId: Long):String{
+        val data =apiService.getTablesByStatus(tableId)
+        return data.is_ac
+    }
 //    fun getAllAreas(): Flow<List<Area>> {
 //        return combine(
 //            tableDao.getAllTables(),
@@ -189,7 +194,8 @@ class TableRepository(
             table_status = this.table_status,
             syncStatus = syncStatus,
             area_id = this.area_id,
-            area_name = this.area_name
+            area_name = this.area_name,
+            table_availabiltiy = this.table_availability
         )
     }
 }

@@ -14,6 +14,7 @@ data class TableEntity(
     val table_status: String,
     val area_id:Long,
     val area_name:String,
+    val table_availabiltiy:String,
     val syncStatus: SyncStatus = SyncStatus.SYNCED,
     val lastModified: Long = System.currentTimeMillis()
 ) {
@@ -27,7 +28,8 @@ data class TableEntity(
                 table_status = table.table_status,
                 syncStatus = syncStatus,
                 area_id =table.area_id,
-                area_name = table.area_name
+                area_name = table.area_name,
+                table_availabiltiy =  table.table_availability
             )
         }
     }
@@ -40,7 +42,8 @@ data class TableEntity(
             is_ac = this.is_ac,
             table_status = this.table_status,
             area_id = this.area_id,
-            area_name = this.area_name
+            area_name = this.area_name,
+            table_availability = this.table_availabiltiy
         )
     }
 }

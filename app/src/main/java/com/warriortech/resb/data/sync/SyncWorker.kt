@@ -177,7 +177,8 @@ class SyncWorker(
             table_status = this.table_status,
             syncStatus = syncStatus,
             area_id = this.area_id,
-            area_name = this.area_name
+            area_name = this.area_name,
+            table_availabiltiy = this.table_availability
         )
     }
 

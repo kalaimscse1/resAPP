@@ -30,7 +30,7 @@ class MenuItemRepository @Inject constructor(
                 if (menuItems != null) {
                     // If category is provided, filter by category
                     val filteredItems = if (category != null) {
-                        menuItems.filter { it.menu_cat_name == category }
+                        menuItems.filter { it.item_cat_name == category }
                     } else {
                         menuItems
                     }
@@ -58,7 +58,7 @@ class MenuItemRepository @Inject constructor(
                 val menuItems = response.body()
                 if (menuItems != null) {
                     // Group items by category
-                    val groupedItems = menuItems.groupBy { it.menu_cat_name }
+                    val groupedItems = menuItems.groupBy { it.item_cat_name }
 
                     // Convert to MenuCategory objects
                     val categories = groupedItems.map { (categoryName, items) ->
