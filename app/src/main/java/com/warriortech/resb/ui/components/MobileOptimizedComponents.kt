@@ -124,15 +124,47 @@ fun MobileOptimizedTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { Text(label, style = MaterialTheme.typography.bodyMedium) },
         modifier = modifier
             .fillMaxWidth()
-            .height(Dimensions.touchTargetComfortable + 8.dp),
+            .height(Dimensions.inputHeight),
         enabled = enabled,
         isError = isError,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
-        shape = RoundedCornerShape(12.dp),
-        singleLine = true
+        shape = RoundedCornerShape(Dimensions.cornerRadiusL),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        textStyle = MaterialTheme.typography.bodyLarge
+    )
+}
+
+@Composable
+fun ModernButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(
+        defaultElevation = Dimensions.elevationM,
+        pressedElevation = Dimensions.elevationL
+    ),
+    content: @Composable RowScope.() -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(Dimensions.buttonHeight),
+        enabled = enabled,
+        colors = colors,
+        elevation = elevation,
+        shape = RoundedCornerShape(Dimensions.cornerRadiusL),
+        content = content
     )
 }

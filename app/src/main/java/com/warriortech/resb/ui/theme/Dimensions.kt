@@ -57,3 +57,50 @@ object Dimensions {
         }
     }
 }
+package com.warriortech.resb.ui.theme
+
+import androidx.compose.ui.unit.dp
+
+object Dimensions {
+    // Spacing
+    val spacingXS = 4.dp
+    val spacingS = 8.dp
+    val spacingM = 16.dp
+    val spacingL = 24.dp
+    val spacingXL = 32.dp
+    val spacingXXL = 48.dp
+    
+    // Corner Radius
+    val cornerRadiusS = 4.dp
+    val cornerRadiusM = 8.dp
+    val cornerRadiusL = 12.dp
+    val cornerRadiusXL = 16.dp
+    val cornerRadiusXXL = 24.dp
+    
+    // Elevation
+    val elevationS = 2.dp
+    val elevationM = 4.dp
+    val elevationL = 8.dp
+    val elevationXL = 12.dp
+    
+    // Touch Targets
+    val touchTargetMinimum = 48.dp
+    val touchTargetComfortable = 56.dp
+    
+    // Icon Sizes
+    val iconS = 16.dp
+    val iconM = 24.dp
+    val iconL = 32.dp
+    val iconXL = 48.dp
+    
+    // Component Heights
+    val buttonHeight = 48.dp
+    val inputHeight = 56.dp
+    val appBarHeight = 64.dp
+    val bottomNavHeight = 80.dp
+    
+    // Layout
+    val screenPadding = 16.dp
+    val cardPadding = 16.dp
+    val listItemPadding = 16.dp
+}

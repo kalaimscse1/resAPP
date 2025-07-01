@@ -1,41 +1,42 @@
+
 package com.warriortech.resb.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
-val Primary = Color(0xFFFF5722)
-val PrimaryDark = Color(0xFFE64A19)
-val PrimaryLight = Color(0xFFFFCCBC)
-
-// Accent colors
-val Accent = Color(0xFF4CAF50)
-val AccentDark = Color(0xFF388E3C)
-
-// Text colors
-val PrimaryText = Color(0xFF212121)
-val SecondaryText = Color(0xFF757575)
-
-// Common colors
-val White = Color(0xFFFFFFFF)
-val Black = Color(0xFF000000)
-val Gray = Color(0xFFE0E0E0)
-
-// Table status colors
-val TableAvailable = Color(0xFF4CAF50)
-val TableOccupied = Color(0xFFF44336)
-val TableReserved = Color(0xFFFFC107)
-
+// Primary Brand Colors
 val BluePrimary = Color(0xFF2196F3)
-val ReddishAccent = Color(0xFFD32F2F)
-val LightBackground = Color(0xFFFFEBEE)
+val BluePrimaryDark = Color(0xFF1976D2)
+val BluePrimaryLight = Color(0xFF64B5F6)
+
+// Secondary Colors
+val ReddishAccent = Color(0xFFE91E63)
+val ReddishAccentDark = Color(0xFFC2185B)
+val ReddishAccentLight = Color(0xFFF06292)
+
+// Background Colors
+val LightBackground = Color(0xFFF8F9FA)
 val DarkBackground = Color(0xFF121212)
+val SurfaceLight = Color(0xFFFFFFFF)
+val SurfaceDark = Color(0xFF1E1E1E)
+
+// Text Colors
 val TextPrimary = Color(0xFF212121)
 val TextSecondary = Color(0xFF757575)
+val TextOnPrimary = Color(0xFFFFFFFF)
+val TextOnDark = Color(0xFFFFFFFF)
 
+// Semantic Colors
+val Success = Color(0xFF4CAF50)
+val Warning = Color(0xFFFF9800)
+val Error = Color(0xFFF44336)
+val Info = Color(0xFF2196F3)
+
+// Additional UI Colors
+val DividerColor = Color(0xFFE0E0E0)
+val DividerColorDark = Color(0xFF333333)
+val CardElevation = Color(0x08000000)
+val Shadow = Color(0x1A000000)
+
+// Gradient Colors
+val GradientStart = Color(0xFF2196F3)
+val GradientEnd = Color(0xFF21CBF3)
