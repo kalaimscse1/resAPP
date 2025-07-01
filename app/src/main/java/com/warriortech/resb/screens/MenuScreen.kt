@@ -210,21 +210,22 @@ fun MenuScreen(
                         )
                     }
                     if (viewModel.isExistingOrderLoaded.value) {
-                        Button(
+                        MobileOptimizedButton(
                             onClick = {
                                 onBillPlaced(selectedItems) },
-                            enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading
-                        ) {
-                            Text("Bill")
-                        }
+                            enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
+                            text = "Bill",
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                     }
 
-                    Button(
+                    MobileOptimizedButton(
                         onClick = { showConfirmDialog = true },
-                        enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading
-                    ) {
-                        Text(if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update Order" else "Place Order")
-                    }
+                        enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
+                        text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update Order" else "Place Order",
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         },
@@ -515,14 +516,18 @@ fun OrderConfirmationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Confirm")
-            }
+            MobileOptimizedButton(
+                onClick = onConfirm,
+                text = "Confirm",
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            MobileOptimizedButton(
+                onClick = onDismiss,
+                text = "Cancel",
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         title = {
             Text("Confirm Order", style = MaterialTheme.typography.titleLarge)

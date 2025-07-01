@@ -283,12 +283,11 @@ fun BillingBottomBar(
                     fontWeight = FontWeight.Bold
                 )
             }
-            Button(
+            MobileOptimizedButton(
                 onClick = onProceedToPayment,
-                enabled = uiState.totalAmount > 0 // Enable only if there's something to pay
-            ) {
-                Text("Proceed to Payment")
-            }
+                text = "Proceed to Payment",
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
