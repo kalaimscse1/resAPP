@@ -72,6 +72,9 @@ import com.warriortech.resb.ui.theme.TextPrimary
 import com.warriortech.resb.ui.viewmodel.MenuViewModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.components.ResponsiveGrid
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
@@ -374,10 +377,10 @@ fun MenuItemCard(
     tableStatus: String
 ) {
 
-    Card(
+    MobileOptimizedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .aspectRatio(0.8f)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -422,9 +425,13 @@ fun MenuItemCard(
                     ) {
                         IconButton(
                             onClick = onRemoveItem,
-                            enabled = quantity > 0
+                            modifier = Modifier.size(32.dp)
                         ) {
-                            Icon(Icons.Default.Remove, contentDescription = "Remove")
+                            Icon(
+                                Icons.Default.Remove,
+                                contentDescription = "Remove",
+                                tint = Error500
+                            )
                         }
 
                         if (quantity > 0) {
@@ -447,8 +454,15 @@ fun MenuItemCard(
                             Spacer(modifier = Modifier.width(36.dp))
                         }
 
-                        IconButton(onClick = onAddItem) {
-                            Icon(Icons.Default.Add, contentDescription = "Add")
+                        IconButton(
+                            onClick = onAddItem,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = "Add",
+                                tint = Success500
+                            )
                         }
                     }
                 } else {

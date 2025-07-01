@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import android.annotation.SuppressLint
@@ -112,7 +111,7 @@ fun OrderScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                
+
                 item {
                     OrderSection(
                         title = "Takeaway",
@@ -122,7 +121,7 @@ fun OrderScreen(
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
-                
+
                 item {
                     OrderSection(
                         title = "Delivery",
@@ -189,7 +188,7 @@ private fun OrderSection(
                     )
                 }
             }
-            
+
             if (orders.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 orders.forEach { order ->
@@ -268,7 +267,7 @@ private fun OrderItem(
                     )
                 }
             }
-            
+
             if (order.items.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -420,14 +419,9 @@ fun OrderItem(
     order: OrderDisplayItem,
     onClick: () -> Unit
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        shape = RoundedCornerShape(8.dp)
-    ) {
+    MobileOptimizedCard(
+                    modifier = Modifier.padding(horizontal = Dimensions.spacingM, vertical = Dimensions.spacingS)
+                ) {
         Column(
             modifier = Modifier.padding(12.dp)
         ) {
@@ -467,14 +461,14 @@ fun OrderItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             Text(
                 text = "₹${String.format("%.2f", order.totalAmount)}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
             )
-            
+
             Text(
                 text = order.timestamp,
                 style = MaterialTheme.typography.bodySmall,
@@ -493,3 +487,4 @@ data class OrderDisplayItem(
     val timestamp: String,
     val orderType: String
 )
+`

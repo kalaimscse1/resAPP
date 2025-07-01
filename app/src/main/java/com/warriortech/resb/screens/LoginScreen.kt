@@ -219,6 +219,22 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.ui.viewmodel.LoginViewModel // Import your ViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.warriortech.resb.ui.theme.*
+import com.warriortech.resb.ui.viewmodel.LoginViewModel
+import com.warriortech.resb.ui.components.MobileOptimizedTextField
+import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.components.MobileOptimizedCard
 
 @Composable
 fun LoginScreen(
@@ -298,7 +314,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            
+
             Text(
                 text = "Sign in to continue",
                 style = MaterialTheme.typography.bodyLarge,
@@ -309,27 +325,18 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             // Login form card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            MobileOptimizedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimensions.spacingL)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp)
                 ) {
-                    OutlinedTextField(
+                    MobileOptimizedTextField(
                         value = uiState.username,
                         onValueChange = viewModel::onUsernameChange,
-                        label = { Text("Username") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
-                        ),
+                        label = "Username",
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Person,
@@ -341,53 +348,38 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    OutlinedTextField(
+                    MobileOptimizedTextField(
                         value = uiState.password,
                         onValueChange = viewModel::onPasswordChange,
-                        label = { Text("Password") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        visualTransformation = PasswordVisualTransformation(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            focusedLabelColor = MaterialTheme.colorScheme.primary
-                        ),
+                        label = "Password",
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Lock,
                                 contentDescription = "Password",
                                 tint = MaterialTheme.colorScheme.primary
                             )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
+                                Icon(
+                                    imageVector = if (uiState.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (uiState.isPasswordVisible) "Hide Password" else "Show Password"
+                                )
+                            }
                         }
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Button(
-                        onClick = { viewModel.onLoginClick() },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                    MobileOptimizedButton(
+                        onClick = {
+                            keyboardController?.hide() // Hide keyboard on button press
+                            viewModel.attemptLogin()
+                        },
                         enabled = !uiState.isLoading,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                color = Color.White,
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(
-                                "Sign In",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
+                        text = if (uiState.isLoading) "Logging in..." else "Login",
+                        icon = if (uiState.isLoading) null else Icons.Default.Login
+                    )
                 }
             }
         }

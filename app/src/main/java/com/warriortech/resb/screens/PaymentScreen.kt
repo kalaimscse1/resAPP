@@ -24,6 +24,11 @@ import com.warriortech.resb.ui.viewmodel.PaymentMethod
 import com.warriortech.resb.ui.viewmodel.PaymentProcessingState
 import java.text.NumberFormat
 import java.util.Locale
+import com.warriortech.resb.ui.components.PaymentMethodCard
+import com.warriortech.resb.ui.components.PaymentSummaryCard
+import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -207,7 +212,7 @@ fun PaymentScreen(
                     item {
                         PaymentSummaryCard(uiState = uiState)
                     }
-                    
+
                     item {
                         PaymentMethodCard(
                             uiState = uiState,
@@ -225,12 +230,12 @@ fun PaymentScreen(
                     val successState = uiState.paymentProcessingState as PaymentProcessingState.Success
                     Text("Transaction ID: ${successState.transactionId}", style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(24.dp))
-                    Button(onClick = {
+                    MobileOptimizedButton(onClick = {
                         viewModel.resetPaymentState()
                         // TODO: Navigate to a new order screen or main screen
                         // navController.popBackStack(navController.graph.startDestinationId, false)
                         navController.popBackStack() // Or navigate to a new order/home
-                    }) {
+                    }, enabled = true, text = "New Bill / Done") {
                         Text("New Bill / Done")
                     }
                 }
@@ -352,14 +357,13 @@ fun PaymentBottomBar(
                 "Paying: ${currencyFormatter.format(uiState.amountToPay)}",
                 style = MaterialTheme.typography.titleMedium
             )
-            Button(
+            MobileOptimizedButton(
                 onClick = onConfirmPayment,
                 enabled = uiState.selectedPaymentMethod != null &&
                         uiState.amountToPay > 0 &&
-                        uiState.paymentProcessingState == PaymentProcessingState.Idle
-            ) {
-                Text("Confirm Payment")
-            }
+                        uiState.paymentProcessingState == PaymentProcessingState.Idle,
+                text = "Confirm Payment"
+            )
         }
     }
 }
