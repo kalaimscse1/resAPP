@@ -4,6 +4,7 @@ package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -82,10 +83,10 @@ class MenuViewModel @Inject constructor(
                                 menu_item_name_tamil = it.menuItem.menu_item_name_tamil,
                                 item_cat_id = it.menuItem.item_cat_id,
                                 item_cat_name = it.menuItem.item_cat_name,
-                                rate = it.menuItem.rate,
-                                ac_rate = it.menuItem.ac_rate,
-                                parcel_rate = it.menuItem.parcel_rate,
-                                parcel_charge = it.menuItem.parcel_charge,
+                                rate = it.rate,
+                                ac_rate = it.rate,
+                                parcel_rate = it.rate,
+                                parcel_charge = it.rate,
                                 tax_id = it.menuItem.tax_id,
                                 tax_name = it.menuItem.tax_name,
                                 tax_percentage = it.menuItem.tax_percentage,
@@ -102,9 +103,12 @@ class MenuViewModel @Inject constructor(
                                 is_raw = it.menuItem.is_raw,
                                 is_available = it.menuItem.is_available,
                                 image = it.menuItem.image,
-                                qty = it.qty
+                                qty = it.qty,
+                                cess_specific = it.cess_specific,
+                                cess_per = it.cess_per.toString()
                             )
                     }
+                    Log.d("MenuViewModel", "Existing Items: $menuItems")
                     _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
                          // Adjust based on your MenuItem and how quantity is stored
                     _isExistingOrderLoaded.value = true
@@ -122,7 +126,7 @@ class MenuViewModel @Inject constructor(
         viewModelScope.launch {
             _menuState.value = MenuUiState.Loading
             tableStatus.value= _selectedTableId.value?.let { tableRepository.getstatus(it) }
-            menuRepository.getMenuItemsByCategory(category).collect { result ->
+            menuRepository.getMenuItems(category).collect { result ->
                 result.fold(
                     onSuccess = { menuItems ->
                         _menuState.value = MenuUiState.Success(menuItems)

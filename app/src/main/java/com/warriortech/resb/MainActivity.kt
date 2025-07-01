@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -121,13 +122,13 @@ class MainActivity : ComponentActivity() {
                 val isLargeScreen = screenWidth >= 600
                 val isTablet = screenWidth >= 600 && screenHeight >= 960
                 val isLandscape = screenWidth > screenHeight
-                val isCollapsed = remember { mutableStateOf(!isLargeScreen) }
-                
+                val isCollapsed = remember { mutableStateOf(false) }
+
                 // Responsive drawer width based on screen size
                 val drawerWidth = when {
                     isTablet -> if (isCollapsed.value) 80.dp else 320.dp
                     isLargeScreen -> if (isCollapsed.value) 72.dp else 280.dp
-                    else -> if (isCollapsed.value) 0.dp else (screenWidth * 0.75f).dp
+                    else -> if (isCollapsed.value) 72.dp else (screenWidth * 0.8f).dp.coerceAtMost(300.dp)
                 }
                 val animatedDrawerWidth by animateDpAsState(targetValue = drawerWidth)
 
@@ -176,7 +177,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 } else {
-                    ModalNavigationDrawer(drawerState = drawerState, drawerContent = drawerContent) {
+                    ModalNavigationDrawer(
+                        drawerState = drawerState,
+                        drawerContent = drawerContent,
+                        gesturesEnabled = true
+                    ) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
                             elevation = 2.dp,
@@ -202,8 +207,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
-    val selectedItems by remember { mutableStateOf(mapOf<MenuItem, Int>()) }
-
+    var selectedItems by remember { mutableStateOf(mapOf<MenuItem, Int>()) }
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
@@ -246,14 +250,33 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onBackPressed = { navController.popBackStack() },
                 onOrderPlaced = { navController.popBackStack() },
                 drawerState = drawerState,
-                onBillPlaced = { navController.navigate("billing_screen") }
+                onBillPlaced = { items->
+                    selectedItems=items
+                    navController.navigate("billing_screen") }
+            )
+        }
+
+        composable("takeaway_menu") {
+            MenuScreen(
+                isTakeaway = "TAKEAWAY",
+                tableStatId = false,
+                tableId = 1L,
+                onBackPressed = { navController.popBackStack() },
+                onOrderPlaced = { navController.popBackStack()
+                                selectedTable=null},
+                drawerState = drawerState,
+                onBillPlaced = { items->
+                    Log.d("BillingScreen", "NavigationSelected Items: $items")
+                    selectedItems=items
+                    navController.navigate("billing_screen") }
             )
         }
         composable("billing_screen") {
+            Log.d("BillingScreen", "Selected Items: $selectedItems")
             BillingScreen(
                 navController = navController,
                 initialItems = selectedItems,
-                tableStatus = selectedTable?.table_status ?: "AVAILABLE"
+                tableStatus = if (isTakeaway == "TABLE") selectedTable?.is_ac else isTakeaway
             )
         }
 
@@ -341,7 +364,7 @@ fun DrawerContent(
                 label = { if (!isCollapsed) Text("Takeaway Menu") else Text("") },
                 icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
                 selected = false,
-                onClick = { onDestinationClicked("menu") },
+                onClick = { onDestinationClicked("takeaway_menu") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 

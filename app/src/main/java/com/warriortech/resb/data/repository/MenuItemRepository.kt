@@ -10,6 +10,7 @@ import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,6 +32,7 @@ class MenuItemRepository @Inject constructor(
     }
     suspend fun getMenuItems(category: String? = null): Flow<Result<List<MenuItem>>> = flow {
         try {
+            getAllMenuItems()
             val response = apiService.getMenuItems()
 
             if (response.isSuccessful) {
@@ -54,7 +56,7 @@ class MenuItemRepository @Inject constructor(
         }
     }
 
-    fun getMenuItemsByCategory(categoryId: String?): Flow<List<MenuItem>> {
+    fun getMenuItemsByCategory(categoryId: Long): Flow<List<MenuItem>> {
         return menuItemDao.getMenuItemsByCategory(categoryId.toString())
             .map { entities -> entities.map { it.toModel() } }
     }
@@ -109,7 +111,9 @@ private fun MenuItem.toEntity() = MenuItemEntity(
     hsn_code = hsn_code,
     order_by = order_by,
     is_inventory = is_inventory,
-    is_raw = is_raw
+    is_raw = is_raw,
+    cess_specific = cess_specific,
+    cess_per= cess_per
 )
 
 private fun MenuItemEntity.toModel() = MenuItem(
@@ -137,5 +141,7 @@ private fun MenuItemEntity.toModel() = MenuItem(
     hsn_code = this.hsn_code,
     order_by = this.order_by,
     is_inventory = this.is_inventory,
-    is_raw = this.is_raw
+    is_raw = this.is_raw,
+    cess_per = this.cess_per,
+    cess_specific = this.cess_specific
 )

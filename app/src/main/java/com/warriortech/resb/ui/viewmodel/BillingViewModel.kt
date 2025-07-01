@@ -153,7 +153,9 @@ class BillingViewModel @Inject constructor(
                 availablePaymentMethods = listOf(
                     PaymentMethod("cash", "Cash"),
                     PaymentMethod("card", "Credit/Debit Card"),
-                    PaymentMethod("upi", "UPI / QR Code")
+                    PaymentMethod("upi", "UPI / QR Code"),
+                    PaymentMethod("due", "Credit/Due"),
+                    PaymentMethod("others", "Others")
                     // Add more methods
                 )
             )

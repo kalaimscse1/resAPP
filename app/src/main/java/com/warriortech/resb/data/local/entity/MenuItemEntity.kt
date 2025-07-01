@@ -31,6 +31,8 @@ data class MenuItemEntity(
     val is_inventory:Long,
     val is_raw:String,
     val is_available: String,
+    val cess_per:String,
+    val cess_specific: Double,
     val image: String? = null,
     val syncStatus: SyncStatus = SyncStatus.SYNCED,
     val lastModified: Long = System.currentTimeMillis()
@@ -63,7 +65,9 @@ data class MenuItemEntity(
                 hsn_code = menuItem.hsn_code,
                 order_by = menuItem.order_by,
                 is_inventory = menuItem.is_inventory,
-                is_raw = menuItem.is_raw
+                is_raw = menuItem.is_raw,
+                cess_per = menuItem.cess_per,
+                cess_specific = menuItem.cess_specific
             )
         }
     }
@@ -94,7 +98,9 @@ data class MenuItemEntity(
             hsn_code = this.hsn_code,
             order_by = this.order_by,
             is_inventory = this.is_inventory,
-            is_raw = this.is_raw
+            is_raw = this.is_raw,
+            cess_per = this.cess_per,
+            cess_specific = this.cess_specific
         )
     }
 }

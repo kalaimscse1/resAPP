@@ -83,7 +83,7 @@ fun MenuScreen(
     tableId: Long,       // Actual table ID for table orders, or a placeholder for others
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
-    onBillPlaced: () -> Unit,
+    onBillPlaced: (Map<MenuItem, Int>) -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
     drawerState: DrawerState
 ) {
@@ -206,10 +206,11 @@ fun MenuScreen(
                     }
                     if (viewModel.isExistingOrderLoaded.value) {
                         Button(
-                            onClick = { onBillPlaced },
+                            onClick = {
+                                onBillPlaced(selectedItems) },
                             enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading
                         ) {
-                            Text("BILL")
+                            Text("Bill")
                         }
                     }
 

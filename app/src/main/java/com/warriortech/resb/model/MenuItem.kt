@@ -13,6 +13,8 @@ data class MenuItem(
     val tax_id:Long,
     val tax_name:String,
     val tax_percentage:String,
+    val cess_per:String,
+    val cess_specific: Double,
     val kitchen_cat_id:Long,
     val kitchen_cat_name:String,
     val stock_maintain:String,

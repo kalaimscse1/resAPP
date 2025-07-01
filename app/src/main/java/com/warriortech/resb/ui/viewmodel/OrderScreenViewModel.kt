@@ -38,15 +38,17 @@ class OrderScreenViewModel @Inject constructor(
             try {
                 val orders = orderRepository.getAllOrders()
                 val orderDisplayItems = orders.map { order ->
+                    val totalAmount = orderRepository.getRunningOrderAmount(order.order_master_id?.toLong() ?: 0)
                     OrderDisplayItem(
                         orderId = order.order_master_id?.toLong() ?: 0,
-                        tableNumber = if (order.table_id > 0) order.table_id.toInt() else null,
-                        totalAmount = 0.0,
+                        areaName = order.area_name,
+                        tableName =  order.table_name,
+                        totalAmount = totalAmount["grand_total"] ?: 0.0,
                         status = order.order_status,
                         timestamp = formatTimestamp(order.order_date),
                         orderType = when {
-                            order.table_id == 0L -> "TAKEAWAY"
-                            order.table_id == 1L -> "DELIVERY"
+                            order.table_id == 1L -> "TAKEAWAY"
+                            order.table_id == 0L -> "DELIVERY"
                             order.table_id > 1L -> "DINE_IN"
                             else -> "UNKNOWN"
                         }

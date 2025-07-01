@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -80,6 +81,7 @@ fun OrderScreen(
                         orders = dineInOrders,
                         onOrderClick = { order ->
                             // Handle order click
+                            val orderId = order.orderId
                         }
                     )
                 }
@@ -91,6 +93,7 @@ fun OrderScreen(
                         orders = takeawayOrders,
                         onOrderClick = { order ->
                             // Handle order click
+
                         }
                     )
                 }
@@ -169,6 +172,7 @@ fun OrderTypeSection(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun OrderItem(
     order: OrderDisplayItem,
@@ -207,10 +211,16 @@ fun OrderItem(
                     }
                 )
             }
-            
-            if (order.tableNumber != null) {
+            if (order.areaName != null) {
                 Text(
-                    text = "Table ${order.tableNumber}",
+                    text = order.areaName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (order.tableName != null) {
+                Text(
+                    text = order.tableName,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -234,7 +244,8 @@ fun OrderItem(
 
 data class OrderDisplayItem(
     val orderId: Long,
-    val tableNumber: Int?,
+    val areaName: String?,
+    val tableName: String?,
     val totalAmount: Double,
     val status: String,
     val timestamp: String,

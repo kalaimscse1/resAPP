@@ -1,6 +1,7 @@
 package com.warriortech.resb.screens
 
 
+import android.graphics.Color.rgb
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,6 +42,7 @@ import com.warriortech.resb.ui.viewmodel.TableViewModel
 import com.warriortech.resb.util.NetworkStatusBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.launch
 
@@ -125,7 +128,8 @@ fun SelectionScreen(
                 ) {
                     areas.filter { it.area_name != "--" }.forEach { areaItem ->
                         AssistChip(
-                            onClick = { viewModel.setSection(areaItem.area_id) },
+                            onClick = { viewModel.setSection(areaItem.area_id)
+                                Modifier.background(Color(rgb(129, 154, 145)))},
                             label = { Text(areaItem.area_name) }
                         )
                     }

@@ -29,7 +29,7 @@ fun BillingScreen(
     navController: NavHostController, // For navigation
     viewModel: BillingViewModel = hiltViewModel(),
     // Pass orderId or initial items if loading an existing bill
-     initialItems: Map<MenuItem, Int>? = null,
+     initialItems: Map<MenuItem, Int>?,
      tableStatus: String?
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
