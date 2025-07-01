@@ -1,6 +1,7 @@
-
 package com.warriortech.resb.ui.components
 
+import androidx.compose.foundation.BorderStroke
+import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,18 +39,18 @@ fun PaymentSummaryCard(uiState: PaymentUiState) {
                     fontWeight = FontWeight.Bold
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             PaymentSummaryRow(label = "Subtotal", amount = "₹${uiState.subtotal}")
             PaymentSummaryRow(label = "Tax", amount = "₹${uiState.tax}")
             PaymentSummaryRow(label = "Service Charge", amount = "₹${uiState.serviceCharge}")
-            
+
             Divider(
                 modifier = Modifier.padding(vertical = 12.dp),
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -120,16 +121,16 @@ fun PaymentMethodCard(
                     fontWeight = FontWeight.Bold
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             val paymentMethods = listOf(
                 "Cash" to Icons.Default.Money,
                 "Card" to Icons.Default.CreditCard,
                 "UPI" to Icons.Default.QrCode,
                 "Online" to Icons.Default.AccountBalance
             )
-            
+
             paymentMethods.forEach { (method, icon) ->
                 PaymentMethodOption(
                     method = method,

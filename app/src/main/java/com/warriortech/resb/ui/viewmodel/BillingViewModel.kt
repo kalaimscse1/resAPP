@@ -225,6 +225,11 @@ class BillingViewModel @Inject constructor(
         }
     }
 
+    fun updatePaymentMethod(paymentMethodName: String) {
+        val paymentMethod = _uiState.value.availablePaymentMethods.find { it.name == paymentMethodName }
+        _uiState.update { it.copy(selectedPaymentMethod = paymentMethod) }
+    }
+
     fun resetPaymentState() {
         _uiState.update { it.copy(paymentProcessingState = PaymentProcessingState.Idle, errorMessage = null) }
     }
