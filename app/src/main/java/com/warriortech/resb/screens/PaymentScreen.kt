@@ -1,9 +1,11 @@
 package com.warriortech.resb.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -12,12 +14,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.ui.components.PaymentMethodCard
+import com.warriortech.resb.ui.components.PaymentSummaryCard
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import com.warriortech.resb.ui.viewmodel.PaymentMethod
@@ -212,7 +219,7 @@ fun PaymentScreen(
                     item {
                         PaymentSummaryCard(uiState = uiState)
                     }
-
+                    
                     item {
                         PaymentMethodCard(
                             uiState = uiState,
@@ -221,33 +228,6 @@ fun PaymentScreen(
                     }
                 }
             }
-        }
-                .padding(paddingValues), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Filled.CheckCircle, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
-                    Spacer(Modifier.height(16.dp))
-                    Text("Payment Successful!", style = MaterialTheme.typography.headlineSmall)
-                    val successState = uiState.paymentProcessingState as PaymentProcessingState.Success
-                    Text("Transaction ID: ${successState.transactionId}", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(Modifier.height(24.dp))
-                    MobileOptimizedButton(onClick = {
-                        viewModel.resetPaymentState()
-                        // TODO: Navigate to a new order screen or main screen
-                        // navController.popBackStack(navController.graph.startDestinationId, false)
-                        navController.popBackStack() // Or navigate to a new order/home
-                    }, enabled = true, text = "New Bill / Done") {
-                        Text("New Bill / Done")
-                    }
-                }
-            }
-        }
-        else {
-            PaymentContent(
-                modifier = Modifier.padding(paddingValues),
-                uiState = uiState,
-                onSelectPaymentMethod = { viewModel.selectPaymentMethod(it) },
-                onAmountChange = { viewModel.updateAmountToPay(it) }
-            )
         }
     }
 }

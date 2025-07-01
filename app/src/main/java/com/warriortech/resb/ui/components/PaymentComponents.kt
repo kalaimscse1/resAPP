@@ -1,8 +1,8 @@
 package com.warriortech.resb.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
-import com.warriortech.resb.ui.viewmodel.PaymentUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -63,7 +63,7 @@ fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "₹${uiState.total}",
+                    "₹${uiState.amountToPay}",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

@@ -1,11 +1,13 @@
 
 package com.warriortech.resb.ui.theme
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun getScreenSizeInfo(): ScreenSizeInfo {
     val configuration = LocalConfiguration.current
@@ -25,41 +27,7 @@ data class ScreenSizeInfo(
     val isLandscape: Boolean get() = wPX > hPX
 }
 
-object Dimensions {
-    // Touch targets (minimum 48dp for accessibility)
-    val touchTargetMin = 48.dp
-    val touchTargetComfortable = 56.dp
-    
-    // Spacing
-    val spacingXS = 4.dp
-    val spacingS = 8.dp
-    val spacingM = 16.dp
-    val spacingL = 24.dp
-    val spacingXL = 32.dp
-    
-    // Padding for different screen sizes
-    @Composable
-    fun getHorizontalPadding(): Dp {
-        val screenInfo = getScreenSizeInfo()
-        return when {
-            screenInfo.isCompact -> spacingM
-            screenInfo.isMedium -> spacingL
-            else -> spacingXL
-        }
-    }
-    
-    @Composable
-    fun getVerticalPadding(): Dp {
-        val screenInfo = getScreenSizeInfo()
-        return when {
-            screenInfo.isCompact -> spacingS
-            else -> spacingM
-        }
-    }
-}
-package com.warriortech.resb.ui.theme
 
-import androidx.compose.ui.unit.dp
 
 object Dimensions {
     // Spacing
@@ -103,4 +71,23 @@ object Dimensions {
     val screenPadding = 16.dp
     val cardPadding = 16.dp
     val listItemPadding = 16.dp
+
+    @Composable
+    fun getHorizontalPadding(): Dp {
+        val screenInfo = getScreenSizeInfo()
+        return when {
+            screenInfo.isCompact -> spacingM
+            screenInfo.isMedium -> spacingL
+            else -> spacingXL
+        }
+    }
+
+    @Composable
+    fun getVerticalPadding(): Dp {
+        val screenInfo = getScreenSizeInfo()
+        return when {
+            screenInfo.isCompact -> spacingS
+            else -> spacingM
+        }
+    }
 }

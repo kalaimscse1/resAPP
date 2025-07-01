@@ -14,11 +14,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.Dimensions
 import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
 
@@ -242,7 +246,7 @@ private fun OrderItem(
                         color = contentColor
                     )
                     Text(
-                        text = "Table: ${order.tableNumber}",
+                        text = "Table: ${order.tableName}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = contentColor.copy(alpha = 0.8f)
                     )
@@ -267,92 +271,11 @@ private fun OrderItem(
                     )
                 }
             }
-
-            if (order.items.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Items: ${order.items.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = contentColor.copy(alpha = 0.7f),
-                    maxLines = 2
-                )
-            }
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Orders") },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    OrderTypeSection(
-                        title = "Dine-In",
-                        icon = Icons.Default.Restaurant,
-                        orders = dineInOrders,
-                        onOrderClick = { order ->
-                            // Handle order click
-                            val orderId = order.orderId
-                        }
-                    )
-                }
-
-                item {
-                    OrderTypeSection(
-                        title = "Takeaway",
-                        icon = Icons.Default.DirectionsCar,
-                        orders = takeawayOrders,
-                        onOrderClick = { order ->
-                            // Handle order click
-
-                        }
-                    )
-                }
-
-                item {
-                    OrderTypeSection(
-                        title = "Delivery",
-                        icon = Icons.Default.DeliveryDining,
-                        orders = deliveryOrders,
-                        onOrderClick = { order ->
-                            // Handle order click
-                        }
-                    )
-                }
-            }
-        }
-    }
 }
+
 
 @Composable
 fun OrderTypeSection(
@@ -487,4 +410,3 @@ data class OrderDisplayItem(
     val timestamp: String,
     val orderType: String
 )
-`

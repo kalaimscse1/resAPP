@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -430,7 +432,7 @@ fun MenuItemCard(
                             Icon(
                                 Icons.Default.Remove,
                                 contentDescription = "Remove",
-                                tint = Error500
+                                tint = Color.Red
                             )
                         }
 
@@ -461,7 +463,7 @@ fun MenuItemCard(
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Add",
-                                tint = Success500
+                                tint = Color.Green
                             )
                         }
                     }
