@@ -2,6 +2,7 @@ package com.warriortech.resb.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
+import com.warriortech.resb.ui.viewmodel.PaymentUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PaymentSummaryCard(uiState: PaymentUiState) {
+fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
     ModernCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -43,8 +44,8 @@ fun PaymentSummaryCard(uiState: PaymentUiState) {
             Spacer(modifier = Modifier.height(16.dp))
 
             PaymentSummaryRow(label = "Subtotal", amount = "₹${uiState.subtotal}")
-            PaymentSummaryRow(label = "Tax", amount = "₹${uiState.tax}")
-            PaymentSummaryRow(label = "Service Charge", amount = "₹${uiState.serviceCharge}")
+            PaymentSummaryRow(label = "Tax", amount = "₹${uiState.taxAmount}")
+            PaymentSummaryRow(label = "Service Charge", amount = "₹0.0")
 
             Divider(
                 modifier = Modifier.padding(vertical = 12.dp),
@@ -95,7 +96,7 @@ private fun PaymentSummaryRow(label: String, amount: String) {
 
 @Composable
 fun PaymentMethodCard(
-    uiState: PaymentUiState,
+    uiState: BillingPaymentUiState,
     onPaymentMethodChange: (String) -> Unit
 ) {
     ModernCard(
@@ -135,7 +136,7 @@ fun PaymentMethodCard(
                 PaymentMethodOption(
                     method = method,
                     icon = icon,
-                    isSelected = uiState.selectedPaymentMethod == method,
+                    isSelected = uiState.selectedPaymentMethod?.name == method,
                     onSelect = { onPaymentMethodChange(method) }
                 )
                 if (method != paymentMethods.last().first) {
