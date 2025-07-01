@@ -388,106 +388,92 @@ fun LoginScreen(
     Scaffold(
         scaffoldState = scaffoldState
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+                .padding(paddingValues)
+                .padding(horizontal = Dimensions.spacingL),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
+            // Logo
+            Image(
+                painter = painterResource(id = R.drawable.resb_logo1),
+                contentDescription = "Restaurant Logo",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .size(200.dp)
+                    .padding(bottom = Dimensions.spacingL)
+            )
+
+            // Welcome text
+            Text(
+                text = "Welcome Back",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "Sign in to continue",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = Dimensions.spacingS)
+            )
+
+            Spacer(modifier = Modifier.height(Dimensions.spacingXL))
+
+            // Login form card
+            MobileOptimizedCard(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.resb_logo1),
-                    contentDescription = "Restaurant Logo",
-                    modifier = Modifier
-                        .size(250.dp)
-                        .padding(bottom = 16.dp)
-                )
-
-                OutlinedTextField(
-                    value = uiState.companyCode,
-                    onValueChange = { viewModel.onCompanyCodeChange(it) },
-                    label = { Text("Company Code") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Business,
-                            contentDescription = "Company Code"
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = uiState.loginError != null // Optionally highlight field on error
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
+                MobileOptimizedTextField(
                     value = uiState.username,
-                    onValueChange = { viewModel.onUsernameChange(it) },
-                    label = { Text("Username") },
+                    onValueChange = viewModel::onUsernameChange,
+                    label = "Username",
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Username"
+                            Icons.Default.Person,
+                            contentDescription = "Username",
+                            tint = MaterialTheme.colorScheme.primary
                         )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = uiState.loginError != null
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dimensions.spacingM))
 
-                OutlinedTextField(
+                MobileOptimizedTextField(
                     value = uiState.password,
-                    onValueChange = { viewModel.onPasswordChange(it) },
-                    label = { Text("Password") },
+                    onValueChange = viewModel::onPasswordChange,
+                    label = "Password",
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Password"
+                            Icons.Default.Lock,
+                            contentDescription = "Password",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     },
                     trailingIcon = {
                         IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                             Icon(
-                                imageVector = if (uiState.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (uiState.isPasswordVisible) "Hide Password" else "Show Password"
+                                imageVector = if (uiState.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (uiState.isPasswordVisible) "Hide password" else "Show password",
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
-                    },
-                    visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = uiState.loginError != null
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(Dimensions.spacingL))
 
-                Button(
+                MobileOptimizedButton(
                     onClick = {
-                        keyboardController?.hide() // Hide keyboard on button press
+                        keyboardController?.hide()
                         viewModel.attemptLogin()
                     },
                     enabled = !uiState.isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White, // Material Design guidelines suggest this should be MaterialTheme.colors.onPrimary
-                            modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Text("LOGIN")
-                    }
-                }
+                    text = if (uiState.isLoading) "Logging in..." else "Login",
+                    icon = if (uiState.isLoading) null else Icons.Default.Login
+                )
             }
         }
     }
