@@ -311,7 +311,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("orders") {
             OrderScreen(
-                drawerState = drawerState
+                drawerState = drawerState,
+                onNavigateToBilling = { items, tableStatus ->
+                    selectedItems = items
+                    navController.navigate("billing_screen")
+                }
             )
         }
     }
