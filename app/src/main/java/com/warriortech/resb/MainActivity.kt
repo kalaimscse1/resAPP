@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        SessionManager.init(this)
         // Initialize sync when app starts
         lifecycleScope.launch {
             networkMonitor.isOnline.collect { connectionState ->

@@ -26,6 +26,7 @@ import com.warriortech.resb.ui.theme.Dimensions
 import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderScreen(
@@ -45,12 +46,12 @@ fun OrderScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         "Orders Dashboard",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
-                    ) 
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -112,7 +113,11 @@ fun OrderScreen(
                         icon = Icons.Default.Restaurant,
                         orders = dineInOrders,
                         backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        onOrderClick = { order ->
+                            // Handle order click
+                            val orderId = order.orderId
+                        }
                     )
                 }
 
@@ -122,7 +127,12 @@ fun OrderScreen(
                         icon = Icons.Default.DirectionsCar,
                         orders = takeawayOrders,
                         backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        onOrderClick = { order ->
+                            // Handle order click
+                            val orderId = order.orderId
+                        }
+
                     )
                 }
 
@@ -132,7 +142,11 @@ fun OrderScreen(
                         icon = Icons.Default.DeliveryDining,
                         orders = deliveryOrders,
                         backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        onOrderClick = { order ->
+                            // Handle order click
+                            val orderId = order.orderId
+                        }
                     )
                 }
             }
@@ -145,6 +159,7 @@ private fun OrderSection(
     title: String,
     icon: ImageVector,
     orders: List<OrderDisplayItem>,
+    onOrderClick: (OrderDisplayItem) -> Unit,
     backgroundColor: Color,
     contentColor: Color
 ) {
@@ -198,7 +213,8 @@ private fun OrderSection(
                 orders.forEach { order ->
                     OrderItem(
                         order = order,
-                        contentColor = contentColor
+                        contentColor = contentColor,
+                        onClick = { onOrderClick(order) }
                     )
                     if (order != orders.last()) {
                         Spacer(modifier = Modifier.height(12.dp))
@@ -218,17 +234,20 @@ private fun OrderSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OrderItem(
     order: OrderDisplayItem,
-    contentColor: Color
+    contentColor: Color,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = contentColor.copy(alpha = 0.1f)
-        )
+        ),
+        onClick= onClick
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -246,7 +265,17 @@ private fun OrderItem(
                         color = contentColor
                     )
                     Text(
-                        text = "Table: ${order.tableName}",
+                        text = "${order.areaName}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = contentColor.copy(alpha = 0.8f)
+                    )
+                    Text(
+                        text = "${order.tableName}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = contentColor.copy(alpha = 0.8f)
+                    )
+                    Text(
+                        text = "${order.totalAmount}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = contentColor.copy(alpha = 0.8f)
                     )
@@ -271,132 +300,16 @@ private fun OrderItem(
                     )
                 }
             }
-        }
-    }
 
-}
-
-
-@Composable
-fun OrderTypeSection(
-    title: String,
-    icon: ImageVector,
-    orders: List<OrderDisplayItem>,
-    onOrderClick: (OrderDisplayItem) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 12.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Badge {
-                    Text(orders.size.toString())
-                }
-            }
-
-            if (orders.isEmpty()) {
-                Text(
-                    text = "No orders",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-            } else {
-                orders.forEach { order ->
-                    OrderItem(
-                        order = order,
-                        onClick = { onOrderClick(order) }
-                    )
-                    if (order != orders.last()) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun OrderItem(
-    order: OrderDisplayItem,
-    onClick: () -> Unit
-) {
-    MobileOptimizedCard(
-                    modifier = Modifier.padding(horizontal = Dimensions.spacingM, vertical = Dimensions.spacingS)
-                ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Order #${order.orderId}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = order.status,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = when (order.status) {
-                        "PENDING" -> MaterialTheme.colorScheme.error
-                        "PREPARING" -> MaterialTheme.colorScheme.primary
-                        "READY" -> MaterialTheme.colorScheme.tertiary
-                        "COMPLETED" -> MaterialTheme.colorScheme.secondary
-                        else -> MaterialTheme.colorScheme.onSurface
-                    }
-                )
-            }
-            if (order.areaName != null) {
-                Text(
-                    text = order.areaName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (order.tableName != null) {
-                Text(
-                    text = order.tableName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Text(
-                text = "₹${String.format("%.2f", order.totalAmount)}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Text(
-                text = order.timestamp,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+//            if (order.items.isNotEmpty()) {
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Text(
+//                    text = "Items: ${order.items.joinToString(", ")}",
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = contentColor.copy(alpha = 0.7f),
+//                    maxLines = 2
+//                )
+//            }
         }
     }
 }

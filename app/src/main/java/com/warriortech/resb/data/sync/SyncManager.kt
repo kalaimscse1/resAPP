@@ -53,7 +53,11 @@ class SyncManager(
                 workerParameters: WorkerParameters
             ): ListenableWorker? {
                 return if (workerClassName == SyncWorker::class.java.name) {
-                    SyncWorker(appContext, workerParameters, apiService)
+                    SyncWorker(
+                        appContext,
+                        workerParameters,
+                        apiService
+                    )
                 } else {
                     null
                 }
