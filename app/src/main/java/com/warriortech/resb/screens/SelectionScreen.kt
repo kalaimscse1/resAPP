@@ -30,8 +30,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +50,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.launch
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.ScrollableTabRow
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Tab
+import com.warriortech.resb.ui.theme.TextPrimary
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +71,8 @@ fun SelectionScreen(
     val tablesState by viewModel.tablesState.collectAsState()
     val areas by viewModel.areas.collectAsState()
     val scope = rememberCoroutineScope()
+    var selectedArea by remember { mutableStateOf<String?>(null) }
+
 
     LaunchedEffect(Unit) {
         viewModel.loadTables()
@@ -116,25 +128,26 @@ fun SelectionScreen(
 //                    )
 //                }
 //            }
-
-            // Area Chips
             if (areas.isNotEmpty()) {
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ScrollableTabRow(
+                    selectedTabIndex = areas.indexOfFirst { it.area_name == selectedArea },
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    contentColor = TextPrimary,
+                    edgePadding = 0.dp
                 ) {
-                    areas.filter { it.area_name != "--" }.forEach { areaItem ->
-                        AssistChip(
-                            onClick = { viewModel.setSection(areaItem.area_id)
-                                Modifier.background(Color(rgb(129, 154, 145)))},
-                            label = { Text(areaItem.area_name) }
+                    areas.filter { it.area_name != "--" }.forEachIndexed { index, areaItem ->
+                        Tab(
+                            selected = areaItem.area_name == selectedArea,
+                            onClick = {
+                                selectedArea = areaItem.area_name
+                                viewModel.setSection(areaItem.area_id)
+                            },
+                            text = { Text(areaItem.area_name) }
                         )
                     }
                 }
             }
+
 
             // Table Grid
             when (val currentTablesState = tablesState) {
@@ -149,7 +162,12 @@ fun SelectionScreen(
 
                 is TableViewModel.TablesState.Success -> {
                     val tables = currentTablesState.tables
-                    if (tables.isEmpty()) {
+                    val filteredTables = if (selectedArea != null) {
+                        tables.filter { it.area_name == selectedArea }
+                    } else {
+                        tables
+                    }
+                    if (filteredTables.isEmpty()) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -168,7 +186,7 @@ fun SelectionScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            tables.forEach { table ->
+                            filteredTables.forEach { table ->
                                 TableItem(table = table, onClick = { onTableSelected(table) })
                             }
                         }
