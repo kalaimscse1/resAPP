@@ -63,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -132,6 +133,9 @@ class MainActivity : ComponentActivity() {
                 }
                 val animatedDrawerWidth by animateDpAsState(targetValue = drawerWidth)
 
+                val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+                val showDrawer = currentRoute != "login"
+
                 val drawerContent = @Composable {
                     DrawerContent(
                         isCollapsed = isCollapsed.value,
@@ -160,39 +164,55 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                if (isLargeScreen) {
-                    PermanentNavigationDrawer(drawerContent = drawerContent) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            elevation = 4.dp,
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colors.background
+                if (showDrawer) {
+                    if (isLargeScreen) {
+                        PermanentNavigationDrawer(drawerContent = drawerContent) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                elevation = 4.dp,
+                                shape = MaterialTheme.shapes.large,
+                                color = MaterialTheme.colors.background
+                            ) {
+                                Column {
+                                    NetworkStatusBar(connectionState = connectionState)
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        AppNavigation(drawerState, navController)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        ModalNavigationDrawer(
+                            drawerState = drawerState,
+                            drawerContent = drawerContent,
+                            gesturesEnabled = true
                         ) {
-                            Column {
-                                NetworkStatusBar(connectionState = connectionState)
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    AppNavigation(drawerState, navController)
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                elevation = 2.dp,
+                                shape = MaterialTheme.shapes.large,
+                                color = MaterialTheme.colors.background
+                            ) {
+                                Column {
+                                    NetworkStatusBar(connectionState = connectionState)
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        AppNavigation(drawerState, navController)
+                                    }
                                 }
                             }
                         }
                     }
                 } else {
-                    ModalNavigationDrawer(
-                        drawerState = drawerState,
-                        drawerContent = drawerContent,
-                        gesturesEnabled = true
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        elevation = 2.dp,
+                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colors.background
                     ) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            elevation = 2.dp,
-                            shape = MaterialTheme.shapes.large,
-                            color = MaterialTheme.colors.background
-                        ) {
-                            Column {
-                                NetworkStatusBar(connectionState = connectionState)
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    AppNavigation(drawerState, navController)
-                                }
+                        Column {
+                            NetworkStatusBar(connectionState = connectionState)
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                AppNavigation(drawerState, navController)
                             }
                         }
                     }
@@ -208,10 +228,13 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(mapOf<MenuItem, Int>()) }
+    var isLoggedIn by remember { mutableStateOf(false) }
+    
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
+                    isLoggedIn = true
                     navController.navigate("selects") {
                         popUpTo("login") { inclusive = true }
                     }
