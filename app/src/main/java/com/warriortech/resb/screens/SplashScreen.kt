@@ -23,7 +23,7 @@ fun SplashScreen(
     onSplashFinished: () -> Unit
 ) {
     LaunchedEffect(true) {
-        delay(2000) // Simulate loading or init
+        delay(1000) // Reduced delay for faster startup
         onSplashFinished()
     }
 
