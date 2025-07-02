@@ -41,6 +41,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -370,6 +371,7 @@ fun MenuScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @SuppressLint("DefaultLocale")
 @Composable
 fun MenuItemCard(
@@ -383,7 +385,7 @@ fun MenuItemCard(
     MobileOptimizedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.8f)
+            .padding(vertical = 4.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -427,8 +429,7 @@ fun MenuItemCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
-                            onClick = onRemoveItem,
-                            modifier = Modifier.size(32.dp)
+                            onClick = onRemoveItem
                         ) {
                             Icon(
                                 Icons.Default.Remove,
@@ -458,8 +459,7 @@ fun MenuItemCard(
                         }
 
                         IconButton(
-                            onClick = onAddItem,
-                            modifier = Modifier.size(32.dp)
+                            onClick = onAddItem
                         ) {
                             Icon(
                                 Icons.Default.Add,

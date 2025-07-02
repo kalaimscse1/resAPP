@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import java.text.NumberFormat
