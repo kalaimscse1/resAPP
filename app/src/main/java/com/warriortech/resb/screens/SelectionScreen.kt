@@ -2,6 +2,7 @@ package com.warriortech.resb.screens
 
 
 import android.graphics.Color.rgb
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -100,42 +101,16 @@ fun SelectionScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             NetworkStatusBar(connectionState = connectionState)
-
-            // Order Type Chips
-//            Surface(
-//                modifier = Modifier.padding(16.dp),
-//                elevation = 1.dp,
-//                shape = MaterialTheme.shapes.medium
-//            ) {
-//                FlowRow(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(8.dp),
-//                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-//                    verticalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    AssistChip(
-//                        onClick = onDinePressed,
-//                        label = { Text("Dine-In") }
-//                    )
-//                    AssistChip(
-//                        onClick = onTakeAwayPressed,
-//                        label = { Text("TakeAway") }
-//                    )
-//                    AssistChip(
-//                        onClick = onDeliverPressed,
-//                        label = { Text("Delivery") }
-//                    )
-//                }
-//            }
             if (areas.isNotEmpty()) {
+                val displayablAreas = areas.filter { it.area_name != "--" }
+                val calculatedIndex = displayablAreas.indexOfFirst { it.area_name == selectedArea }
                 ScrollableTabRow(
-                    selectedTabIndex = areas.indexOfFirst { it.area_name == selectedArea },
+                    selectedTabIndex = calculatedIndex.coerceAtLeast(0),
                     backgroundColor = MaterialTheme.colorScheme.surface,
                     contentColor = TextPrimary,
                     edgePadding = 0.dp
                 ) {
-                    areas.filter { it.area_name != "--" }.forEachIndexed { index, areaItem ->
+                    displayablAreas.forEachIndexed { index, areaItem ->
                         Tab(
                             selected = areaItem.area_name == selectedArea,
                             onClick = {
@@ -225,9 +200,9 @@ fun TableItem(table: Table, onClick: () -> Unit) {
             .width(150.dp)
             .height(150.dp)
             .clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.small,
         elevation = 4.dp,
-        color = color
+        border = _root_ide_package_.androidx.compose.foundation.BorderStroke(4.dp, color)
     ) {
         Column(
             modifier = Modifier
