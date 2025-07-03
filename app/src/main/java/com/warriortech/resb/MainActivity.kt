@@ -315,6 +315,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onNavigateToBilling = { items, tableStatus ->
                     selectedItems = items
                     navController.navigate("billing_screen")
+                },
+                onNavigateToBillingWithOrderDetails = { orderDetails, orderMasterId ->
+                    // Store order details in a way that can be passed to billing screen
+                    // For now, we'll navigate and let BillingScreen load the data
+                    navController.navigate("billing_screen")
                 }
             )
         }

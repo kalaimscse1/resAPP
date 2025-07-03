@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,37 +24,123 @@ import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import java.text.NumberFormat
 import java.util.Locale
+import com.warriortech.resb.model.TblOrderDetailsResponse
+
+@Composable
+fun KotSelectionDialog(
+    orderDetails: List<TblOrderDetailsResponse>,
+    onKotSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val kotNumbers = orderDetails.map { it.kot_number }.distinct().sorted()
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            MobileOptimizedButton(
+                onClick = onDismiss,
+                text = "Cancel",
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        title = {
+            Text("Select KOT Number", style = MaterialTheme.typography.titleLarge)
+        },
+        text = {
+            Column {
+                Text("Choose a KOT to view its items:", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                LazyColumn {
+                    item {
+                        MobileOptimizedButton(
+                            onClick = { 
+                                onKotSelected(-1) // -1 means show all items
+                            },
+                            text = "Show All Items",
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    
+                    items(kotNumbers) { kotNumber ->
+                        MobileOptimizedButton(
+                            onClick = { onKotSelected(kotNumber) },
+                            text = "KOT #$kotNumber",
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BillingScreen(
-    navController: NavHostController, // For navigation
+    navController: NavHostController,
     viewModel: BillingViewModel = hiltViewModel(),
-    // Pass orderId or initial items if loading an existing bill
-     initialItems: Map<MenuItem, Int>?,
-     tableStatus: String?
+    initialItems: Map<MenuItem, Int>? = null,
+    tableStatus: String? = null,
+    orderDetailsResponse: List<TblOrderDetailsResponse>? = null,
+    orderMasterId: Long? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var selectedKotNumber by remember { mutableStateOf<Int?>(null) }
+    var showKotSelectionDialog by remember { mutableStateOf(false) }
 
-    // TODO: Load initial billing details if passed (e.g., from a previous screen like Menu/Order)
-     LaunchedEffect(key1 = initialItems, key2 = tableStatus) {
-         if (initialItems != null && tableStatus != null) {
-             viewModel.setBillingDetails(initialItems, tableStatus)
-         } else {
-             // Load a default or fetch an existing bill by ID
-         }
-     }
+    // Load billing details from TblOrderDetailsResponse or initial items
+    LaunchedEffect(key1 = orderDetailsResponse, key2 = initialItems, key3 = tableStatus) {
+        when {
+            orderDetailsResponse != null && orderMasterId != null -> {
+                viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId)
+            }
+            initialItems != null && tableStatus != null -> {
+                viewModel.setBillingDetails(initialItems, tableStatus)
+            }
+        }
+    }
+
+    // KOT Selection Dialog
+    if (showKotSelectionDialog && orderDetailsResponse != null) {
+        KotSelectionDialog(
+            orderDetails = orderDetailsResponse,
+            onKotSelected = { kotNumber ->
+                selectedKotNumber = kotNumber
+                showKotSelectionDialog = false
+                viewModel.filterByKotNumber(kotNumber)
+            },
+            onDismiss = { showKotSelectionDialog = false }
+        )
+    }
 
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Bill Summary") },
+                title = { 
+                    Text(
+                        if (selectedKotNumber != null) "Bill Summary - KOT #$selectedKotNumber" 
+                        else "Bill Summary"
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (orderDetailsResponse != null) {
+                        IconButton(onClick = { showKotSelectionDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = "Select KOT"
+                            )
+                        }
                     }
                 }
             )
@@ -176,7 +263,8 @@ fun BilledItemRow(
     menuItem: MenuItem,
     quantity: Int,
     tableStatus: String,
-    currencyFormatter: NumberFormat
+    currencyFormatter: NumberFormat,
+    kotNumber: Int? = null
 ) {
     val itemPrice = when (tableStatus) {
         "AC" -> menuItem.ac_rate
@@ -187,10 +275,42 @@ fun BilledItemRow(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("${menuItem.menu_item_name} x $quantity")
+        Column(modifier = Modifier.weight(1f)) {
+            Text("${menuItem.menu_item_name} x $quantity")
+            if (kotNumber != null) {
+                Text(
+                    "KOT #$kotNumber",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
         Text(currencyFormatter.format(itemTotal))
+    }
+}
+
+@Composable
+fun OrderDetailRow(
+    orderDetail: TblOrderDetailsResponse,
+    currencyFormatter: NumberFormat
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text("${orderDetail.menuItem.menu_item_name} x ${orderDetail.qty}")
+            Text(
+                "KOT #${orderDetail.kot_number}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        }
+        Text(currencyFormatter.format(orderDetail.total))
     }
 }
 

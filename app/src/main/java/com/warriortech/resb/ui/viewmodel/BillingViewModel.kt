@@ -3,15 +3,18 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.model.MenuItem // Assuming MenuItem model
-// Import other necessary models like PaymentMethod, TransactionResult, etc.
+import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.viewmodel.BillingViewModel
+import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID // For generating a unique transaction ID
+import java.util.UUID
 import javax.inject.Inject
 
 // --- Data Models (Place in your 'model' package) ---
@@ -41,6 +44,9 @@ data class BillingPaymentUiState(
     val subtotal: Double = 0.0,
     val taxAmount: Double = 0.0,
     val totalAmount: Double = 0.0,
+    val orderDetails: List<TblOrderDetailsResponse> = emptyList(),
+    val orderMasterId: Long? = null,
+    val selectedKotNumber: Int? = null,
 
     // Payment Details
     val availablePaymentMethods: List<PaymentMethod> = emptyList(),
@@ -63,6 +69,9 @@ class BillingViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
     val uiState: StateFlow<BillingPaymentUiState> = _uiState.asStateFlow()
+
+    private val _originalOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
+    private val _filteredOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
     init {
         // Load initial data like available payment methods
@@ -96,8 +105,104 @@ class BillingViewModel @Inject constructor(
                 subtotal = newSubtotal,
                 taxAmount = newTaxAmount,
                 totalAmount = newTotalAmount,
-                amountToPay = newTotalAmount // Default amount to pay is the total
+                amountToPay = newTotalAmount
             )
+        }
+    }
+
+    fun setBillingDetailsFromOrderResponse(
+        orderDetails: List<TblOrderDetailsResponse>,
+        orderMasterId: Long
+    ) {
+        _originalOrderDetails.value = orderDetails
+        _filteredOrderDetails.value = orderDetails
+
+        // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
+        val itemsMap = mutableMapOf<MenuItem, Int>()
+        var tableStatus = "TABLE" // Default
+
+        orderDetails.forEach { detail ->
+            val existingQty = itemsMap[detail.menuItem] ?: 0
+            itemsMap[detail.menuItem] = existingQty + detail.qty
+        }
+
+        // Calculate totals from order details
+        val subtotal = orderDetails.sumOf { it.total }
+        val taxAmount = orderDetails.sumOf { it.tax_amount }
+        val totalAmount = subtotal + taxAmount
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                billedItems = itemsMap,
+                tableStatus = tableStatus,
+                subtotal = subtotal,
+                taxAmount = taxAmount,
+                totalAmount = totalAmount,
+                amountToPay = totalAmount,
+                orderDetails = orderDetails,
+                orderMasterId = orderMasterId
+            )
+        }
+    }
+
+    fun filterByKotNumber(kotNumber: Int) {
+        val filtered = if (kotNumber == -1) {
+            _originalOrderDetails.value // Show all items
+        } else {
+            _originalOrderDetails.value.filter { it.kot_number == kotNumber }
+        }
+
+        _filteredOrderDetails.value = filtered
+
+        // Recalculate billing details for filtered items
+        val itemsMap = mutableMapOf<MenuItem, Int>()
+        filtered.forEach { detail ->
+            val existingQty = itemsMap[detail.menuItem] ?: 0
+            itemsMap[detail.menuItem] = existingQty + detail.qty
+        }
+
+        val subtotal = filtered.sumOf { it.total }
+        val taxAmount = filtered.sumOf { it.tax_amount }
+        val totalAmount = subtotal + taxAmount
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                billedItems = itemsMap,
+                subtotal = subtotal,
+                taxAmount = taxAmount,
+                totalAmount = totalAmount,
+                amountToPay = totalAmount,
+                selectedKotNumber = if (kotNumber == -1) null else kotNumber
+            )
+        }
+    }
+
+    fun updateKotItem(
+        orderDetailId: Long,
+        newQuantity: Int,
+        newRate: Double
+    ) {
+        // Update specific order detail item
+        val updatedDetails = _originalOrderDetails.value.map { detail ->
+            if (detail.order_details_id == orderDetailId) {
+                detail.copy(
+                    qty = newQuantity,
+                    rate = newRate,
+                    total = newQuantity * newRate
+                )
+            } else {
+                detail
+            }
+        }
+
+        _originalOrderDetails.value = updatedDetails
+
+        // Refresh filtered details and billing calculation
+        val currentKot = _uiState.value.selectedKotNumber
+        if (currentKot != null) {
+            filterByKotNumber(currentKot)
+        } else {
+            filterByKotNumber(-1) // Show all
         }
     }
 
