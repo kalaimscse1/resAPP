@@ -121,12 +121,9 @@ fun MenuScreen(
 
     LaunchedEffect(key1 = isTakeaway, key2 = tableId, key3 = tableStatId) {
         // This effect will run when these key parameters change, or on initial composition.
-        // viewModel.setTableId(tableId) // This seems to be more for *placing* the order.
-        // The ViewModel should know the tableId for *loading* from initializeScreen.
         viewModel.setTableId(tableId)
         val isTableOrderScenario = isTakeaway == "TABLE" && tableStatId
         viewModel.initializeScreen(isTableOrder = isTableOrderScenario, currentTableId = tableId)
-
     }
 
     LaunchedEffect(orderState) {
@@ -165,16 +162,24 @@ fun MenuScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Menu Selection") }, // Indicate table
+                title = { 
+                    Column {
+                        Text("Menu Selection")
+                        if (viewModel.isExistingOrderLoaded.value) {
+                            Text(
+                                text = "Editing Order #${viewModel.existingOrderId.value ?: ""}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }
                     }) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
-//                    IconButton(onClick = {onBackPressed}) {
-//                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-//                    }
                 },
                 actions = {
                     androidx.compose.material.IconButton(onClick = {
@@ -197,12 +202,21 @@ fun MenuScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    val itemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum()+selectedItems.values.sum() else selectedItems.values.sum()
-                    val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString()) // Use effectiveStatus
+                    val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
+                    val existingItemCount = if(viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
+                    val totalItemCount = newItemCount + existingItemCount
+                    val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
 
                     Column {
+                        if (viewModel.isExistingOrderLoaded.value) {
+                            Text(
+                                text = "Existing: $existingItemCount | New: $newItemCount",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
                         Text(
-                            text = "Items: $itemCount",
+                            text = "Total Items: $totalItemCount",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
@@ -224,8 +238,8 @@ fun MenuScreen(
 
                     MobileOptimizedButton(
                         onClick = { showConfirmDialog = true },
-                        enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
-                        text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update Order" else "Place Order",
+                        enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                        text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -242,12 +256,13 @@ fun MenuScreen(
         },
         // ... (snackbarHost and floatingActionButton remain similar, ensure floatingActionButton also uses effectiveStatus if needed for display)
         floatingActionButton = {
-            if (selectedItems.isNotEmpty()) {
+            val hasNewItems = if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()
+            if (hasNewItems) {
                 FloatingActionButton(
                     onClick = { showConfirmDialog = true }
                 ) {
-                    // Consider if the FAB text needs to change based on new vs. existing order
-                    Text("${if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum()+selectedItems.values.sum() else selectedItems.values.sum()}")
+                    val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
+                    Text("$newItemCount")
                 }
             }
         }
@@ -320,9 +335,11 @@ fun MenuScreen(
                                 MenuItemCard(
                                     menuItem = menuItem,
                                     quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem] ?: 0 else selectedItems[menuItem] ?: 0,
+                                    existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem] ?: 0 else 0,
                                     onAddItem = { viewModel.addItemToOrder(menuItem) },
                                     onRemoveItem = { viewModel.removeItemFromOrder(menuItem) },
-                                    tableStatus = effectiveStatus.toString() // Use effectiveStatus
+                                    tableStatus = effectiveStatus.toString(),
+                                    isExistingOrder = viewModel.isExistingOrderLoaded.value
                                 )
                             }
                             item { Spacer(modifier = Modifier.height(80.dp)) } // For bottom bar
@@ -378,9 +395,11 @@ fun MenuScreen(
 fun MenuItemCard(
     menuItem: MenuItem,
     quantity: Int,
+    existingQuantity: Int = 0,
     onAddItem: () -> Unit,
     onRemoveItem: () -> Unit,
-    tableStatus: String
+    tableStatus: String,
+    isExistingOrder: Boolean = false
 ) {
 
     MobileOptimizedCard(
@@ -423,6 +442,16 @@ fun MenuItemCard(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
                     )
+                    
+                    if (isExistingOrder && existingQuantity > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Previously ordered: $existingQuantity",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
 
                 if (menuItem.is_available=="YES") {
@@ -478,7 +507,7 @@ fun MenuItemCard(
                 }
             }
 
-            AnimatedVisibility(visible = quantity > 0) {
+            AnimatedVisibility(visible = quantity > 0 || existingQuantity > 0) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -486,20 +515,44 @@ fun MenuItemCard(
                     Divider()
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = if (tableStatus=="AC")"$quantity ×₹${String.format("%.2f", menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "$quantity ×₹${String.format("%.2f", menuItem.parcel_rate)}" else "$quantity ×₹${String.format("%.2f", menuItem.rate)}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                    if (isExistingOrder && existingQuantity > 0) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Existing: $existingQuantity × ${if (tableStatus=="AC")"₹${String.format("%.2f", menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", menuItem.parcel_rate)}" else "₹${String.format("%.2f", menuItem.rate)}"}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            Text(
+                                text = if (tableStatus=="AC")"₹${String.format("%.2f", existingQuantity * menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", existingQuantity * menuItem.parcel_rate)}" else "₹${String.format("%.2f", existingQuantity * menuItem.rate)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        if (quantity > 0) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                    }
+                    
+                    if (quantity > 0) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "${if (isExistingOrder) "New: " else ""}$quantity × ${if (tableStatus=="AC")"₹${String.format("%.2f", menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", menuItem.parcel_rate)}" else "₹${String.format("%.2f", menuItem.rate)}"}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isExistingOrder) FontWeight.Bold else FontWeight.Normal
+                            )
 
-                        Text(
-                            text = if (tableStatus=="AC")"₹${String.format("%.2f", quantity * menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", quantity * menuItem.parcel_rate)}" else "₹${String.format("%.2f", quantity * menuItem.rate)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                            Text(
+                                text = if (tableStatus=="AC")"₹${String.format("%.2f", quantity * menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", quantity * menuItem.parcel_rate)}" else "₹${String.format("%.2f", quantity * menuItem.rate)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
