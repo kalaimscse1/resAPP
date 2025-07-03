@@ -22,14 +22,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblOrderDetailsResponse
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderScreen(
     drawerState: DrawerState,
     viewModel: OrderScreenViewModel = hiltViewModel(),
-    onNavigateToBilling: (Map<MenuItem, Int>, String) -> Unit,
-    onNavigateToBillingWithOrderDetails: Function<Unit>
+    onNavigateToBilling: (List<TblOrderDetailsResponse>) -> Unit,
 ) {
     val dineInOrders by viewModel.dineInOrders.collectAsStateWithLifecycle()
     val takeawayOrders by viewModel.takeawayOrders.collectAsStateWithLifecycle()
@@ -115,6 +115,7 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
+                            onNavigateToBilling(viewModel.getOrdersByOrderId(orderId))
                         }
                     )
                 }
@@ -129,6 +130,7 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
+                            onNavigateToBilling(viewModel.getOrdersByOrderId(orderId))
                         }
 
                     )
@@ -144,7 +146,7 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
-//                            onNavigateToBilling(order.items, order.tableStatus)
+                            onNavigateToBilling(viewModel.getOrdersByOrderId(orderId))
                         }
                     )
                 }
@@ -152,6 +154,8 @@ fun OrderScreen(
         }
     }
 }
+
+
 
 @Composable
 private fun OrderSection(

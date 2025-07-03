@@ -16,6 +16,7 @@ import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.KOTItem
 import com.warriortech.resb.model.KOTRequest
+import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,8 +61,8 @@ class MenuViewModel @Inject constructor(
     private val _newselectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
     var newselectedItems: StateFlow<Map<MenuItem, Int>> = _newselectedItems.asStateFlow()
     private val _isExistingOrderLoaded = MutableStateFlow(false)
-     val isExistingOrderLoaded: StateFlow<Boolean> = _isExistingOrderLoaded.asStateFlow()
-
+    val isExistingOrderLoaded: StateFlow<Boolean> = _isExistingOrderLoaded.asStateFlow()
+    val orderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
         viewModelScope.launch {
@@ -76,6 +77,7 @@ class MenuViewModel @Inject constructor(
                     // For now, let's assume selectedItems can be populated here.
                     // Or, you might have a separate flow for "billable items" vs "newly selected items"
                     // For simplicity here, we'll assume selectedItems is the live cart
+                    orderDetailsResponse.value = existingItemsForTable
                     val menuItems=existingItemsForTable.map{
 
                             MenuItem(

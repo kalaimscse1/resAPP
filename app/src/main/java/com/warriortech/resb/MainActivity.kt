@@ -77,7 +77,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.content.edit
-import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
-    var selectedItems by remember { mutableStateOf(mapOf<MenuItem, Int>()) }
+    var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     
     NavHost(navController = navController, startDestination = "login") {
@@ -293,8 +293,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             Log.d("BillingScreen", "Selected Items: $selectedItems")
             BillingScreen(
                 navController = navController,
-                initialItems = selectedItems,
-                tableStatus = if (isTakeaway == "TABLE") selectedTable?.is_ac else isTakeaway
+                orderDetailsResponse = selectedItems
             )
         }
 
@@ -307,13 +306,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         composable("orders") {
             OrderScreen(
                 drawerState = drawerState,
-                onNavigateToBilling = { items, tableStatus ->
+                onNavigateToBilling = { items ->
                     selectedItems = items
-                    navController.navigate("billing_screen")
-                },
-                onNavigateToBillingWithOrderDetails = {
-                    // Store order details in a way that can be passed to billing screen
-                    // For now, we'll navigate and let BillingScreen load the data
                     navController.navigate("billing_screen")
                 }
             )

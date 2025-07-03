@@ -90,7 +90,7 @@ interface ApiService {
     suspend fun getOpenOrderItemsForTable(@Path("table_id") tableId: Long):Response<Map<String, Int>>
 
     @GET("order/orderDetails/getOrdersDetailsByOrderIdApp/{order_master_id}")
-    suspend fun getOpenOrderDetailsForTable(@Path("order_master_id") tableId: Int?):Response<List<TblOrderDetailsResponse>>
+    suspend fun getOpenOrderDetailsForTable(@Path("order_master_id") tableId: Long?):Response<List<TblOrderDetailsResponse>>
 
     @POST("print/kot")
     suspend fun printKOT(@Body orderRequest: KOTRequest): Response<Map<String, String>>
@@ -100,6 +100,9 @@ interface ApiService {
         @Path("orderId") orderId: Int,
         @Body statusUpdate: Map<String, String>
     ): Response<Order>
+
+
+    suspend fun getOrdersByOrderId(lng: Long): List<TblOrderDetailsResponse>
 
     /**
      * Analytics

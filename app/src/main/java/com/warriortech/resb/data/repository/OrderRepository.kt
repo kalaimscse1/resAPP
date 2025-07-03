@@ -18,6 +18,7 @@ import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.getCurrentDateModern
 import com.warriortech.resb.util.getCurrentTimeModern
 import kotlinx.coroutines.flow.*
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -226,7 +227,7 @@ class OrderRepository @Inject constructor(
 
                 // Step 2: Fetch all OrderDetails for that OrderMaster ID.
                 // Assuming getOpenOrderDetailsForTable actually means "getAllOrderDetailsForOrderMaster"
-                val orderDetailsResponse = apiService.getOpenOrderDetailsForTable(orderMasterId?.toInt()) // YOU MAY NEED TO RENAME/CREATE THIS
+                val orderDetailsResponse = apiService.getOpenOrderDetailsForTable(orderMasterId?.toLong()) // YOU MAY NEED TO RENAME/CREATE THIS
                 if (orderDetailsResponse.isSuccessful && orderDetailsResponse.body() != null) {
                     return orderDetailsResponse.body()!!
                 }
@@ -286,7 +287,7 @@ class OrderRepository @Inject constructor(
 //                    val tableOrders = allOrders.filter { it.tableId == tableId }
                 }
             }
-            val orderDetails = apiService.getOpenOrderDetailsForTable(order)
+            val orderDetails = apiService.getOpenOrderDetailsForTable(order.toLong())
             if(orderDetails.isSuccessful){
                 return orderDetails.body()!!
             }
@@ -377,6 +378,10 @@ class OrderRepository @Inject constructor(
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
+    }
+
+    suspend fun getOrdersByOrderId(lng: Long): Response<List<TblOrderDetailsResponse>> {
+        return apiService.getOpenOrderDetailsForTable(lng)
     }
 }
 data class GstResult(val basePrice: Double, val gstAmount: Double, val totalPrice: Double)

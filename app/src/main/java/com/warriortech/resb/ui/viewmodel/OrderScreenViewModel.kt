@@ -4,6 +4,7 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.OrderRepository
+import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.screens.OrderDisplayItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,5 +76,14 @@ class OrderScreenViewModel @Inject constructor(
         } catch (e: Exception) {
             timestamp
         }
+    }
+
+    fun getOrdersByOrderId(lng: Long): List<TblOrderDetailsResponse> {
+        viewModelScope.launch {
+            val order = orderRepository.getOrdersByOrderId(lng)
+            if (order.body()!=null)
+                return@launch
+        }
+        return emptyList()
     }
 }

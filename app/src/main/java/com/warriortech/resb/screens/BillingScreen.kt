@@ -26,9 +26,9 @@ import java.text.NumberFormat
 import kotlin.math.roundToInt
 
 // Extension function for formatting Double values
-fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
+
 
 @Composable
 fun KotSelectionDialog(
@@ -86,8 +86,6 @@ fun KotSelectionDialog(
 fun BillingScreen(
     navController: NavHostController,
     viewModel: BillingViewModel = hiltViewModel(),
-    initialItems: Map<MenuItem, Int>? = null,
-    tableStatus: String? = null,
     orderDetailsResponse: List<TblOrderDetailsResponse>? = null,
     orderMasterId: Long? = null
 ) {
@@ -97,13 +95,10 @@ fun BillingScreen(
     var showKotSelectionDialog by remember { mutableStateOf(false) }
 
     // Load billing details from TblOrderDetailsResponse or initial items
-    LaunchedEffect(key1 = orderDetailsResponse, key2 = initialItems, key3 = tableStatus) {
+    LaunchedEffect(key1 = orderDetailsResponse) {
         when {
             orderDetailsResponse != null && orderMasterId != null -> {
                 viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId)
-            }
-            initialItems != null && tableStatus != null -> {
-                viewModel.setBillingDetails(initialItems, tableStatus)
             }
         }
     }
