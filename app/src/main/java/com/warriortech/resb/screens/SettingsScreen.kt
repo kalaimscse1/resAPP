@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
@@ -6,7 +5,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Delete
+importandroidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PointOfSale
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Store
+import androidx.compose.material.icons.filled.SupervisorAccount
+import androidx.compose.material.icons.filled.TableRestaurant
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -82,7 +100,11 @@ fun SettingsMainScreen(
             SettingsModule.Role,
             SettingsModule.Printer,
             SettingsModule.Tax,
-            SettingsModule.TaxSplit
+            SettingsModule.TaxSplit,
+			SettingsModule.RestaurantProfile,
+			SettingsModule.GeneralSettings,
+			SettingsModule.CreateVoucher,
+			SettingsModule.Counter
         )
     }
 
@@ -132,9 +154,9 @@ fun SettingsModuleCard(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(32.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = module.title,
@@ -147,7 +169,7 @@ fun SettingsModuleCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             Icon(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Open",
@@ -165,7 +187,7 @@ fun SettingsModuleScreen(
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    
+
     LaunchedEffect(module) {
         viewModel.loadModuleData(module)
     }
@@ -184,7 +206,7 @@ fun SettingsModuleScreen(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Add ${module.title}")
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
 
         when (uiState) {
@@ -196,7 +218,7 @@ fun SettingsModuleScreen(
                     CircularProgressIndicator()
                 }
             }
-            
+
             is SettingsUiState.Success -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -210,7 +232,7 @@ fun SettingsModuleScreen(
                     }
                 }
             }
-            
+
             is SettingsUiState.Error -> {
                 Text(
                     text = uiState.message,
@@ -263,7 +285,7 @@ fun SettingsItemCard(
                     )
                 }
             }
-            
+
             Row {
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit")
@@ -334,7 +356,7 @@ sealed class SettingsModule(
         Icons.Default.LocationOn,
         listOf("name", "description", "capacity")
     )
-    
+
     object Table : SettingsModule(
         "table",
         "Table",
@@ -342,7 +364,7 @@ sealed class SettingsModule(
         Icons.Default.TableRestaurant,
         listOf("table_number", "area_id", "capacity", "status")
     )
-    
+
     object Menu : SettingsModule(
         "menu",
         "Menu",
@@ -350,7 +372,7 @@ sealed class SettingsModule(
         Icons.Default.MenuBook,
         listOf("name", "description", "is_active")
     )
-    
+
     object MenuCategory : SettingsModule(
         "menu_category",
         "Menu Category",
@@ -358,7 +380,7 @@ sealed class SettingsModule(
         Icons.Default.Category,
         listOf("name", "description", "sort_order")
     )
-    
+
     object MenuItem : SettingsModule(
         "menu_item",
         "Menu Item",
@@ -366,7 +388,7 @@ sealed class SettingsModule(
         Icons.Default.Restaurant,
         listOf("name", "name_tamil", "category_id", "rate", "ac_rate", "parcel_rate", "description")
     )
-    
+
     object Customer : SettingsModule(
         "customer",
         "Customer",
@@ -374,7 +396,7 @@ sealed class SettingsModule(
         Icons.Default.Person,
         listOf("name", "phone", "email", "address")
     )
-    
+
     object Staff : SettingsModule(
         "staff",
         "Staff",
@@ -382,7 +404,7 @@ sealed class SettingsModule(
         Icons.Default.People,
         listOf("name", "phone", "email", "role_id", "hire_date")
     )
-    
+
     object Role : SettingsModule(
         "role",
         "Role",
@@ -390,7 +412,7 @@ sealed class SettingsModule(
         Icons.Default.Security,
         listOf("name", "description", "permissions")
     )
-    
+
     object Printer : SettingsModule(
         "printer",
         "Printer",
@@ -398,7 +420,7 @@ sealed class SettingsModule(
         Icons.Default.Print,
         listOf("name", "ip_address", "port", "type", "location")
     )
-    
+
     object Tax : SettingsModule(
         "tax",
         "Tax",
@@ -406,13 +428,44 @@ sealed class SettingsModule(
         Icons.Default.Calculate,
         listOf("name", "rate", "type", "is_active")
     )
-    
+
     object TaxSplit : SettingsModule(
         "tax_split",
         "Tax Split",
         "Manage tax splitting configurations",
         Icons.Default.CallSplit,
         listOf("name", "description", "split_type", "percentage")
+    )
+	object RestaurantProfile : SettingsModule(
+        "restaurant_profile",
+        "Restaurant Profile",
+        "Manage restaurant profile",
+        Icons.Default.Store,
+        listOf("name", "address", "phone", "email")
+    )
+
+    object GeneralSettings : SettingsModule(
+        "general_settings",
+        "General Settings",
+        "Manage general settings",
+        Icons.Default.Settings,
+        listOf("currency", "language", "timezone")
+    )
+
+    object CreateVoucher : SettingsModule(
+        "create_voucher",
+        "Create Voucher",
+        "Create vouchers",
+        Icons.Default.LocalOffer,
+        listOf("code", "discount", "expiry_date")
+    )
+
+    object Counter : SettingsModule(
+        "counter",
+        "Counter",
+        "Manage counter",
+        Icons.Default.PointOfSale,
+        listOf("name")
     )
 }
 
