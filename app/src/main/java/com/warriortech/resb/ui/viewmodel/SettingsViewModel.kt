@@ -3,6 +3,8 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.SettingsRepository
+import com.warriortech.resb.model.*
 import com.warriortech.resb.screens.SettingsItem
 import com.warriortech.resb.screens.SettingsModule
 import com.warriortech.resb.screens.SettingsUiState
@@ -15,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    // Add repository dependencies here
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Loading)
@@ -28,9 +30,246 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = SettingsUiState.Loading
             try {
-                // Simulate loading data - replace with actual repository calls
-                val mockData = generateMockData(module)
-                _uiState.value = SettingsUiState.Success(mockData)
+                val items = when (module) {
+                    is SettingsModule.Area -> {
+                        val areas = settingsRepository.getAllAreas()
+                        areas.map { area ->
+                            SettingsItem(
+                                id = area.id.toString(),
+                                name = area.area_name,
+                                description = "Capacity: ${area.capacity}",
+                                data = mapOf(
+                                    "name" to area.area_name,
+                                    "capacity" to area.capacity.toString(),
+                                    "status" to area.status
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Table -> {
+                        val tables = settingsRepository.getAllTables()
+                        tables.map { table ->
+                            SettingsItem(
+                                id = table.table_id.toString(),
+                                name = table.table_name,
+                                description = "Area: ${table.area_id}",
+                                data = mapOf(
+                                    "name" to table.table_name,
+                                    "area_id" to table.area_id.toString(),
+                                    "capacity" to table.capacity.toString(),
+                                    "status" to table.status
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Menu -> {
+                        val menus = settingsRepository.getAllMenus()
+                        menus.map { menu ->
+                            SettingsItem(
+                                id = menu.id.toString(),
+                                name = menu.name,
+                                description = menu.description,
+                                data = mapOf(
+                                    "name" to menu.name,
+                                    "description" to menu.description,
+                                    "is_active" to menu.isActive.toString()
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.MenuCategory -> {
+                        val categories = settingsRepository.getAllMenuCategories()
+                        categories.map { category ->
+                            SettingsItem(
+                                id = category.id.toString(),
+                                name = category.name,
+                                description = category.description,
+                                data = mapOf(
+                                    "name" to category.name,
+                                    "description" to category.description,
+                                    "sort_order" to category.sortOrder.toString()
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.MenuItem -> {
+                        val items = settingsRepository.getAllMenuItems()
+                        items.map { item ->
+                            SettingsItem(
+                                id = item.menu_item_id.toString(),
+                                name = item.menu_item_name,
+                                description = "Rate: ₹${item.rate}",
+                                data = mapOf(
+                                    "name" to item.menu_item_name,
+                                    "rate" to item.rate.toString(),
+                                    "category" to item.item_cat_name,
+                                    "is_available" to item.is_available
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Customer -> {
+                        val customers = settingsRepository.getAllCustomers()
+                        customers.map { customer ->
+                            SettingsItem(
+                                id = customer.id.toString(),
+                                name = customer.name,
+                                description = customer.phone,
+                                data = mapOf(
+                                    "name" to customer.name,
+                                    "phone" to customer.phone,
+                                    "email" to customer.email,
+                                    "address" to customer.address
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Staff -> {
+                        val staff = settingsRepository.getAllStaff()
+                        staff.map { staffMember ->
+                            SettingsItem(
+                                id = staffMember.id.toString(),
+                                name = staffMember.name,
+                                description = "Role: ${staffMember.role}",
+                                data = mapOf(
+                                    "name" to staffMember.name,
+                                    "role" to staffMember.role,
+                                    "phone" to staffMember.phone,
+                                    "email" to staffMember.email
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Role -> {
+                        val roles = settingsRepository.getAllRoles()
+                        roles.map { role ->
+                            SettingsItem(
+                                id = role.id.toString(),
+                                name = role.name,
+                                description = role.description,
+                                data = mapOf(
+                                    "name" to role.name,
+                                    "description" to role.description,
+                                    "permissions" to role.permissions
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Printer -> {
+                        val printers = settingsRepository.getAllPrinters()
+                        printers.map { printer ->
+                            SettingsItem(
+                                id = printer.id.toString(),
+                                name = printer.name,
+                                description = "IP: ${printer.ipAddress}",
+                                data = mapOf(
+                                    "name" to printer.name,
+                                    "ip_address" to printer.ipAddress,
+                                    "port" to printer.port.toString(),
+                                    "type" to printer.type
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Tax -> {
+                        val taxes = settingsRepository.getAllTaxes()
+                        taxes.map { tax ->
+                            SettingsItem(
+                                id = tax.id.toString(),
+                                name = tax.name,
+                                description = "Rate: ${tax.rate}%",
+                                data = mapOf(
+                                    "name" to tax.name,
+                                    "rate" to tax.rate.toString(),
+                                    "type" to tax.type,
+                                    "is_active" to tax.isActive.toString()
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.TaxSplit -> {
+                        val taxSplits = settingsRepository.getAllTaxSplits()
+                        taxSplits.map { taxSplit ->
+                            SettingsItem(
+                                id = taxSplit.id.toString(),
+                                name = taxSplit.name,
+                                description = taxSplit.description,
+                                data = mapOf(
+                                    "name" to taxSplit.name,
+                                    "description" to taxSplit.description,
+                                    "split_type" to taxSplit.splitType,
+                                    "percentage" to taxSplit.percentage.toString()
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.RestaurantProfile -> {
+                        val profile = settingsRepository.getRestaurantProfile()
+                        if (profile != null) {
+                            listOf(
+                                SettingsItem(
+                                    id = "1",
+                                    name = profile.name,
+                                    description = profile.address,
+                                    data = mapOf(
+                                        "name" to profile.name,
+                                        "address" to profile.address,
+                                        "phone" to profile.phone,
+                                        "email" to profile.email
+                                    )
+                                )
+                            )
+                        } else emptyList()
+                    }
+                    is SettingsModule.GeneralSettings -> {
+                        val settings = settingsRepository.getGeneralSettings()
+                        if (settings != null) {
+                            listOf(
+                                SettingsItem(
+                                    id = "1",
+                                    name = "General Settings",
+                                    description = "Currency: ${settings.currency}",
+                                    data = mapOf(
+                                        "currency" to settings.currency,
+                                        "language" to settings.language,
+                                        "timezone" to settings.timezone
+                                    )
+                                )
+                            )
+                        } else emptyList()
+                    }
+                    is SettingsModule.CreateVoucher -> {
+                        val vouchers = settingsRepository.getAllVouchers()
+                        vouchers.map { voucher ->
+                            SettingsItem(
+                                id = voucher.id.toString(),
+                                name = voucher.code,
+                                description = "Discount: ${voucher.discount}%",
+                                data = mapOf(
+                                    "code" to voucher.code,
+                                    "discount" to voucher.discount.toString(),
+                                    "expiry_date" to voucher.expiryDate,
+                                    "is_active" to voucher.isActive.toString()
+                                )
+                            )
+                        }
+                    }
+                    is SettingsModule.Counter -> {
+                        val counters = settingsRepository.getAllCounters()
+                        counters.map { counter ->
+                            SettingsItem(
+                                id = counter.id.toString(),
+                                name = counter.name,
+                                description = "Status: ${if (counter.isActive) "Active" else "Inactive"}",
+                                data = mapOf(
+                                    "name" to counter.name,
+                                    "is_active" to counter.isActive.toString()
+                                )
+                            )
+                        }
+                    }
+                }
+                _uiState.value = SettingsUiState.Success(items)
             } catch (e: Exception) {
                 _uiState.value = SettingsUiState.Error("Failed to load ${module.title}: ${e.message}")
             }
@@ -40,8 +279,152 @@ class SettingsViewModel @Inject constructor(
     fun addItem(module: SettingsModule, data: Map<String, String>) {
         viewModelScope.launch {
             try {
-                // Add implementation for creating items in database
-                // Example: repository.addArea(data) for Area module
+                when (module) {
+                    is SettingsModule.Area -> {
+                        val area = Area(
+                            id = 0,
+                            area_name = data["name"] ?: "",
+                            capacity = data["capacity"]?.toIntOrNull() ?: 0,
+                            status = data["status"] ?: "Active"
+                        )
+                        settingsRepository.insertArea(area)
+                    }
+                    is SettingsModule.Table -> {
+                        val table = Table(
+                            table_id = 0,
+                            table_name = data["name"] ?: "",
+                            area_id = data["area_id"]?.toLongOrNull() ?: 0,
+                            capacity = data["capacity"]?.toIntOrNull() ?: 0,
+                            status = data["status"] ?: "Available"
+                        )
+                        settingsRepository.insertTable(table)
+                    }
+                    is SettingsModule.Menu -> {
+                        val menu = Menu(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            description = data["description"] ?: "",
+                            isActive = data["is_active"]?.toBoolean() ?: true
+                        )
+                        settingsRepository.insertMenu(menu)
+                    }
+                    is SettingsModule.MenuCategory -> {
+                        val category = MenuCategory(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            description = data["description"] ?: "",
+                            sortOrder = data["sort_order"]?.toIntOrNull() ?: 0
+                        )
+                        settingsRepository.insertMenuCategory(category)
+                    }
+                    is SettingsModule.MenuItem -> {
+                        val menuItem = MenuItem(
+                            menu_item_id = 0,
+                            menu_item_name = data["name"] ?: "",
+                            menu_item_name_tamil = "",
+                            rate = data["rate"]?.toDoubleOrNull() ?: 0.0,
+                            ac_rate = data["rate"]?.toDoubleOrNull() ?: 0.0,
+                            parcel_rate = data["rate"]?.toDoubleOrNull() ?: 0.0,
+                            item_cat_name = data["category"] ?: "",
+                            is_available = data["is_available"] ?: "YES"
+                        )
+                        settingsRepository.insertMenuItem(menuItem)
+                    }
+                    is SettingsModule.Customer -> {
+                        val customer = Customer(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            phone = data["phone"] ?: "",
+                            email = data["email"] ?: "",
+                            address = data["address"] ?: ""
+                        )
+                        settingsRepository.insertCustomer(customer)
+                    }
+                    is SettingsModule.Staff -> {
+                        val staff = Staff(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            role = data["role"] ?: "",
+                            phone = data["phone"] ?: "",
+                            email = data["email"] ?: ""
+                        )
+                        settingsRepository.insertStaff(staff)
+                    }
+                    is SettingsModule.Role -> {
+                        val role = Role(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            description = data["description"] ?: "",
+                            permissions = data["permissions"] ?: ""
+                        )
+                        settingsRepository.insertRole(role)
+                    }
+                    is SettingsModule.Printer -> {
+                        val printer = Printer(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            ipAddress = data["ip_address"] ?: "",
+                            port = data["port"]?.toIntOrNull() ?: 9100,
+                            type = data["type"] ?: "thermal"
+                        )
+                        settingsRepository.insertPrinter(printer)
+                    }
+                    is SettingsModule.Tax -> {
+                        val tax = Tax(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            rate = data["rate"]?.toDoubleOrNull() ?: 0.0,
+                            type = data["type"] ?: "percentage",
+                            isActive = data["is_active"]?.toBoolean() ?: true
+                        )
+                        settingsRepository.insertTax(tax)
+                    }
+                    is SettingsModule.TaxSplit -> {
+                        val taxSplit = TaxSplit(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            description = data["description"] ?: "",
+                            splitType = data["split_type"] ?: "percentage",
+                            percentage = data["percentage"]?.toDoubleOrNull() ?: 0.0
+                        )
+                        settingsRepository.insertTaxSplit(taxSplit)
+                    }
+                    is SettingsModule.CreateVoucher -> {
+                        val voucher = Voucher(
+                            id = 0,
+                            code = data["code"] ?: "",
+                            discount = data["discount"]?.toDoubleOrNull() ?: 0.0,
+                            expiryDate = data["expiry_date"] ?: "",
+                            isActive = data["is_active"]?.toBoolean() ?: true
+                        )
+                        settingsRepository.insertVoucher(voucher)
+                    }
+                    is SettingsModule.Counter -> {
+                        val counter = Counter(
+                            id = 0,
+                            name = data["name"] ?: "",
+                            isActive = data["is_active"]?.toBoolean() ?: true
+                        )
+                        settingsRepository.insertCounter(counter)
+                    }
+                    is SettingsModule.RestaurantProfile -> {
+                        val profile = RestaurantProfile(
+                            name = data["name"] ?: "",
+                            address = data["address"] ?: "",
+                            phone = data["phone"] ?: "",
+                            email = data["email"] ?: ""
+                        )
+                        settingsRepository.updateRestaurantProfile(profile)
+                    }
+                    is SettingsModule.GeneralSettings -> {
+                        val settings = GeneralSettings(
+                            currency = data["currency"] ?: "INR",
+                            language = data["language"] ?: "English",
+                            timezone = data["timezone"] ?: "Asia/Kolkata"
+                        )
+                        settingsRepository.updateGeneralSettings(settings)
+                    }
+                }
                 loadModuleData(module) // Refresh data
             } catch (e: Exception) {
                 _uiState.value = SettingsUiState.Error("Failed to add ${module.title}: ${e.message}")
@@ -52,8 +435,9 @@ class SettingsViewModel @Inject constructor(
     fun editItem(item: SettingsItem) {
         viewModelScope.launch {
             try {
-                // Add implementation for editing items in database
-                // Refresh data after edit
+                // Implementation will depend on the specific module
+                // This is a placeholder - you'd need to implement edit functionality
+                // based on the current selected module
             } catch (e: Exception) {
                 _uiState.value = SettingsUiState.Error("Failed to edit item: ${e.message}")
             }
@@ -63,66 +447,33 @@ class SettingsViewModel @Inject constructor(
     fun deleteItem(item: SettingsItem) {
         viewModelScope.launch {
             try {
-                // Add implementation for deleting items from database
-                // Refresh data after delete
+                val itemId = item.id.toLongOrNull() ?: return@launch
+                val currentModule = _selectedModule.value ?: return@launch
+                
+                when (currentModule) {
+                    is SettingsModule.Area -> settingsRepository.deleteArea(itemId)
+                    is SettingsModule.Table -> settingsRepository.deleteTable(itemId)
+                    is SettingsModule.Menu -> settingsRepository.deleteMenu(itemId)
+                    is SettingsModule.MenuCategory -> settingsRepository.deleteMenuCategory(itemId)
+                    is SettingsModule.MenuItem -> settingsRepository.deleteMenuItem(itemId)
+                    is SettingsModule.Customer -> settingsRepository.deleteCustomer(itemId)
+                    is SettingsModule.Staff -> settingsRepository.deleteStaff(itemId)
+                    is SettingsModule.Role -> settingsRepository.deleteRole(itemId)
+                    is SettingsModule.Printer -> settingsRepository.deletePrinter(itemId)
+                    is SettingsModule.Tax -> settingsRepository.deleteTax(itemId)
+                    is SettingsModule.TaxSplit -> settingsRepository.deleteTaxSplit(itemId)
+                    is SettingsModule.CreateVoucher -> settingsRepository.deleteVoucher(itemId)
+                    is SettingsModule.Counter -> settingsRepository.deleteCounter(itemId)
+                    else -> {} // RestaurantProfile and GeneralSettings don't support delete
+                }
+                loadModuleData(currentModule) // Refresh data
             } catch (e: Exception) {
                 _uiState.value = SettingsUiState.Error("Failed to delete item: ${e.message}")
             }
         }
     }
 
-    private fun generateMockData(module: SettingsModule): List<SettingsItem> {
-        return when (module) {
-            is SettingsModule.Area -> listOf(
-                SettingsItem("1", "Main Dining", "Primary dining area", mapOf("capacity" to "50")),
-                SettingsItem("2", "VIP Section", "Premium dining area", mapOf("capacity" to "20")),
-                SettingsItem("3", "Outdoor Terrace", "Open air dining", mapOf("capacity" to "30"))
-            )
-            is SettingsModule.Table -> listOf(
-                SettingsItem("1", "Table 1", "4-seater in main dining", mapOf("capacity" to "4", "area" to "Main Dining")),
-                SettingsItem("2", "Table 2", "2-seater in main dining", mapOf("capacity" to "2", "area" to "Main Dining")),
-                SettingsItem("3", "VIP Table 1", "6-seater in VIP section", mapOf("capacity" to "6", "area" to "VIP Section"))
-            )
-            is SettingsModule.Menu -> listOf(
-                SettingsItem("1", "Breakfast Menu", "Morning menu items", mapOf("active" to "true")),
-                SettingsItem("2", "Lunch Menu", "Afternoon menu items", mapOf("active" to "true")),
-                SettingsItem("3", "Dinner Menu", "Evening menu items", mapOf("active" to "true"))
-            )
-            is SettingsModule.MenuCategory -> listOf(
-                SettingsItem("1", "Appetizers", "Starter dishes", mapOf("sort_order" to "1")),
-                SettingsItem("2", "Main Course", "Primary dishes", mapOf("sort_order" to "2")),
-                SettingsItem("3", "Desserts", "Sweet dishes", mapOf("sort_order" to "3"))
-            )
-            is SettingsModule.MenuItem -> listOf(
-                SettingsItem("1", "Chicken Biryani", "Aromatic rice with chicken", mapOf("rate" to "250", "category" to "Main Course")),
-                SettingsItem("2", "Paneer Tikka", "Grilled cottage cheese", mapOf("rate" to "180", "category" to "Appetizers")),
-                SettingsItem("3", "Gulab Jamun", "Sweet milk dumplings", mapOf("rate" to "80", "category" to "Desserts"))
-            )
-            is SettingsModule.Customer -> listOf(
-                SettingsItem("1", "John Doe", "Regular customer", mapOf("phone" to "9876543210", "email" to "john@example.com")),
-                SettingsItem("2", "Jane Smith", "VIP customer", mapOf("phone" to "9876543211", "email" to "jane@example.com"))
-            )
-            is SettingsModule.Staff -> listOf(
-                SettingsItem("1", "Ravi Kumar", "Head Chef", mapOf("role" to "Chef", "phone" to "9876543212")),
-                SettingsItem("2", "Priya Sharma", "Manager", mapOf("role" to "Manager", "phone" to "9876543213"))
-            )
-            is SettingsModule.Role -> listOf(
-                SettingsItem("1", "Manager", "Full access to all features", mapOf("permissions" to "all")),
-                SettingsItem("2", "Waiter", "Order taking and serving", mapOf("permissions" to "orders,billing")),
-                SettingsItem("3", "Chef", "Kitchen operations", mapOf("permissions" to "kitchen,orders"))
-            )
-            is SettingsModule.Printer -> listOf(
-                SettingsItem("1", "Kitchen Printer", "KOT printer in kitchen", mapOf("ip" to "192.168.1.100", "type" to "thermal")),
-                SettingsItem("2", "Billing Printer", "Receipt printer at counter", mapOf("ip" to "192.168.1.101", "type" to "thermal"))
-            )
-            is SettingsModule.Tax -> listOf(
-                SettingsItem("1", "CGST", "Central GST", mapOf("rate" to "9", "type" to "percentage")),
-                SettingsItem("2", "SGST", "State GST", mapOf("rate" to "9", "type" to "percentage"))
-            )
-            is SettingsModule.TaxSplit -> listOf(
-                SettingsItem("1", "Standard GST Split", "18% split as 9% CGST + 9% SGST", mapOf("percentage" to "18")),
-                SettingsItem("2", "Service Tax", "Service charge", mapOf("percentage" to "10"))
-            )
-        }
+    fun setSelectedModule(module: SettingsModule) {
+        _selectedModule.value = module
     }
 }
