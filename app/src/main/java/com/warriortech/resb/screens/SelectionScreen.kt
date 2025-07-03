@@ -55,6 +55,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.TextPrimary
 
 
@@ -89,7 +90,7 @@ fun SelectionScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = GradientStart
                 )
             )
         }

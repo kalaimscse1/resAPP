@@ -1,7 +1,6 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.dao.*
 import com.warriortech.resb.model.*
 import javax.inject.Inject
 import javax.inject.Singleton

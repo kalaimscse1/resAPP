@@ -29,13 +29,14 @@ import com.warriortech.resb.model.TblOrderDetailsResponse
 fun OrderScreen(
     drawerState: DrawerState,
     viewModel: OrderScreenViewModel = hiltViewModel(),
-    onNavigateToBilling: (List<TblOrderDetailsResponse>) -> Unit,
+    onNavigateToBilling: (List<TblOrderDetailsResponse>, Long) -> Unit,
 ) {
     val dineInOrders by viewModel.dineInOrders.collectAsStateWithLifecycle()
     val takeawayOrders by viewModel.takeawayOrders.collectAsStateWithLifecycle()
     val deliveryOrders by viewModel.deliveryOrders.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val tblOrderDetailsResponse by viewModel.tblOrderDetailsResponse.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.loadOrders()
@@ -115,7 +116,8 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
-                            onNavigateToBilling(viewModel.getOrdersByOrderId(orderId))
+                            viewModel.getOrdersByOrderId(orderId)
+                            onNavigateToBilling(tblOrderDetailsResponse,orderId)
                         }
                     )
                 }
@@ -130,7 +132,8 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
-                            onNavigateToBilling(viewModel.getOrdersByOrderId(orderId))
+                            viewModel.getOrdersByOrderId(orderId)
+                            onNavigateToBilling(tblOrderDetailsResponse,orderId)
                         }
 
                     )
@@ -146,7 +149,8 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
-                            onNavigateToBilling(viewModel.getOrdersByOrderId(orderId))
+                            viewModel.getOrdersByOrderId(orderId)
+                            onNavigateToBilling(tblOrderDetailsResponse,orderId)
                         }
                     )
                 }
@@ -303,16 +307,6 @@ private fun OrderItem(
                     )
                 }
             }
-
-//            if (order.items.isNotEmpty()) {
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Text(
-//                    text = "Items: ${order.items.joinToString(", ")}",
-//                    style = MaterialTheme.typography.bodySmall,
-//                    color = contentColor.copy(alpha = 0.7f),
-//                    maxLines = 2
-//                )
-//            }
         }
     }
 }

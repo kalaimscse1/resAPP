@@ -225,6 +225,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
+    var selectedOrderId by remember { mutableStateOf<Long?>(null) }
+
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
@@ -307,15 +309,20 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         composable("orders") {
             OrderScreen(
                 drawerState = drawerState,
-                onNavigateToBilling = { items ->
+                onNavigateToBilling = { items, orderId ->
+                    Log.d("BillingScreen", "order Items: $items")
                     selectedItems = items
+                    selectedOrderId = orderId
                     navController.navigate("billing_screen")
                 }
             )
         }
 
         composable("settings") {
-            SettingsScreen(drawerState = drawerState)
+            SettingsScreen(
+                drawerState = drawerState,
+                onBackPressed = {navController.popBackStack()}
+            )
         }
     }
 }

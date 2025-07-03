@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens // Or your preferred screen package
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -95,7 +96,8 @@ fun BillingScreen(
     var showKotSelectionDialog by remember { mutableStateOf(false) }
 
     // Load billing details from TblOrderDetailsResponse or initial items
-    LaunchedEffect(key1 = orderDetailsResponse) {
+    LaunchedEffect(key1 = orderDetailsResponse, key2 = orderMasterId) {
+        Log.d("BillingScreen", "Loading billing details for orderMasterId: $orderMasterId,$orderDetailsResponse")
         when {
             orderDetailsResponse != null && orderMasterId != null -> {
                 viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId)

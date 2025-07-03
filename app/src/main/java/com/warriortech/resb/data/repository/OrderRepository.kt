@@ -137,33 +137,30 @@ class OrderRepository @Inject constructor(
                 val tax = apiService.getTaxSplit(item.menuItem.tax_id)
                 val cgst = tax[0].tax_split_percentage
                 val sgst= tax[1].tax_split_percentage
-                val totalAmountForTaxCalc = pricePerUnit * item.quantity
-                val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), true)
-                val cgstAmount = calculateGst(totalAmountForTaxCalc, cgst.toDouble(), true)
-                val sgstAmount = calculateGst(totalAmountForTaxCalc, sgst.toDouble(), true)
-                val cess = if (item.menuItem.cess_specific!=0.00) calculateGstAndCess(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true,cessSpecific = item.menuItem.cess_specific)
-                else calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true)
-                OrderDetails(
+                val totalAmountForTaxCalc = pricePerUnit
+                val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), false,sgst.toDouble(),cgst.toDouble())
+                val cess =  calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), false,item.menuItem.cess_specific,sgst.toDouble(),cgst.toDouble())
+               OrderDetails(
                     order_master_id = currentOrderMasterId, // Link to existing or new OrderMaster
                     order_details_id = 0, // Backend should generate this or handle it
                     kot_number = newKotNumber, // KOT number for this specific batch
                     menu_item_id = item.menuItem.menu_item_id,
                     rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice else cess.basePrice, // Rate per unit (base price)
                     qty = item.quantity,
-                    total = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice else cess.basePrice, // Total base price for this item line
+                    total = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice * item.quantity else cess.basePrice * item.quantity, // Total base price for this item line
                     tax_id = item.menuItem.tax_id,
                     tax_name = item.menuItem.tax_name,
                     tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount else cess.gstAmount,
                     sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
-                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") sgstAmount.gstAmount else 0.0} else{if (tableStatus!="DELIVERY") cess.gstAmount / 2 else 0.0},
+                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.sgst else 0.0} else{if (tableStatus!="DELIVERY") cess.sgst else 0.0},
                     cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
-                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") cgstAmount.gstAmount else 0.0} else{if (tableStatus!="DELIVERY") cess.gstAmount / 2 else 0.0}, // Adjust if your backend calculates differently
+                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.cgst else 0.0} else{if (tableStatus!="DELIVERY") cess.cgst else 0.0}, // Adjust if your backend calculates differently
                     igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
                     igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount else 0.0 ,
                     cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
                     cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.cessAmount else 0.0,
                     cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) item.menuItem.cess_specific else 0.0 ,
-                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.totalPrice else taxAmount.totalPrice,
+                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.totalPrice * item.quantity else taxAmount.totalPrice* item.quantity,
                     prepare_status = true, // Item needs preparation
                     item_add_mode = existingOpenOrderMasterId != null, // True if adding to an existing order
                     is_flag = false,
@@ -384,18 +381,24 @@ class OrderRepository @Inject constructor(
         return apiService.getOpenOrderDetailsForTable(lng)
     }
 }
-data class GstResult(val basePrice: Double, val gstAmount: Double, val totalPrice: Double)
+data class GstResult(val basePrice: Double, val gstAmount: Double, val totalPrice: Double,
+                     val cgst: Double,
+                     val sgst: Double)
 
-fun calculateGst(amount: Double, gstRate: Double, isInclusive: Boolean): GstResult {
+fun calculateGst(amount: Double, gstRate: Double, isInclusive: Boolean,sgst: Double,cgst: Double): GstResult {
     return if (isInclusive) {
         val basePrice = amount / (1 + gstRate / 100)
         val gstAmount = basePrice * gstRate / 100
+        val cgstAmount = basePrice * cgst / 100
+        val sgstAmount = basePrice * sgst / 100
         val totalPrice = basePrice + gstAmount
-        GstResult(basePrice, gstAmount, totalPrice)
+        GstResult(basePrice, gstAmount, totalPrice, cgstAmount, sgstAmount)
     } else {
         val gstAmount = amount * gstRate / 100
+        val cgstAmount = amount * cgst / 100
+        val sgstAmount = amount * sgst / 100
         val totalPrice = amount + gstAmount
-        GstResult(amount, gstAmount, totalPrice)
+        GstResult(amount, gstAmount, totalPrice, cgstAmount, sgstAmount)
     }
 }
 
@@ -403,37 +406,28 @@ data class GstCessResult(
     val basePrice: Double,
     val gstAmount: Double,
     val cessAmount: Double,
-    val totalPrice: Double
+    val totalPrice: Double,
+    val cgst: Double,
+    val sgst: Double
 )
-fun calculateGstAndCess(amount: Double, gstRate: Double, cessRate: Double, isInclusive: Boolean,cessSpecific:Double?=0.0): GstCessResult {
-    return if (cessSpecific!=null) {
-        if (isInclusive) {
+
+fun calculateGstAndCess(amount: Double, gstRate: Double, cessRate: Double, isInclusive: Boolean,cessSpecific:Double,sgst: Double,cgst: Double): GstCessResult {
+    return if (isInclusive) {
             val amount = amount - cessSpecific
             val totalRate = gstRate + cessRate
             val basePrice = amount / ( 1 + totalRate / 100)
             val gstAmount = basePrice * gstRate / 100
+            val cgstAmount = basePrice * cgst / 100
+            val sgstAmount = basePrice * sgst / 100
             val cessAmount = basePrice * cessRate / 100
             val totalPrice = basePrice + gstAmount + cessAmount +cessSpecific
-            GstCessResult(basePrice, gstAmount, cessAmount, totalPrice)
+            GstCessResult(basePrice, gstAmount, cessAmount, totalPrice, cgstAmount, sgstAmount)
         } else {
             val gstAmount = amount * gstRate / 100
+            val cgstAmount = amount * cgst / 100
+            val sgstAmount = amount * sgst / 100
             val cessAmount = amount * cessRate / 100
             val totalPrice = amount + gstAmount + cessAmount+cessSpecific
-            GstCessResult(amount, gstAmount, cessAmount, totalPrice)
-        }
-    } else{
-        if (isInclusive) {
-            val totalRate = gstRate + cessRate
-            val basePrice = amount / ( 1 + totalRate / 100)
-            val gstAmount = basePrice * gstRate / 100
-            val cessAmount = basePrice * cessRate / 100
-            val totalPrice = basePrice + gstAmount + cessAmount
-            GstCessResult(basePrice, gstAmount, cessAmount, totalPrice)
-        } else {
-            val gstAmount = amount * gstRate / 100
-            val cessAmount = amount * cessRate / 100
-            val totalPrice = amount + gstAmount + cessAmount
-            GstCessResult(amount, gstAmount, cessAmount, totalPrice)
+            GstCessResult(amount, gstAmount, cessAmount, totalPrice, cgstAmount, sgstAmount)
         }
     }
-}

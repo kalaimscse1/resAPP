@@ -33,6 +33,8 @@ class OrderScreenViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    val tblOrderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
+
     fun loadOrders() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -82,6 +84,7 @@ class OrderScreenViewModel @Inject constructor(
         viewModelScope.launch {
             val order = orderRepository.getOrdersByOrderId(lng)
             if (order.body()!=null)
+                tblOrderDetailsResponse.value = order.body()!!
                 return@launch
         }
         return emptyList()
