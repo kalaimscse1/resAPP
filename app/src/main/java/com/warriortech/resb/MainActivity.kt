@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -82,6 +83,7 @@ import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
 import com.warriortech.resb.screens.SettingsScreen
+import com.warriortech.resb.screens.DashboardScreen
 
 
 @AndroidEntryPoint
@@ -228,7 +230,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedOrderId by remember { mutableStateOf<Long?>(null) }
 
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "dashboard") {
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
@@ -324,6 +326,10 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onBackPressed = {navController.popBackStack()}
             )
         }
+
+        composable("dashboard") {
+            DashboardScreen(drawerState = drawerState)
+        }
     }
 }
 @Composable
@@ -384,6 +390,14 @@ fun DrawerContent(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("Dashboard") else Text("") },
+                icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                selected = false,
+                onClick = { onDestinationClicked("dashboard") },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Select Order Type") else Text("") },

@@ -1,4 +1,25 @@
-@GET("areas")
+import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.model.TblStaffResponse
+import com.warriortech.resb.model.TblTableResponse
+import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.Order
+import com.warriortech.resb.model.OrderItem
+import com.warriortech.resb.model.OrderRequest
+import com.warriortech.resb.model.KOTRequest
+import com.warriortech.resb.model.SettingsModels
+import com.warriortech.resb.model.DashboardMetrics
+import com.warriortech.resb.model.RunningOrder
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+interface ApiService {
+    @GET("areas")
     suspend fun getAllAreas(): List<Area>
 
     @POST("areas")
@@ -181,3 +202,32 @@
 
     @DELETE("counters/{id}")
     suspend fun deleteCounter(@Path("id") id: Long)
+
+    /**
+     * Order Management
+     */
+    @POST("orders")
+    suspend fun createOrder(@Body orderRequest: OrderRequest): Order
+
+    @GET("orders")
+    suspend fun getOrders(): Response<List<Order>>
+
+    @GET("orders/details/{orderId}")
+    suspend fun getOrdersByOrderId(@Path("orderId") lng: Long): List<TblOrderDetailsResponse>
+
+    /**
+     * Dashboard
+     */
+    @GET("dashboard/metrics")
+    suspend fun getDashboardMetrics(): Response<DashboardMetrics>
+
+    @GET("dashboard/running-orders")
+    suspend fun getRunningOrders(): Response<List<RunningOrder>>
+
+    @GET("dashboard/recent-activity")
+    suspend fun getRecentActivity(): Response<List<String>>
+
+    /**
+     * Analytics
+     */
+}
