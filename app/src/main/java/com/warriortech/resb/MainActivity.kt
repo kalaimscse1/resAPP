@@ -81,6 +81,7 @@ import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
+import com.warriortech.resb.screens.SettingsScreen
 
 
 @AndroidEntryPoint
@@ -224,7 +225,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
-    
+
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
@@ -312,6 +313,10 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 }
             )
         }
+
+        composable("settings") {
+            SettingsScreen(drawerState = drawerState)
+        }
     }
 }
 @Composable
@@ -394,6 +399,14 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                 selected = false,
                 onClick = { onDestinationClicked("orders") },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("Settings") else Text("") },
+                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                selected = false,
+                onClick = { onDestinationClicked("settings") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
