@@ -62,6 +62,7 @@ class MenuViewModel @Inject constructor(
     private val _isExistingOrderLoaded = MutableStateFlow(false)
      val isExistingOrderLoaded: StateFlow<Boolean> = _isExistingOrderLoaded.asStateFlow()
 
+
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
         viewModelScope.launch {
             loadMenuItems()// Always load menu items
@@ -108,7 +109,6 @@ class MenuViewModel @Inject constructor(
                                 cess_per = it.cess_per.toString()
                             )
                     }
-                    Log.d("MenuViewModel", "Existing Items: $menuItems")
                     _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
                          // Adjust based on your MenuItem and how quantity is stored
                     _isExistingOrderLoaded.value = true

@@ -19,10 +19,6 @@ import javax.inject.Inject
 
 @HiltAndroidApp
 class ResbApplication : Application(), Configuration.Provider {
-
-    @Inject
-    lateinit var workerFactory: CustomWorkerFactory
-
     override fun onCreate() {
         super.onCreate()
 
@@ -31,11 +27,32 @@ class ResbApplication : Application(), Configuration.Provider {
             Timber.plant(Timber.DebugTree())
         }
     }
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
+    override fun getWorkManagerConfiguration(): Configuration {
+        val syncWorkerFactory = object : WorkerFactory() {
+            override fun createWorker(
+                appContext: Context,
+                workerClassName: String,
+                workerParameters: WorkerParameters
+            ): ListenableWorker? {
+                return if (workerClassName == SyncWorker::class.java.name) {
+                    SyncWorker(
+                        appContext,
+                        workerParameters,
+                        apiService
+                    )
+                } else {
+                    null
+                }
+            }
+        }
+        return Configuration.Builder()
+            .setMinimumLoggingLevel(Log.INFO)
+            .setWorkerFactory(syncWorkerFactory)
             .build()
+    }
+    private fun isDebugBuild(): Boolean {
+        return applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0
+    }
 }
 
 class CustomWorkerFactory @Inject constructor(

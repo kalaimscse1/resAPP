@@ -232,7 +232,18 @@ fun BillingContent(
                 valueLabel = "Tax %"
             )
         }
-
+        item {
+            EditableBillingRow(
+                label = "Tax (${uiState.cessPercentage.format(1)}%)",
+                amount = uiState.taxAmount,
+                currentValue = uiState.taxPercentage,
+                onValueChange = {
+                    it.toDoubleOrNull()?.let { taxVal -> onUpdateTax(taxVal) }
+                },
+                currencyFormatter = currencyFormatter,
+                valueLabel = "Tax %"
+            )
+        }
 
         // Discount (Allow editing)
         item {

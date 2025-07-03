@@ -41,6 +41,8 @@ data class BillingPaymentUiState(
     val tableStatus: String = "TABLE", // e.g., "AC", "TAKEAWAY"
     val taxPercentage: Double = 5.0, // Default GST
     val discountFlat: Double = 0.0,
+    val cessPercentage: Double=0.0,
+    val cessSpecific: Double=0.0,
     val subtotal: Double = 0.0,
     val taxAmount: Double = 0.0,
     val totalAmount: Double = 0.0,

@@ -1,9 +1,7 @@
 package com.warriortech.resb.screens
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -21,17 +19,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.Dimensions
 import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.clickable
+import com.warriortech.resb.model.MenuItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderScreen(
     drawerState: DrawerState,
-    viewModel: OrderScreenViewModel = hiltViewModel()
+    viewModel: OrderScreenViewModel = hiltViewModel(),
+    onNavigateToBilling: (Map<MenuItem, Int>, String) -> Unit,
+    onNavigateToBillingWithOrderDetails: Function<Unit>
 ) {
     val dineInOrders by viewModel.dineInOrders.collectAsStateWithLifecycle()
     val takeawayOrders by viewModel.takeawayOrders.collectAsStateWithLifecycle()
@@ -146,6 +144,7 @@ fun OrderScreen(
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
+//                            onNavigateToBilling(order.items, order.tableStatus)
                         }
                     )
                 }

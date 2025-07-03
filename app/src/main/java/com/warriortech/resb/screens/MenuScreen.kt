@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.theme.TextPrimary
 import com.warriortech.resb.ui.viewmodel.MenuViewModel
 import kotlinx.coroutines.coroutineScope
@@ -89,7 +90,7 @@ fun MenuScreen(
     tableId: Long,       // Actual table ID for table orders, or a placeholder for others
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
-    onBillPlaced: (Map<MenuItem, Int>) -> Unit,
+    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>) -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
     drawerState: DrawerState
 ) {
@@ -213,7 +214,7 @@ fun MenuScreen(
                     if (viewModel.isExistingOrderLoaded.value) {
                         MobileOptimizedButton(
                             onClick = {
-                                onBillPlaced(selectedItems) },
+                                onBillPlaced(viewModel.orderDetailsResponse.value) },
                             enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
                             text = "Bill",
                             modifier = Modifier.weight(1f)

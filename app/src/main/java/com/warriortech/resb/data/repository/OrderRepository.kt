@@ -133,12 +133,15 @@ class OrderRepository @Inject constructor(
                     "PARCEL", "DELIVERY" -> item.menuItem.parcel_rate
                     else -> item.menuItem.rate
                 }
+                val tax = apiService.getTaxSplit(item.menuItem.tax_id)
+                val cgst = tax[0].tax_split_percentage
+                val sgst= tax[1].tax_split_percentage
                 val totalAmountForTaxCalc = pricePerUnit * item.quantity
                 val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), true)
+                val cgstAmount = calculateGst(totalAmountForTaxCalc, cgst.toDouble(), true)
+                val sgstAmount = calculateGst(totalAmountForTaxCalc, sgst.toDouble(), true)
                 val cess = if (item.menuItem.cess_specific!=0.00) calculateGstAndCess(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true,cessSpecific = item.menuItem.cess_specific)
                 else calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true)
-                Log.d("OrderRepository", "Tax Amount: $taxAmount")
-                Log.d("OrderRepository", "cess Amount: $cess")
                 OrderDetails(
                     order_master_id = currentOrderMasterId, // Link to existing or new OrderMaster
                     order_details_id = 0, // Backend should generate this or handle it
@@ -150,10 +153,10 @@ class OrderRepository @Inject constructor(
                     tax_id = item.menuItem.tax_id,
                     tax_name = item.menuItem.tax_name,
                     tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount else cess.gstAmount,
-                    sgst_per = if (tableStatus!="DELIVERY")item.menuItem.tax_percentage.toDouble() / 2 else 0.0,
-                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.gstAmount / 2 else 0.0} else{if (tableStatus!="DELIVERY") cess.gstAmount / 2 else 0.0},
-                    cgst_per = if (tableStatus!="DELIVERY") item.menuItem.tax_percentage.toDouble() / 2 else 0.0,// Assuming SGST/CGST are half of total GST
-                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.gstAmount / 2 else 0.0} else{if (tableStatus!="DELIVERY") cess.gstAmount / 2 else 0.0}, // Adjust if your backend calculates differently
+                    sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
+                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") sgstAmount.gstAmount else 0.0} else{if (tableStatus!="DELIVERY") cess.gstAmount / 2 else 0.0},
+                    cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
+                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") cgstAmount.gstAmount else 0.0} else{if (tableStatus!="DELIVERY") cess.gstAmount / 2 else 0.0}, // Adjust if your backend calculates differently
                     igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
                     igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount else 0.0 ,
                     cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,

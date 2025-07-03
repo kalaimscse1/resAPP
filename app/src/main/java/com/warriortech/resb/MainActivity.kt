@@ -1,7 +1,6 @@
 package com.warriortech.resb
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -27,14 +26,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
@@ -316,7 +311,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                     selectedItems = items
                     navController.navigate("billing_screen")
                 },
-                onNavigateToBillingWithOrderDetails = { orderDetails, orderMasterId ->
+                onNavigateToBillingWithOrderDetails = {
                     // Store order details in a way that can be passed to billing screen
                     // For now, we'll navigate and let BillingScreen load the data
                     navController.navigate("billing_screen")
