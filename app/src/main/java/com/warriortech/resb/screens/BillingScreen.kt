@@ -23,6 +23,10 @@ import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import java.text.NumberFormat
+import kotlin.math.roundToInt
+
+// Extension function for formatting Double values
+fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
 

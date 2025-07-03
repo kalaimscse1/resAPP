@@ -1,4 +1,6 @@
 
+package com.warriortech.resb.ui.theme
+
 object PerformanceOptimizer {
     
     // Lazy initialization of heavy components
