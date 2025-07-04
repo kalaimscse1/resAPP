@@ -8,13 +8,6 @@ data class Menu(
     val isActive: Boolean
 )
 
-data class MenuCategory(
-    val id: Long,
-    val name: String,
-    val description: String,
-    val sortOrder: Int
-)
-
 data class Customer(
     val id: Long,
     val name: String,

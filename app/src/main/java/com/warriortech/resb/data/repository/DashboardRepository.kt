@@ -1,9 +1,9 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.remote.ApiService
 import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
+import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,8 +12,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DashboardRepository @Inject constructor(
-    private val apiService: ApiService,
-    private val sessionManager: SessionManager
+    private val apiService: ApiService
 ) {
 
     suspend fun getDashboardMetrics(): DashboardMetrics {

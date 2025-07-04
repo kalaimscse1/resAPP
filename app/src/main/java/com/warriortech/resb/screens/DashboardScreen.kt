@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,7 +51,7 @@ fun DashboardScreen(
                 title = {
                     Column {
                         Text(
-                            "Restaurant Dashboard",
+                            "Dashboard",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -192,6 +193,7 @@ fun DashboardScreen(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun MetricsSection(
     metrics: DashboardMetrics,

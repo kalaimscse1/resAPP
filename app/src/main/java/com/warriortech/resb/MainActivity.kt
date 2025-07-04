@@ -96,6 +96,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var syncManager: SyncManager
 
+
     @SuppressLint("ConfigurationScreenWidthHeight")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -231,12 +232,12 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedOrderId by remember { mutableStateOf<Long?>(null) }
 
 
-    NavHost(navController = navController, startDestination = "dashboard") {
+    NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
                     isLoggedIn = true
-                    navController.navigate("selects") {
+                    navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -342,7 +343,13 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         }
 
         composable("dashboard") {
-            DashboardScreen(drawerState = drawerState)
+            DashboardScreen(
+                drawerState = drawerState,
+                onNavigateToOrders = {navController.popBackStack()},
+                onNavigateToMenu = {navController.popBackStack()},
+                onNavigateToSettings = {navController.popBackStack()},
+                onNavigateToBilling = {navController.popBackStack()}
+            )
         }
     }
 }

@@ -1,19 +1,25 @@
 package com.warriortech.resb.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.CallSplit
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
-importandroidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Print
@@ -302,6 +308,7 @@ fun SettingsItemCard(
     }
 }
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun AddItemDialog(
     module: SettingsModule,
@@ -354,7 +361,7 @@ sealed class SettingsModule(
         "Area",
         "Manage dining areas and zones",
         Icons.Default.LocationOn,
-        listOf("name", "description", "capacity")
+        listOf("name","status")
     )
 
     object Table : SettingsModule(
