@@ -84,6 +84,7 @@ import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
 import com.warriortech.resb.screens.SettingsScreen
 import com.warriortech.resb.screens.DashboardScreen
+import com.warriortech.resb.screens.CounterScreen
 
 
 @AndroidEntryPoint
@@ -327,6 +328,19 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             )
         }
 
+        composable("counter") {
+            CounterScreen(
+                onBackPressed = { navController.popBackStack() },
+                onProceedToBilling = { items ->
+                    // Convert counter items to billing format
+                    val billingItems = items.mapKeys { it.key }.mapValues { it.value }
+                    // Navigate to billing with counter items
+                    navController.navigate("billing_screen")
+                },
+                drawerState = drawerState
+            )
+        }
+
         composable("dashboard") {
             DashboardScreen(drawerState = drawerState)
         }
@@ -428,6 +442,14 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                 selected = false,
                 onClick = { onDestinationClicked("settings") },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
+                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                selected = false,
+                onClick = { onDestinationClicked("counter") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
