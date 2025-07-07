@@ -14,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CounterViewModel @Inject constructor(
-    private val menuRepository: MenuItemRepository
+    private val menuRepository: MenuItemRepository,
+    private val counterRepository: com.warriortech.resb.data.repository.CounterRepository
 ) : ViewModel() {
 
     private val _menuState = MutableStateFlow<MenuUiState>(MenuUiState.Loading)
@@ -27,6 +28,9 @@ class CounterViewModel @Inject constructor(
     val categories: StateFlow<List<String>> = _categories.asStateFlow()
 
     val selectedCategory = MutableStateFlow<String?>(null)
+    
+    private val _currentCounter = MutableStateFlow<com.warriortech.resb.model.Counter?>(null)
+    val currentCounter: StateFlow<com.warriortech.resb.model.Counter?> = _currentCounter.asStateFlow()
 
     sealed class MenuUiState {
         object Loading : MenuUiState()
@@ -90,6 +94,10 @@ class CounterViewModel @Inject constructor(
 
     fun clearOrder() {
         _selectedItems.value = emptyMap()
+    }
+    
+    fun setCurrentCounter(counter: com.warriortech.resb.model.Counter) {
+        _currentCounter.value = counter
     }
 
     fun getOrderTotal(): Double {

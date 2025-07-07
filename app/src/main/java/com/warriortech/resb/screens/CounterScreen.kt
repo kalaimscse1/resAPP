@@ -43,7 +43,8 @@ fun CounterScreen(
     onBackPressed: () -> Unit,
     onProceedToBilling: (Map<MenuItem, Int>) -> Unit,
     viewModel: CounterViewModel = hiltViewModel(),
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    counterId: Long? = null
 ) {
     val menuState by viewModel.menuState.collectAsStateWithLifecycle()
     val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
@@ -55,11 +56,26 @@ fun CounterScreen(
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
     }
+    
+    LaunchedEffect(counterId) {
+        if (counterId != null) {
+            // Load counter information by ID
+            // This would typically come from a repository call
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Counter Billing") },
+                title = { 
+                    val currentCounter by viewModel.currentCounter.collectAsStateWithLifecycle()
+                    Text(
+                        if (currentCounter != null) 
+                            "Counter Billing - ${currentCounter!!.code}" 
+                        else 
+                            "Counter Billing"
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }

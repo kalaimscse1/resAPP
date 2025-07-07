@@ -349,6 +349,34 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             )
         }
 
+        composable("counter_selection") {
+            com.warriortech.resb.screens.CounterSelectionScreen(
+                onCounterSelected = { counter ->
+                    navController.navigate("counter/${counter.id}") {
+                        popUpTo("counter_selection") { inclusive = true }
+                    }
+                },
+                drawerState = drawerState
+            )
+        }
+
+        composable("counter/{counterId}") { backStackEntry ->
+            val counterId = backStackEntry.arguments?.getString("counterId")?.toLongOrNull() ?: 1L
+            CounterScreen(
+                onBackPressed = { navController.popBackStack() },
+                onProceedToBilling = { items ->
+                    // Convert counter items to billing format
+                    val billingItems = items.mapKeys { it.key }.mapValues { it.value }
+                    // Navigate to billing with counter items
+                    navController.navigate("billing_screen/${billingItems.values ?: 0L}") {
+                        popUpTo("counter/${counterId}") { inclusive = true }
+                    }
+                },
+                drawerState = drawerState,
+                counterId = counterId
+            )
+        }
+
         composable("counter") {
             CounterScreen(
                 onBackPressed = { navController.popBackStack() },
