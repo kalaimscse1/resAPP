@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -85,6 +86,8 @@ import com.warriortech.resb.screens.OrderScreen
 import com.warriortech.resb.screens.SettingsScreen
 import com.warriortech.resb.screens.DashboardScreen
 import com.warriortech.resb.screens.CounterScreen
+import com.warriortech.resb.screens.KitchenScreen
+import com.warriortech.resb.screens.ReportScreen
 
 
 @AndroidEntryPoint
@@ -303,10 +306,17 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 orderDetailsResponse = selectedItems
             )
         }
-
         composable("payment_screen") {
-            PaymentScreen(
-                navController = navController
+            PaymentScreen(navController = navController)
+        }
+        composable("report_screen") {
+            ReportScreen(navController = navController)
+        }
+
+        composable("kitchen") {
+            KitchenScreen(
+                navController = navController,
+                drawerState = drawerState
             )
         }
 
@@ -458,6 +468,23 @@ fun DrawerContent(
                 selected = false,
                 onClick = { onDestinationClicked("counter") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+
+            NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Reports") else Text("") },
+                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                    selected = false,
+                    onClick = { onDestinationClicked("report_screen") },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+
+            // Show Kitchen for chef, admin and superadmin roles
+            NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Kitchen") else Text("") },
+                    icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                    selected = false,
+                    onClick = { onDestinationClicked("kitchen") },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             Spacer(modifier = Modifier.weight(1f))

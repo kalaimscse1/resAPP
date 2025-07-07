@@ -129,7 +129,9 @@ fun PaymentMethodCard(
                 "Cash" to Icons.Default.Money,
                 "Card" to Icons.Default.CreditCard,
                 "UPI" to Icons.Default.QrCode,
-                "Online" to Icons.Default.AccountBalance
+                "Online" to Icons.Default.AccountBalance,
+                "DUE" to Icons.Default.Payment,
+                "OTHERS" to Icons.Default.MoreHoriz
             )
 
             paymentMethods.forEach { (method, icon) ->

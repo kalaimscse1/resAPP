@@ -9,7 +9,7 @@ import retrofit2.http.*
  * Includes endpoints with offline caching policies
  */
 interface ApiService {
-    
+
     /**
      * Authentication
      */
@@ -49,14 +49,21 @@ interface ApiService {
     @GET("table/area/getAreasByIsActive")
     suspend fun getAllAreas(): List<Area>
     // Menu item endpoints
-    @GET("menu-items")
+    @GET("menu/menuItem/getMenuItemsByIsActive")
+    suspend fun getMenuItems(): Response<List<MenuItem>>
+
+    @GET("menu/menuItem/getMenuItemsByIsActive")
     suspend fun getAllMenuItems(): List<MenuItem>
 
-    @GET("menu-items/category/{category}")
-    suspend fun getMenuItemsByCategory(@Path("category") category: String): List<MenuItem>
+    @GET("menu/menuItem/search")
+    suspend fun searchMenuItems(@Query("query") query: String): Response<List<MenuItem>>
 
-    @GET("menu/menuItem/getMenuItemsByIsActiveApp")
-    suspend fun getMenuItems(): Response<List<MenuItem>>
+    // Customer endpoints
+    @GET("customers/search")
+    suspend fun searchCustomers(@Query("q") query: String): Response<CustomerSearchResponse>
+
+    @POST("customers")
+    suspend fun createCustomer(@Body customer: CreateCustomerRequest): Response<CreateCustomerResponse>
 
     // Order endpoints
     @POST("order/addOrder")
@@ -70,9 +77,9 @@ interface ApiService {
 
     @POST("order/orderDetails/addAllOrderDetails")
     suspend fun createOrderDetails(@Body orderRequest: List<OrderDetails>): Response<List<OrderDetails>>
-    
+
     @GET("order/getOrderByTableId/{table_id}")
-     suspend fun getOpenOrderMasterForTable(@Path("table_id") tableId: Long): Response<TblOrderResponse>
+    suspend fun getOpenOrderMasterForTable(@Path("table_id") tableId: Long): Response<TblOrderResponse>
 
     @GET("order/getOrderNO")
     suspend fun getOrderNo(): Map<String, Int>
@@ -127,6 +134,16 @@ interface ApiService {
 
     @GET("dashboard/metrics")
     suspend fun getDashboardMetrics(): Response<DashboardMetrics>
+
+    // Report API endpoints
+    @GET("reports/today-sales")
+    suspend fun getTodaySales(): Response<TodaySalesReport>
+
+    @GET("reports/gst-summary")
+    suspend fun getGSTSummary(): Response<GSTSummaryReport>
+
+    @GET("reports/sales-summary/{date}")
+    suspend fun getSalesSummaryByDate(@Path("date") date: String): Response<SalesSummaryReport>
 
     @GET("dashboard/running-orders")
     suspend fun getRunningOrders(): Response<List<RunningOrder>>
@@ -304,4 +321,37 @@ interface ApiService {
 
     @DELETE("counters/{id}")
     suspend fun deleteCounter(@Path("id") id: Long): Response<Int>
+
+    // Modifier API endpoints
+    @GET("modifiers")
+    suspend fun getAllModifiers(): Response<List<Modifiers>>
+
+    @GET("modifiers/category/{categoryId}")
+    suspend fun getModifiersByCategory(@Path("categoryId") categoryId: Long): List<Modifiers>
+
+    @GET("modifiers/menu-item/{menuItemId}")
+    suspend fun getModifiersByMenuItem(@Path("menuItemId") menuItemId: Long): List<Modifiers>
+
+    @POST("modifiers")
+    suspend fun createModifier(@Body modifier: Modifiers): Response<Modifiers>
+
+    @PUT("modifiers/{id}")
+    suspend fun updateModifier(@Path("id") id: Long, @Body modifier: Modifiers): Response<Modifiers>
+
+    @DELETE("modifiers/{id}")
+    suspend fun deleteModifier(@Path("id") id: Long): Response<Int>
+
+    // Report API Endpoints
+    @POST("reports/sales-summary")
+    suspend fun getSalesSummary(@Body request: Map<String, Any>): Response<SalesSummaryResponse>
+
+    // Kitchen API endpoints
+    @GET("kitchen/kots")
+    suspend fun getKitchenKOTs(): Response<KitchenKOTResponse>
+
+    @PUT("kitchen/kot/{kotId}/status")
+    suspend fun updateKOTStatus(
+        @Path("kotId") kotId: Int,
+        @Body statusUpdate: KOTStatusUpdate
+    ): Response<KOTUpdateResponse>
 }

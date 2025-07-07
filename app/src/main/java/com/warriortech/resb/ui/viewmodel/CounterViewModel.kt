@@ -3,7 +3,7 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.data.repository.MenuRepository
+import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.model.MenuItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CounterViewModel @Inject constructor(
-    private val menuRepository: MenuRepository
+    private val menuRepository: MenuItemRepository
 ) : ViewModel() {
 
     private val _menuState = MutableStateFlow<MenuUiState>(MenuUiState.Loading)
@@ -39,15 +39,28 @@ class CounterViewModel @Inject constructor(
             try {
                 _menuState.value = MenuUiState.Loading
                 val menuItems = menuRepository.getMenuItems()
-                _menuState.value = MenuUiState.Success(menuItems)
-                
-                // Extract unique categories
-                val uniqueCategories = menuItems.map { it.item_cat_name }.distinct().sorted()
-                _categories.value = uniqueCategories
-                
-                // Set first category as selected if available
-                if (uniqueCategories.isNotEmpty() && selectedCategory.value == null) {
-                    selectedCategory.value = uniqueCategories.first()
+                menuItems.collect{
+                        result->
+                    result.fold(
+                        onSuccess = { menuItems ->
+                            _menuState.value = MenuUiState.Success(menuItems)
+
+                            // Extract unique categories
+                            val uniqueCategories =
+                                menuItems.map { it.item_cat_name }.distinct().sorted()
+                            _categories.value = uniqueCategories
+
+                            // Set first category as selected if available
+                            if (uniqueCategories.isNotEmpty() && selectedCategory.value == null) {
+                                selectedCategory.value = uniqueCategories.first()
+                            }
+                        },
+                        onFailure = { error ->
+                            _menuState.value =
+                                MenuUiState.Error(error.message ?: "Failed to load menu items")
+                        }
+
+                    )
                 }
             } catch (e: Exception) {
                 _menuState.value = MenuUiState.Error(e.message ?: "Failed to load menu items")

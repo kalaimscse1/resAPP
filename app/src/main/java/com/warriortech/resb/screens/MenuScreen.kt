@@ -139,7 +139,7 @@ fun MenuScreen(
                     snackbarHostState.showSnackbar(currentOrderState.message)
                 }
             }
-            else -> { /* do nothing for Loading or Idle */ }
+            else -> { snackbarHostState.showSnackbar("Loading") }
         }
     }
 
@@ -162,7 +162,7 @@ fun MenuScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Column {
                         Text("Menu Selection")
                         if (viewModel.isExistingOrderLoaded.value) {
@@ -442,7 +442,7 @@ fun MenuItemCard(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     if (isExistingOrder && existingQuantity > 0) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
@@ -535,7 +535,7 @@ fun MenuItemCard(
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
-                    
+
                     if (quantity > 0) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

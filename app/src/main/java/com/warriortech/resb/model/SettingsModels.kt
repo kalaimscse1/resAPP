@@ -8,13 +8,13 @@ data class Menu(
     val isActive: Boolean
 )
 
-data class Customer(
-    val id: Long,
-    val name: String,
-    val phone: String,
-    val email: String,
-    val address: String
-)
+//data class Customer(
+//    val id: Long,
+//    val name: String,
+//    val phone: String,
+//    val email: String,
+//    val address: String
+//)
 
 data class Staff(
     val id: Long,

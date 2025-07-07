@@ -79,7 +79,7 @@ data class MenuItemEntity(
             menu_item_name_tamil = this.menu_item_name_tamil,
             rate = this.rate,
             item_cat_name = this.item_cat_name,
-            image = this.image,
+            image = this.image.toString(),
             ac_rate = this.ac_rate,
             is_available = this.is_available,
             parcel_rate = this.parcel_rate,

@@ -20,7 +20,7 @@ data class TblStaff(
     var role_name:String,
     var last_login:String,
     var is_block:Boolean,
-    var is_active:Boolean
+    var is_active:Long
 )
 data class LoginRequest(
     val companyCode: String,

@@ -51,5 +51,7 @@ data class TableEntity(
 enum class SyncStatus {
     SYNCED,           // Data is synchronized with the server
     PENDING_SYNC,     // Local changes need to be synced to server
-    SYNC_FAILED       // Failed to sync with server
+    SYNC_FAILED,
+    PENDING_DELETE,
+    PENDING_UPDATE,// Failed to sync with server
 }

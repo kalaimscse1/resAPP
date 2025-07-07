@@ -27,9 +27,81 @@ data class MenuItem(
     val is_inventory:Long,
     val is_raw:String,
     val is_available: String,
-    val image: String? = null,
-    var qty: Int? = 0
-)
+    val image: String = "",
+    var qty: Int = 0
+){
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MenuItem
+
+        if (menu_item_id != other.menu_item_id) return false
+        if (menu_item_name != other.menu_item_name) return false
+        if (menu_item_name_tamil != other.menu_item_name_tamil) return false
+        if (item_cat_id != other.item_cat_id) return false
+        if (item_cat_name != other.item_cat_name) return false
+        if (rate != other.rate) return false
+        if (ac_rate != other.ac_rate) return false
+        if (parcel_rate != other.parcel_rate) return false
+        if (parcel_charge != other.parcel_charge) return false
+        if (tax_id != other.tax_id) return false
+        if (tax_name != other.tax_name) return false
+        if (tax_percentage != other.tax_percentage) return false
+        if (cess_per != other.cess_per) return false
+        if (cess_specific != other.cess_specific) return false
+        if (kitchen_cat_id != other.kitchen_cat_id) return false
+        if (kitchen_cat_name != other.kitchen_cat_name) return false
+        if (stock_maintain != other.stock_maintain) return false
+        if (rate_lock != other.rate_lock) return false
+        if (unit_id != other.unit_id) return false
+        if (unit_name != other.unit_name) return false
+        if (min_stock != other.min_stock) return false
+        if (hsn_code != other.hsn_code) return false
+        if (order_by != other.order_by) return false
+        if (is_inventory != other.is_inventory) return false
+        if (is_raw != other.is_raw) return false
+        if (is_available != other.is_available) return false
+        if (image != other.image) return false
+        // qty is not part of default equals/hashCode for data class primary constructor
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = menu_item_id.hashCode()
+        // For every String property, defensively use ?.hashCode() ?: 0
+        // This assumes any of them could be null due to Java interop issues
+        result = 31 * result + (menu_item_name?.hashCode() ?: 0)
+        result = 31 * result + (menu_item_name_tamil?.hashCode() ?: 0)
+        result = 31 * result + item_cat_id.hashCode()
+        result = 31 * result + (item_cat_name?.hashCode() ?: 0)
+        result = 31 * result + rate.hashCode()
+        result = 31 * result + ac_rate.hashCode()
+        result = 31 * result + parcel_rate.hashCode()
+        result = 31 * result + parcel_charge.hashCode()
+        result = 31 * result + tax_id.hashCode()
+        result = 31 * result + (tax_name?.hashCode() ?: 0)
+        result = 31 * result + (tax_percentage?.hashCode() ?: 0)
+        result = 31 * result + (cess_per?.hashCode() ?: 0)
+        result = 31 * result + cess_specific.hashCode()
+        result = 31 * result + kitchen_cat_id.hashCode()
+        result = 31 * result + (kitchen_cat_name?.hashCode() ?: 0)
+        result = 31 * result + (stock_maintain?.hashCode() ?: 0)
+        result = 31 * result + (rate_lock?.hashCode() ?: 0)
+        result = 31 * result + unit_id.hashCode()
+        result = 31 * result + (unit_name?.hashCode() ?: 0)
+        result = 31 * result + min_stock.hashCode()
+        result = 31 * result + (hsn_code?.hashCode() ?: 0)
+        result = 31 * result + order_by.hashCode()
+        result = 31 * result + is_inventory.hashCode()
+        result = 31 * result + (is_raw?.hashCode() ?: 0)
+        result = 31 * result + (is_available?.hashCode() ?: 0)
+        result = 31 * result + (image?.hashCode() ?: 0)
+        // qty is not part of default equals/hashCode for data class primary constructor
+        return result
+    }
+}
 
 
 /**
