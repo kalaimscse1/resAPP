@@ -18,7 +18,7 @@ fun getCurrentDateModern(): String {
 @RequiresApi(Build.VERSION_CODES.O)
 fun getCurrentTimeModern(): String {
     val currentTime = LocalTime.now()
-    val formatter = DateTimeFormatter.ofPattern("hh:mm a") // Customize your time format (e.g., "hh:mm a" for 12-hour format)
+    val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.US) // Customize your time format (e.g., "hh:mm a" for 12-hour format)
     return currentTime.format(formatter)
 }
 

@@ -70,6 +70,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.theme.TextPrimary
@@ -90,9 +91,10 @@ fun MenuScreen(
     tableId: Long,       // Actual table ID for table orders, or a placeholder for others
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
-    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>) -> Unit,
+    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId:Long) -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    navController: NavHostController
 ) {
     val menuState by viewModel.menuState.collectAsStateWithLifecycle()
     val orderState by viewModel.orderState.collectAsStateWithLifecycle()
@@ -228,7 +230,13 @@ fun MenuScreen(
                     if (viewModel.isExistingOrderLoaded.value) {
                         MobileOptimizedButton(
                             onClick = {
-                                onBillPlaced(viewModel.orderDetailsResponse.value) },
+                                navController.navigate("billing_screen/${viewModel.existingOrderId.value?.toLong() ?: 0}") {
+                                    launchSingleTop = true
+                                }
+//                                onBillPlaced(viewModel.orderDetailsResponse.value,
+//                                    viewModel.existingOrderId.value?.toLong()!!
+//                                )
+                                },
                             enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
                             text = "Bill",
                             modifier = Modifier.weight(1f)

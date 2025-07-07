@@ -41,16 +41,16 @@ import com.warriortech.resb.ui.theme.*
 @Composable
 fun PaymentScreen(
     navController: NavHostController,
-    viewModel: BillingViewModel = hiltViewModel() // Shared ViewModel
-    // amountToPayFromRoute: Float? = null // If passing amount via route
+    viewModel: BillingViewModel = hiltViewModel(), // Shared ViewModel
+    amountToPayFromRoute: Double? = null // If passing amount via route
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // If amount was passed via route, you might set it in the ViewModel once
-    // LaunchedEffect(key1 = amountToPayFromRoute) {
-    //     amountToPayFromRoute?.let { viewModel.updateAmountToPay(it.toDouble()) }
-    // }
+     LaunchedEffect(key1 = amountToPayFromRoute) {
+         amountToPayFromRoute?.let { viewModel.updateAmountToPay(it.toDouble()) }
+     }
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
@@ -68,11 +68,11 @@ fun PaymentScreen(
             // }
             // For now, just show a snackbar and allow manual dismissal or pop back
             snackbarHostState.showSnackbar("Payment Successful! TXN ID: ${successState.transactionId}")
-            // viewModel.resetPaymentState() // Reset for next payment
+             viewModel.resetPaymentState() // Reset for next payment
         } else if (uiState.paymentProcessingState is PaymentProcessingState.Error) {
             val errorState = uiState.paymentProcessingState as PaymentProcessingState.Error
             snackbarHostState.showSnackbar("Payment Failed: ${errorState.message}")
-            // viewModel.resetPaymentState() // Allow retry
+             viewModel.resetPaymentState() // Allow retry
         }
     }
 

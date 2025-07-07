@@ -76,7 +76,7 @@ interface ApiService {
     suspend fun getOrderMasterById(@Path("order_master_id") orderId: Long): Response<TblOrderResponse>
 
     @POST("order/orderDetails/addAllOrderDetails")
-    suspend fun createOrderDetails(@Body orderRequest: List<OrderDetails>): Response<List<OrderDetails>>
+    suspend fun createOrderDetails(@Body orderRequest: List<OrderDetails>): Response<List<TblOrderDetailsResponse>>
 
     @GET("order/getOrderByTableId/{table_id}")
     suspend fun getOpenOrderMasterForTable(@Path("table_id") tableId: Long): Response<TblOrderResponse>
@@ -98,6 +98,9 @@ interface ApiService {
 
     @GET("order/orderDetails/getOrdersDetailsByOrderIdApp/{order_master_id}")
     suspend fun getOpenOrderDetailsForTable(@Path("order_master_id") tableId: Long?):Response<List<TblOrderDetailsResponse>>
+
+    @GET("order/orderDetails/getOrdersDetailsByIsActive")
+    suspend fun getAllOrderDetails(): Response<List<TblOrderDetailsResponse>>
 
     @POST("print/kot")
     suspend fun printKOT(@Body orderRequest: KOTRequest): Response<Map<String, String>>

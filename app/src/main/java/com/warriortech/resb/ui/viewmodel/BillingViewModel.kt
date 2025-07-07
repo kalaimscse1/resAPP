@@ -3,6 +3,7 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
@@ -30,7 +31,7 @@ data class PaymentMethod(
 sealed interface PaymentProcessingState {
     object Idle : PaymentProcessingState
     object Processing : PaymentProcessingState
-    data class Success(val order: com.warriortech.resb.ui.viewmodel.Order, val transactionId: String) : PaymentProcessingState
+    data class Success(val order:Order, val transactionId: String) : PaymentProcessingState
     data class Error(val message: String) : PaymentProcessingState
 }
 
@@ -65,10 +66,10 @@ data class BillingPaymentUiState(
 
 @HiltViewModel
 class BillingViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
     // Inject Repositories or UseCases for fetching payment methods, processing payments, saving orders
     // private val paymentRepository: PaymentRepository,
-    // private val orderRepository: OrderRepository
+     private val orderRepository: OrderRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
@@ -118,35 +119,76 @@ class BillingViewModel @Inject constructor(
         orderDetails: List<TblOrderDetailsResponse>,
         orderMasterId: Long
     ) {
-        _originalOrderDetails.value = orderDetails
-        _filteredOrderDetails.value = orderDetails
+        viewModelScope.launch {
+            val order = orderRepository.getOrdersByOrderId(orderMasterId)
+            if (order.body() != null) {
+                val orderDetailsResponse = order.body()!!
 
-        // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
-        val itemsMap = mutableMapOf<MenuItem, Int>()
-        var tableStatus = "TABLE" // Default
+                // This function sets billing details from an existing order response
+                // Set billing details from TblOrderDetailsResponse
 
-        orderDetails.forEach { detail ->
-            val existingQty = itemsMap[detail.menuItem] ?: 0
-            itemsMap[detail.menuItem] = existingQty + detail.qty
+                _originalOrderDetails.value = orderDetails
+                _filteredOrderDetails.value = orderDetails
+                val menuItems=orderDetailsResponse.map{
+
+                    MenuItem(
+                        menu_item_id = it.menuItem.menu_item_id,
+                        menu_item_name = it.menuItem.menu_item_name,
+                        menu_item_name_tamil = it.menuItem.menu_item_name_tamil,
+                        item_cat_id = it.menuItem.item_cat_id,
+                        item_cat_name = it.menuItem.item_cat_name,
+                        rate = it.rate,
+                        ac_rate = it.rate,
+                        parcel_rate = it.rate,
+                        parcel_charge = it.rate,
+                        tax_id = it.menuItem.tax_id,
+                        tax_name = it.menuItem.tax_name,
+                        tax_percentage = it.menuItem.tax_percentage,
+                        kitchen_cat_id = it.menuItem.kitchen_cat_id,
+                        kitchen_cat_name = it.menuItem.kitchen_cat_name,
+                        stock_maintain = it.menuItem.stock_maintain,
+                        rate_lock = it.menuItem.rate_lock,
+                        unit_id = it.menuItem.unit_id,
+                        unit_name = it.menuItem.unit_name,
+                        min_stock = it.menuItem.min_stock,
+                        hsn_code = it.menuItem.hsn_code,
+                        order_by = it.menuItem.order_by,
+                        is_inventory = it.menuItem.is_inventory,
+                        is_raw = it.menuItem.is_raw,
+                        is_available = it.menuItem.is_available,
+                        image = it.menuItem.image,
+                        qty = it.qty,
+                        cess_specific = it.cess_specific,
+                        cess_per = it.cess_per.toString()
+                    )
+                }
+                // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
+                val itemsMap = menuItems.associateWith { it.qty as Int }.toMutableMap()
+                var tableStatus = "TABLE" // Default
+
+                // Calculate totals from order details
+                val subtotal = orderDetailsResponse.sumOf { it.total }
+                val taxAmount = orderDetailsResponse.sumOf { it.tax_amount }
+                val totalAmount = subtotal + taxAmount
+
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        billedItems = itemsMap,
+                        tableStatus = tableStatus,
+                        subtotal = subtotal,
+                        taxAmount = taxAmount,
+                        totalAmount = totalAmount,
+                        amountToPay = totalAmount,
+                        orderDetails = orderDetails,
+                        orderMasterId = orderMasterId
+                    )
+                }
+
+            } else {
+                _uiState.update { it.copy(errorMessage = "Order not found") }
+            }
         }
 
-        // Calculate totals from order details
-        val subtotal = orderDetails.sumOf { it.total }
-        val taxAmount = orderDetails.sumOf { it.tax_amount }
-        val totalAmount = subtotal + taxAmount
-
-        _uiState.update { currentState ->
-            currentState.copy(
-                billedItems = itemsMap,
-                tableStatus = tableStatus,
-                subtotal = subtotal,
-                taxAmount = taxAmount,
-                totalAmount = totalAmount,
-                amountToPay = totalAmount,
-                orderDetails = orderDetails,
-                orderMasterId = orderMasterId
-            )
-        }
     }
 
     fun filterByKotNumber(kotNumber: Int) {
@@ -260,11 +302,12 @@ class BillingViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 availablePaymentMethods = listOf(
-                    PaymentMethod("cash", "Cash"),
-                    PaymentMethod("card", "Credit/Debit Card"),
-                    PaymentMethod("upi", "UPI / QR Code"),
-                    PaymentMethod("due", "Credit/Due"),
-                    PaymentMethod("others", "Others")
+                    PaymentMethod("cash", "CASH"),
+                    PaymentMethod("card", "CARD"),
+                    PaymentMethod("upi", "UPI"),
+                    PaymentMethod("due", "DUE"),
+                    PaymentMethod("online", "ONLINE"),
+                    PaymentMethod("others", "OTHERS")
                     // Add more methods
                 )
             )
@@ -345,10 +388,6 @@ class BillingViewModel @Inject constructor(
 
     fun clearErrorMessage() {
         _uiState.update { it.copy(errorMessage = null) }
-    }
-
-    fun selectPaymentMethod(paymentMethod: PaymentMethod) {
-        _uiState.update { it.copy(selectedPaymentMethod = paymentMethod) }
     }
 
     fun updateAmountReceived(amount: Double) {

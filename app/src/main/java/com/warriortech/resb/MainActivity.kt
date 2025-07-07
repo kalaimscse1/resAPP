@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-importandroidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -165,7 +165,8 @@ class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                 }
                             }
-                        }
+                        },
+                        navController = navController
                     )
                 }
 
@@ -280,9 +281,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onBackPressed = { navController.popBackStack() },
                 onOrderPlaced = { navController.popBackStack() },
                 drawerState = drawerState,
-                onBillPlaced = { items->
+                onBillPlaced = { items,orderId->
                     selectedItems=items
-                    navController.navigate("billing_screen") }
+                    selectedOrderId = orderId
+                    navController.navigate("billing_screen/${orderId}") },
+                navController = navController
             )
         }
 
@@ -295,21 +298,24 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onOrderPlaced = { navController.popBackStack()
                                 selectedTable=null},
                 drawerState = drawerState,
-                onBillPlaced = { items->
-                    Log.d("BillingScreen", "NavigationSelected Items: $items")
+                onBillPlaced = { items,orderId->
                     selectedItems=items
-                    navController.navigate("billing_screen") }
+                    selectedOrderId = orderId
+                    navController.navigate("billing_screen/${orderId}") },
+                navController = navController
             )
         }
-        composable("billing_screen") {
-            Log.d("BillingScreen", "Selected Items: $selectedItems")
+        composable("billing_screen/{orderMasterId}") { backStackEntry ->
             BillingScreen(
                 navController = navController,
-                orderDetailsResponse = selectedItems
+                orderDetailsResponse = selectedItems,
+                orderMasterId = backStackEntry.arguments?.getString("orderMasterId")?.toLong() ?: 0L
             )
         }
-        composable("payment_screen") {
-            PaymentScreen(navController = navController)
+        composable("payment_screen/{amountToPayFromRoute}") {
+            PaymentScreen(navController = navController,
+                amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")?.toDoubleOrNull() ?: 0.0
+            )
         }
         composable("report_screen") {
             ReportScreen(navController = navController)
@@ -329,7 +335,9 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                     Log.d("BillingScreen", "order Items: $items")
                     selectedItems = items
                     selectedOrderId = orderId
-                    navController.navigate("billing_screen")
+                    navController.navigate("billing_screen/${orderId}") {
+                        popUpTo("orders") { inclusive = true }
+                    }
                 }
             )
         }
@@ -348,7 +356,9 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                     // Convert counter items to billing format
                     val billingItems = items.mapKeys { it.key }.mapValues { it.value }
                     // Navigate to billing with counter items
-                    navController.navigate("billing_screen")
+                    navController.navigate("billing_screen/${billingItems.values ?: 0L}") {
+                        popUpTo("counter") { inclusive = true }
+                    }
                 },
                 drawerState = drawerState
             )
@@ -357,10 +367,10 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         composable("dashboard") {
             DashboardScreen(
                 drawerState = drawerState,
-                onNavigateToOrders = {navController.popBackStack()},
-                onNavigateToMenu = {navController.popBackStack()},
-                onNavigateToSettings = {navController.popBackStack()},
-                onNavigateToBilling = {navController.popBackStack()}
+                onNavigateToOrders = {navController.navigate("orders")},
+                onNavigateToMenu = {navController.navigate("menu")},
+                onNavigateToSettings = {navController.navigate("settings")},
+                onNavigateToBilling = {navController.navigate("counter")}
             )
         }
         composable("report_screen") {
@@ -379,7 +389,8 @@ fun DrawerContent(
     isCollapsed: Boolean,
     drawerWidth: Dp,
     onCollapseToggle: () -> Unit,
-    onDestinationClicked: (String) -> Unit
+    onDestinationClicked: (String) -> Unit,
+    navController: NavHostController
 ) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
@@ -447,7 +458,6 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
                 selected = currentDestination?.route == "selects",
                 onClick = {
-                    scope.launch { drawerState.close() }
                     onDestinationClicked("selects")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -458,7 +468,6 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
                 selected = currentDestination?.route == "takeaway_menu",
                 onClick = {
-                    scope.launch { drawerState.close() }
                     onDestinationClicked("takeaway_menu")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -469,8 +478,7 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                 selected = currentDestination?.route == "orders",
                 onClick = {
-                    scope.launch { drawerState.close() }
-                    navController.navigate("orders")
+                    onDestinationClicked("orders")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
@@ -480,8 +488,7 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                 selected = currentDestination?.route == "settings",
                 onClick = {
-                    scope.launch { drawerState.close() }
-                    navController.navigate("settings")
+                    onDestinationClicked("settings")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
@@ -491,8 +498,7 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                 selected = currentDestination?.route == "counter",
                 onClick = {
-                    scope.launch { drawerState.close() }
-                    navController.navigate("counter")
+                    onDestinationClicked("counter")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
@@ -502,8 +508,7 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                 selected = currentDestination?.route == "report_screen",
                 onClick = {
-                    scope.launch { drawerState.close() }
-                    navController.navigate("report_screen")
+                    onDestinationClicked("report_screen")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
@@ -513,8 +518,7 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
                 selected = currentDestination?.route == "ai_assistant",
                 onClick = {
-                    scope.launch { drawerState.close() }
-                    navController.navigate("ai_assistant")
+                    onDestinationClicked("ai_assistant")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
@@ -525,8 +529,7 @@ fun DrawerContent(
                 icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
                 selected = currentDestination?.route == "kitchen",
                 onClick = {
-                    scope.launch { drawerState.close() }
-                    navController.navigate("kitchen")
+                    onDestinationClicked("kitchen")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )

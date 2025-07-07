@@ -85,17 +85,9 @@ fun AIAssistantScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         MobileOptimizedButton(
                             onClick = { viewModel.enhanceMenuDescriptions() },
-                            enabled = !uiState.isLoading
-                        ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text("Enhance Menu")
-                            }
-                        }
+                            enabled = !uiState.isLoading,
+                            text = "Enhance Menu"
+                        )
                     }
                 }
             }
@@ -125,10 +117,9 @@ fun AIAssistantScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         MobileOptimizedButton(
                             onClick = { viewModel.generateUpsellSuggestions() },
-                            enabled = !uiState.isLoading
-                        ) {
-                            Text("Get Suggestions")
-                        }
+                            enabled = !uiState.isLoading,
+                            text = "Get Suggestions"
+                        )
                     }
                 }
             }
@@ -158,10 +149,9 @@ fun AIAssistantScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         MobileOptimizedButton(
                             onClick = { viewModel.analyzeSalesData() },
-                            enabled = !uiState.isLoading
-                        ) {
-                            Text("Analyze Sales")
-                        }
+                            enabled = !uiState.isLoading,
+                            text =  "Analyze Sales"
+                        )
                     }
                 }
             }
@@ -191,10 +181,9 @@ fun AIAssistantScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         MobileOptimizedButton(
                             onClick = { viewModel.generateCustomerRecommendations() },
-                            enabled = !uiState.isLoading
-                        ) {
-                            Text("Get Recommendations")
-                        }
+                            enabled = !uiState.isLoading,
+                            text = "Get Recommendations"
+                        )
                     }
                 }
             }
@@ -243,7 +232,7 @@ fun AIAssistantScreen(
                         )
                     ) {
                         Text(
-                            text = uiState.errorMessage,
+                            text = uiState.errorMessage!!,
                             modifier = Modifier.padding(16.dp),
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
@@ -277,11 +266,10 @@ fun AIAssistantScreen(
                     onClick = {
                         viewModel.setApiKey(apiKey)
                         showApiKeyDialog = false
-                        apiKey = ""
-                    }
-                ) {
-                    Text("Save")
-                }
+                        apiKey = "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"
+                    },
+                    text = "Save"
+                )
             },
             dismissButton = {
                 TextButton(onClick = { showApiKeyDialog = false }) {

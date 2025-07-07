@@ -138,8 +138,8 @@ class OrderRepository @Inject constructor(
                 val cgst = tax[0].tax_split_percentage
                 val sgst= tax[1].tax_split_percentage
                 val totalAmountForTaxCalc = pricePerUnit
-                val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), false,sgst.toDouble(),cgst.toDouble())
-                val cess =  calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), false,item.menuItem.cess_specific,sgst.toDouble(),cgst.toDouble())
+                val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), true,sgst.toDouble(),cgst.toDouble())
+                val cess =  calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true,item.menuItem.cess_specific,sgst.toDouble(),cgst.toDouble())
                OrderDetails(
                     order_master_id = currentOrderMasterId, // Link to existing or new OrderMaster
                     order_details_id = 0, // Backend should generate this or handle it
@@ -169,8 +169,10 @@ class OrderRepository @Inject constructor(
                     merge_pax = 0, // Pax of the current table
                     is_active = 1
                 )
+//                Log.d("OrderRepository", "Creating OrderDetails: $OrderDetails")
             }
 
+            Log.d("OrderRepository", "Creating OrderDetails: $orderDetailsList")
             val detailsResponse = apiService.createOrderDetails(orderDetailsList)
 
             if (detailsResponse.isSuccessful) {

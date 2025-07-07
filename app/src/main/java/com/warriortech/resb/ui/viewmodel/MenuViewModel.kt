@@ -111,7 +111,7 @@ class MenuViewModel @Inject constructor(
                                 cess_per = it.cess_per.toString()
                             )
                     }
-                    _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
+                        _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
                          // Adjust based on your MenuItem and how quantity is stored
                     _isExistingOrderLoaded.value = true
                     existingOrderId.value= existingItemsForTable.firstOrNull()?.order_master_id?.toInt()
@@ -229,7 +229,7 @@ class MenuViewModel @Inject constructor(
                                 )
                             }
                             val kotRequest = KOTRequest(
-                                tableNumber = if (tableStatus1 != "TAKEAWAY" && tableStatus1 != "DELIVERY") order.table_name.toString() else tableStatus1.toString(),
+                                tableNumber = if (tableStatus1 != "TAKEAWAY" && tableStatus1 != "DELIVERY") order.table_name else tableStatus1.toString(),
                                 kotId = order.kot_number,
                                 orderId = order.order_master_id?.toLong(),
                                 waiterName = SessionManager.getUser()?.user_name,

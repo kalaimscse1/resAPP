@@ -9,26 +9,21 @@ import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
-
-fun MenuItemEntity.toMenuItem(): MenuItem {
-    return MenuItem(
-        id = this.id,
-        name = this.name,
-        rate = this.rate,
-        description = this.description ?: ""
-    )
-}
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.warriortech.resb.data.local.entity.toModel
+import com.warriortech.resb.network.ApiService
+
 
 @HiltViewModel
 class AIAssistantViewModel @Inject constructor(
     private val aiRepository: AIRepository,
-    private val menuItemDao: MenuItemDao
+    private val menuItemDao: MenuItemDao,
+    private val apiService: ApiService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AIAssistantUiState())
@@ -46,14 +41,17 @@ class AIAssistantViewModel @Inject constructor(
             try {
                 val menuItems = menuItemDao.getAllMenuItems()
                 val results = mutableListOf<String>()
-                
-                menuItems.take(3).forEach { menuItem ->
-                    val result = aiRepository.generateMenuDescription(menuItem.toMenuItem())
-                    result.onSuccess { description ->
-                        results.add("${menuItem.name}: $description")
-                    }.onFailure { error ->
-                        results.add("${menuItem.name}: Failed to generate description - ${error.message}")
+
+                menuItems.collect { menuItem ->
+                    menuItem.map {
+                        val result = aiRepository.generateMenuDescription(it.toModel())
+                        result.onSuccess { description ->
+                            results.add("${it.menu_item_name}: $description")
+                        }.onFailure { error ->
+                            results.add("${it.menu_item_name}: Failed to generate description - ${error.message}")
+                        }
                     }
+
                 }
                 
                 _uiState.update { 
@@ -80,20 +78,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample order items for demonstration
-                val sampleOrderItems = listOf(
-                    TblOrderDetailsResponse(
-                        orderId = 1,
-                        name = "Chicken Biryani",
-                        rate = 250.0,
-                        quantity = 1
-                    ),
-                    TblOrderDetailsResponse(
-                        orderId = 1,
-                        name = "Paneer Butter Masala",
-                        rate = 180.0,
-                        quantity = 1
-                    )
-                )
+                val sampleOrderItems = apiService.getAllOrderDetails().body()!!
                 
                 val result = aiRepository.suggestUpsells(sampleOrderItems)
                 result.onSuccess { suggestions ->
@@ -129,12 +114,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample sales data for demonstration
-                val sampleSalesData = listOf(
-                    TblOrderDetailsResponse(orderId = 1, name = "Chicken Biryani", rate = 250.0, quantity = 3),
-                    TblOrderDetailsResponse(orderId = 2, name = "Paneer Butter Masala", rate = 180.0, quantity = 2),
-                    TblOrderDetailsResponse(orderId = 3, name = "Dal Tadka", rate = 120.0, quantity = 5),
-                    TblOrderDetailsResponse(orderId = 4, name = "Chicken Biryani", rate = 250.0, quantity = 2)
-                )
+                 val sampleSalesData = apiService.getAllOrderDetails().body()!!
                 
                 val result = aiRepository.analyzeSalesData(sampleSalesData)
                 result.onSuccess { analysis ->
@@ -170,12 +150,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample customer order history
-                val customerHistory = listOf(
-                    TblOrderDetailsResponse(orderId = 1, name = "Chicken Biryani", rate = 250.0, quantity = 1),
-                    TblOrderDetailsResponse(orderId = 2, name = "Chicken Biryani", rate = 250.0, quantity = 1),
-                    TblOrderDetailsResponse(orderId = 3, name = "Butter Naan", rate = 50.0, quantity = 2),
-                    TblOrderDetailsResponse(orderId = 4, name = "Lassi", rate = 60.0, quantity = 3)
-                )
+                val customerHistory =apiService.getAllOrderDetails().body()!!
                 
                 val result = aiRepository.generateCustomerRecommendations(customerHistory)
                 result.onSuccess { recommendations ->

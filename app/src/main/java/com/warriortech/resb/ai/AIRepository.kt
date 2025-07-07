@@ -51,7 +51,7 @@ class AIRepository @Inject constructor(
             
             val messages = listOf(
                 Message("system", "You are a creative restaurant menu writer. Generate appealing descriptions for menu items."),
-                Message("user", "Generate a short, appetizing description for this menu item: ${menuItem.name}. Price: ₹${menuItem.rate}. Make it sound delicious and appealing to customers.")
+                Message("user", "Generate a short, appetizing description for this menu item: ${menuItem.menu_item_name}. Price: ₹${menuItem.rate}. Make it sound delicious and appealing to customers.")
             )
 
             val request = ChatCompletionRequest(messages = messages, max_tokens = 100)
@@ -72,7 +72,7 @@ class AIRepository @Inject constructor(
         try {
             val apiKey = getApiKey() ?: return@withContext Result.failure(Exception("API key not set"))
             
-            val itemNames = orderItems.joinToString(", ") { it.name }
+            val itemNames = orderItems.joinToString(", ") { it.menuItem.menu_item_name }
             val messages = listOf(
                 Message("system", "You are a restaurant AI assistant. Suggest complementary items to increase order value."),
                 Message("user", "Based on these ordered items: $itemNames, suggest 3 complementary items that would go well with this order. Keep suggestions brief and appetizing.")
@@ -99,7 +99,7 @@ class AIRepository @Inject constructor(
         try {
             val apiKey = getApiKey() ?: return@withContext Result.failure(Exception("API key not set"))
             
-            val salesSummary = orderHistory.groupBy { it.name }
+            val salesSummary = orderHistory.groupBy { it.menuItem.menu_item_name }
                 .map { "${it.key}: ${it.value.size} orders" }
                 .take(10)
                 .joinToString(", ")
@@ -127,7 +127,7 @@ class AIRepository @Inject constructor(
         try {
             val apiKey = getApiKey() ?: return@withContext Result.failure(Exception("API key not set"))
             
-            val favoriteItems = customerOrderHistory.groupBy { it.name }
+            val favoriteItems = customerOrderHistory.groupBy { it.menuItem.menu_item_name }
                 .map { "${it.key} (${it.value.size} times)" }
                 .take(5)
                 .joinToString(", ")

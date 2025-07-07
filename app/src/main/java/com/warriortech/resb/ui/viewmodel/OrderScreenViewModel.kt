@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.ui.viewmodel
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.OrderRepository
@@ -80,6 +81,7 @@ class OrderScreenViewModel @Inject constructor(
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     fun getOrdersByOrderId(lng: Long): List<TblOrderDetailsResponse> {
         viewModelScope.launch {
             val order = orderRepository.getOrdersByOrderId(lng)

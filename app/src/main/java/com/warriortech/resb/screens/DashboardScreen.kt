@@ -40,6 +40,7 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val tblOrderDetailsResponse by viewModel.tblOrderDetailsResponse.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.loadDashboardData()

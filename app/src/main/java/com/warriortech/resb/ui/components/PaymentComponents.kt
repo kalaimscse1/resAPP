@@ -126,10 +126,10 @@ fun PaymentMethodCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             val paymentMethods = listOf(
-                "Cash" to Icons.Default.Money,
-                "Card" to Icons.Default.CreditCard,
+                "CASH" to Icons.Default.Money,
+                "CARD" to Icons.Default.CreditCard,
                 "UPI" to Icons.Default.QrCode,
-                "Online" to Icons.Default.AccountBalance,
+                "ONLINE" to Icons.Default.AccountBalance,
                 "DUE" to Icons.Default.Payment,
                 "OTHERS" to Icons.Default.MoreHoriz
             )

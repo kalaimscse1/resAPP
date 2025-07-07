@@ -30,7 +30,7 @@ import kotlin.math.roundToInt
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
 
-fun Double.format(digits: Int) = "%.${digits}f".format(this)
+//fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
 
 @Composable
@@ -154,7 +154,7 @@ fun BillingScreen(
                 // Option 1: Pass total amount via route (simple)
                 // navController.navigate("payment/${uiState.totalAmount}")
                 // Option 2: ViewModel holds state, PaymentScreen also uses it (better for complex state)
-                navController.navigate("payment_screen")
+                navController.navigate("payment_screen/${uiState.totalAmount}")
             }
         }
     ) { paddingValues ->
