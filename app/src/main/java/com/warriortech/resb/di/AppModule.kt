@@ -97,6 +97,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAIRepository(@ApplicationContext context: Context): com.warriortech.resb.ai.AIRepository {
+        return com.warriortech.resb.ai.AIRepository(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideTableRepository(
         tableDao: TableDao,
         apiService: ApiService,

@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+importandroidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Kitchen
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -88,6 +89,7 @@ import com.warriortech.resb.screens.DashboardScreen
 import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
+import com.warriortech.resb.screens.AIAssistantScreen
 
 
 @AndroidEntryPoint
@@ -361,6 +363,15 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onNavigateToBilling = {navController.popBackStack()}
             )
         }
+        composable("report_screen") {
+            ReportScreen(navController = navController)
+        }
+
+        composable("ai_assistant") {
+            AIAssistantScreen(
+                onBackPressed = { navController.popBackStack() }
+            )
+        }
     }
 }
 @Composable
@@ -370,6 +381,8 @@ fun DrawerContent(
     onCollapseToggle: () -> Unit,
     onDestinationClicked: (String) -> Unit
 ) {
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+
     ModalDrawerSheet(
         modifier = Modifier.width(drawerWidth),
         drawerContainerColor = MaterialTheme.colors.surface,
@@ -382,8 +395,7 @@ fun DrawerContent(
                     .fillMaxWidth()
                     .padding(16.dp),
                 shape = MaterialTheme.shapes.medium,
-                elevation = 1.dp
-            ) {
+                elevation = 1.dp) {
                 Row(
                     modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -425,7 +437,7 @@ fun DrawerContent(
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Dashboard") else Text("") },
                 icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
-                selected = false,
+                selected = currentDestination?.route == "dashboard",
                 onClick = { onDestinationClicked("dashboard") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
@@ -433,58 +445,90 @@ fun DrawerContent(
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Select Order Type") else Text("") },
                 icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
-                selected = false,
-                onClick = { onDestinationClicked("selects") },
+                selected = currentDestination?.route == "selects",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    onDestinationClicked("selects")
+                },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Takeaway Menu") else Text("") },
                 icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
-                selected = false,
-                onClick = { onDestinationClicked("takeaway_menu") },
+                selected = currentDestination?.route == "takeaway_menu",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    onDestinationClicked("takeaway_menu")
+                },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Orders") else Text("") },
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = false,
-                onClick = { onDestinationClicked("orders") },
+                selected = currentDestination?.route == "orders",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("orders")
+                },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Settings") else Text("") },
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = false,
-                onClick = { onDestinationClicked("settings") },
+                selected = currentDestination?.route == "settings",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("settings")
+                },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = false,
-                onClick = { onDestinationClicked("counter") },
+                selected = currentDestination?.route == "counter",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("counter")
+                },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Reports") else Text("") },
-                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                    selected = false,
-                    onClick = { onDestinationClicked("report_screen") },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                label = { if (!isCollapsed) Text("Reports") else Text("") },
+                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                selected = currentDestination?.route == "report_screen",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("report_screen")
+                },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
+                icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
+                selected = currentDestination?.route == "ai_assistant",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("ai_assistant")
+                },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             // Show Kitchen for chef, admin and superadmin roles
             NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Kitchen") else Text("") },
-                    icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
-                    selected = false,
-                    onClick = { onDestinationClicked("kitchen") },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                label = { if (!isCollapsed) Text("Kitchen") else Text("") },
+                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                selected = currentDestination?.route == "kitchen",
+                onClick = {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("kitchen")
+                },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
             Spacer(modifier = Modifier.weight(1f))
