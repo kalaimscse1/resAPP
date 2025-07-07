@@ -55,6 +55,8 @@ data class BillingPaymentUiState(
     val selectedPaymentMethod: PaymentMethod? = null,
     val amountToPay: Double = 0.0, // Could be same as totalAmount or partial
     val paymentProcessingState: PaymentProcessingState = PaymentProcessingState.Idle,
+    val amountReceived: Double = 0.0,
+    val changeAmount: Double = 0.0,
 
     // General
     val isLoading: Boolean = false,
@@ -343,6 +345,20 @@ class BillingViewModel @Inject constructor(
 
     fun clearErrorMessage() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun selectPaymentMethod(paymentMethod: PaymentMethod) {
+        _uiState.update { it.copy(selectedPaymentMethod = paymentMethod) }
+    }
+
+    fun updateAmountReceived(amount: Double) {
+        _uiState.update { currentState ->
+            val change = amount - currentState.totalAmount
+            currentState.copy(
+                amountReceived = amount,
+                changeAmount = maxOf(0.0, change)
+            )
+        }
     }
 }
 

@@ -30,6 +30,8 @@ import kotlin.math.roundToInt
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
 
+fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
 
 @Composable
 fun KotSelectionDialog(
