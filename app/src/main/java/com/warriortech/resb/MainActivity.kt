@@ -92,6 +92,7 @@ import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.AIAssistantScreen
 import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
+import com.warriortech.resb.screens.TemplatePreviewScreen
 
 
 @AndroidEntryPoint
@@ -419,6 +420,14 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("template_editor") {
             TemplateEditorScreen(navController = navController)
+        }
+
+        composable("template_preview/{templateId}") { backStackEntry ->
+            val templateId = backStackEntry.arguments?.getString("templateId") ?: ""
+            com.warriortech.resb.screens.TemplatePreviewScreen(
+                navController = navController,
+                templateId = templateId
+            )
         }
     }
 }
