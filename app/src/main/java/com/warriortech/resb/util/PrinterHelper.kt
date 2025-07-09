@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import com.warriortech.resb.model.*
@@ -109,7 +110,7 @@ class PrinterHelper(private val context: Context) {
      * @return true if print successful, false otherwise
      */
     fun printBill(billData: Bill, template: ReceiptTemplate): Boolean {
-        Log.d(TAG, "Printing Bill #${billData.billNumber}")
+        Log.d(TAG, "Printing Bill #${billData.billNo}")
 
         try {
             // 1. Connect to printer (if not already connected)
@@ -200,6 +201,7 @@ class PrinterHelper(private val context: Context) {
     /**
      * Format bill data into a proper format for printing using template.
      */
+    @SuppressLint("DefaultLocale")
     fun formatBillForPrinting(billData: Bill, template: ReceiptTemplate): String {
         val stringBuilder = StringBuilder()
         val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
@@ -216,8 +218,8 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append("\n")
         
         // Bill details
-        stringBuilder.append("Bill #: ${billData.billNumber}\n")
-        stringBuilder.append("Table: ${billData.tableNumber}\n")
+        stringBuilder.append("Bill #: ${billData.billNo}\n")
+        stringBuilder.append("Table: ${billData.tableNo}\n")
         stringBuilder.append("Date: ${dateFormat.format(Date())}\n")
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
@@ -239,17 +241,17 @@ class PrinterHelper(private val context: Context) {
             stringBuilder.append("\n")
 
             billData.items.forEach { item ->
-                val itemName = item.name.take(12)
+                val itemName = item.itemName.take(12)
                 stringBuilder.append(itemName.padEnd(12))
                 
                 if (template.bodySettings.showQuantity) {
-                    stringBuilder.append(" ${item.quantity.toString().padStart(3)}")
+                    stringBuilder.append(" ${item.qty.toString().padStart(3)}")
                 }
                 if (template.bodySettings.showPrice) {
                     stringBuilder.append(" ${String.format("%.2f", item.price).padStart(6)}")
                 }
                 if (template.bodySettings.showTotal) {
-                    stringBuilder.append(" ${String.format("%.2f", item.total).padStart(6)}")
+                    stringBuilder.append(" ${String.format("%.2f", item.amount).padStart(6)}")
                 }
                 stringBuilder.append("\n")
             }
@@ -259,7 +261,7 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
         stringBuilder.append("Subtotal: ${String.format("%.2f", billData.subtotal)}\n")
-        stringBuilder.append("Tax: ${String.format("%.2f", billData.tax)}\n")
+        stringBuilder.append("Tax: ${String.format("%.2f", billData.cgst+billData.sgst)}\n")
         stringBuilder.append("Total: ${String.format("%.2f", billData.total)}\n")
 
         // Footer with template settings

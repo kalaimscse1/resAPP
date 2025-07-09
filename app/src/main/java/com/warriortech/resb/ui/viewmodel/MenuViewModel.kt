@@ -28,7 +28,8 @@ import javax.inject.Inject
 class MenuViewModel @Inject constructor(
     private val menuRepository: MenuItemRepository,
     private val orderRepository: OrderRepository,
-    private val printService: com.warriortech.resb.service.PrintService
+    private val printService: com.warriortech.resb.service.PrintService,
+    private val tableRepository: TableRepository
 ) : ViewModel() {
 
     sealed class MenuUiState {

@@ -6,6 +6,7 @@ import com.warriortech.resb.data.repository.TemplateRepository
 import com.warriortech.resb.model.*
 import com.warriortech.resb.util.PrinterHelper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -76,6 +77,8 @@ class PrintService @Inject constructor(
             emit(Result.failure(Exception("Error printing bill: ${e.message}")))
         }
     }
+
+
 
     /**
      * Get preview of KOT formatted with template

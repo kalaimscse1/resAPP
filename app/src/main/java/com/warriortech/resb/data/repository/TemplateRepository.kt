@@ -25,8 +25,13 @@ class TemplateRepository @Inject constructor() {
         emit(templates.filter { it.type == type })
     }
     
-    suspend fun getDefaultTemplate(type: ReceiptType): Flow<ReceiptTemplate?> = flow {
-        emit(templates.find { it.type == type && it.isDefault })
+    suspend fun getDefaultTemplate(type: ReceiptType): ReceiptTemplate {
+       return templates.find { it.type == type && it.isDefault }
+            ?: throw NoSuchElementException("Default template for type $type not found")
+    }
+    suspend fun getTemplate(templateId: String): ReceiptTemplate {
+        return templates.find { it.id == templateId }
+            ?: throw NoSuchElementException("Template with id $templateId not found")
     }
     
     suspend fun saveTemplate(template: ReceiptTemplate): Flow<Result<ReceiptTemplate>> = flow {
