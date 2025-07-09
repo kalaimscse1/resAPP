@@ -1,11 +1,11 @@
+
 package com.warriortech.resb.util
 
 import android.content.Context
 import android.util.Log
-import com.warriortech.resb.model.KotData
-import com.warriortech.resb.model.Bill
-import com.warriortech.resb.model.ReceiptTemplate
-import com.warriortech.resb.model.ReceiptType
+import com.warriortech.resb.model.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Helper class for handling communication with physical printer hardware.
@@ -35,7 +35,41 @@ class PrinterHelper(private val context: Context) {
     }
 
     /**
-     * Print a KOT ticket to the kitchen printer.
+     * Print a KOT ticket to the kitchen printer with template.
+     *
+     * @param kotData The KOT data to be printed
+     * @param template The receipt template to use
+     * @return true if print successful, false otherwise
+     */
+    fun printKot(kotData: KotData, template: ReceiptTemplate): Boolean {
+        Log.d(TAG, "Printing KOT #${kotData.kotNumber} for Table ${kotData.tableNumber}")
+
+        try {
+            // 1. Connect to printer (if not already connected)
+            if (!connectPrinter()) {
+                Log.e(TAG, "Failed to connect to printer")
+                return false
+            }
+
+            // 2. Format KOT data for printing using template
+            val printData = formatKotForPrinting(kotData, template)
+
+            // 3. Send data to printer
+            // This is where you would use your printer's SDK to send the actual data
+            Log.d(TAG, "Sending KOT data to printer: $printData")
+
+            // 4. Disconnect printer
+            disconnectPrinter()
+
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error printing KOT: ${e.message}")
+            return false
+        }
+    }
+
+    /**
+     * Print a KOT ticket to the kitchen printer (without template).
      *
      * @param kotData The KOT data to be printed
      * @return true if print successful, false otherwise
@@ -43,7 +77,6 @@ class PrinterHelper(private val context: Context) {
     fun printKot(kotData: KotData): Boolean {
         Log.d(TAG, "Printing KOT #${kotData.kotNumber} for Table ${kotData.tableNumber}")
 
-        // Example of how printer integration might work
         try {
             // 1. Connect to printer (if not already connected)
             if (!connectPrinter()) {
@@ -69,7 +102,187 @@ class PrinterHelper(private val context: Context) {
     }
 
     /**
-     * Format KOT data into a proper format for printing.
+     * Print a bill with template.
+     *
+     * @param billData The bill data to be printed
+     * @param template The receipt template to use
+     * @return true if print successful, false otherwise
+     */
+    fun printBill(billData: Bill, template: ReceiptTemplate): Boolean {
+        Log.d(TAG, "Printing Bill #${billData.billNumber}")
+
+        try {
+            // 1. Connect to printer (if not already connected)
+            if (!connectPrinter()) {
+                Log.e(TAG, "Failed to connect to printer")
+                return false
+            }
+
+            // 2. Format bill data for printing using template
+            val printData = formatBillForPrinting(billData, template)
+
+            // 3. Send data to printer
+            Log.d(TAG, "Sending bill data to printer: $printData")
+
+            // 4. Disconnect printer
+            disconnectPrinter()
+
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error printing bill: ${e.message}")
+            return false
+        }
+    }
+
+    /**
+     * Format KOT data into a proper format for printing using template.
+     */
+    fun formatKotForPrinting(kotData: KotData, template: ReceiptTemplate): String {
+        val stringBuilder = StringBuilder()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+        // Header with template settings
+        if (template.headerSettings.showLogo) {
+            stringBuilder.append(centerText("RESTAURANT", template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+        }
+        
+        stringBuilder.append(centerText("KITCHEN ORDER TICKET", template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        
+        // Order details
+        stringBuilder.append("KOT #: ${kotData.kotNumber}\n")
+        stringBuilder.append("Table: ${kotData.tableNumber}\n")
+        stringBuilder.append("Time: ${dateFormat.format(Date())}\n")
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n\n")
+
+        // Items with template body settings
+        if (template.bodySettings.showItemDetails) {
+            stringBuilder.append("ITEMS")
+            if (template.bodySettings.showQuantity) {
+                stringBuilder.append("          QTY")
+            }
+            stringBuilder.append("\n")
+            stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+
+            kotData.items.forEach { item ->
+                val itemName = item.menuItem.menu_item_name.take(15).padEnd(15)
+                stringBuilder.append(itemName)
+                if (template.bodySettings.showQuantity) {
+                    stringBuilder.append(" ${item.quantity}")
+                }
+                stringBuilder.append("\n")
+            }
+        }
+
+        // Footer with template settings
+        stringBuilder.append("\n")
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        
+        if (template.footerSettings.showThankYou) {
+            stringBuilder.append(centerText("THANK YOU", template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+        }
+        
+        if (template.footerSettings.showDateTime) {
+            stringBuilder.append(centerText(dateFormat.format(Date()), template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+        }
+
+        return stringBuilder.toString()
+    }
+
+    /**
+     * Format bill data into a proper format for printing using template.
+     */
+    fun formatBillForPrinting(billData: Bill, template: ReceiptTemplate): String {
+        val stringBuilder = StringBuilder()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+        // Header with template settings
+        if (template.headerSettings.showLogo) {
+            stringBuilder.append(centerText("RESTAURANT", template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+        }
+        
+        stringBuilder.append(centerText("BILL", template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        
+        // Bill details
+        stringBuilder.append("Bill #: ${billData.billNumber}\n")
+        stringBuilder.append("Table: ${billData.tableNumber}\n")
+        stringBuilder.append("Date: ${dateFormat.format(Date())}\n")
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+
+        // Items with template body settings
+        if (template.bodySettings.showItemDetails) {
+            stringBuilder.append("ITEM")
+            if (template.bodySettings.showQuantity) {
+                stringBuilder.append("     QTY")
+            }
+            if (template.bodySettings.showPrice) {
+                stringBuilder.append("   PRICE")
+            }
+            if (template.bodySettings.showTotal) {
+                stringBuilder.append("   TOTAL")
+            }
+            stringBuilder.append("\n")
+            stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+
+            billData.items.forEach { item ->
+                val itemName = item.name.take(12)
+                stringBuilder.append(itemName.padEnd(12))
+                
+                if (template.bodySettings.showQuantity) {
+                    stringBuilder.append(" ${item.quantity.toString().padStart(3)}")
+                }
+                if (template.bodySettings.showPrice) {
+                    stringBuilder.append(" ${String.format("%.2f", item.price).padStart(6)}")
+                }
+                if (template.bodySettings.showTotal) {
+                    stringBuilder.append(" ${String.format("%.2f", item.total).padStart(6)}")
+                }
+                stringBuilder.append("\n")
+            }
+        }
+
+        // Totals
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        stringBuilder.append("Subtotal: ${String.format("%.2f", billData.subtotal)}\n")
+        stringBuilder.append("Tax: ${String.format("%.2f", billData.tax)}\n")
+        stringBuilder.append("Total: ${String.format("%.2f", billData.total)}\n")
+
+        // Footer with template settings
+        stringBuilder.append("\n")
+        stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
+        stringBuilder.append("\n")
+        
+        if (template.footerSettings.showThankYou) {
+            val message = template.footerSettings.customMessage ?: "THANK YOU"
+            stringBuilder.append(centerText(message, template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+        }
+        
+        if (template.footerSettings.showDateTime) {
+            stringBuilder.append(centerText(dateFormat.format(Date()), template.paperSettings.characterWidth))
+            stringBuilder.append("\n")
+        }
+
+        return stringBuilder.toString()
+    }
+
+    /**
+     * Format KOT data into a proper format for printing (without template).
      */
     private fun formatKotForPrinting(kotData: KotData): String {
         val sectionName = when (kotData.section) {
@@ -103,6 +316,21 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append("     THANK YOU     \n")
 
         return stringBuilder.toString()
+    }
+
+    /**
+     * Helper function to center text
+     */
+    private fun centerText(text: String, width: Int): String {
+        val padding = (width - text.length) / 2
+        return " ".repeat(maxOf(0, padding)) + text
+    }
+
+    /**
+     * Helper function to repeat character
+     */
+    private fun repeatChar(char: Char, count: Int): String {
+        return char.toString().repeat(count)
     }
 
     /**
