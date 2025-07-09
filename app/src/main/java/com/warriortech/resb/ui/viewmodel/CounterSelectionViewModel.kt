@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.CounterRepository
 import com.warriortech.resb.model.Counter
+import com.warriortech.resb.model.Counters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,12 +21,12 @@ class CounterSelectionViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<CounterUiState>(CounterUiState.Loading)
     val uiState: StateFlow<CounterUiState> = _uiState.asStateFlow()
     
-    private val _selectedCounter = MutableStateFlow<Counter?>(null)
-    val selectedCounter: StateFlow<Counter?> = _selectedCounter.asStateFlow()
+    private val _selectedCounter = MutableStateFlow<Counters?>(null)
+    val selectedCounter: StateFlow<Counters?> = _selectedCounter.asStateFlow()
     
     sealed class CounterUiState {
         object Loading : CounterUiState()
-        data class Success(val counters: List<Counter>) : CounterUiState()
+        data class Success(val counters: List<Counters>) : CounterUiState()
         data class Error(val message: String) : CounterUiState()
     }
     
@@ -53,7 +54,7 @@ class CounterSelectionViewModel @Inject constructor(
         }
     }
     
-    fun selectCounter(counter: Counter) {
+    fun selectCounter(counter: Counters) {
         _selectedCounter.value = counter
         viewModelScope.launch {
             try {
@@ -65,5 +66,5 @@ class CounterSelectionViewModel @Inject constructor(
         }
     }
     
-    fun getCurrentCounter(): Counter? = _selectedCounter.value
+    fun getCurrentCounter(): Counters? = _selectedCounter.value
 }

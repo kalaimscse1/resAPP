@@ -102,7 +102,7 @@ fun BillingScreen(
         Log.d("BillingScreen", "Loading billing details for orderMasterId: $orderMasterId,$orderDetailsResponse")
         when {
             orderDetailsResponse != null && orderMasterId != null -> {
-                viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId)
+                viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId,)
             }
         }
     }
@@ -221,27 +221,28 @@ fun BillingContent(
         // Tax (Allow editing if needed)
         item {
             EditableBillingRow(
-                label = "Tax (${uiState.taxPercentage.format(1)}%)",
+                label = "Tax Amount",
                 amount = uiState.taxAmount,
-                currentValue = uiState.taxPercentage,
-                onValueChange = {
-                    it.toDoubleOrNull()?.let { taxVal -> onUpdateTax(taxVal) }
-                },
-                currencyFormatter = currencyFormatter,
-                valueLabel = "Tax %"
+                currencyFormatter = currencyFormatter
             )
         }
-        item {
-            EditableBillingRow(
-                label = "Tax (${uiState.cessPercentage.format(1)}%)",
-                amount = uiState.taxAmount,
-                currentValue = uiState.taxPercentage,
-                onValueChange = {
-                    it.toDoubleOrNull()?.let { taxVal -> onUpdateTax(taxVal) }
-                },
-                currencyFormatter = currencyFormatter,
-                valueLabel = "Tax %"
-            )
+        if (uiState.cessAmount>0) {
+            item {
+                EditableBillingRow(
+                    label = "Cess Amount",
+                    amount = uiState.cessAmount,
+                    currencyFormatter = currencyFormatter
+                )
+            }
+        }
+        if (uiState.cessSpecific>0) {
+            item {
+                EditableBillingRow(
+                    label = "Cess Specific",
+                    amount = uiState.cessSpecific,
+                    currencyFormatter = currencyFormatter
+                )
+            }
         }
 
         // Discount (Allow editing)
@@ -249,13 +250,7 @@ fun BillingContent(
             EditableBillingRow(
                 label = "Discount",
                 amount = uiState.discountFlat,
-                currentValue = uiState.discountFlat,
-                onValueChange = {
-                    it.toDoubleOrNull()?.let { discountVal -> onUpdateDiscount(discountVal) }
-                },
-                isCurrencyInput = true,
-                currencyFormatter = currencyFormatter,
-                valueLabel = "Discount Amount"
+                currencyFormatter = currencyFormatter
             )
         }
 
@@ -358,13 +353,9 @@ fun BillingSummaryRow(
 fun EditableBillingRow(
     label: String,
     amount: Double,
-    currentValue: Double,
-    onValueChange: (String) -> Unit,
-    currencyFormatter: NumberFormat,
-    valueLabel: String,
-    isCurrencyInput: Boolean = false
+    currencyFormatter: NumberFormat
 ) {
-    var textValue by remember(currentValue) { mutableStateOf(currentValue.format(if (isCurrencyInput) 2 else 1)) }
+//    var textValue by remember(currentValue) { mutableStateOf(currentValue.format(if (isCurrencyInput) 2 else 1)) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -372,17 +363,7 @@ fun EditableBillingRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        OutlinedTextField(
-            value = textValue,
-            onValueChange = {
-                textValue = it
-                onValueChange(it) // ViewModel will parse and update
-            },
-            label = { Text(valueLabel) },
-            modifier = Modifier.width(100.dp),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
+        Spacer(Modifier.width(8.dp))
         Spacer(Modifier.width(8.dp))
         Text(
             currencyFormatter.format(amount),

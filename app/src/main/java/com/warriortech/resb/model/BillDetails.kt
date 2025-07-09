@@ -1,0 +1,99 @@
+package com.warriortech.resb.model
+
+import java.time.LocalDate
+
+data class TblBillingRequest(
+    var bill_no: String,
+    var bill_date: String,
+    var bill_create_time:String,
+    var order_master_id:Long,
+    var voucher_id:Long,
+    var staff_id:Long,
+    var customer_id:Long,
+    var order_amt:Double,
+    var disc_amt:Double,
+    var tax_amt:Double,
+    var cess:Double,
+    var cess_specific:Double,
+    var delivery_amt:Double,
+    var grand_total:Double,
+    var round_off:Double,
+    var rounded_amt:Double,
+    var cash:Double,
+    var card:Double,
+    var upi:Double,
+    var due:Double,
+    var others:Double,
+    var received_amt:Double,
+    var pending_amt:Double,
+    var change:Double,
+    var note:String,
+    var is_active:Long
+)
+
+data class TblBillingResponse(
+    var bill_no: String,
+    var bill_date:LocalDate,
+    var bill_create_time:String,
+    var order_master:TblOrderResponse,
+    var voucher:TblVoucher,
+    var staff:TblStaff,
+    var customer:TblCustomer,
+    var order_amt:Double,
+    var disc_amt:Double,
+    var tax_amt:Double,
+    var cess:Double,
+    var cess_specific:Double,
+    var delivery_amt:Double,
+    var grand_total:Double,
+    var round_off:Double,
+    var rounded_amt:Double,
+    var cash:Double,
+    var card:Double,
+    var upi:Double,
+    var due:Double,
+    var others:Double,
+    var received_amt:Double,
+    var pending_amt:Double,
+    var change:Double,
+    var note:String,
+    var is_active:Long
+)
+
+data class BillItem(
+    val sn: Int,
+    val itemName: String,
+    val qty: Int,
+    val price: Double,
+    val amount: Double
+)
+
+data class Bill(
+    val company_code: String,
+    val items: List<BillItem>,
+    val subtotal: Double,
+    val billNo: String,
+    val date: String,
+    val sgstPercent: Double,
+    val cgstPercent: Double,
+    val igstPercent: Double,
+    val cessPercent: Double,
+    val sgst: Double,
+    val cgst: Double,
+    val igst: Double,
+    val cess: Double,
+    val cess_specific: Double,
+    val deliveryCharge: Double,
+    val discount: Double,
+    val roundedAmount: Double,
+    val total: Double,
+    val paperWidth: Int = 48,
+    val time:String,
+    val orderNo:Long,
+    val counter:String,
+    val tableNo:String,
+    val custName:String,
+    val custNo:String,
+    val custAddress:String,
+    val custGstin:String
+)

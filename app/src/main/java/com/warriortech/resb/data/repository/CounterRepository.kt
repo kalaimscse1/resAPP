@@ -3,6 +3,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.Counter
 import com.warriortech.resb.model.CounterSession
+import com.warriortech.resb.model.Counters
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -13,12 +14,12 @@ class CounterRepository @Inject constructor() {
     
     // Simulated data - replace with actual database implementation
     private val counters = listOf(
-        Counter(1L, "Counter 1", "C1", "Main billing counter", true, "Ground Floor", "Staff 1"),
-        Counter(2L, "Counter 2", "C2", "Express billing counter", true, "Ground Floor", "Staff 2"),
-        Counter(3L, "Counter 3", "C3", "VIP billing counter", false, "First Floor", "Staff 3")
+        Counters(1L, "Counter 1", "C1", "Main billing counter", true, "Ground Floor", "Staff 1"),
+        Counters(2L, "Counter 2", "C2", "Express billing counter", true, "Ground Floor", "Staff 2"),
+        Counters(3L, "Counter 3", "C3", "VIP billing counter", false, "First Floor", "Staff 3")
     )
     
-    fun getActiveCounters(): Flow<Result<List<Counter>>> = flow {
+    fun getActiveCounters(): Flow<Result<List<Counters>>> = flow {
         try {
             val activeCounters = counters.filter { it.isActive }
             emit(Result.success(activeCounters))
@@ -27,7 +28,7 @@ class CounterRepository @Inject constructor() {
         }
     }
     
-    fun getAllCounters(): Flow<Result<List<Counter>>> = flow {
+    fun getAllCounters(): Flow<Result<List<Counters>>> = flow {
         try {
             emit(Result.success(counters))
         } catch (e: Exception) {
@@ -35,7 +36,7 @@ class CounterRepository @Inject constructor() {
         }
     }
     
-    fun getCounterById(id: Long): Flow<Result<Counter?>> = flow {
+    fun getCounterById(id: Long): Flow<Result<Counters?>> = flow {
         try {
             val counter = counters.find { it.id == id }
             emit(Result.success(counter))
@@ -44,7 +45,7 @@ class CounterRepository @Inject constructor() {
         }
     }
     
-    fun getCounterByCode(code: String): Flow<Result<Counter?>> = flow {
+    fun getCounterByCode(code: String): Flow<Result<Counters?>> = flow {
         try {
             val counter = counters.find { it.code == code }
             emit(Result.success(counter))

@@ -4,6 +4,7 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.MenuItemRepository
+import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.MenuItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,8 +30,8 @@ class CounterViewModel @Inject constructor(
 
     val selectedCategory = MutableStateFlow<String?>(null)
     
-    private val _currentCounter = MutableStateFlow<com.warriortech.resb.model.Counter?>(null)
-    val currentCounter: StateFlow<com.warriortech.resb.model.Counter?> = _currentCounter.asStateFlow()
+    private val _currentCounter = MutableStateFlow<Counters?>(null)
+    val currentCounter: StateFlow<Counters?> = _currentCounter.asStateFlow()
 
     sealed class MenuUiState {
         object Loading : MenuUiState()
@@ -96,7 +97,7 @@ class CounterViewModel @Inject constructor(
         _selectedItems.value = emptyMap()
     }
     
-    fun setCurrentCounter(counter: com.warriortech.resb.model.Counter) {
+    fun setCurrentCounter(counter: Counters) {
         _currentCounter.value = counter
     }
 

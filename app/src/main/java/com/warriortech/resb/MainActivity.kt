@@ -449,7 +449,7 @@ fun DrawerContent(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(SessionManager.getUser()?.staff_name?:"", fontWeight = FontWeight.Bold)
-                            Text(SessionManager.getUser()?.role_name?:"", style = MaterialTheme.typography.body1)
+                            Text(SessionManager.getUser()?.role?:"", style = MaterialTheme.typography.body1)
                         }
                     }
                 }
@@ -482,7 +482,7 @@ fun DrawerContent(
             )
 
             NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Select Order Type") else Text("") },
+                label = { if (!isCollapsed) Text("Dine In") else Text("") },
                 icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
                 selected = currentDestination?.route == "selects",
                 onClick = {
@@ -492,7 +492,7 @@ fun DrawerContent(
             )
 
             NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Takeaway Menu") else Text("") },
+                label = { if (!isCollapsed) Text("Takeaway") else Text("") },
                 icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
                 selected = currentDestination?.route == "takeaway_menu",
                 onClick = {

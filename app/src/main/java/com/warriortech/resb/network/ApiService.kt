@@ -69,9 +69,6 @@ interface ApiService {
     @POST("order/addOrder")
     suspend fun createOrder(@Body orderRequest: OrderMaster): Response<TblOrderResponse>
 
-    @GET("order/getOrder/{table_id}")
-    suspend fun getOrder(@Path("table_id") tableId: Long): Response<TblOrderResponse>
-
     @GET("order/getOrder/{order_master_id}")
     suspend fun getOrderMasterById(@Path("order_master_id") orderId: Long): Response<TblOrderResponse>
 
@@ -110,6 +107,15 @@ interface ApiService {
         @Path("orderId") orderId: Int,
         @Body statusUpdate: Map<String, String>
     ): Response<Order>
+
+    @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
+    suspend fun getVoucherByCounterId(@Path("counter_id") counterId: Long): Response<TblVoucherResponse>
+
+    @GET("payment/getBillNoByCounterId")
+    suspend fun getBillNoByCounterId(@Query("counter_id") counterId: Long): Response<Map<String, String>>
+
+    @POST("payment/addPayment")
+    suspend fun addPayment(@Body paymentRequest: TblBillingRequest): Response<TblBillingResponse>
 
     @POST("table/area/addArea")
     suspend fun createArea(@Body area: Area) : Response<Area>

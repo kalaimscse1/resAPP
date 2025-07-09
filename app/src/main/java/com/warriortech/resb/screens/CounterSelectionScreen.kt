@@ -23,12 +23,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.Counter
+import com.warriortech.resb.model.Counters
 import com.warriortech.resb.ui.viewmodel.CounterSelectionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CounterSelectionScreen(
-    onCounterSelected: (Counter) -> Unit,
+    onCounterSelected: (Counters) -> Unit,
     drawerState: DrawerState,
     viewModel: CounterSelectionViewModel = hiltViewModel()
 ) {
@@ -67,7 +68,7 @@ fun CounterSelectionScreen(
                 
                 is CounterSelectionViewModel.CounterUiState.Success -> {
                     CounterSelectionContent(
-                        counters = uiState.counters,
+                        counters = (uiState as CounterSelectionViewModel.CounterUiState.Success).counters,
                         onCounterSelected = { counter ->
                             viewModel.selectCounter(counter)
                             onCounterSelected(counter)
@@ -81,7 +82,7 @@ fun CounterSelectionScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Error: ${uiState.message}",
+                            text = "Error: ${(uiState as CounterSelectionViewModel.CounterUiState.Error).message}",
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center
                         )
@@ -98,8 +99,8 @@ fun CounterSelectionScreen(
 
 @Composable
 private fun CounterSelectionContent(
-    counters: List<Counter>,
-    onCounterSelected: (Counter) -> Unit
+    counters: List<Counters>,
+    onCounterSelected: (Counters) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -126,7 +127,7 @@ private fun CounterSelectionContent(
 
 @Composable
 private fun CounterCard(
-    counter: Counter,
+    counter: Counters,
     onClick: () -> Unit
 ) {
     Card(

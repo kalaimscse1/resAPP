@@ -87,7 +87,6 @@ class OrderRepository @Inject constructor(
                     order_master_id = newOrderMasterApiId["order_master_id"], // Use ID from getOrderNo
                     is_delivered = false
                 )
-                Log.d("TableStatus", "New OrderMaster ID: $tableStatus,${tableStatus != "TAKEAWAY" && tableStatus != "DELIVERY"}")
                 val response = apiService.createOrder(orderRequest)
                 if (response.isSuccessful && response.body() != null) {
                     orderMasterResponse = response.body()
@@ -169,10 +168,7 @@ class OrderRepository @Inject constructor(
                     merge_pax = 0, // Pax of the current table
                     is_active = 1
                 )
-//                Log.d("OrderRepository", "Creating OrderDetails: $OrderDetails")
             }
-
-            Log.d("OrderRepository", "Creating OrderDetails: $orderDetailsList")
             val detailsResponse = apiService.createOrderDetails(orderDetailsList)
 
             if (detailsResponse.isSuccessful) {
@@ -383,9 +379,13 @@ class OrderRepository @Inject constructor(
         return apiService.getOpenOrderDetailsForTable(lng)
     }
 }
-data class GstResult(val basePrice: Double, val gstAmount: Double, val totalPrice: Double,
-                     val cgst: Double,
-                     val sgst: Double)
+data class GstResult(
+    val basePrice: Double,
+    val gstAmount: Double,
+    val totalPrice: Double,
+    val cgst: Double,
+    val sgst: Double
+)
 
 fun calculateGst(amount: Double, gstRate: Double, isInclusive: Boolean,sgst: Double,cgst: Double): GstResult {
     return if (isInclusive) {

@@ -17,9 +17,11 @@ data class TblStaff(
     var user_name:String,
     var password:String,
     var role_id:Long,
-    var role_name:String,
+    var role:String,
     var last_login:String,
     var is_block:Boolean,
+    var counter_id:Long,
+    var counter_name:String,
     var is_active:Long
 )
 data class LoginRequest(

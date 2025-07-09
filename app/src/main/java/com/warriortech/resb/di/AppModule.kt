@@ -164,12 +164,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAIRepository(aiService: com.warriortech.resb.ai.AIService): com.warriortech.resb.ai.AIRepository {
-        return com.warriortech.resb.ai.AIRepository(aiService)
-    }
-
-    @Provides
-    @Singleton
     fun provideCounterRepository(): com.warriortech.resb.data.repository.CounterRepository {
         return com.warriortech.resb.data.repository.CounterRepository()
     }

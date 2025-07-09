@@ -3,12 +3,10 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.BillRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
-import com.warriortech.resb.ui.components.MobileOptimizedButton
-import com.warriortech.resb.ui.viewmodel.BillingViewModel
-import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,18 +37,16 @@ sealed interface PaymentProcessingState {
 data class BillingPaymentUiState(
     // Billing Details (from your existing ViewModel)
     val billedItems: Map<MenuItem, Int> = emptyMap(),
-    val tableStatus: String = "TABLE", // e.g., "AC", "TAKEAWAY"
-    val taxPercentage: Double = 5.0, // Default GST
+    val tableStatus: String = "TABLE", // Default GST
     val discountFlat: Double = 0.0,
-    val cessPercentage: Double=0.0,
     val cessSpecific: Double=0.0,
+    val cessAmount: Double = 0.0, // Cess percentage if applicable
     val subtotal: Double = 0.0,
     val taxAmount: Double = 0.0,
     val totalAmount: Double = 0.0,
     val orderDetails: List<TblOrderDetailsResponse> = emptyList(),
     val orderMasterId: Long? = null,
     val selectedKotNumber: Int? = null,
-
     // Payment Details
     val availablePaymentMethods: List<PaymentMethod> = emptyList(),
     val selectedPaymentMethod: PaymentMethod? = null,
@@ -58,7 +54,6 @@ data class BillingPaymentUiState(
     val paymentProcessingState: PaymentProcessingState = PaymentProcessingState.Idle,
     val amountReceived: Double = 0.0,
     val changeAmount: Double = 0.0,
-
     // General
     val isLoading: Boolean = false,
     val errorMessage: String? = null
@@ -67,8 +62,7 @@ data class BillingPaymentUiState(
 @HiltViewModel
 class BillingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    // Inject Repositories or UseCases for fetching payment methods, processing payments, saving orders
-    // private val paymentRepository: PaymentRepository,
+    private val billRepository: BillRepository,
      private val orderRepository: OrderRepository
 ) : ViewModel() {
 
@@ -81,39 +75,8 @@ class BillingViewModel @Inject constructor(
     init {
         // Load initial data like available payment methods
         loadAvailablePaymentMethods()
-
-        // If billing details are passed via navigation, load them
-        // Example: val orderId = savedStateHandle.get<Long>("orderId")
-        // if (orderId != null) { loadBillingDetailsForOrder(orderId) }
     }
 
-    // --- Billing Functions (Adapted from your existing ViewModel) ---
-    fun setBillingDetails(
-        items: Map<MenuItem, Int>,
-        status: String,
-        discount: Double? = null, // Allow null to use current or default
-        tax: Double? = null
-    ) {
-        _uiState.update { currentState ->
-            val newDiscount = discount ?: currentState.discountFlat
-            val newTaxPercentage = tax ?: currentState.taxPercentage
-
-            val newSubtotal = calculateSubtotal(items, status)
-            val newTaxAmount = calculateTaxAmount(newSubtotal, newTaxPercentage)
-            val newTotalAmount = calculateTotal(newSubtotal, newTaxAmount, newDiscount)
-
-            currentState.copy(
-                billedItems = items,
-                tableStatus = status,
-                discountFlat = newDiscount,
-                taxPercentage = newTaxPercentage,
-                subtotal = newSubtotal,
-                taxAmount = newTaxAmount,
-                totalAmount = newTotalAmount,
-                amountToPay = newTotalAmount
-            )
-        }
-    }
 
     fun setBillingDetailsFromOrderResponse(
         orderDetails: List<TblOrderDetailsResponse>,
@@ -127,8 +90,8 @@ class BillingViewModel @Inject constructor(
                 // This function sets billing details from an existing order response
                 // Set billing details from TblOrderDetailsResponse
 
-                _originalOrderDetails.value = orderDetails
-                _filteredOrderDetails.value = orderDetails
+                _originalOrderDetails.value = orderDetailsResponse
+                _filteredOrderDetails.value = orderDetailsResponse
                 val menuItems=orderDetailsResponse.map{
 
                     MenuItem(
@@ -163,25 +126,44 @@ class BillingViewModel @Inject constructor(
                     )
                 }
                 // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
-                val itemsMap = menuItems.associateWith { it.qty as Int }.toMutableMap()
+                val itemsMap = menuItems.associateWith { it.qty }.toMutableMap()
                 var tableStatus = "TABLE" // Default
 
                 // Calculate totals from order details
                 val subtotal = orderDetailsResponse.sumOf { it.total }
                 val taxAmount = orderDetailsResponse.sumOf { it.tax_amount }
-                val totalAmount = subtotal + taxAmount
+                val cessAmount = orderDetailsResponse.sumOf { if (it.cess>0) it.cess else 0.0 }
+                val cessSpecific = orderDetailsResponse.sumOf { if (it.cess_specific>0) it.cess_specific else 0.0 }
+                val totalAmount = subtotal + taxAmount + cessAmount + cessSpecific
 
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        billedItems = itemsMap,
-                        tableStatus = tableStatus,
-                        subtotal = subtotal,
-                        taxAmount = taxAmount,
-                        totalAmount = totalAmount,
-                        amountToPay = totalAmount,
-                        orderDetails = orderDetails,
-                        orderMasterId = orderMasterId
-                    )
+                if (cessAmount>0.0){
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            billedItems = itemsMap,
+                            tableStatus = tableStatus,
+                            subtotal = subtotal,
+                            taxAmount = taxAmount,
+                            totalAmount = totalAmount,
+                            amountToPay = totalAmount,
+                            orderDetails = orderDetails,
+                            orderMasterId = orderMasterId,
+                            cessAmount = cessAmount,
+                            cessSpecific = cessSpecific
+                        )
+                    }
+                }else {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            billedItems = itemsMap,
+                            tableStatus = tableStatus,
+                            subtotal = subtotal,
+                            taxAmount = taxAmount,
+                            totalAmount = totalAmount,
+                            amountToPay = totalAmount,
+                            orderDetails = orderDetails,
+                            orderMasterId = orderMasterId
+                        )
+                    }
                 }
 
             } else {
@@ -257,7 +239,6 @@ class BillingViewModel @Inject constructor(
             val newTaxAmount = calculateTaxAmount(currentState.subtotal, tax)
             val newTotalAmount = calculateTotal(currentState.subtotal, newTaxAmount, currentState.discountFlat)
             currentState.copy(
-                taxPercentage = tax,
                 taxAmount = newTaxAmount,
                 totalAmount = newTotalAmount,
                 amountToPay = newTotalAmount
@@ -273,17 +254,6 @@ class BillingViewModel @Inject constructor(
                 totalAmount = newTotalAmount,
                 amountToPay = newTotalAmount
             )
-        }
-    }
-
-    private fun calculateSubtotal(items: Map<MenuItem, Int>, tableStatus: String): Double {
-        return items.entries.sumOf { (item, qty) ->
-            val rate = when (tableStatus) {
-                "AC" -> item.ac_rate
-                "TAKEAWAY", "DELIVERY" -> item.parcel_rate
-                else -> item.rate
-            }
-            qty * rate
         }
     }
 

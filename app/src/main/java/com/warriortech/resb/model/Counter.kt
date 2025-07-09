@@ -1,7 +1,7 @@
 
 package com.warriortech.resb.model
 
-data class Counter(
+data class Counters(
     val id: Long,
     val name: String,
     val code: String, // e.g., "C1", "C2"
