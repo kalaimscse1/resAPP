@@ -18,7 +18,7 @@ data class HeaderSettings(
     val businessAddress: String = "",
     val businessPhone: String = "",
     val fontSize: Int = 16,
-    val fontWeight: FontWeight = FontWeight.BOLD,
+    val fontWeight: FontWeights = FontWeights.BOLD,
     val textAlign: TextAlign = TextAlign.CENTER
 )
 
@@ -28,7 +28,7 @@ data class BodySettings(
     val showPrice: Boolean = true,
     val showTotal: Boolean = true,
     val fontSize: Int = 12,
-    val fontWeight: FontWeight = FontWeight.NORMAL,
+    val fontWeight: FontWeights = FontWeights.NORMAL,
     val showBorders: Boolean = true,
     val lineSpacing: Int = 2
 )
@@ -38,7 +38,7 @@ data class FooterSettings(
     val customMessage: String = "",
     val showDateTime: Boolean = true,
     val fontSize: Int = 10,
-    val fontWeight: FontWeight = FontWeight.NORMAL,
+    val fontWeight: FontWeights = FontWeights.NORMAL,
     val textAlign: TextAlign = TextAlign.CENTER
 )
 
@@ -60,7 +60,7 @@ enum class ReceiptType {
     BILL
 }
 
-enum class FontWeight {
+enum class FontWeights {
     NORMAL,
     BOLD,
     LIGHT

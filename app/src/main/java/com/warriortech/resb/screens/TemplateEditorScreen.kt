@@ -458,11 +458,11 @@ fun PaperSettingsSection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FontWeightDropdown(
-    selectedWeight: FontWeight,
-    onWeightChange: (FontWeight) -> Unit
+    selectedWeight: FontWeights,
+    onWeightChange: (FontWeights) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val weights = FontWeight.values()
+    val weights = FontWeights.values()
 
     ExposedDropdownMenuBox(
         expanded = expanded,

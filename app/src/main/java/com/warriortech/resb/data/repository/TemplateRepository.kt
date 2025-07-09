@@ -87,7 +87,7 @@ class TemplateRepository @Inject constructor() {
                     businessAddress = "Restaurant Address",
                     businessPhone = "Phone Number",
                     fontSize = 16,
-                    fontWeight = FontWeight.BOLD,
+                    fontWeight = FontWeights.BOLD,
                     textAlign = TextAlign.CENTER
                 ),
                 bodySettings = BodySettings(
@@ -96,7 +96,7 @@ class TemplateRepository @Inject constructor() {
                     showPrice = false,
                     showTotal = false,
                     fontSize = 14,
-                    fontWeight = FontWeight.NORMAL,
+                    fontWeight = FontWeights.NORMAL,
                     showBorders = true,
                     lineSpacing = 2
                 ),
@@ -105,7 +105,7 @@ class TemplateRepository @Inject constructor() {
                     customMessage = "Kitchen Order Ticket",
                     showDateTime = true,
                     fontSize = 10,
-                    fontWeight = FontWeight.NORMAL,
+                    fontWeight = FontWeights.NORMAL,
                     textAlign = TextAlign.CENTER
                 ),
                 paperSettings = PaperSettings(
@@ -125,7 +125,7 @@ class TemplateRepository @Inject constructor() {
                     businessAddress = "Restaurant Address",
                     businessPhone = "Phone Number",
                     fontSize = 16,
-                    fontWeight = FontWeight.BOLD,
+                    fontWeight = FontWeights.BOLD,
                     textAlign = TextAlign.CENTER
                 ),
                 bodySettings = BodySettings(
@@ -134,7 +134,7 @@ class TemplateRepository @Inject constructor() {
                     showPrice = true,
                     showTotal = true,
                     fontSize = 12,
-                    fontWeight = FontWeight.NORMAL,
+                    fontWeight = FontWeights.NORMAL,
                     showBorders = true,
                     lineSpacing = 2
                 ),
@@ -143,7 +143,7 @@ class TemplateRepository @Inject constructor() {
                     customMessage = "Thank you for your visit!",
                     showDateTime = true,
                     fontSize = 10,
-                    fontWeight = FontWeight.NORMAL,
+                    fontWeight = FontWeights.NORMAL,
                     textAlign = TextAlign.CENTER
                 ),
                 paperSettings = PaperSettings(
