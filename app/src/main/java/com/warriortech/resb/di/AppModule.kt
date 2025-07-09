@@ -175,4 +175,13 @@ object AppModule {
     fun provideTemplateRepository(): TemplateRepository {
         return TemplateRepository()
     }
+
+    @Provides
+    @Singleton
+    fun providePrintService(
+        @ApplicationContext context: Context,
+        templateRepository: TemplateRepository
+    ): com.warriortech.resb.service.PrintService {
+        return com.warriortech.resb.service.PrintService(context, templateRepository)
+    }
 }

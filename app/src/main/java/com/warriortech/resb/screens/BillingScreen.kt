@@ -40,7 +40,7 @@ fun KotSelectionDialog(
     onDismiss: () -> Unit
 ) {
     val kotNumbers = orderDetails.map { it.kot_number }.distinct().sorted()
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -57,7 +57,7 @@ fun KotSelectionDialog(
             Column {
                 Text("Choose a KOT to view its items:", style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 LazyColumn {
                     item {
                         MobileOptimizedButton(
@@ -69,7 +69,7 @@ fun KotSelectionDialog(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                    
+
                     items(kotNumbers) { kotNumber ->
                         MobileOptimizedButton(
                             onClick = { onKotSelected(kotNumber) },
@@ -149,7 +149,7 @@ fun BillingScreen(
             )
         },
         bottomBar = {
-            BillingBottomBar(uiState = uiState) {
+            BillingBottomBar(uiState = uiState,orderMasterId = orderMasterId) {
                 // Navigate to Payment Screen, passing necessary info
                 // Option 1: Pass total amount via route (simple)
                 // navController.navigate("payment/${uiState.totalAmount}")
@@ -378,6 +378,7 @@ fun EditableBillingRow(
 @Composable
 fun BillingBottomBar(
     uiState: BillingPaymentUiState,
+    orderMasterId: Long? = null,
     onProceedToPayment: () -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
@@ -399,11 +400,21 @@ fun BillingBottomBar(
                     fontWeight = FontWeight.Bold
                 )
             }
-            MobileOptimizedButton(
-                onClick = onProceedToPayment,
-                text = "Proceed to Payment",
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                MobileOptimizedButton(
+                    onClick = {
+                        if (orderMasterId != null) {
+                            // Handle payment processing
+                            onProceedToPayment()
+                        }
+                    },
+                    text = "Proceed to Payment",
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }

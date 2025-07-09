@@ -1,7 +1,11 @@
 package com.warriortech.resb.util
+
 import android.content.Context
 import android.util.Log
 import com.warriortech.resb.model.KotData
+import com.warriortech.resb.model.Bill
+import com.warriortech.resb.model.ReceiptTemplate
+import com.warriortech.resb.model.ReceiptType
 
 /**
  * Helper class for handling communication with physical printer hardware.

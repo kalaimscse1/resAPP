@@ -1,7 +1,5 @@
 package com.warriortech.resb.ui.viewmodel
 
-
-
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
@@ -30,7 +28,7 @@ import javax.inject.Inject
 class MenuViewModel @Inject constructor(
     private val menuRepository: MenuItemRepository,
     private val orderRepository: OrderRepository,
-    private val tableRepository: TableRepository
+    private val printService: com.warriortech.resb.service.PrintService
 ) : ViewModel() {
 
     sealed class MenuUiState {

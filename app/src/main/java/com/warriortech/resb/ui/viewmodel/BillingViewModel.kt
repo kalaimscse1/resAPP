@@ -63,7 +63,8 @@ data class BillingPaymentUiState(
 class BillingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val billRepository: BillRepository,
-     private val orderRepository: OrderRepository
+     private val orderRepository: OrderRepository,
+    private val printService: com.warriortech.resb.service.PrintService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
