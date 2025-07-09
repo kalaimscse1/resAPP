@@ -90,6 +90,8 @@ import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.AIAssistantScreen
+import com.warriortech.resb.screens.TemplateScreen
+import com.warriortech.resb.screens.TemplateEditorScreen
 
 
 @AndroidEntryPoint
@@ -410,6 +412,14 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onBackPressed = { navController.popBackStack() }
             )
         }
+
+        composable("template_screen") {
+            TemplateScreen(navController = navController)
+        }
+
+        composable("template_editor") {
+            TemplateEditorScreen(navController = navController)
+        }
     }
 }
 @Composable
@@ -558,6 +568,16 @@ fun DrawerContent(
                 selected = currentDestination?.route == "kitchen",
                 onClick = {
                     onDestinationClicked("kitchen")
+                },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+            
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("Templates") else Text("") },
+                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                selected = currentDestination?.route == "template_screen",
+                onClick = {
+                    onDestinationClicked("template_screen")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )

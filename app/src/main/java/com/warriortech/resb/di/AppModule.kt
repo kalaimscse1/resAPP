@@ -12,6 +12,8 @@ import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.SettingsRepository
 import com.warriortech.resb.data.repository.TableRepository
+import com.warriortech.resb.data.repository.CounterRepository
+import com.warriortech.resb.data.repository.TemplateRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.util.NetworkMonitor
@@ -164,7 +166,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCounterRepository(): com.warriortech.resb.data.repository.CounterRepository {
-        return com.warriortech.resb.data.repository.CounterRepository()
+    fun provideCounterRepository(): CounterRepository {
+        return CounterRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTemplateRepository(): TemplateRepository {
+        return TemplateRepository()
     }
 }
