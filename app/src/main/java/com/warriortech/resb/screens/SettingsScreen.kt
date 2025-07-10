@@ -196,38 +196,62 @@ fun SettingsModuleScreen(
     viewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(module) {
-        viewModel.loadModuleData(module)
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        // Add button
-        Button(
-            onClick = { showAddDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add ${module.title}")
+    when (module) {
+        is SettingsModule.Area -> {
+            AreaSettingsScreen(modifier = modifier)
         }
+        is SettingsModule.Table -> {
+            TableSettingsScreen(modifier = modifier)
+        }
+        is SettingsModule.MenuItem -> {
+            MenuItemSettingsScreen()
+        }
+        is SettingsModule.Menu -> {
+            MenuSettingsScreen()
+        }
+        is SettingsModule.MenuCategory -> {
+            MenuCategorySettingsScreen()
+        }
+        is SettingsModule.Customer -> {
+            CustomerSettingsScreen()
+        }
+        is SettingsModule.Staff -> {
+            StaffSettingsScreen()
+        }
+        else -> {
+            // Fallback for modules that don't have dedicated screens yet
+            var showAddDialog by remember { mutableStateOf(false) }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (uiState) {
-            is SettingsUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+            LaunchedEffect(module) {
+                viewModel.loadModuleData(module)
             }
+
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                // Add button
+                Button(
+                    onClick = { showAddDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Add ${module.title}")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                when (uiState) {
+                    is SettingsUiState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
 
             is SettingsUiState.Success -> {
                 LazyColumn(

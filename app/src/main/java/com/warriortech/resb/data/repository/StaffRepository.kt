@@ -40,3 +40,40 @@ class StaffRepository @Inject constructor() {
         _staff.value = _staff.value.filter { it.id != staffId }
     }
 }
+package com.warriortech.resb.data.repository
+
+import com.warriortech.resb.model.Staff
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class StaffRepository @Inject constructor() {
+
+    private val staff = mutableListOf<Staff>()
+
+    suspend fun getAllStaff(): List<Staff> {
+        return staff.toList()
+    }
+
+    suspend fun insertStaff(staffMember: Staff): Long {
+        val newId = (staff.maxOfOrNull { it.id } ?: 0) + 1
+        val newStaff = staffMember.copy(id = newId)
+        staff.add(newStaff)
+        return newId
+    }
+
+    suspend fun updateStaff(staffMember: Staff) {
+        val index = staff.indexOfFirst { it.id == staffMember.id }
+        if (index != -1) {
+            staff[index] = staffMember
+        }
+    }
+
+    suspend fun deleteStaff(id: Long) {
+        staff.removeAll { it.id == id }
+    }
+
+    suspend fun getStaffById(id: Long): Staff? {
+        return staff.find { it.id == id }
+    }
+}
