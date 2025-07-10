@@ -40,3 +40,36 @@ class AreaRepository @Inject constructor() {
         _areas.value = _areas.value.filter { it.id != areaId }
     }
 }
+package com.warriortech.resb.data.repository
+
+import com.warriortech.resb.model.Area
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class AreaRepository @Inject constructor(
+    // Add your data source here (Room DAO, API service, etc.)
+) {
+    
+    suspend fun getAllAreas(): List<Area> {
+        // TODO: Implement actual data fetching
+        // For now, return sample data
+        return listOf(
+            Area(1, "Main Hall", "Primary dining area"),
+            Area(2, "Terrace", "Outdoor seating area"),
+            Area(3, "Private Room", "VIP dining area")
+        )
+    }
+
+    suspend fun insertArea(area: Area) {
+        // TODO: Implement actual data insertion
+    }
+
+    suspend fun updateArea(area: Area) {
+        // TODO: Implement actual data update
+    }
+
+    suspend fun deleteArea(areaId: Int) {
+        // TODO: Implement actual data deletion
+    }
+}

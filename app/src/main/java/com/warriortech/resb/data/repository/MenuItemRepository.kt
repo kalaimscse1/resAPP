@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.data.local.dao.MenuItemDao
@@ -81,6 +80,81 @@ class MenuItemRepository @Inject constructor(
         if (isOnline()) {
             syncMenuItemsFromRemote()
         }
+    }
+
+    suspend fun getAllMenuItems(): List<com.warriortech.resb.model.MenuItem> {
+        // TODO: Implement actual data fetching from database
+        // For now, return sample data
+        return listOf(
+            com.warriortech.resb.model.MenuItem(
+                menu_item_id = 1,
+                menu_item_name = "Chicken Biryani",
+                menu_item_name_tamil = "சிக்கன் பிரியாணி",
+                item_cat_id = 1,
+                rate = 250.0,
+                ac_rate = 280.0,
+                parcel_rate = 230.0,
+                image = "",
+                is_available = true,
+                parcel_charge = 10.0,
+                tax_id = 1,
+                tax_name = "GST",
+                tax_percentage = 5.0,
+                kitchen_cat_id = 1,
+                kitchen_cat_name = "Main Kitchen",
+                stock_maintain = true,
+                rate_lock = false,
+                unit_id = 1,
+                unit_name = "Plate",
+                min_stock = 5,
+                hsn_code = "12345",
+                order_by = 1,
+                is_inventory = true,
+                is_raw = false,
+                cess_specific = 2.0,
+                cess_per = 1.0
+            ),
+            com.warriortech.resb.model.MenuItem(
+                menu_item_id = 2,
+                menu_item_name = "Mutton Curry",
+                menu_item_name_tamil = "ஆட்டுக்கறி",
+                item_cat_id = 1,
+                rate = 180.0,
+                ac_rate = 200.0,
+                parcel_rate = 170.0,
+                image = "",
+                is_available = true,
+                parcel_charge = 10.0,
+                tax_id = 1,
+                tax_name = "GST",
+                tax_percentage = 5.0,
+                kitchen_cat_id = 1,
+                kitchen_cat_name = "Main Kitchen",
+                stock_maintain = true,
+                rate_lock = false,
+                unit_id = 1,
+                unit_name = "Plate",
+                min_stock = 5,
+                hsn_code = "12345",
+                order_by = 1,
+                is_inventory = true,
+                is_raw = false,
+                cess_specific = 2.0,
+                cess_per = 1.0
+            )
+        )
+    }
+
+    suspend fun insertMenuItem(menuItem: com.warriortech.resb.model.MenuItem) {
+        // TODO: Implement actual data insertion
+    }
+
+    suspend fun updateMenuItem(menuItem: com.warriortech.resb.model.MenuItem) {
+        // TODO: Implement actual data update
+    }
+
+    suspend fun deleteMenuItem(menuItemId: Int) {
+        // TODO: Implement actual data deletion
     }
 }
 

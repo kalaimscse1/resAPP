@@ -113,3 +113,15 @@ data class MenuCategory(
     val name: String,
     val items: List<MenuItem> = emptyList()
 )
+package com.warriortech.resb.model
+
+data class MenuItem(
+    val id: Int = 0,
+    val name: String,
+    val nameTamil: String = "",
+    val categoryId: Int,
+    val rate: Double,
+    val acRate: Double = 0.0,
+    val parcelRate: Double = 0.0,
+    val description: String = ""
+)
