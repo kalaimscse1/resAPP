@@ -172,6 +172,30 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAreaRepository(): AreaRepository {
+        return AreaRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideStaffRepository(): StaffRepository {
+        return StaffRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRoleRepository(): RoleRepository {
+        return RoleRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun providePrinterRepository(): PrinterRepository {
+        return PrinterRepository()
+    }
+
+    @Provides
+    @Singleton
     fun provideTemplateRepository(): TemplateRepository {
         return TemplateRepository()
     }

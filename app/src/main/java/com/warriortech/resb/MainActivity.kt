@@ -347,8 +347,9 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("settings") {
             SettingsScreen(
+                onBackPressed = { navController.popBackStack() },
                 drawerState = drawerState,
-                onBackPressed = {navController.popBackStack()}
+                navController = navController
             )
         }
 
@@ -580,7 +581,7 @@ fun DrawerContent(
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
-            
+
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Templates") else Text("") },
                 icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
