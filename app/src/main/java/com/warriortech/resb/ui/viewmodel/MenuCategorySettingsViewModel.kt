@@ -38,14 +38,14 @@ class MenuCategorySettingsViewModel @Inject constructor(
         }
     }
 
-    fun addCategory(name: String, description: String, sortOrder: Int) {
+    fun addCategory(name: String, sortOrder: String,is_active: Boolean) {
         viewModelScope.launch {
             try {
                 val category = MenuCategory(
-                    id = 0,
-                    name = name,
-//                    description = description,
-//                    sortOrder = sortOrder
+                    item_cat_id = 0,
+                    item_cat_name = name,
+                    order_by = sortOrder,
+                    is_active = is_active
                 )
                 categoryRepository.insertCategory(category)
                 loadCategories()
@@ -55,14 +55,14 @@ class MenuCategorySettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateCategory(id: Long, name: String, description: String, sortOrder: Int) {
+    fun updateCategory(id: Long, name: String,sortOrder: String,is_active: Boolean) {
         viewModelScope.launch {
             try {
                 val category = MenuCategory(
-                    id = id,
-                    name = name,
-//                    description = description,
-//                    sortOrder = sortOrder
+                    item_cat_id = id,
+                    item_cat_name = name,
+                    order_by = sortOrder,
+                    is_active = is_active
                 )
                 categoryRepository.updateCategory(category)
                 loadCategories()

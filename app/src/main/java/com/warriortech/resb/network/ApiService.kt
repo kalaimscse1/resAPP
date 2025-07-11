@@ -1,5 +1,6 @@
 package com.warriortech.resb.network
 
+import android.content.SyncRequest
 import com.warriortech.resb.model.*
 import retrofit2.Response
 import retrofit2.http.*
@@ -20,10 +21,42 @@ interface ApiService {
     ): ApiResponse<AuthResponse>
 
     /**
+     * Dashboard Management
+     */
+    @GET("dashboard/metrics")
+    suspend fun getDashboardMetrics(): Response<DashboardMetrics>
+
+    @GET("dashboard/running-orders")
+    suspend fun getRunningOrders(): Response<List<RunningOrder>>
+
+    @GET("dashboard/recent-activity")
+    suspend fun getRecentActivity(): Response<List<String>>
+
+
+    /**
+     * Area Management
+     */
+
+    @GET("table/area/getAreasByIsActive")
+    suspend fun getAllAreas(): Response<List<Area>>
+
+    @POST("table/area/addArea")
+    suspend fun createArea(@Body area: Area) : Response<Area>
+
+    @PUT("table/area/updateArea/{area_id}")
+    suspend fun updateArea(
+        @Path("area_id") lng: Long,
+        @Body area: Area) : Response<Int>
+
+    @DELETE("table/area/deleteAreaById/{area_id}")
+    suspend fun deleteArea(
+        @Path("area_id") lng: Long) : Response<Int>
+
+    /**
      * Table Management
      */
     @GET("table/table/getTablesByIsActive")
-    suspend fun getAllTables(): List<Table>
+    suspend fun getAllTables(): Response<List<Table>>
 
     @GET("table/table/getTableByAreaId/{area_id}")
     suspend fun getTablesBySection(@Path("area_id") section: Long): List<Table>
@@ -37,8 +70,17 @@ interface ApiService {
         @Query("status") status: String
     ): Response<Void>
 
-    @GET("settings/tax/getTaxSplitByTaxId/{tax_id}")
-    suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
+    @POST("table/table/addTable")
+    suspend fun createTable(
+        @Body table: Table) : Response<Table>
+
+    @PUT("table/table/updateTables/{table_id}")
+    suspend fun updateTable(
+        @Path("table_id") lng: Long,
+        @Body table: Table) : Response<Int>
+
+    @DELETE("table/table/deleteTableById/{table_id}")
+    suspend fun deleteTable(lng: Long) : Response<Int>
 
     @GET("table/table/updateTableAvailabilityByTableId/{table_id}")
     suspend fun updateTableAvailability(
@@ -46,26 +88,66 @@ interface ApiService {
         @Query("table_availability") status: String
     ): Int
 
-    @GET("table/area/getAreasByIsActive")
-    suspend fun getAllAreas(): List<Area>
-    // Menu item endpoints
+    @DELETE("table/table/deleteTableById/{table_id}")
+    suspend fun deleteTable(@Path("table_id") id: Int): Response<Unit>
+
+    /**
+     * Menu Management
+     */
+
+    @GET("menu/getMenusByIsActive")
+    suspend fun getAllMenus(): Response<List<Menu>>
+
+    @POST("menu/addMenu")
+    suspend fun createMenu(@Body menu: Menu): Response<Menu>
+
+    @PUT("menu/updateMenus/{menu_id}")
+    suspend fun updateMenu(@Path("menu_id") id: Long, @Body menu: Menu): Response<Int>
+
+    @DELETE("menu/deleteMenuById/{menu_id}")
+    suspend fun deleteMenu(@Path("menu_id") id: Long): Response<Int>
+
+    /**
+     * MenuCategory Management
+     */
+
+    @GET("menu/itemCategory/getItemCategoryByIsActive")
+    suspend fun getAllMenuCategories(): Response<List<MenuCategory>>
+
+    @POST("menu/itemCategory/addItemCategory")
+    suspend fun createMenuCategory(@Body category: MenuCategory): Response<MenuCategory>
+
+    @PUT("menu/itemCategory/updateItemCategory/{item_cat_id}")
+    suspend fun updateMenuCategory(@Path("item_cat_id") id: Long, @Body category: MenuCategory): Response<MenuCategory>
+
+    @DELETE("menu/itemCategory/deleteItemCategoryById/{item_cat_id}")
+    suspend fun deleteMenuCategory(@Path("item_cat_id") id: Long): Response<Unit>
+
+    /**
+     * MenuItem Management
+     */
+
+    @POST("menu/menuItem/addMenuItem")
+    suspend fun createMenuItem(@Body menuItem: MenuItem): Response<MenuItem>
+
+    @PUT("menu/menuItem/updateMenuItems/{menu_item_id}")
+    suspend fun updateMenuItem(@Path("id") id: Long, @Body menuItem: MenuItem): Response<MenuItem>
+
+    @DELETE("menu/deleteMenuItemById/{menu_item_id}")
+    suspend fun deleteMenuItem(@Path("id") id: Int): Response<Unit>
+
     @GET("menu/menuItem/getMenuItemsByIsActive")
     suspend fun getMenuItems(): Response<List<MenuItem>>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
-    suspend fun getAllMenuItems(): List<MenuItem>
+    suspend fun getAllMenuItems(): Response<List<MenuItem>>
 
     @GET("menu/menuItem/search")
     suspend fun searchMenuItems(@Query("query") query: String): Response<List<MenuItem>>
 
-    // Customer endpoints
-    @GET("customers/search")
-    suspend fun searchCustomers(@Query("q") query: String): Response<CustomerSearchResponse>
-
-    @POST("customers")
-    suspend fun createCustomer(@Body customer: CreateCustomerRequest): Response<CreateCustomerResponse>
-
-    // Order endpoints
+    /**
+     * Order Management
+     */
     @POST("order/addOrder")
     suspend fun createOrder(@Body orderRequest: OrderMaster): Response<TblOrderResponse>
 
@@ -108,8 +190,19 @@ interface ApiService {
         @Body statusUpdate: Map<String, String>
     ): Response<Order>
 
+    /**
+     * Settings Management
+     */
+
     @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
     suspend fun getVoucherByCounterId(@Path("counter_id") counterId: Long): Response<TblVoucherResponse>
+
+    @GET("settings/tax/getTaxSplitByTaxId/{tax_id}")
+    suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
+
+    /**
+     * Payment Management
+     */
 
     @GET("payment/getBillNoByCounterId")
     suspend fun getBillNoByCounterId(@Query("counter_id") counterId: Long): Response<Map<String, String>>
@@ -117,34 +210,12 @@ interface ApiService {
     @POST("payment/addPayment")
     suspend fun addPayment(@Body paymentRequest: TblBillingRequest): Response<TblBillingResponse>
 
-    @POST("table/area/addArea")
-    suspend fun createArea(@Body area: Area) : Response<Area>
 
-    @PUT("table/area/updateArea/{area_id}")
-    suspend fun updateArea(
-        @Path("area_id") lng: Long,
-        @Body area: Area) : Response<Int>
 
-    @DELETE("table/area/deleteAreaById/{area_id}")
-    suspend fun deleteArea(
-        @Path("area_id") lng: Long) : Response<Int>
+    /**
+     * Reports Management
+     */
 
-    @POST("table/table/addTable")
-    suspend fun createTable(
-        @Body table: Table) : Response<Table>
-
-    @PUT("table/table/updateTables/{table_id}")
-    suspend fun updateTable(
-        @Path("table_id") lng: Long,
-        @Body table: Table) : Response<Int>
-
-    @DELETE("table/table/deleteTableById/{table_id}")
-    suspend fun deleteTable(lng: Long) : Response<Int>
-
-    @GET("dashboard/metrics")
-    suspend fun getDashboardMetrics(): Response<DashboardMetrics>
-
-    // Report API endpoints
     @GET("reports/today-sales")
     suspend fun getTodaySales(): Response<TodaySalesReport>
 
@@ -154,184 +225,43 @@ interface ApiService {
     @GET("reports/sales-summary/{date}")
     suspend fun getSalesSummaryByDate(@Path("date") date: String): Response<SalesSummaryReport>
 
-    @GET("dashboard/running-orders")
-    suspend fun getRunningOrders(): Response<List<RunningOrder>>
-
-    @GET("dashboard/recent-activity")
-    suspend fun getRecentActivity(): Response<List<String>>
 
     /**
-     * Analytics
+     * Customers Management
      */
-//    @GET("analytics/sales/daily")
-//    suspend fun getDailySales(@Query("date") date: String): Response<SalesData>
-//
-//    @GET("analytics/sales/weekly")
-//    suspend fun getWeeklySales(@Query("startDate") startDate: String): Response<SalesData>
-//
-//    @GET("analytics/sales/monthly")
-//    suspend fun getMonthlySales(@Query("month") month: Int, @Query("year") year: Int): Response<SalesData>
 
-    /**
-     * Synchronization (for offline functionality)
-     */
-//    @POST("sync")
-//    suspend fun syncPendingChanges(@Body syncRequest: SyncRequest): Response<SyncResponse>
-    @GET("menus")
-    suspend fun getAllMenus(): List<Menu>
-
-    @POST("menus")
-    suspend fun createMenu(@Body menu: Menu): Menu
-
-    @PUT("menus/{id}")
-    suspend fun updateMenu(@Path("id") id: Long, @Body menu: Menu): Menu
-
-    @DELETE("menus/{id}")
-    suspend fun deleteMenu(@Path("id") id: Long)
-
-    // Menu Category management
-    @GET("menu-categories")
-    suspend fun getAllMenuCategories(): List<MenuCategory>
-
-    @POST("menu-categories")
-    suspend fun createMenuCategory(@Body category: MenuCategory): MenuCategory
-
-    @PUT("menu-categories/{id}")
-    suspend fun updateMenuCategory(@Path("id") id: Long, @Body category: MenuCategory): MenuCategory
-
-    @DELETE("menu-categories/{id}")
-    suspend fun deleteMenuCategory(@Path("id") id: Long)
-
-    // Menu Item management
-
-    @POST("menu-items")
-    suspend fun createMenuItem(@Body item: MenuItem): MenuItem
-
-    @PUT("menu-items/{id}")
-    suspend fun updateMenuItem(@Path("id") id: Long, @Body item: MenuItem): MenuItem
-
-    @DELETE("menu-items/{id}")
-    suspend fun deleteMenuItem(@Path("id") id: Long)
-
-    // Customer management
     @GET("customers")
-    suspend fun getAllCustomers(): List<Customer>
+    suspend fun getAllCustomers(): Response<List<Customer>>
 
     @POST("customers")
-    suspend fun createCustomer(@Body customer: Customer): Customer
+    suspend fun createCustomer(@Body customer: Customer): Response<Customer>
 
     @PUT("customers/{id}")
-    suspend fun updateCustomer(@Path("id") id: Long, @Body customer: Customer): Customer
+    suspend fun updateCustomer(@Path("id") id: Long, @Body customer: Customer): Response<Customer>
 
     @DELETE("customers/{id}")
-    suspend fun deleteCustomer(@Path("id") id: Long)
+    suspend fun deleteCustomer(@Path("id") id: Long): Response<Unit>
 
-    // Staff management
-    @GET("staff")
-    suspend fun getAllStaff(): List<Staff>
+    /**
+     * Staff Management
+     */
 
-    @POST("staff")
-    suspend fun createStaff(@Body staff: Staff): Staff
+    @GET("auth/getStaffByIsActive")
+    suspend fun getAllStaff(): Response<List<TblStaff>>
 
-    @PUT("staff/{id}")
-    suspend fun updateStaff(@Path("id") id: Long, @Body staff: Staff): Staff
+    @POST("auth/addStaff")
+    suspend fun createStaff(@Body staff: TblStaff): Response<TblStaff>
 
-    @DELETE("staff/{id}")
-    suspend fun deleteStaff(@Path("id") id: Long)
+    @PUT("auth/updateStaff/{staff_id}")
+    suspend fun updateStaff(@Path("staff_id") id: Long, @Body staff: TblStaff): Response<TblStaff>
 
-    // Role management
-    @GET("roles")
-    suspend fun getAllRoles(): List<Role>
+    @DELETE("auth/deleteStaffById/{staff_id}")
+    suspend fun deleteStaff(@Path("staff_id") id: Long): Response<Unit>
 
-    @POST("roles")
-    suspend fun createRole(@Body role: Role): Role
+    /**
+     * Modifiers Management
+     */
 
-    @PUT("roles/{id}")
-    suspend fun updateRole(@Path("id") id: Long, @Body role: Role): Role
-
-    @DELETE("roles/{id}")
-    suspend fun deleteRole(@Path("id") id: Long)
-
-    // Printer management
-    @GET("printers")
-    suspend fun getAllPrinters(): List<Printer>
-
-    @POST("printers")
-    suspend fun createPrinter(@Body printer: Printer): Printer
-
-    @PUT("printers/{id}")
-    suspend fun updatePrinter(@Path("id") id: Long, @Body printer: Printer): Printer
-
-    @DELETE("printers/{id}")
-    suspend fun deletePrinter(@Path("id") id: Long)
-
-    // Tax management
-    @GET("taxes")
-    suspend fun getAllTaxes(): List<Tax>
-
-    @POST("taxes")
-    suspend fun createTax(@Body tax: Tax): Tax
-
-    @PUT("taxes/{id}")
-    suspend fun updateTax(@Path("id") id: Long, @Body tax: Tax): Tax
-
-    @DELETE("taxes/{id}")
-    suspend fun deleteTax(@Path("id") id: Long)
-
-    // Tax Split management
-    @GET("tax-splits")
-    suspend fun getAllTaxSplits(): List<TaxSplit>
-
-    @POST("tax-splits")
-    suspend fun createTaxSplit(@Body taxSplit: TaxSplit): TaxSplit
-
-    @PUT("tax-splits/{id}")
-    suspend fun updateTaxSplit(@Path("id") id: Long, @Body taxSplit: TaxSplit): TaxSplit
-
-    @DELETE("tax-splits/{id}")
-    suspend fun deleteTaxSplit(@Path("id") id: Long)
-
-    // Restaurant Profile management
-    @GET("restaurant-profile")
-    suspend fun getRestaurantProfile(): RestaurantProfile
-
-    @PUT("restaurant-profile")
-    suspend fun updateRestaurantProfile(@Body profile: RestaurantProfile): RestaurantProfile
-
-    // General Settings management
-    @GET("general-settings")
-    suspend fun getGeneralSettings(): GeneralSettings
-
-    @PUT("general-settings")
-    suspend fun updateGeneralSettings(@Body settings: GeneralSettings): GeneralSettings
-
-    // Voucher management
-    @GET("vouchers")
-    suspend fun getAllVouchers(): List<Voucher>
-
-    @POST("vouchers")
-    suspend fun createVoucher(@Body voucher: Voucher): Voucher
-
-    @PUT("vouchers/{id}")
-    suspend fun updateVoucher(@Path("id") id: Long, @Body voucher: Voucher): Voucher
-
-    @DELETE("vouchers/{id}")
-    suspend fun deleteVoucher(@Path("id") id: Long)
-
-    // Counter management
-    @GET("counters")
-    suspend fun getAllCounters(): List<Counter>
-
-    @POST("counters")
-    suspend fun createCounter(@Body counter: Counter): Counter
-
-    @PUT("counters/{id}")
-    suspend fun updateCounter(@Path("id") id: Long, @Body counter: Counter): Counter
-
-    @DELETE("counters/{id}")
-    suspend fun deleteCounter(@Path("id") id: Long): Response<Int>
-
-    // Modifier API endpoints
     @GET("modifiers")
     suspend fun getAllModifiers(): Response<List<Modifiers>>
 
@@ -350,11 +280,10 @@ interface ApiService {
     @DELETE("modifiers/{id}")
     suspend fun deleteModifier(@Path("id") id: Long): Response<Int>
 
-    // Report API Endpoints
-    @POST("reports/sales-summary")
-    suspend fun getSalesSummary(@Body request: Map<String, Any>): Response<SalesSummaryResponse>
+    /**
+     * Kitchen KOT Management
+     */
 
-    // Kitchen API endpoints
     @GET("kitchen/kots")
     suspend fun getKitchenKOTs(): Response<KitchenKOTResponse>
 

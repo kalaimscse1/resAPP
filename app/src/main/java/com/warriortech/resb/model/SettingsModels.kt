@@ -2,10 +2,10 @@
 package com.warriortech.resb.model
 
 data class Menu(
-    val id: Long,
-    val name: String,
-    val description: String,
-    val isActive: Boolean
+    val menu_id: Long,
+    val menu_name: String,
+    val order_by: String,
+    val is_active: Boolean
 )
 
 //data class Customer(

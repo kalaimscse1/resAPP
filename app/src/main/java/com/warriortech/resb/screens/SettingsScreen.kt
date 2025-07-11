@@ -181,31 +181,31 @@ fun SettingsModuleScreen(
 ) {
     when (module) {
         is SettingsModule.Area -> {
-           navController.navigate("area_settings")
+           navController.navigate("area_setting")
         }
 
         is SettingsModule.Table -> {
-            navController.navigate("table_settings")
+            navController.navigate("table_setting")
         }
 
         is SettingsModule.MenuItem -> {
-           navController.navigate("menu_item_settings")
+           navController.navigate("menu_item_setting")
         }
 
         is SettingsModule.Menu -> {
-            navController.navigate("menu_settings")
+            navController.navigate("menu_setting")
         }
 
         is SettingsModule.MenuCategory -> {
-            navController.navigate("menu_category_settings")
+            navController.navigate("menu_category_setting")
         }
 
         is SettingsModule.Customer -> {
-            navController.navigate("customer_settings")
+            navController.navigate("customer_setting")
         }
 
         is SettingsModule.Staff -> {
-            navController.navigate("staff_settings")
+            navController.navigate("staff_setting")
         }
 
         else -> {

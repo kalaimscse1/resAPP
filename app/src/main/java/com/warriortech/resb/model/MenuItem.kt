@@ -109,7 +109,8 @@ data class MenuItem(
  * Updated to use Int for id to match backend
  */
 data class MenuCategory(
-    val id: Long,
-    val name: String,
-    val items: List<MenuItem> = emptyList()
+    val item_cat_id: Long,
+    val item_cat_name: String,
+    val order_by: String,
+    val is_active: Boolean
 )

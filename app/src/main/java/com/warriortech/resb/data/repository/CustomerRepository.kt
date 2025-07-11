@@ -1,10 +1,10 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
 import com.warriortech.resb.model.Customer
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.warriortech.resb.network.ApiService
 
 @Singleton
 class CustomerRepository @Inject constructor(
@@ -30,7 +30,7 @@ class CustomerRepository @Inject constructor(
     }
 
     suspend fun updateCustomer(customer: Customer): Customer {
-        val response = apiService.updateCustomer(customer.id, customer)
+        val response = apiService.updateCustomer(customer.customer_id, customer)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update customer")
         } else {
@@ -38,7 +38,7 @@ class CustomerRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteCustomer(customerId: Int) {
+    suspend fun deleteCustomer(customerId: Long) {
         val response = apiService.deleteCustomer(customerId)
         if (!response.isSuccessful) {
             throw Exception("Failed to delete customer: ${response.message()}")

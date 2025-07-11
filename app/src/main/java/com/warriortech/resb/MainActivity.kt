@@ -90,12 +90,16 @@ import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.AIAssistantScreen
+import com.warriortech.resb.screens.CounterSelectionScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
 import com.warriortech.resb.screens.settings.StaffSettingsScreen
 import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.screens.settings.CustomerSettingsScreen
+import com.warriortech.resb.screens.settings.MenuCategorySettingsScreen
+import com.warriortech.resb.screens.settings.MenuItemSettingsScreen
+import com.warriortech.resb.screens.settings.MenuSettingsScreen
 import com.warriortech.resb.screens.settings.TableSettingsScreen
 
 
@@ -366,12 +370,25 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 navController.popBackStack()
             })
         }
+        composable("menu_setting"){
+            MenuSettingsScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable("menu_item_setting") {
+            MenuItemSettingsScreen()
+        }
+        composable ("menu_Category_setting") {
+            MenuCategorySettingsScreen()
+        }
         composable("staff_setting") {
             StaffSettingsScreen(
                 onBackPressed = { navController.popBackStack() }
             )
         }
-        composable("customer-setting") {
+        composable("customer_setting") {
            CustomerSettingsScreen(
                 onBackPressed = { navController.popBackStack() }
             )
@@ -379,7 +396,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
 
         composable("counter_selection") {
-            com.warriortech.resb.screens.CounterSelectionScreen(
+            CounterSelectionScreen(
                 onCounterSelected = { counter ->
                     navController.navigate("counter/${counter.id}") {
                         popUpTo("counter_selection") { inclusive = true }

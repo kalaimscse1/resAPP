@@ -4,6 +4,7 @@ package com.warriortech.resb.di
 
 import android.content.Context
 import androidx.room.Room
+import com.warriortech.resb.ai.AIRepository
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.dao.TableDao
@@ -20,6 +21,7 @@ import com.warriortech.resb.data.repository.StaffRepository
 import com.warriortech.resb.data.repository.TemplateRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.util.NetworkMonitor
 import dagger.Module
 import dagger.Provides
@@ -103,8 +105,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAIRepository(@ApplicationContext context: Context): com.warriortech.resb.ai.AIRepository {
-        return com.warriortech.resb.ai.AIRepository(context)
+    fun provideAIRepository(@ApplicationContext context: Context): AIRepository {
+        return AIRepository(context)
     }
 
     @Provides
@@ -176,14 +178,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAreaRepository(): AreaRepository {
-        return AreaRepository()
+    fun provideAreaRepository(
+        apiService: ApiService
+    ): AreaRepository {
+        return AreaRepository(
+            apiService = apiService
+        )
     }
 
     @Provides
     @Singleton
-    fun provideStaffRepository(): StaffRepository {
-        return StaffRepository()
+    fun provideStaffRepository(
+        apiService: ApiService
+    ): StaffRepository {
+        return StaffRepository(
+            apiService = apiService
+        )
     }
 
     @Provides
@@ -209,7 +219,7 @@ object AppModule {
     fun providePrintService(
         @ApplicationContext context: Context,
         templateRepository: TemplateRepository
-    ): com.warriortech.resb.service.PrintService {
-        return com.warriortech.resb.service.PrintService(context, templateRepository)
+    ): PrintService {
+        return PrintService(context, templateRepository)
     }
 }

@@ -6,7 +6,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.StaffRepository
-import com.warriortech.resb.model.Staff
 import com.warriortech.resb.model.TblStaff
 import com.warriortech.resb.util.getCurrentDateModern
 import dagger.hilt.android.lifecycle.HiltViewModel

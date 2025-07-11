@@ -1,7 +1,7 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
+import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.model.Area
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -35,8 +35,8 @@ class AreaRepository @Inject constructor(
         }
     }
 
-    suspend fun updateArea(area: Area): Area {
-        val response = apiService.updateArea(area.id, area)
+    suspend fun updateArea(area: Area): Int {
+        val response = apiService.updateArea(area.area_id, area)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update area")
         } else {
@@ -44,7 +44,7 @@ class AreaRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteArea(areaId: Int) {
+    suspend fun deleteArea(areaId: Long) {
         val response = apiService.deleteArea(areaId)
         if (!response.isSuccessful) {
             throw Exception("Failed to delete area: ${response.message()}")

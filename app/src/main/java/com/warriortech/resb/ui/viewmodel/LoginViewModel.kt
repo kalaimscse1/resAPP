@@ -5,14 +5,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.LoginRequest
+import com.warriortech.resb.model.RunningOrder
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import retrofit2.Response
+import retrofit2.http.GET
 import javax.inject.Inject
 
-// Data class to represent the UI state of the Login screen
+/**
+ * ViewModel for managing the login state and actions.
+ */
 data class LoginUiState(
     val companyCode: String = "",
     val username: String = "",
@@ -22,34 +28,53 @@ data class LoginUiState(
     val loginError: String? = null,
     val loginSuccess: Boolean = false
 )
-
+/**
+ * ViewModel for handling user login functionality.
+ */
 @HiltViewModel
 class LoginViewModel @Inject constructor() : ViewModel() { // Assuming you might inject dependencies later
 
     var uiState by mutableStateOf(LoginUiState())
         private set
-
+    /**
+     * Handles changes to the company code input field.
+     */
     fun onCompanyCodeChange(companyCode: String) {
         uiState = uiState.copy(companyCode = companyCode, loginError = null)
     }
 
+    /**
+     * Handles changes to the username input field.
+     */
     fun onUsernameChange(username: String) {
         uiState = uiState.copy(username = username, loginError = null)
     }
 
+    /**
+     * Handles changes to the password input field.
+     */
     fun onPasswordChange(password: String) {
         uiState = uiState.copy(password = password, loginError = null)
     }
 
+    /**
+     * Toggles the visibility of the password input field.
+     */
     fun togglePasswordVisibility() {
         uiState = uiState.copy(isPasswordVisible = !uiState.isPasswordVisible)
     }
 
+    /**
+     * Validates the input fields to ensure they are not empty.
+     */
     private fun validateInput(): Boolean {
         return uiState.username.isNotBlank() &&
                 uiState.password.isNotBlank() &&
                 uiState.companyCode.isNotBlank()
     }
+    /**
+     * Login function that attempts to log in the user with the provided credentials.
+     */
 
     fun attemptLogin() {
         if (!validateInput()) {
@@ -83,7 +108,9 @@ class LoginViewModel @Inject constructor() : ViewModel() { // Assuming you might
         }
     }
 
-    // Call this after navigation to reset the success flag
+    /**
+     * Resets the login success state after handling the login result.
+     */
     fun onLoginHandled() {
         uiState = uiState.copy(loginSuccess = false, loginError = null)
     }

@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.screens.settings
 
+import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -66,7 +67,7 @@ fun MenuCategorySettingsScreen(
                             onEdit = { editingCategory = it },
                             onDelete = { 
                                 scope.launch { 
-                                    viewModel.deleteCategory(it.id) 
+                                    viewModel.deleteCategory(it.item_cat_id)
                                 }
                             }
                         )
@@ -101,7 +102,7 @@ fun MenuCategorySettingsScreen(
             onDismiss = { editingCategory = null },
             onConfirm = { name, description, sortOrder ->
                 scope.launch {
-                    viewModel.updateCategory(category.id, name, description, sortOrder)
+                    viewModel.updateCategory(category.item_cat_id, name, description, sortOrder)
                     editingCategory = null
                 }
             }
@@ -128,7 +129,7 @@ fun CategoryCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = category.name,
+                    text = category.item_cat_name,
                     style = MaterialTheme.typography.titleMedium
                 )
 //                Text(
@@ -157,11 +158,11 @@ fun CategoryCard(
 fun CategoryDialog(
     category: MenuCategory?,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, Int) -> Unit
+    onConfirm: (String, String, Boolean) -> Unit
 ) {
-    var name by remember { mutableStateOf(category?.name ?: "") }
-//    var description by remember { mutableStateOf(category?.description ?: "") }
-//    var sortOrder by remember { mutableStateOf(category?.sortOrder?.toString() ?: "1") }
+    var name by remember { mutableStateOf(category?.item_cat_name ?: "") }
+    var orderBy by remember { mutableStateOf(category?.order_by ?: "1") }
+    var isActive by remember { mutableStateOf(category?.is_active != false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -175,25 +176,30 @@ fun CategoryDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-//                OutlinedTextField(
-//                    value = description,
-//                    onValueChange = { description = it },
-//                    label = { Text("Description") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                OutlinedTextField(
-//                    value = sortOrder,
-//                    onValueChange = { sortOrder = it },
-//                    label = { Text("Sort Order") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
+                OutlinedTextField(
+                    value = orderBy,
+                    onValueChange = { orderBy = it },
+                    label = { Text("Order") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Switch(
+                        checked = isActive,
+                        onCheckedChange = { isActive = it }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Active")
+                }
+
             }
         },
         confirmButton = {
             TextButton(
                 onClick = { 
-                    onConfirm(name, "",  1)
+                    onConfirm(name, orderBy, isActive)
                 }
             ) {
                 Text(if (category == null) "Add" else "Update")

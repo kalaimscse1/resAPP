@@ -28,6 +28,10 @@ import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
 import kotlinx.coroutines.launch
 
+/**
+ * DashboardScreen displays the main dashboard with real-time metrics,
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
@@ -40,7 +44,6 @@ fun DashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val tblOrderDetailsResponse by viewModel.tblOrderDetailsResponse.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.loadDashboardData()
@@ -116,7 +119,9 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(16.dp)
                 ) {
-                    // Metrics Cards
+                    /**
+                     * Today's Metrics Section
+                     */
                     item {
                         MetricsSection(
                             metrics = state.metrics,
@@ -125,7 +130,9 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Quick Actions
+                    /**
+                     * Quick Actions Section
+                     */
                     item {
                         QuickActionsSection(
                             onNavigateToMenu = onNavigateToMenu,
@@ -135,7 +142,9 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Running Orders
+                    /**
+                     * Running Orders Section
+                     */
                     item {
                         RunningOrdersSection(
                             runningOrders = state.runningOrders,
@@ -146,7 +155,9 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Recent Activity
+                    /**
+                     * Recent Activity Section
+                     */
                     item {
                         RecentActivitySection(
                             recentActivity = state.recentActivity
@@ -395,6 +406,7 @@ fun RunningOrdersSection(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun RunningOrderCard(
     order: RunningOrder,

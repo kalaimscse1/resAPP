@@ -42,10 +42,10 @@ class MenuSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val menu = Menu(
-                    id = 0,
-                    name = name,
-                    description = description,
-                    isActive = isActive
+                    menu_id = 0,
+                    menu_name = name,
+                    order_by = description,
+                    is_active = isActive,
                 )
                 menuRepository.insertMenu(menu)
                 loadMenus()
@@ -59,10 +59,10 @@ class MenuSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val menu = Menu(
-                    id = id,
-                    name = name,
-                    description = description,
-                    isActive = isActive
+                    menu_id = id,
+                    menu_name = name,
+                    order_by = description,
+                    is_active = isActive,
                 )
                 menuRepository.updateMenu(menu)
                 loadMenus()

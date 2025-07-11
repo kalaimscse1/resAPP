@@ -49,6 +49,9 @@ import com.warriortech.resb.ui.theme.Dimensions
 import com.warriortech.resb.ui.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * LoginScreen is the main entry point for user authentication.
+ */
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
@@ -59,7 +62,9 @@ fun LoginScreen(
     val uiState = viewModel.uiState
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Observe login success
+    /**
+     * Effect to handle login success.
+     */
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess) {
             keyboardController?.hide() // Hide keyboard on success
@@ -68,7 +73,9 @@ fun LoginScreen(
         }
     }
 
-    // Show Snackbar for errors
+    /**
+     * Effect to show error messages in a Snackbar.
+     */
     LaunchedEffect(uiState.loginError) {
         uiState.loginError?.let { error ->
             coroutineScope.launch {
@@ -137,7 +144,9 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Login form card
+            /**
+             * Mobile-optimized login form card
+             */
             MobileOptimizedCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -248,7 +257,9 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(Dimensions.spacingXL))
 
-                // Login form card
+                /**
+                 * Mobile-optimized login form
+                 */
                 MobileOptimizedCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {

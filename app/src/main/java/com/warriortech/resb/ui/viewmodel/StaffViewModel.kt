@@ -4,7 +4,6 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.StaffRepository
-import com.warriortech.resb.model.Staff
 import com.warriortech.resb.model.TblStaff
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +67,7 @@ class StaffViewModel @Inject constructor(
                     counter_name = "",
                     is_active = 1
                 )
-                staffRepository.addStaff(staff)
+                staffRepository.insertStaff(staff)
                 loadStaff()
                 _uiState.value = _uiState.value.copy(successMessage = "Staff added successfully")
             } catch (e: Exception) {

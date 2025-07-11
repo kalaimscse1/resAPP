@@ -69,7 +69,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
 
         // Get latest tables from server and update local cache
         try {
-            val remoteTables = apiService.getAllTables()
+            val remoteTables = apiService.getAllTables().body()!!
             val localTables = remoteTables.map {
                 tableDao.getTableById(it.table_id)?.let { localTable ->
                     // Preserve local sync status if it's pending or failed
@@ -90,7 +90,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
     private suspend fun syncMenuItems() {
         // Similar to tables, menu items are mostly read-only from client side
         try {
-            val remoteMenuItems = apiService.getAllMenuItems()
+            val remoteMenuItems = apiService.getAllMenuItems().body()!!
             val localMenuItems = remoteMenuItems.map {
                 menuItemDao.getMenuItemById(it.menu_item_id)?.let { localItem ->
                     // Preserve local sync status if it's pending or failed

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -22,91 +23,119 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuSettingsScreen(
-    viewModel: MenuSettingsViewModel = hiltViewModel()
+    viewModel: MenuSettingsViewModel = hiltViewModel(),
+    onBackPressed: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var editingMenu by remember { mutableStateOf<Menu?>(null) }
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadMenus()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Button(
-            onClick = { showAddDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Menu")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (uiState) {
-            is MenuSettingsViewModel.UiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Menu Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showAddDialog = true }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Menu")
+                    }
                 }
-            }
-            is MenuSettingsViewModel.UiState.Success -> {
-                LazyColumn {
-                    items((uiState as MenuSettingsViewModel.UiState.Success).menus) { menu ->
-                        MenuCard(
-                            menu = menu,
-                            onEdit = { editingMenu = it },
-                            onDelete = { 
-                                scope.launch { 
-                                    viewModel.deleteMenu(it.id) 
-                                }
+            )
+        },
+
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+
+            when (val state = uiState) {
+                is MenuSettingsViewModel.UiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is MenuSettingsViewModel.UiState.Success -> {
+                    if (state.menus.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No menus available. Please add a menu.")
+                        }
+                    } else {
+                        FlowColumn {
+                            state.menus.forEach { menu ->
+                                MenuCard(
+                                    menu = menu,
+                                    onEdit = { editingMenu = it },
+                                    onDelete = {
+                                        scope.launch {
+                                            viewModel.deleteMenu(it.menu_id)
+                                        }
+                                    }
+                                )
                             }
+                        }
+                    }
+                }
+
+                is MenuSettingsViewModel.UiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        // Show error message
+                        Text(
+                            text = state.message,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
             }
-            is MenuSettingsViewModel.UiState.Error -> {
 
-                Text(
-                    text = (uiState as MenuSettingsViewModel.UiState.Error).message,
-                    color = MaterialTheme.colorScheme.error
+            if (showAddDialog) {
+                MenuDialog(
+                    menu = null,
+                    onDismiss = { showAddDialog = false },
+                    onConfirm = { name, description, isActive ->
+                        scope.launch {
+                            viewModel.addMenu(name, description, isActive)
+                            showAddDialog = false
+                        }
+                    }
+                )
+            }
+
+            editingMenu?.let { menu ->
+                MenuDialog(
+                    menu = menu,
+                    onDismiss = { editingMenu = null },
+                    onConfirm = { name, description, isActive ->
+                        scope.launch {
+                            viewModel.updateMenu(menu.menu_id, name, description, isActive)
+                            editingMenu = null
+                        }
+                    }
                 )
             }
         }
-    }
-
-    if (showAddDialog) {
-        MenuDialog(
-            menu = null,
-            onDismiss = { showAddDialog = false },
-            onConfirm = { name, description, isActive ->
-                scope.launch {
-                    viewModel.addMenu(name, description, isActive)
-                    showAddDialog = false
-                }
-            }
-        )
-    }
-
-    editingMenu?.let { menu ->
-        MenuDialog(
-            menu = menu,
-            onDismiss = { editingMenu = null },
-            onConfirm = { name, description, isActive ->
-                scope.launch {
-                    viewModel.updateMenu(menu.id, name, description, isActive)
-                    editingMenu = null
-                }
-            }
-        )
     }
 }
 
@@ -129,18 +158,18 @@ fun MenuCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = menu.name,
+                    text = menu.menu_name,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = menu.description,
+                    text = menu.order_by,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = if (menu.isActive) "Active" else "Inactive",
+                    text = if (menu.is_active) "Active" else "Inactive",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (menu.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    color = if (menu.is_active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 )
             }
 
@@ -161,9 +190,9 @@ fun MenuDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, String, Boolean) -> Unit
 ) {
-    var name by remember { mutableStateOf(menu?.name ?: "") }
-    var description by remember { mutableStateOf(menu?.description ?: "") }
-    var isActive by remember { mutableStateOf(menu?.isActive ?: true) }
+    var name by remember { mutableStateOf(menu?.menu_name ?: "") }
+    var description by remember { mutableStateOf(menu?.order_by ?: "") }
+    var isActive by remember { mutableStateOf(menu?.is_active ?: true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -180,7 +209,7 @@ fun MenuDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description") },
+                    label = { Text("OrderBy") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))

@@ -36,10 +36,13 @@ class AreaViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 val areas = areaRepository.getAllAreas()
-                _uiState.value = _uiState.value.copy(
-                    areas = areas,
-                    isLoading = false
-                )
+                areas.collect {
+                    _uiState.value = _uiState.value.copy(
+                        areas = it,
+                        isLoading = false
+                    )
+                }
+
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     errorMessage = e.message,
@@ -53,7 +56,7 @@ class AreaViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val area = Area(0, name, true)
-                areaRepository.addArea(area)
+                areaRepository.insertArea(area)
                 loadAreas()
                 _uiState.value = _uiState.value.copy(successMessage = "Area added successfully")
             } catch (e: Exception) {

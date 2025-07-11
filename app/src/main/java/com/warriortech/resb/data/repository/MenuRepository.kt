@@ -1,8 +1,8 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
 import com.warriortech.resb.model.Menu
+import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,8 +29,8 @@ class MenuRepository @Inject constructor(
         }
     }
 
-    suspend fun updateMenu(menu: Menu): Menu {
-        val response = apiService.updateMenu(menu.id, menu)
+    suspend fun updateMenu(menu: Menu): Int {
+        val response = apiService.updateMenu(menu.menu_id, menu)
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update menu")
         } else {
@@ -38,7 +38,7 @@ class MenuRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteMenu(menuId: Int) {
+    suspend fun deleteMenu(menuId: Long) {
         val response = apiService.deleteMenu(menuId)
         if (!response.isSuccessful) {
             throw Exception("Failed to delete menu: ${response.message()}")

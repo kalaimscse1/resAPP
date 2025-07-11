@@ -15,7 +15,7 @@ class SettingsRepository @Inject constructor(
     // Area management
     suspend fun getAllAreas(): List<Area> {
         return try {
-            apiService.getAllAreas()
+            apiService.getAllAreas().body()!!
         } catch (e: Exception) {
             throw Exception("Failed to fetch areas: ${e.message}")
         }
@@ -49,7 +49,7 @@ class SettingsRepository @Inject constructor(
     // Table management
     suspend fun getAllTables(): List<Table> {
         return try {
-            apiService.getAllTables()
+            apiService.getAllTables().body()!!
         } catch (e: Exception) {
             throw Exception("Failed to fetch tables: ${e.message}")
         }
