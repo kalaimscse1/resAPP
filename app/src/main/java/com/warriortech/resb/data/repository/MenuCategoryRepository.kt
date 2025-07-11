@@ -1,38 +1,47 @@
 
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.data.api.ApiService
 import com.warriortech.resb.model.MenuCategory
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MenuCategoryRepository @Inject constructor() {
-
-    private val categories = mutableListOf<MenuCategory>()
+class MenuCategoryRepository @Inject constructor(
+    private val apiService: ApiService
+) {
 
     suspend fun getAllCategories(): List<MenuCategory> {
-        return categories.sortedBy { it.name }
-    }
-
-    suspend fun insertCategory(category: MenuCategory): Long {
-        val newId = (categories.maxOfOrNull { it.id } ?: 0) + 1
-        val newCategory = category.copy(id = newId)
-        categories.add(newCategory)
-        return newId
-    }
-
-    suspend fun updateCategory(category: MenuCategory) {
-        val index = categories.indexOfFirst { it.id == category.id }
-        if (index != -1) {
-            categories[index] = category
+        val response = apiService.getAllMenuCategories()
+        if (response.isSuccessful) {
+            return response.body() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch categories: ${response.message()}")
         }
     }
 
-    suspend fun deleteCategory(id: Long) {
-        categories.removeAll { it.id == id }
+    suspend fun insertCategory(category: MenuCategory): MenuCategory {
+        val response = apiService.createMenuCategory(category)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Failed to create category")
+        } else {
+            throw Exception("Failed to create category: ${response.message()}")
+        }
     }
 
-    suspend fun getCategoryById(id: Long): MenuCategory? {
-        return categories.find { it.id == id }
+    suspend fun updateCategory(category: MenuCategory): MenuCategory {
+        val response = apiService.updateMenuCategory(category.id, category)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Failed to update category")
+        } else {
+            throw Exception("Failed to update category: ${response.message()}")
+        }
+    }
+
+    suspend fun deleteCategory(categoryId: Int) {
+        val response = apiService.deleteMenuCategory(categoryId)
+        if (!response.isSuccessful) {
+            throw Exception("Failed to delete category: ${response.message()}")
+        }
     }
 }

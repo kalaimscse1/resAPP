@@ -1,43 +1,53 @@
 
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.data.api.ApiService
 import com.warriortech.resb.model.Area
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AreaRepository @Inject constructor() {
-    private val _areas = MutableStateFlow<List<Area>>(emptyList())
-    val areas: Flow<List<Area>> = _areas.asStateFlow()
-
-    init {
-        // Initialize with sample data
-        _areas.value = listOf(
-            Area(1, "Main Hall", true),
-            Area(2, "VIP Section", true),
-            Area(3, "Terrace", true)
-        )
+class AreaRepository @Inject constructor(
+    private val apiService: ApiService
+) {
+    
+    fun getAllAreas(): Flow<List<Area>> = flow {
+        try {
+            val response = apiService.getAllAreas()
+            if (response.isSuccessful) {
+                emit(response.body() ?: emptyList())
+            } else {
+                throw Exception("Failed to fetch areas: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
-    suspend fun getAllAreas(): List<Area> {
-        return _areas.value
+    suspend fun insertArea(area: Area): Area {
+        val response = apiService.createArea(area)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Failed to create area")
+        } else {
+            throw Exception("Failed to create area: ${response.message()}")
+        }
     }
 
-    suspend fun addArea(area: Area) {
-        val newId = (_areas.value.maxOfOrNull { it.area_id } ?: 0) + 1
-        val newArea = area.copy(area_id =  newId)
-        _areas.value = _areas.value + newArea
+    suspend fun updateArea(area: Area): Area {
+        val response = apiService.updateArea(area.id, area)
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Failed to update area")
+        } else {
+            throw Exception("Failed to update area: ${response.message()}")
+        }
     }
 
-    suspend fun updateArea(area: Area) {
-        _areas.value = _areas.value.map { if (it.area_id == area.area_id) area else it }
-    }
-
-    suspend fun deleteArea(areaId: Long) {
-        _areas.value = _areas.value.filter { it.area_id != areaId }
+    suspend fun deleteArea(areaId: Int) {
+        val response = apiService.deleteArea(areaId)
+        if (!response.isSuccessful) {
+            throw Exception("Failed to delete area: ${response.message()}")
+        }
     }
 }
-
