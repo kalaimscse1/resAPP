@@ -7,6 +7,7 @@ import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.viewmodel.PaymentMethod
 import com.warriortech.resb.util.NetworkMonitor
 import com.warriortech.resb.util.getCurrentDateModern
 import com.warriortech.resb.util.getCurrentTimeModern
@@ -37,10 +38,12 @@ class BillRepository@Inject constructor(
 
     // Add more methods as needed for your application
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun placeBill(orderMasterId: Long): Flow<Result<TblBillingResponse>> = flow {
+    suspend fun placeBill(orderMasterId: Long,paymentMethod: PaymentMethod,
+    ): Flow<Result<TblBillingResponse>> = flow {
         try {
             val billNo= apiService.getBillNoByCounterId(SessionManager.getUser()?.counter_id!!).body()
             val voucher= apiService.getVoucherByCounterId(SessionManager.getUser()?.counter_id!!).body()
+            val orderMaster= apiService.getOpenOrderDetailsForTable(orderMasterId).body()!!
             val request = TblBillingRequest(
                 bill_no = billNo?.get("bill_no")!!,
                 bill_date = getCurrentDateModern(),
@@ -49,20 +52,20 @@ class BillRepository@Inject constructor(
                 voucher_id = voucher?.voucher_id ?: 0L,
                 staff_id = SessionManager.getUser()?.staff_id ?: 0L,
                 customer_id = 1L,
-                order_amt = 0.0,
+                order_amt = orderMaster.sumOf { it.total },
                 disc_amt = 0.0,
-                tax_amt = 0.0,
-                cess = 0.0,
-                cess_specific = 0.0,
+                tax_amt = orderMaster.sumOf { it.tax_amount },
+                cess = orderMaster.sumOf { it.cess },
+                cess_specific = orderMaster.sumOf { it.cess_specific },
                 delivery_amt = 0.0,
-                grand_total = 0.0,
+                grand_total = orderMaster.sumOf { it.grand_total },
                 round_off = 0.0,
                 rounded_amt = 0.0,
-                cash = 0.0,
-                card = 0.0,
-                upi = 0.0,
-                due = 0.0,
-                others = 0.0,
+                cash = if (paymentMethod.name == "CASH") orderMaster.sumOf { it.grand_total} else 0.0,
+                card = if (paymentMethod.name == "CARD") orderMaster.sumOf { it.grand_total} else 0.0,
+                upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total} else 0.0,
+                due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total} else 0.0,
+                others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total} else 0.0,
                 received_amt = 0.0,
                 pending_amt = 0.0,
                 change = 0.0,

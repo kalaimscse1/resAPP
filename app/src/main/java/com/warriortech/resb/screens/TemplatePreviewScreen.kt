@@ -146,27 +146,27 @@ fun KotPreview(template: ReceiptTemplate) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(template.paperSettings.margins.dp)
+            .padding(template.paperSettings.margins.top.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = when (template.headerSettings.alignment) {
-            TextAlignment.LEFT -> Alignment.Start
-            TextAlignment.CENTER -> Alignment.CenterHorizontally
-            TextAlignment.RIGHT -> Alignment.End
+        horizontalAlignment = when (template.headerSettings.textAlign) {
+            TextAligns.LEFT -> Alignment.Start
+            TextAligns.CENTER -> Alignment.CenterHorizontally
+            TextAligns.RIGHT -> Alignment.End
         }
     ) {
         // Header
         Text(
-            text = template.headerSettings.text,
+            text = template.headerSettings.businessName,
             fontSize = template.headerSettings.fontSize.sp,
             fontWeight = when (template.headerSettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             },
-            textAlign = when (template.headerSettings.alignment) {
-                TextAlignment.LEFT -> TextAlign.Start
-                TextAlignment.CENTER -> TextAlign.Center
-                TextAlignment.RIGHT -> TextAlign.End
+            textAlign = when (template.headerSettings.textAlign) {
+                TextAligns.LEFT -> TextAlign.Start
+                TextAligns.CENTER -> TextAlign.Center
+                TextAligns.RIGHT -> TextAlign.End
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -178,9 +178,9 @@ fun KotPreview(template: ReceiptTemplate) {
             text = "KOT #: ${sampleKotData.kotNumber}",
             fontSize = template.bodySettings.fontSize.sp,
             fontWeight = when (template.bodySettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             }
         )
         
@@ -188,9 +188,9 @@ fun KotPreview(template: ReceiptTemplate) {
             text = "Table: ${sampleKotData.tableNumber}",
             fontSize = template.bodySettings.fontSize.sp,
             fontWeight = when (template.bodySettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             }
         )
         
@@ -198,9 +198,9 @@ fun KotPreview(template: ReceiptTemplate) {
             text = "Time: ${sampleKotData.timestamp}",
             fontSize = template.bodySettings.fontSize.sp,
             fontWeight = when (template.bodySettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             }
         )
         
@@ -216,9 +216,9 @@ fun KotPreview(template: ReceiptTemplate) {
                     text = "${item.quantity}x ${item.itemName}",
                     fontSize = template.bodySettings.fontSize.sp,
                     fontWeight = when (template.bodySettings.fontWeight) {
-                        FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                        FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                        FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                        FontWeights.NORMAL -> FontWeight.Normal
+                        FontWeights.BOLD -> FontWeight.Bold
+                        FontWeights.LIGHT -> FontWeight.Light
                     }
                 )
             }
@@ -227,9 +227,9 @@ fun KotPreview(template: ReceiptTemplate) {
                     text = "  Note: ${item.notes}",
                     fontSize = (template.bodySettings.fontSize - 2).sp,
                     fontWeight = when (template.bodySettings.fontWeight) {
-                        FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                        FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                        FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                        FontWeights.NORMAL -> FontWeight.Normal
+                        FontWeights.BOLD -> FontWeight.Bold
+                        FontWeights.LIGHT -> FontWeight.Light
                     }
                 )
             }
@@ -238,19 +238,19 @@ fun KotPreview(template: ReceiptTemplate) {
         Spacer(modifier = Modifier.height(16.dp))
         
         // Footer
-        if (template.footerSettings.text.isNotEmpty()) {
+        if (template.footerSettings.customMessage.isNotEmpty()) {
             Text(
-                text = template.footerSettings.text,
+                text = template.footerSettings.customMessage,
                 fontSize = template.footerSettings.fontSize.sp,
                 fontWeight = when (template.footerSettings.fontWeight) {
-                    FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                    FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                    FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                    FontWeights.NORMAL -> FontWeight.Normal
+                    FontWeights.BOLD -> FontWeight.Bold
+                    FontWeights.LIGHT -> FontWeight.Light
                 },
-                textAlign = when (template.footerSettings.alignment) {
-                    TextAlignment.LEFT -> TextAlign.Start
-                    TextAlignment.CENTER -> TextAlign.Center
-                    TextAlignment.RIGHT -> TextAlign.End
+                textAlign = when (template.footerSettings.textAlign) {
+                    TextAligns.LEFT -> TextAlign.Start
+                    TextAligns.CENTER -> TextAlign.Center
+                    TextAligns.RIGHT -> TextAlign.End
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -265,27 +265,27 @@ fun BillPreview(template: ReceiptTemplate) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(template.paperSettings.margins.dp)
+            .padding(template.paperSettings.margins.top.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = when (template.headerSettings.alignment) {
-            TextAlignment.LEFT -> Alignment.Start
-            TextAlignment.CENTER -> Alignment.CenterHorizontally
-            TextAlignment.RIGHT -> Alignment.End
+        horizontalAlignment = when (template.headerSettings.textAlign) {
+            TextAligns.LEFT -> Alignment.Start
+            TextAligns.CENTER -> Alignment.CenterHorizontally
+            TextAligns.RIGHT -> Alignment.End
         }
     ) {
         // Header
         Text(
-            text = template.headerSettings.text,
+            text = template.headerSettings.businessName,
             fontSize = template.headerSettings.fontSize.sp,
             fontWeight = when (template.headerSettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             },
-            textAlign = when (template.headerSettings.alignment) {
-                TextAlignment.LEFT -> TextAlign.Start
-                TextAlignment.CENTER -> TextAlign.Center
-                TextAlignment.RIGHT -> TextAlign.End
+            textAlign = when (template.headerSettings.textAlign) {
+                TextAligns.LEFT -> TextAlign.Start
+                TextAligns.CENTER -> TextAlign.Center
+                TextAligns.RIGHT -> TextAlign.End
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -294,12 +294,12 @@ fun BillPreview(template: ReceiptTemplate) {
         
         // Bill Details
         Text(
-            text = "Bill #: ${sampleBillData.billNumber}",
+            text = "Bill #: ${sampleBillData.billNo}",
             fontSize = template.bodySettings.fontSize.sp,
             fontWeight = when (template.bodySettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             }
         )
         
@@ -307,19 +307,19 @@ fun BillPreview(template: ReceiptTemplate) {
             text = "Date: ${sampleBillData.date}",
             fontSize = template.bodySettings.fontSize.sp,
             fontWeight = when (template.bodySettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             }
         )
         
         Text(
-            text = "Table: ${sampleBillData.tableNumber}",
+            text = "Table: ${sampleBillData.tableNo}",
             fontSize = template.bodySettings.fontSize.sp,
             fontWeight = when (template.bodySettings.fontWeight) {
-                FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                FontWeights.NORMAL -> FontWeight.Normal
+                FontWeights.BOLD -> FontWeight.Bold
+                FontWeights.LIGHT -> FontWeight.Light
             }
         )
         
@@ -333,22 +333,22 @@ fun BillPreview(template: ReceiptTemplate) {
             Text(
                 text = "Item",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = "Qty",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = "Price",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = "Total",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
         }
         
@@ -366,7 +366,7 @@ fun BillPreview(template: ReceiptTemplate) {
                     modifier = Modifier.weight(2f)
                 )
                 Text(
-                    text = "${item.quantity}",
+                    text = "${item.qty}",
                     fontSize = template.bodySettings.fontSize.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
@@ -378,7 +378,7 @@ fun BillPreview(template: ReceiptTemplate) {
                     textAlign = TextAlign.End
                 )
                 Text(
-                    text = "₹${item.total}",
+                    text = "₹${item.amount}",
                     fontSize = template.bodySettings.fontSize.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.End
@@ -396,12 +396,12 @@ fun BillPreview(template: ReceiptTemplate) {
             Text(
                 text = "Subtotal:",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = "₹${sampleBillData.subtotal}",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
         }
         
@@ -410,11 +410,11 @@ fun BillPreview(template: ReceiptTemplate) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Tax (${sampleBillData.taxPercentage}%):",
+                text = "Tax (${sampleBillData.cgstPercent + sampleBillData.sgstPercent}%):",
                 fontSize = template.bodySettings.fontSize.sp
             )
             Text(
-                text = "₹${sampleBillData.taxAmount}",
+                text = "₹${sampleBillData.sgst + sampleBillData.cgst}",
                 fontSize = template.bodySettings.fontSize.sp
             )
         }
@@ -426,31 +426,31 @@ fun BillPreview(template: ReceiptTemplate) {
             Text(
                 text = "Total:",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
             Text(
                 text = "₹${sampleBillData.total}",
                 fontSize = template.bodySettings.fontSize.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
         // Footer
-        if (template.footerSettings.text.isNotEmpty()) {
+        if (template.footerSettings.customMessage.isNotEmpty()) {
             Text(
-                text = template.footerSettings.text,
+                text = template.footerSettings.customMessage,
                 fontSize = template.footerSettings.fontSize.sp,
                 fontWeight = when (template.footerSettings.fontWeight) {
-                    FontWeight.Normal -> androidx.compose.ui.text.font.FontWeight.Normal
-                    FontWeight.Bold -> androidx.compose.ui.text.font.FontWeight.Bold
-                    FontWeight.Light -> androidx.compose.ui.text.font.FontWeight.Light
+                    FontWeights.NORMAL -> FontWeight.Normal
+                    FontWeights.BOLD -> FontWeight.Bold
+                    FontWeights.LIGHT -> FontWeight.Light
                 },
-                textAlign = when (template.footerSettings.alignment) {
-                    TextAlignment.LEFT -> TextAlign.Start
-                    TextAlignment.CENTER -> TextAlign.Center
-                    TextAlignment.RIGHT -> TextAlign.End
+                textAlign = when (template.footerSettings.textAlign) {
+                    TextAligns.LEFT -> TextAlign.Start
+                    TextAligns.CENTER -> TextAlign.Center
+                    TextAligns.RIGHT -> TextAlign.End
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -474,18 +474,37 @@ fun createSampleKotData(): KotData {
 
 fun createSampleBillData(): Bill {
     return Bill(
-        billNumber = "BILL001",
+        billNo = "BILL001",
         date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
-        tableNumber = "Table 5",
+        tableNo = "Table 5",
         items = listOf(
-            BillItem("Margherita Pizza", 2, 350.0, 700.0),
-            BillItem("Caesar Salad", 1, 180.0, 180.0),
-            BillItem("Coca Cola", 2, 50.0, 100.0)
+            BillItem(1, "Margherita Pizza", 2, 350.0, 700.0),
+            BillItem(2, "Caesar Salad", 1, 180.0, 180.0),
+            BillItem(3, "Coca Cola", 2, 50.0, 100.0)
         ),
         subtotal = 980.0,
-        taxPercentage = 18.0,
-        taxAmount = 176.4,
-        total = 1156.4
+        total = 1156.4,
+        company_code = "",
+        sgstPercent = 0.0,
+        cgstPercent = 0.0,
+        igstPercent = 0.0,
+        cessPercent = 0.0,
+        sgst = 0.0,
+        cgst = 0.0,
+        igst = 0.0,
+        cess = 0.0,
+        cess_specific = 0.0,
+        deliveryCharge = 0.0,
+        discount = 0.0,
+        roundedAmount = 0.0,
+        paperWidth = 48,
+        time = "",
+        orderNo = 1L,
+        counter = "",
+        custName = "",
+        custNo = "",
+        custAddress = "",
+        custGstin = ""
     )
 }
 

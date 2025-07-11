@@ -60,7 +60,7 @@ fun MenuCategorySettingsScreen(
             }
             is MenuCategorySettingsViewModel.UiState.Success -> {
                 LazyColumn {
-                    items(uiState.categories) { category ->
+                    items((uiState as MenuCategorySettingsViewModel.UiState.Success).categories) { category ->
                         CategoryCard(
                             category = category,
                             onEdit = { editingCategory = it },
@@ -75,7 +75,7 @@ fun MenuCategorySettingsScreen(
             }
             is MenuCategorySettingsViewModel.UiState.Error -> {
                 Text(
-                    text = uiState.message,
+                    text = (uiState as MenuCategorySettingsViewModel.UiState.Error).message,
                     color = MaterialTheme.colorScheme.error
                 )
             }
@@ -131,15 +131,15 @@ fun CategoryCard(
                     text = category.name,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Text(
-                    text = category.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Sort Order: ${category.sortOrder}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+//                Text(
+//                    text = category.,
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant
+//                )
+//                Text(
+//                    text = "Sort Order: ${category.sortOrder}",
+//                    style = MaterialTheme.typography.bodySmall
+//                )
             }
 
             IconButton(onClick = { onEdit(category) }) {
@@ -160,8 +160,8 @@ fun CategoryDialog(
     onConfirm: (String, String, Int) -> Unit
 ) {
     var name by remember { mutableStateOf(category?.name ?: "") }
-    var description by remember { mutableStateOf(category?.description ?: "") }
-    var sortOrder by remember { mutableStateOf(category?.sortOrder?.toString() ?: "1") }
+//    var description by remember { mutableStateOf(category?.description ?: "") }
+//    var sortOrder by remember { mutableStateOf(category?.sortOrder?.toString() ?: "1") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -175,25 +175,25 @@ fun CategoryDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = sortOrder,
-                    onValueChange = { sortOrder = it },
-                    label = { Text("Sort Order") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+//                OutlinedTextField(
+//                    value = description,
+//                    onValueChange = { description = it },
+//                    label = { Text("Description") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = sortOrder,
+//                    onValueChange = { sortOrder = it },
+//                    label = { Text("Sort Order") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = { 
-                    onConfirm(name, description, sortOrder.toIntOrNull() ?: 1) 
+                    onConfirm(name, "",  1)
                 }
             ) {
                 Text(if (category == null) "Add" else "Update")

@@ -10,17 +10,3 @@ data class Table(
     val table_status: String,
     var table_availability:String,// e.g., "available", "occupied", "reserved"
 )
-data class Area(
-    val area_id: Long,
-    val area_name: String,
-    val isActvice: Boolean
-)
-package com.warriortech.resb.model
-
-data class Table(
-    val id: Int = 0,
-    val tableNumber: Int,
-    val areaId: Int,
-    val capacity: Int,
-    val status: String = "Available"
-)

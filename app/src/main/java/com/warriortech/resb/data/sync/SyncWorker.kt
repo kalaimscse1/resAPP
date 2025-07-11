@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.local.RestaurantDatabase
+import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TableEntity
+import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -21,7 +23,7 @@ class SyncWorker(
 
 private val database = RestaurantDatabase.getDatabase(appContext)
     private val tableDao = database.tableDao()
-//    private val menuItemDao = database.menuItemDao()
+    private val menuItemDao = database.menuItemDao()
 //    private val orderDao = database.orderDao()
 //    private val orderItemDao = database.orderItemDao()
 
@@ -31,7 +33,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             syncTables()
 
             // Sync menu items
-//            syncMenuItems()
+            syncMenuItems()
 
             // Sync orders (most important, as they affect revenue)
 //            syncOrders()
@@ -85,26 +87,26 @@ private val database = RestaurantDatabase.getDatabase(appContext)
         }
     }
 
-//    private suspend fun syncMenuItems() {
-//        // Similar to tables, menu items are mostly read-only from client side
-//        try {
-//            val remoteMenuItems = apiService.getAllMenuItems()
-//            val localMenuItems = remoteMenuItems.map {
-//                menuItemDao.getMenuItemById(it.id)?.let { localItem ->
-//                    // Preserve local sync status if it's pending or failed
-//                    if (localItem.syncStatus != SyncStatus.SYNCED) {
-//                        localItem
-//                    } else {
-//                        // Otherwise update with remote data
-//                        it.toEntity()
-//                    }
-//                } ?: it.toEntity() // If doesn't exist locally, add it
-//            }
-//            menuItemDao.insertMenuItems(localMenuItems)
-//        } catch (e: Exception) {
-//            Timber.e(e, "Failed to fetch menu items from server")
-//        }
-//    }
+    private suspend fun syncMenuItems() {
+        // Similar to tables, menu items are mostly read-only from client side
+        try {
+            val remoteMenuItems = apiService.getAllMenuItems()
+            val localMenuItems = remoteMenuItems.map {
+                menuItemDao.getMenuItemById(it.menu_item_id)?.let { localItem ->
+                    // Preserve local sync status if it's pending or failed
+                    if (localItem.syncStatus != SyncStatus.SYNCED) {
+                        localItem
+                    } else {
+                        // Otherwise update with remote data
+                        it.toEntity()
+                    }
+                } ?: it.toEntity() // If doesn't exist locally, add it
+            }
+            menuItemDao.insertMenuItems(localMenuItems)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to fetch menu items from server")
+        }
+    }
 
     //    private suspend fun syncOrders() {
 //        // Get local orders that need to be synced
@@ -176,9 +178,42 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             is_ac = this.is_ac,
             table_status = this.table_status,
             syncStatus = syncStatus,
-            area_id =this.area_id,
+            area_id = this.area_id,
             area_name = this.area_name,
-            table_availabiltiy =  this.table_availability
+            table_availabiltiy = this.table_availability,
+            is_active = true
+        )
+    }
+    private fun MenuItem.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): MenuItemEntity {
+        return return MenuItemEntity(
+            menu_item_id = this.menu_item_id,
+            menu_item_name = this.menu_item_name,
+            menu_item_name_tamil = this.menu_item_name_tamil,
+            rate = this.rate,
+            item_cat_name = this.item_cat_name,
+            image = this.image,
+            syncStatus = syncStatus,
+            ac_rate = this.ac_rate,
+            parcel_rate = this.parcel_rate,
+            is_available = this.is_available,
+            item_cat_id = this.item_cat_id,
+            parcel_charge = this.parcel_charge,
+            tax_id = this.tax_id,
+            tax_name = this.tax_name,
+            tax_percentage = this.tax_percentage,
+            kitchen_cat_id = this.kitchen_cat_id,
+            kitchen_cat_name = this.kitchen_cat_name,
+            stock_maintain = this.stock_maintain,
+            rate_lock = this.rate_lock,
+            unit_id = this.unit_id,
+            unit_name = this.unit_name,
+            min_stock = this.min_stock,
+            hsn_code = this.hsn_code,
+            order_by = this.order_by,
+            is_inventory = this.is_inventory,
+            is_raw = this.is_raw,
+            cess_per = this.cess_per,
+            cess_specific = this.cess_specific
         )
     }
 

@@ -4,41 +4,21 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.CallSplit
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.CallSplit
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LocalOffer
-importandroidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PointOfSale
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Store
-import androidx.compose.material.icons.filled.SupervisorAccount
-import androidx.compose.material.icons.filled.TableRestaurant
-import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,7 +33,8 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     onBackPressed: () -> Unit,
     drawerState: DrawerState,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedModule by remember { mutableStateOf<SettingsModule?>(null) }
@@ -87,7 +68,8 @@ fun SettingsScreen(
                 module = selectedModule!!,
                 uiState = uiState,
                 viewModel = viewModel,
-                modifier = Modifier.padding(paddingValues)
+                modifier = Modifier.padding(paddingValues),
+                navController
             )
         }
     }
@@ -194,30 +176,38 @@ fun SettingsModuleScreen(
     module: SettingsModule,
     uiState: SettingsUiState,
     viewModel: SettingsViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     when (module) {
         is SettingsModule.Area -> {
-            AreaSettingsScreen(modifier = modifier)
+           navController.navigate("area_settings")
         }
+
         is SettingsModule.Table -> {
-            TableSettingsScreen(modifier = modifier)
+            navController.navigate("table_settings")
         }
+
         is SettingsModule.MenuItem -> {
-            MenuItemSettingsScreen()
+           navController.navigate("menu_item_settings")
         }
+
         is SettingsModule.Menu -> {
-            MenuSettingsScreen()
+            navController.navigate("menu_settings")
         }
+
         is SettingsModule.MenuCategory -> {
-            MenuCategorySettingsScreen()
+            navController.navigate("menu_category_settings")
         }
+
         is SettingsModule.Customer -> {
-            CustomerSettingsScreen()
+            navController.navigate("customer_settings")
         }
+
         is SettingsModule.Staff -> {
-            StaffSettingsScreen()
+            navController.navigate("staff_settings")
         }
+
         else -> {
             // Fallback for modules that don't have dedicated screens yet
             var showAddDialog by remember { mutableStateOf(false) }
@@ -253,129 +243,131 @@ fun SettingsModuleScreen(
                         }
                     }
 
-            is SettingsUiState.Success -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.items) { item ->
-                        SettingsItemCard(
-                            item = item,
-                            onEdit = { viewModel.editItem(item) },
-                            onDelete = { viewModel.deleteItem(item) }
+                    is SettingsUiState.Success -> {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.items) { item ->
+                                SettingsItemCard(
+                                    item = item,
+                                    onEdit = { viewModel.editItem(item) },
+                                    onDelete = { viewModel.deleteItem(item) }
+                                )
+                            }
+                        }
+                    }
+
+                    is SettingsUiState.Error -> {
+                        Text(
+                            text = uiState.message,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
             }
 
-            is SettingsUiState.Error -> {
-                Text(
-                    text = uiState.message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.fillMaxWidth()
+            if (showAddDialog) {
+                AddItemDialog(
+                    module = module,
+                    onDismiss = { showAddDialog = false },
+                    onConfirm = { data ->
+                        viewModel.addItem(module, data)
+                        showAddDialog = false
+                    }
                 )
             }
         }
     }
-
-    if (showAddDialog) {
-        AddItemDialog(
-            module = module,
-            onDismiss = { showAddDialog = false },
-            onConfirm = { data ->
-                viewModel.addItem(module, data)
-                showAddDialog = false
-            }
-        )
-    }
 }
 
-@Composable
-fun SettingsItemCard(
-    item: SettingsItem,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        @Composable
+        fun SettingsItemCard(
+            item: SettingsItem,
+            onEdit: () -> Unit,
+            onDelete: () -> Unit
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                if (item.description.isNotEmpty()) {
-                    Text(
-                        text = item.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-    }
-}
-
-@SuppressLint("MutableCollectionMutableState")
-@Composable
-fun AddItemDialog(
-    module: SettingsModule,
-    onDismiss: () -> Unit,
-    onConfirm: (Map<String, String>) -> Unit
-) {
-    var formData by remember { mutableStateOf(mutableMapOf<String, String>()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add ${module.title}") },
-        text = {
-            LazyColumn {
-                items(module.fields) { field ->
-                    OutlinedTextField(
-                        value = formData[field] ?: "",
-                        onValueChange = { formData[field] = it },
-                        label = { Text(field.replaceFirstChar { it.uppercase() }) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(formData) }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (item.description.isNotEmpty()) {
+                            Text(
+                                text = item.description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Row {
+                        IconButton(onClick = onEdit) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        }
+                        IconButton(onClick = onDelete) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
             }
         }
-    )
-}
+
+            @SuppressLint("MutableCollectionMutableState")
+        @Composable
+        fun AddItemDialog(
+            module: SettingsModule,
+            onDismiss: () -> Unit,
+            onConfirm: (Map<String, String>) -> Unit
+        ) {
+            var formData by remember { mutableStateOf(mutableMapOf<String, String>()) }
+
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text("Add ${module.title}") },
+                text = {
+                    LazyColumn {
+                        items(module.fields) { field ->
+                            OutlinedTextField(
+                                value = formData[field] ?: "",
+                                onValueChange = { formData[field] = it },
+                                label = { Text(field.replaceFirstChar { it.uppercase() }) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { onConfirm(formData) }
+                    ) {
+                        Text("Add")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
 
 sealed class SettingsModule(
     val id: String,

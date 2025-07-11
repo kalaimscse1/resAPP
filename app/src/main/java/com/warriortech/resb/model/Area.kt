@@ -2,14 +2,7 @@
 package com.warriortech.resb.model
 
 data class Area(
-    val id: Long,
-    val name: String,
-    val description: String
-)
-package com.warriortech.resb.model
-
-data class Area(
-    val id: Int = 0,
-    val name: String,
-    val description: String = ""
+    val area_id: Long,
+    val area_name: String,
+    val isActvice: Boolean
 )

@@ -90,9 +90,13 @@ import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.AIAssistantScreen
+import com.warriortech.resb.screens.settings.AreaSettingsScreen
+import com.warriortech.resb.screens.settings.StaffSettingsScreen
 import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
+import com.warriortech.resb.screens.settings.CustomerSettingsScreen
+import com.warriortech.resb.screens.settings.TableSettingsScreen
 
 
 @AndroidEntryPoint
@@ -349,9 +353,30 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             SettingsScreen(
                 onBackPressed = { navController.popBackStack() },
                 drawerState = drawerState,
-                navController = navController
+                navController= navController
             )
         }
+        composable("area_setting") {
+            AreaSettingsScreen(
+                onBackPressed = { navController.popBackStack() }
+            )
+        }
+        composable("table_setting") {
+            TableSettingsScreen(onBackPressed = {
+                navController.popBackStack()
+            })
+        }
+        composable("staff_setting") {
+            StaffSettingsScreen(
+                onBackPressed = { navController.popBackStack() }
+            )
+        }
+        composable("customer-setting") {
+           CustomerSettingsScreen(
+                onBackPressed = { navController.popBackStack() }
+            )
+        }
+
 
         composable("counter_selection") {
             com.warriortech.resb.screens.CounterSelectionScreen(
@@ -419,13 +444,14 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             TemplateScreen(navController = navController)
         }
 
-        composable("template_editor") {
-            TemplateEditorScreen(navController = navController)
+        composable("template_editor/{templateId}") {
+            val templateId = it.arguments?.getString("templateId") ?: ""
+            TemplateEditorScreen(navController = navController,templateId=templateId)
         }
 
         composable("template_preview/{templateId}") { backStackEntry ->
             val templateId = backStackEntry.arguments?.getString("templateId") ?: ""
-            com.warriortech.resb.screens.TemplatePreviewScreen(
+            TemplatePreviewScreen(
                 navController = navController,
                 templateId = templateId
             )

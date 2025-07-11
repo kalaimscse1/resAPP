@@ -15,6 +15,7 @@ data class TableEntity(
     val area_id:Long,
     val area_name:String,
     val table_availabiltiy:String,
+    val is_active: Boolean ,
     val syncStatus: SyncStatus = SyncStatus.SYNCED,
     val lastModified: Long = System.currentTimeMillis()
 ) {
@@ -27,9 +28,10 @@ data class TableEntity(
                 is_ac = table.is_ac,
                 table_status = table.table_status,
                 syncStatus = syncStatus,
-                area_id =table.area_id,
+                area_id = table.area_id,
                 area_name = table.area_name,
-                table_availabiltiy =  table.table_availability
+                table_availabiltiy = table.table_availability,
+                is_active = true
             )
         }
     }

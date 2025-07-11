@@ -1,6 +1,8 @@
 
 package com.warriortech.resb.screens.settings
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,14 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.warriortech.resb.model.Customer
 import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerSettingsScreen(
-    viewModel: CustomerSettingsViewModel = hiltViewModel()
+    viewModel: CustomerSettingsViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -60,13 +65,13 @@ fun CustomerSettingsScreen(
             }
             is CustomerSettingsViewModel.UiState.Success -> {
                 LazyColumn {
-                    items(uiState.customers) { customer ->
+                    items((uiState as CustomerSettingsViewModel.UiState.Success).customers) { customer ->
                         CustomerCard(
                             customer = customer,
                             onEdit = { editingCustomer = it },
                             onDelete = { 
                                 scope.launch { 
-                                    viewModel.deleteCustomer(it.id) 
+                                    viewModel.deleteCustomer(it.customer_id)
                                 }
                             }
                         )
@@ -74,8 +79,9 @@ fun CustomerSettingsScreen(
                 }
             }
             is CustomerSettingsViewModel.UiState.Error -> {
+
                 Text(
-                    text = uiState.message,
+                    text = (uiState as CustomerSettingsViewModel.UiState.Error).message,
                     color = MaterialTheme.colorScheme.error
                 )
             }
@@ -101,7 +107,7 @@ fun CustomerSettingsScreen(
             onDismiss = { editingCustomer = null },
             onConfirm = { name, phone, email, address ->
                 scope.launch {
-                    viewModel.updateCustomer(customer.id, name, phone, email, address)
+                    viewModel.updateCustomer(customer.customer_id, name, phone, email, address)
                     editingCustomer = null
                 }
             }
@@ -128,20 +134,20 @@ fun CustomerCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = customer.name,
+                    text = customer.customer_name,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = customer.phone,
+                    text = customer.customer_phone,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = customer.email,
+                    text = customer.customer_email.toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = customer.address,
+                    text = customer.customer_address.toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -164,10 +170,10 @@ fun CustomerDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, String, String, String) -> Unit
 ) {
-    var name by remember { mutableStateOf(customer?.name ?: "") }
-    var phone by remember { mutableStateOf(customer?.phone ?: "") }
-    var email by remember { mutableStateOf(customer?.email ?: "") }
-    var address by remember { mutableStateOf(customer?.address ?: "") }
+    var name by remember { mutableStateOf(customer?.customer_name ?: "") }
+    var phone by remember { mutableStateOf(customer?.customer_phone ?: "") }
+    var email by remember { mutableStateOf(customer?.customer_email ?: "") }
+    var address by remember { mutableStateOf(customer?.customer_address ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,

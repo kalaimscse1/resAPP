@@ -15,24 +15,24 @@ class CustomerRepository @Inject constructor() {
     }
 
     suspend fun insertCustomer(customer: Customer): Long {
-        val newId = (customers.maxOfOrNull { it.id } ?: 0) + 1
-        val newCustomer = customer.copy(id = newId)
+        val newId = (customers.maxOfOrNull { it.customer_id } ?: 0) + 1
+        val newCustomer = customer.copy(customer_id = newId)
         customers.add(newCustomer)
         return newId
     }
 
     suspend fun updateCustomer(customer: Customer) {
-        val index = customers.indexOfFirst { it.id == customer.id }
+        val index = customers.indexOfFirst { it.customer_id == customer.customer_id }
         if (index != -1) {
             customers[index] = customer
         }
     }
 
     suspend fun deleteCustomer(id: Long) {
-        customers.removeAll { it.id == id }
+        customers.removeAll { it.customer_id == id }
     }
 
     suspend fun getCustomerById(id: Long): Customer? {
-        return customers.find { it.id == id }
+        return customers.find { it.customer_id == id }
     }
 }

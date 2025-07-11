@@ -60,7 +60,7 @@ fun MenuSettingsScreen(
             }
             is MenuSettingsViewModel.UiState.Success -> {
                 LazyColumn {
-                    items(uiState.menus) { menu ->
+                    items((uiState as MenuSettingsViewModel.UiState.Success).menus) { menu ->
                         MenuCard(
                             menu = menu,
                             onEdit = { editingMenu = it },
@@ -74,8 +74,9 @@ fun MenuSettingsScreen(
                 }
             }
             is MenuSettingsViewModel.UiState.Error -> {
+
                 Text(
-                    text = uiState.message,
+                    text = (uiState as MenuSettingsViewModel.UiState.Error).message,
                     color = MaterialTheme.colorScheme.error
                 )
             }

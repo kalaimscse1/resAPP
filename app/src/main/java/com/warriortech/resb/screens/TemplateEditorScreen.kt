@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,13 +22,18 @@ import com.warriortech.resb.ui.viewmodel.TemplateViewModel
 @Composable
 fun TemplateEditorScreen(
     navController: NavController,
+    templateId: String,
     viewModel: TemplateViewModel = hiltViewModel()
 ) {
     val editingTemplate by viewModel.editingTemplate.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     
     val template = editingTemplate ?: return
-    
+    LaunchedEffect(templateId) {
+        val template = uiState.templates.find { it.id == templateId }
+        viewModel.startEditingTemplate(template!!)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -499,11 +505,11 @@ fun FontWeightDropdown(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextAlignDropdown(
-    selectedAlign: TextAlign,
-    onAlignChange: (TextAlign) -> Unit
+    selectedAlign: TextAligns,
+    onAlignChange: (TextAligns) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val alignments = TextAlign.values()
+    val alignments = TextAligns.values()
 
     ExposedDropdownMenuBox(
         expanded = expanded,

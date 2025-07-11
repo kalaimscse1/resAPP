@@ -3,9 +3,6 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.data.repository.MenuItemRepository
-import com.warriortech.resb.data.repository.OrderRepository
-import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.data.repository.SettingsRepository
 import com.warriortech.resb.model.*
 import com.warriortech.resb.screens.SettingsItem

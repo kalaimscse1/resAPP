@@ -16,20 +16,7 @@ data class Menu(
 //    val address: String
 //)
 
-data class Staff(
-    val id: Long,
-    val name: String,
-    val role: String,
-    val phone: String,
-    val email: String
-)
 
-data class Role(
-    val id: Long,
-    val name: String,
-    val description: String,
-    val permissions: String
-)
 
 data class Printer(
     val id: Long,

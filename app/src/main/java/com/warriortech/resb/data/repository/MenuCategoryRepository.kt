@@ -11,7 +11,7 @@ class MenuCategoryRepository @Inject constructor() {
     private val categories = mutableListOf<MenuCategory>()
 
     suspend fun getAllCategories(): List<MenuCategory> {
-        return categories.sortedBy { it.sortOrder }
+        return categories.sortedBy { it.name }
     }
 
     suspend fun insertCategory(category: MenuCategory): Long {

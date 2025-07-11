@@ -16,9 +16,9 @@ class PrinterRepository @Inject constructor() {
     init {
         // Initialize with sample data
         _printers.value = listOf(
-            Printer(1, "Kitchen Printer", "192.168.1.100", "EPSON", true),
-            Printer(2, "Receipt Printer", "192.168.1.101", "STAR", true),
-            Printer(3, "Bar Printer", "192.168.1.102", "CITIZEN", false)
+            Printer(1, "Kitchen Printer", "192.168.1.100", 33, "EPSON"),
+            Printer(2, "Receipt Printer", "192.168.1.101", 89, "EPSON"),
+            Printer(3, "Bar Printer", "192.168.1.102", 89, "EPSON")
         )
     }
 

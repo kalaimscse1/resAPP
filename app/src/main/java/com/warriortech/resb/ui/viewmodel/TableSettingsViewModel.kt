@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,7 +27,22 @@ class TableSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = TableSettingsUiState.Loading
                 val tables = tableRepository.getAllTables()
-                _uiState.value = TableSettingsUiState.Success(tables)
+                tables.collect { result ->
+                    result.map {
+                            Table(
+                                table_id = it.table_id,
+                                table_name = it.table_name,
+                                area_id = it.area_id,
+                                area_name = it.area_name,
+                                seating_capacity = it.seating_capacity,
+                                is_ac = it.is_ac,
+                                table_status = it.table_status,
+                                table_availability = it.table_availability
+                            )
+                    }.let { list ->
+                        _uiState.value = TableSettingsUiState.Success(tables = list)
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.value = TableSettingsUiState.Error(e.message ?: "Unknown error")
             }
@@ -44,6 +60,8 @@ class TableSettingsViewModel @Inject constructor(
         }
     }
 
+
+
     fun updateTable(table: Table) {
         viewModelScope.launch {
             try {
@@ -55,7 +73,7 @@ class TableSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deleteTable(tableId: Int) {
+    fun deleteTable(tableId: Long) {
         viewModelScope.launch {
             try {
                 tableRepository.deleteTable(tableId)

@@ -19,7 +19,7 @@ data class HeaderSettings(
     val businessPhone: String = "",
     val fontSize: Int = 16,
     val fontWeight: FontWeights = FontWeights.BOLD,
-    val textAlign: TextAlign = TextAlign.CENTER
+    val textAlign: TextAligns = TextAligns.CENTER
 )
 
 data class BodySettings(
@@ -39,7 +39,7 @@ data class FooterSettings(
     val showDateTime: Boolean = true,
     val fontSize: Int = 10,
     val fontWeight: FontWeights = FontWeights.NORMAL,
-    val textAlign: TextAlign = TextAlign.CENTER
+    val textAlign: TextAligns = TextAligns.CENTER
 )
 
 data class PaperSettings(
@@ -66,7 +66,7 @@ enum class FontWeights {
     LIGHT
 }
 
-enum class TextAlign {
+enum class TextAligns {
     LEFT,
     CENTER,
     RIGHT

@@ -93,7 +93,7 @@ class TemplateRepository @Inject constructor() {
                     businessPhone = "Phone Number",
                     fontSize = 16,
                     fontWeight = FontWeights.BOLD,
-                    textAlign = TextAlign.CENTER
+                    textAlign = TextAligns.CENTER
                 ),
                 bodySettings = BodySettings(
                     showItemDetails = true,
@@ -111,7 +111,7 @@ class TemplateRepository @Inject constructor() {
                     showDateTime = true,
                     fontSize = 10,
                     fontWeight = FontWeights.NORMAL,
-                    textAlign = TextAlign.CENTER
+                    textAlign = TextAligns.CENTER
                 ),
                 paperSettings = PaperSettings(
                     paperSize = PaperSize.RECEIPT_80MM,
@@ -131,7 +131,7 @@ class TemplateRepository @Inject constructor() {
                     businessPhone = "Phone Number",
                     fontSize = 16,
                     fontWeight = FontWeights.BOLD,
-                    textAlign = TextAlign.CENTER
+                    textAlign = TextAligns.CENTER
                 ),
                 bodySettings = BodySettings(
                     showItemDetails = true,
@@ -149,7 +149,7 @@ class TemplateRepository @Inject constructor() {
                     showDateTime = true,
                     fontSize = 10,
                     fontWeight = FontWeights.NORMAL,
-                    textAlign = TextAlign.CENTER
+                    textAlign = TextAligns.CENTER
                 ),
                 paperSettings = PaperSettings(
                     paperSize = PaperSize.RECEIPT_80MM,

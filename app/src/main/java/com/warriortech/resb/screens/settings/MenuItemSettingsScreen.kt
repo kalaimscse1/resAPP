@@ -63,13 +63,13 @@ fun MenuItemSettingsScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.menuItems) { menuItem ->
+                    items((uiState as MenuItemSettingsUiState.Success).menuItems) { menuItem ->
                         MenuItemCard(
                             menuItem = menuItem,
                             onEdit = { editingMenuItem = menuItem },
                             onDelete = { 
                                 scope.launch {
-                                    viewModel.deleteMenuItem(menuItem.id)
+                                    viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
                                 }
                             }
                         )
@@ -77,13 +77,14 @@ fun MenuItemSettingsScreen(
                 }
             }
             is MenuItemSettingsUiState.Error -> {
+
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Error: ${uiState.message}",
+                        text = "Error: ${(uiState as MenuItemSettingsUiState.Error).message}",
                         color = MaterialTheme.colorScheme.error
                     )
                     Button(
@@ -137,7 +138,7 @@ fun MenuItemCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = menuItem.name,
+                    text = menuItem.menu_item_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -146,9 +147,9 @@ fun MenuItemCard(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                if (menuItem.description.isNotEmpty()) {
+                if (menuItem.menu_item_name_tamil.isNotEmpty()) {
                     Text(
-                        text = menuItem.description,
+                        text = menuItem.menu_item_name_tamil,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -173,12 +174,12 @@ fun MenuItemDialog(
     onDismiss: () -> Unit,
     onSave: (MenuItem) -> Unit
 ) {
-    var name by remember { mutableStateOf(menuItem?.name ?: "") }
-    var nameTamil by remember { mutableStateOf(menuItem?.nameTamil ?: "") }
-    var description by remember { mutableStateOf(menuItem?.description ?: "") }
+    var name by remember { mutableStateOf(menuItem?.menu_item_name ?: "") }
+    var nameTamil by remember { mutableStateOf(menuItem?.menu_item_name_tamil ?: "") }
+//    var description by remember { mutableStateOf(menuItem?.description ?: "") }
     var rate by remember { mutableStateOf(menuItem?.rate?.toString() ?: "") }
-    var acRate by remember { mutableStateOf(menuItem?.acRate?.toString() ?: "") }
-    var parcelRate by remember { mutableStateOf(menuItem?.parcelRate?.toString() ?: "") }
+    var acRate by remember { mutableStateOf(menuItem?.ac_rate?.toString() ?: "") }
+    var parcelRate by remember { mutableStateOf(menuItem?.parcel_rate?.toString() ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -198,13 +199,13 @@ fun MenuItemDialog(
                     label = { Text("Name (Tamil)") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = description,
+//                    onValueChange = { description = it },
+//                    label = { Text("Description") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = rate,
@@ -232,14 +233,34 @@ fun MenuItemDialog(
             TextButton(
                 onClick = {
                     val newMenuItem = MenuItem(
-                        id = menuItem?.id ?: 0,
-                        name = name,
-                        nameTamil = nameTamil,
-                        categoryId = menuItem?.categoryId ?: 1,
+                        menu_item_id = menuItem?.menu_item_id ?: 0,
+                        menu_item_name = name,
+                        menu_item_name_tamil = nameTamil,
+                        item_cat_id = menuItem?.item_cat_id ?: 1,
+                        item_cat_name = menuItem?.item_cat_name ?: "",
                         rate = rate.toDoubleOrNull() ?: 0.0,
-                        acRate = acRate.toDoubleOrNull() ?: 0.0,
-                        parcelRate = parcelRate.toDoubleOrNull() ?: 0.0,
-                        description = description
+                        ac_rate = acRate.toDoubleOrNull() ?: 0.0,
+                        parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
+                        parcel_charge = menuItem?.parcel_charge?: 0.0,
+                        tax_id = menuItem?.tax_id ?: 1,
+                        tax_name = menuItem?.tax_name ?: "",
+                        tax_percentage = menuItem?.tax_percentage ?: 0.0.toString(),
+                        cess_per = TODO(),
+                        cess_specific = TODO(),
+                        kitchen_cat_id = TODO(),
+                        kitchen_cat_name = TODO(),
+                        stock_maintain = TODO(),
+                        rate_lock = TODO(),
+                        unit_id = TODO(),
+                        unit_name = TODO(),
+                        min_stock = TODO(),
+                        hsn_code = TODO(),
+                        order_by = TODO(),
+                        is_inventory = TODO(),
+                        is_raw = TODO(),
+                        is_available = TODO(),
+                        image = TODO(),
+                        qty = TODO()
                     )
                     onSave(newMenuItem)
                 },

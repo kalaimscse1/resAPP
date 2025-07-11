@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.StaffRepository
 import com.warriortech.resb.model.Staff
+import com.warriortech.resb.model.TblStaff
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class StaffUiState(
-    val staff: List<Staff> = emptyList(),
+    val staff: List<TblStaff> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null
@@ -52,7 +53,21 @@ class StaffViewModel @Inject constructor(
     fun addStaff(name: String, role: String, email: String, phone: String) {
         viewModelScope.launch {
             try {
-                val staff = Staff(0, name, role, email, phone)
+                val staff = TblStaff(
+                    staff_id = 1,
+                    staff_name = name,
+                    contact_no = phone,
+                    address = "",
+                    user_name = email,
+                    password ="",
+                    role_id = 1,
+                    role = role,
+                    last_login = "",
+                    is_block = false,
+                    counter_id = 1,
+                    counter_name = "",
+                    is_active = 1
+                )
                 staffRepository.addStaff(staff)
                 loadStaff()
                 _uiState.value = _uiState.value.copy(successMessage = "Staff added successfully")
@@ -62,7 +77,7 @@ class StaffViewModel @Inject constructor(
         }
     }
 
-    fun updateStaff(staff: Staff) {
+    fun updateStaff(staff: TblStaff) {
         viewModelScope.launch {
             try {
                 staffRepository.updateStaff(staff)

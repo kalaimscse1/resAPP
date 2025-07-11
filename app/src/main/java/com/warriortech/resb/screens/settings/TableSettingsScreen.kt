@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.viewmodel.TableSettingsViewModel
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TableSettingsScreen(
-    viewModel: TableSettingsViewModel = hiltViewModel()
+    viewModel: TableSettingsViewModel = hiltViewModel(),
+    onBackPressed: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -63,13 +65,13 @@ fun TableSettingsScreen(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.tables) { table ->
+                    items((uiState as TableSettingsUiState.Success).tables) { table ->
                         TableItem(
                             table = table,
                             onEdit = { editingTable = table },
                             onDelete = { 
                                 scope.launch {
-                                    viewModel.deleteTable(table.id)
+                                    viewModel.deleteTable(table.table_id)
                                 }
                             }
                         )
@@ -81,9 +83,11 @@ fun TableSettingsScreen(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
+
                 ) {
+
                     Text(
-                        text = "Error: ${uiState.message}",
+                        text = "Error: ${(uiState as TableSettingsUiState.Error).message}",
                         color = MaterialTheme.colorScheme.error
                     )
                     Button(
@@ -137,12 +141,12 @@ fun TableItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Table ${table.tableNumber}",
+                    text = "Table ${table.table_name}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Capacity: ${table.capacity} | Status: ${table.status}",
+                    text = "Capacity: ${table.seating_capacity} | Status: ${table.table_availability}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -166,9 +170,9 @@ fun TableDialog(
     onDismiss: () -> Unit,
     onSave: (Table) -> Unit
 ) {
-    var tableNumber by remember { mutableStateOf(table?.tableNumber?.toString() ?: "") }
-    var capacity by remember { mutableStateOf(table?.capacity?.toString() ?: "") }
-    var status by remember { mutableStateOf(table?.status ?: "Available") }
+    var tableNumber by remember { mutableStateOf(table?.table_name?.toString() ?: "") }
+    var capacity by remember { mutableStateOf(table?.seating_capacity?.toString() ?: "") }
+    var status by remember { mutableStateOf(table?.table_availability ?: "Available") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -201,11 +205,14 @@ fun TableDialog(
             TextButton(
                 onClick = {
                     val newTable = Table(
-                        id = table?.id ?: 0,
-                        tableNumber = tableNumber.toIntOrNull() ?: 0,
-                        areaId = table?.areaId ?: 1,
-                        capacity = capacity.toIntOrNull() ?: 4,
-                        status = status
+                        table_id = table?.table_id ?: 0,
+                        area_id = table?.area_id ?:1,
+                        area_name = table?.area_name ?: "Table Area",
+                        table_name = table?.table_name ?: "Table Name",
+                        seating_capacity = table?.seating_capacity?: 4,
+                        is_ac = table?.is_ac ?: "",
+                        table_status = table?.table_status ?: "",
+                        table_availability = table?.table_availability ?: "Available",
                     )
                     onSave(newTable)
                 },

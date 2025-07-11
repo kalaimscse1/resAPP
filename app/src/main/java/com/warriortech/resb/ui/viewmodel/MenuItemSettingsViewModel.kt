@@ -26,7 +26,10 @@ class MenuItemSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = MenuItemSettingsUiState.Loading
                 val menuItems = menuItemRepository.getAllMenuItems()
-                _uiState.value = MenuItemSettingsUiState.Success(menuItems)
+                menuItems.collect {
+                    _uiState.value = MenuItemSettingsUiState.Success(it)
+                }
+
             } catch (e: Exception) {
                 _uiState.value = MenuItemSettingsUiState.Error(e.message ?: "Unknown error")
             }

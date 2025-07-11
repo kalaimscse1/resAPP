@@ -1,10 +1,13 @@
 
 package com.warriortech.resb.ui.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.CustomerRepository
 import com.warriortech.resb.model.Customer
+import com.warriortech.resb.util.getCurrentDateModern
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,15 +41,18 @@ class CustomerSettingsViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun addCustomer(name: String, phone: String, email: String, address: String) {
         viewModelScope.launch {
             try {
                 val customer = Customer(
-                    id = 0,
-                    name = name,
-                    phone = phone,
-                    email = email,
-                    address = address
+                    customer_id = 0,
+                    customer_name = name,
+                    customer_phone = phone,
+                    customer_email = email,
+                    customer_address = address,
+                    created_date = getCurrentDateModern(),
+                    is_active = true
                 )
                 customerRepository.insertCustomer(customer)
                 loadCustomers()
@@ -56,15 +62,18 @@ class CustomerSettingsViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun updateCustomer(id: Long, name: String, phone: String, email: String, address: String) {
         viewModelScope.launch {
             try {
                 val customer = Customer(
-                    id = id,
-                    name = name,
-                    phone = phone,
-                    email = email,
-                    address = address
+                    customer_id = 0,
+                    customer_name = name,
+                    customer_phone = phone,
+                    customer_email = email,
+                    customer_address = address,
+                    created_date = getCurrentDateModern(),
+                    is_active = true
                 )
                 customerRepository.updateCustomer(customer)
                 loadCustomers()

@@ -1,6 +1,7 @@
 
 package com.warriortech.resb.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TemplateRepository
@@ -58,7 +59,9 @@ class TemplateViewModel @Inject constructor(
     }
 
     fun startEditingTemplate(template: ReceiptTemplate) {
+        Log.d("TemplateViewModel", "Editing template: ${template.name}")
         _editingTemplate.value = template
+        Log.d("TemplateViewModel", "Editing template: ${_editingTemplate.value?.name}")
     }
 
     fun createNewTemplate(type: ReceiptType) {

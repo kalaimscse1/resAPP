@@ -16,10 +16,10 @@ class RoleRepository @Inject constructor() {
     init {
         // Initialize with sample data
         _roles.value = listOf(
-            Role(1, "Admin", "Full system access"),
-            Role(2, "Manager", "Management access"),
-            Role(3, "Waiter", "Order taking and serving"),
-            Role(4, "Chef", "Kitchen operations")
+            Role(1, "Admin", 1),
+            Role(2, "Manager", 1),
+            Role(3, "Waiter", 1),
+            Role(4, "Chef", 1)
         )
     }
 
@@ -28,16 +28,16 @@ class RoleRepository @Inject constructor() {
     }
 
     suspend fun addRole(role: Role) {
-        val newId = (_roles.value.maxOfOrNull { it.id } ?: 0) + 1
-        val newRole = role.copy(id = newId)
+        val newId = (_roles.value.maxOfOrNull { it.role_id } ?: 0) + 1
+        val newRole = role.copy(role_id = newId)
         _roles.value = _roles.value + newRole
     }
 
     suspend fun updateRole(role: Role) {
-        _roles.value = _roles.value.map { if (it.id == role.id) role else it }
+        _roles.value = _roles.value.map { if (it.role_id == role.role_id) role else it }
     }
 
     suspend fun deleteRole(roleId: Long) {
-        _roles.value = _roles.value.filter { it.id != roleId }
+        _roles.value = _roles.value.filter { it.role_id != roleId }
     }
 }

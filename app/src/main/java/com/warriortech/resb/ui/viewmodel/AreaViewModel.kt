@@ -52,7 +52,7 @@ class AreaViewModel @Inject constructor(
     fun addArea(name: String, description: String) {
         viewModelScope.launch {
             try {
-                val area = Area(0, name, description)
+                val area = Area(0, name, true)
                 areaRepository.addArea(area)
                 loadAreas()
                 _uiState.value = _uiState.value.copy(successMessage = "Area added successfully")

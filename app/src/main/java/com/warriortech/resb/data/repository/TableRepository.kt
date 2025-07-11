@@ -105,9 +105,42 @@ class TableRepository @Inject constructor(
         val data =apiService.getTablesByStatus(tableId)
         return data.is_ac
     }
+    suspend fun insertTable(table: Table) {
+        safeApiCall {
+            val entity = table.toEntity()
+            tableDao.insertTable(entity)
+            if (isOnline()) {
+                // Sync with remote if online
+                apiService.createTable(table)
+            }
+        }
+    }
 
     // Get tables that need to be synced
     suspend fun getPendingSyncTables() = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
+    suspend fun updateTable(table: Table) {
+        safeApiCall {
+            val entity = table.toEntity()
+            tableDao.updateTable(entity)
+            if (isOnline()) {
+                // Sync with remote if online
+                apiService.updateTable(table.table_id, table)
+            }
+        }
+    }
+   suspend fun deleteTable(lng: Long) {
+        safeApiCall {
+            tableDao.deleteTable(lng)
+            if (isOnline()) {
+                // Sync with remote if online
+                apiService.deleteTable(lng)
+            }
+        }
+    }
+
+    suspend fun getTableById(tableId: Long): Table? {
+        return tableDao.getTableById(tableId)?.toModel()
+   }
 }
 
 // Extension functions for entity conversion
@@ -120,7 +153,8 @@ private fun Table.toEntity() = TableEntity(
     seating_capacity = seating_capacity,
     is_ac = is_ac,
     area_name = area_name,
-    table_availabiltiy = table_availability
+    table_availabiltiy = table_availability,
+    is_active = true
 )
 
 private fun TableEntity.toModel() = Table(

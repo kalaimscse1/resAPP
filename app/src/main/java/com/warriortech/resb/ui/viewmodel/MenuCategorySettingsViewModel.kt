@@ -44,8 +44,8 @@ class MenuCategorySettingsViewModel @Inject constructor(
                 val category = MenuCategory(
                     id = 0,
                     name = name,
-                    description = description,
-                    sortOrder = sortOrder
+//                    description = description,
+//                    sortOrder = sortOrder
                 )
                 categoryRepository.insertCategory(category)
                 loadCategories()
@@ -61,8 +61,8 @@ class MenuCategorySettingsViewModel @Inject constructor(
                 val category = MenuCategory(
                     id = id,
                     name = name,
-                    description = description,
-                    sortOrder = sortOrder
+//                    description = description,
+//                    sortOrder = sortOrder
                 )
                 categoryRepository.updateCategory(category)
                 loadCategories()

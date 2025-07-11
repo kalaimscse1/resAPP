@@ -32,8 +32,8 @@ interface TableDao {
     @Update
     suspend fun updateTable(table: TableEntity)
     
-    @Delete
-    suspend fun deleteTable(table: TableEntity)
+    @Query("UPDATE tables SET is_active = false WHERE table_id = :tableId")
+    suspend fun deleteTable(tableId: Long)
     
     @Query("UPDATE tables SET table_status = :status, syncStatus = :syncStatus, lastModified = :lastModified WHERE table_id = :id")
     suspend fun updateTableStatus(id: Long, status: String, syncStatus: SyncStatus, lastModified: Long = System.currentTimeMillis())

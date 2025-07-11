@@ -7,12 +7,16 @@ import androidx.room.Room
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.dao.TableDao
+import com.warriortech.resb.data.repository.AreaRepository
 import com.warriortech.resb.data.repository.DashboardRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.SettingsRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.data.repository.CounterRepository
+import com.warriortech.resb.data.repository.PrinterRepository
+import com.warriortech.resb.data.repository.RoleRepository
+import com.warriortech.resb.data.repository.StaffRepository
 import com.warriortech.resb.data.repository.TemplateRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
