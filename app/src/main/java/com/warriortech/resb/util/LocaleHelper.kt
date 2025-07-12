@@ -1,11 +1,13 @@
 
 package com.warriortech.resb.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Build
 import java.util.*
+import androidx.core.content.edit
 
 object LocaleHelper {
     private const val SELECTED_LANGUAGE = "Locale.Helper.Selected.Language"
@@ -26,6 +28,7 @@ object LocaleHelper {
         return getPersistedData(context, Locale.getDefault().language)
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     fun setLocale(context: Context, language: String): Context {
         persist(context, language)
 
@@ -43,9 +46,9 @@ object LocaleHelper {
 
     private fun persist(context: Context, language: String) {
         val preferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val editor = preferences.edit()
-        editor.putString(SELECTED_LANGUAGE, language)
-        editor.apply()
+        preferences.edit {
+            putString(SELECTED_LANGUAGE, language)
+        }
     }
 
     private fun updateResources(context: Context, language: String): Context {
