@@ -1,6 +1,76 @@
 
 package com.warriortech.resb.screens
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.warriortech.resb.R
+import com.warriortech.resb.ui.viewmodel.CounterViewModel
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CounterScreen(
+    navController: NavController,
+    viewModel: CounterViewModel = hiltViewModel()
+) {
+    val count by viewModel.count.collectAsState()
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.counter_title)) }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.counter_value, count),
+                style = MaterialTheme.typography.headlineLarge
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = { viewModel.decrement() }
+                ) {
+                    Text(stringResource(R.string.decrease))
+                }
+                
+                Button(
+                    onClick = { viewModel.increment() }
+                ) {
+                    Text(stringResource(R.string.increase))
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = { viewModel.reset() }
+            ) {
+                Text(stringResource(R.string.reset))
+            }
+        }
+    }
+}
+
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi

@@ -1,7 +1,6 @@
-
 <resources>
     <string name="app_name">RESB</string>
-    
+
     <!-- Common -->
     <string name="ok">சரி</string>
     <string name="cancel">ரத்து</string>
@@ -13,7 +12,7 @@
     <string name="loading">ஏற்றுகிறது...</string>
     <string name="error">பிழை</string>
     <string name="success">வெற்றி</string>
-    
+
     <!-- Navigation -->
     <string name="dashboard">முதன்மை பலகை</string>
     <string name="orders">ஆர்டர்கள்</string>
@@ -21,7 +20,7 @@
     <string name="tables">மேசைகள்</string>
     <string name="settings">அமைப்புகள்</string>
     <string name="logout">வெளியேறு</string>
-    
+
     <!-- Settings -->
     <string name="language_settings">மொழி அமைப்புகள்</string>
     <string name="language">மொழி</string>
@@ -29,7 +28,7 @@
     <string name="tamil">தமிழ்</string>
     <string name="select_language">மொழியைத் தேர்ந்தெடுக்கவும்</string>
     <string name="language_changed">மொழி வெற்றிகரமாக மாற்றப்பட்டது</string>
-    
+
     <!-- Settings Modules -->
     <string name="area_settings">பகுதி அமைப்புகள்</string>
     <string name="table_settings">மேசை அமைப்புகள்</string>
@@ -38,14 +37,21 @@
     <string name="menu_item_settings">மெனு உருப்படி அமைப்புகள்</string>
     <string name="customer_settings">வாடிக்கையாளர் அமைப்புகள்</string>
     <string name="staff_settings">ஊழியர் அமைப்புகள்</string>
-    
+    <string name="settings_table">அட்டவணை அமைப்புகள்</string>
+    <string name="settings_menu">மெனு அமைப்புகள்</string>
+    <string name="settings_menu_category">மெனு வகை அமைப்புகள்</string>
+    <string name="settings_menu_item">மெனு பொருள் அமைப்புகள்</string>
+    <string name="settings_customer">வாடிக்கையாளர் அமைப்புகள்</string>
+    <string name="settings_staff">ஊழியர் அமைப்புகள்</string>
+    <string name="settings_language">மொழி அமைப்புகள்</string>
+
     <!-- Area -->
     <string name="area_name">பகுதி பெயர்</string>
     <string name="area_description">பகுதி விளக்கம்</string>
     <string name="add_area">பகுதி சேர்</string>
     <string name="edit_area">பகுதி திருத்து</string>
     <string name="delete_area">பகுதி நீக்கு</string>
-    
+
     <!-- Table -->
     <string name="table_number">மேசை எண்</string>
     <string name="table_capacity">மேசை கொள்ளளவு</string>
@@ -53,7 +59,7 @@
     <string name="add_table">மேசை சேர்</string>
     <string name="edit_table">மேசை திருத்து</string>
     <string name="delete_table">மேசை நீக்கு</string>
-    
+
     <!-- Menu -->
     <string name="menu_name">மெனு பெயர்</string>
     <string name="menu_description">மெனு விளக்கம்</string>
@@ -61,14 +67,14 @@
     <string name="add_menu">மெனு சேர்</string>
     <string name="edit_menu">மெனு திருத்து</string>
     <string name="delete_menu">மெனு நீக்கு</string>
-    
+
     <!-- Menu Category -->
     <string name="category_name">வகை பெயர்</string>
     <string name="category_description">வகை விளக்கம்</string>
     <string name="add_category">வகை சேர்</string>
     <string name="edit_category">வகை திருத்து</string>
     <string name="delete_category">வகை நீக்கு</string>
-    
+
     <!-- Menu Item -->
     <string name="item_name">உருப்படி பெயர்</string>
     <string name="item_description">உருப்படி விளக்கம்</string>
@@ -76,7 +82,7 @@
     <string name="add_item">உருப்படி சேர்</string>
     <string name="edit_item">உருப்படி திருத்து</string>
     <string name="delete_item">உருப்படி நீக்கு</string>
-    
+
     <!-- Customer -->
     <string name="customer_name">வாடிக்கையாளர் பெயர்</string>
     <string name="customer_phone">தொலைபேசி எண்</string>
@@ -84,7 +90,7 @@
     <string name="add_customer">வாடிக்கையாளர் சேர்</string>
     <string name="edit_customer">வாடிக்கையாளர் திருத்து</string>
     <string name="delete_customer">வாடிக்கையாளர் நீக்கு</string>
-    
+
     <!-- Staff -->
     <string name="staff_name">ஊழியர் பெயர்</string>
     <string name="staff_role">பாத்திரம்</string>
@@ -92,4 +98,46 @@
     <string name="add_staff">ஊழியர் சேர்</string>
     <string name="edit_staff">ஊழியர் திருத்து</string>
     <string name="delete_staff">ஊழியர் நீக்கு</string>
+
+    <!-- Counter Screen -->
+    <string name="counter_title">கவுண்டர்</string>
+    <string name="counter_value">எண்ணிக்கை: %d</string>
+    <string name="increase">அதிகரி</string>
+    <string name="decrease">குறை</string>
+    <string name="reset">மீட்டமை</string>
+
+    <!-- Menu Screen -->
+    <string name="menu_title">மெனு</string>
+    <string name="price_format">₹%.2f</string>
+
+    <!-- Selection Screen -->
+    <string name="selection_title">பொருட்களைத் தேர்ந்தெடு</string>
+    <string name="selected_items_count">தேர்ந்தெடுக்கப்பட்டது: %d பொருட்கள்</string>
+    <string name="continue_text">தொடர்</string>
+    <string name="selected">தேர்ந்தெடுக்கப்பட்டது</string>
+
+    <!-- Payment Screen -->
+    <string name="payment_title">பணம் செலுத்துதல்</string>
+    <string name="order_summary">ஆர்டர் சுருக்கம்</string>
+    <string name="total_amount_format">மொத்தம்: ₹%.2f</string>
+    <string name="payment_method">பணம் செலுத்தும் முறை</string>
+    <string name="payment_cash">பணம்</string>
+    <string name="payment_card">கார்டு</string>
+    <string name="payment_digital">டிஜிட்டல் பணம் செலுத்துதல்</string>
+    <string name="processing_payment">செயலாக்கம்…</string>
+    <string name="confirm_payment">பணம் செலுத்துதலை உறுதிப்படுத்து</string>
+
+    <!-- Login Screen -->
+    <string name="app_logo">ஆப் லோகோ</string>
+    <string name="welcome_message">RESB-ல் வரவேற்கிறோம்</string>
+    <string name="login_subtitle">தொடர உள்நுழையவும்</string>
+    <string name="username">பயனர்பெயர்</string>
+    <string name="password">கடவுச்சொல்</string>
+    <string name="toggle_password_visibility">கடவுச்சொல் தெரிவுநிலையை மாற்று</string>
+    <string name="logging_in">உள்நுழைகிறது…</string>
+    <string name="login">உள்நுழை</string>
+    <string name="forgot_password">கடவுச்சொல் மறந்துவிட்டதா?</string>
+
+    <!-- Common -->
+    <string name="back">பின்</string>
 </resources>
