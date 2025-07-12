@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
-import com.warriortech.resb.model.Counter
 import com.warriortech.resb.model.Counters
 import com.warriortech.resb.ui.viewmodel.CounterSelectionViewModel
 

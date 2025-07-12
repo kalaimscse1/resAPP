@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.theme
 
 import androidx.compose.ui.graphics.Color

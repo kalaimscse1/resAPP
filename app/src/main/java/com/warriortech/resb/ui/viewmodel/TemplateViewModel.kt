@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import android.util.Log

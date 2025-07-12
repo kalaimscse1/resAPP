@@ -31,11 +31,7 @@ import com.warriortech.resb.ui.viewmodel.PaymentMethod
 import com.warriortech.resb.ui.viewmodel.PaymentProcessingState
 import java.text.NumberFormat
 import java.util.Locale
-import com.warriortech.resb.ui.components.PaymentMethodCard
-import com.warriortech.resb.ui.components.PaymentSummaryCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
-import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

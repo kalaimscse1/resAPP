@@ -5,9 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.ai.AIRepository
 import com.warriortech.resb.data.local.dao.MenuItemDao
-import com.warriortech.resb.data.local.entity.MenuItemEntity
-import com.warriortech.resb.model.MenuItem
-import com.warriortech.resb.model.TblOrderDetailsResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.warriortech.resb.data.local.entity.toModel
 import com.warriortech.resb.network.ApiService
 
 

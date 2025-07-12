@@ -4,7 +4,6 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.CounterRepository
-import com.warriortech.resb.model.Counter
 import com.warriortech.resb.model.Counters
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

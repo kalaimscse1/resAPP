@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.theme
 
 import android.annotation.SuppressLint

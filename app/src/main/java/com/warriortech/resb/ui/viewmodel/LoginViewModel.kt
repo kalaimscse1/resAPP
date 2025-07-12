@@ -5,15 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.LoginRequest
-import com.warriortech.resb.model.RunningOrder
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import retrofit2.Response
-import retrofit2.http.GET
 import javax.inject.Inject
 
 /**

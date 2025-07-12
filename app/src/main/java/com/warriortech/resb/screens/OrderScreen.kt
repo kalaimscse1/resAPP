@@ -21,7 +21,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.components
 
 import android.annotation.SuppressLint
@@ -20,7 +19,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.warriortech.resb.ui.theme.Dimensions
 
 data class ScreenSizeInfo(
     val heightDp: Int,

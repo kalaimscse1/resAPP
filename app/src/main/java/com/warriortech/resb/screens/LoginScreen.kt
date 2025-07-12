@@ -23,12 +23,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,9 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.R
-import com.warriortech.resb.ui.components.MobileOptimizedButton
-import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.components.MobileOptimizedTextField
+import com.warriortech.resb.ui.components.*
 import com.warriortech.resb.ui.theme.Dimensions
 import com.warriortech.resb.ui.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.service
 
 import android.content.Context
@@ -6,7 +5,6 @@ import com.warriortech.resb.data.repository.TemplateRepository
 import com.warriortech.resb.model.*
 import com.warriortech.resb.util.PrinterHelper
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton

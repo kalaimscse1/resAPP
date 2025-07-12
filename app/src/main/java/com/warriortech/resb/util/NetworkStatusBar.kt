@@ -1,6 +1,5 @@
 package com.warriortech.resb.util
 
-
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -19,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.warriortech.resb.util.ConnectionState
 import kotlinx.coroutines.delay
 
 @Composable

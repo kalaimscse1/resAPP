@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.MaterialTheme
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Surface
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -263,15 +265,15 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("selects") {
             SelectionScreen(
-                onDinePressed = { navController.navigate("selects") },
-                onTakeAwayPressed = {
-                    navController.navigate("menu")
-                    isTakeaway = "TAKEAWAY"
-                },
-                onDeliverPressed = {
-                    navController.navigate("menu")
-                    isTakeaway = "DELIVERY"
-                },
+//                onDinePressed = { navController.navigate("selects") },
+//                onTakeAwayPressed = {
+//                    navController.navigate("menu")
+//                    isTakeaway = "TAKEAWAY"
+//                },
+//                onDeliverPressed = {
+//                    navController.navigate("menu")
+//                    isTakeaway = "DELIVERY"
+//                },
                 onTableSelected = { table ->
                     isTakeaway = "TABLE"
                     selectedTable = table

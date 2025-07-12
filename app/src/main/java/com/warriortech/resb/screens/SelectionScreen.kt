@@ -1,8 +1,7 @@
 package com.warriortech.resb.screens
 
 
-import android.graphics.Color.rgb
-import android.util.Log
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,17 +10,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.CircularProgressIndicator
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Surface
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -46,9 +45,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.ui.viewmodel.TableViewModel
 import com.warriortech.resb.util.NetworkStatusBar
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.launch
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -62,9 +58,6 @@ import com.warriortech.resb.ui.theme.TextPrimary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionScreen(
-    onDinePressed: () -> Unit,
-    onTakeAwayPressed: () -> Unit,
-    onDeliverPressed: () -> Unit,
     onTableSelected: (Table) -> Unit,
     viewModel: TableViewModel = hiltViewModel(),
     drawerState: DrawerState
