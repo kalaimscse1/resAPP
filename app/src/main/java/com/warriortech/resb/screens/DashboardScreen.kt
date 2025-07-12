@@ -17,10 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
-import com.warriortech.resb.util.LocaleHelper
-import com.warriortech.resb.util.rememberLocaleState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.components.MobileOptimizedCard
@@ -35,6 +31,7 @@ import com.warriortech.resb.R
  * DashboardScreen displays the main dashboard with real-time metrics,
  */
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
 @Composable
 fun DashboardScreen(

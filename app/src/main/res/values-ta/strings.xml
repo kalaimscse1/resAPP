@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">RESB</string>
 
     <!-- Common -->
@@ -9,7 +9,7 @@
     <string name="edit">திருத்து</string>
     <string name="add">சேர்</string>
     <string name="search">தேடு</string>
-    <string name="loading">ஏற்றுகிறது...</string>
+    <string name="loading">ஏற்றுகிறது…</string>
     <string name="error">பிழை</string>
     <string name="success">வெற்றி</string>
     <string name="screen">திரைகள்</string>
@@ -115,7 +115,7 @@
     <string name="selection_title">பொருட்களைத் தேர்ந்தெடு</string>
     <string name="selected_items_count">தேர்ந்தெடுக்கப்பட்டது: %d பொருட்கள்</string>
     <string name="continue_text">தொடர்</string>
-    <string name="selected">தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="selected" tools:ignore="PrivateResource">தேர்ந்தெடுக்கப்பட்டது</string>
 
     <!-- Payment Screen -->
     <string name="payment_title">பணம் செலுத்துதல்</string>
@@ -126,26 +126,16 @@
     <string name="payment_card">கார்டு</string>
     <string name="payment_digital">டிஜிட்டல் பணம் செலுத்துதல்</string>
     <string name="processing_payment">செயலாக்கம்…</string>
-    <string name="confirm_payment">பணம் செலுத்துதலை உறுதிப்படுத்து</string>
     <string name="payment_successful">பணம் செலுத்துதல் வெற்றிகரமானது</string>
     <string name="payment_failed">பணம் செலுத்துதல் தோல்வியடைந்தது</string>
-    <string name="processing_payment">பணம் செலுத்துதல் செயலாக்கம்...</string>
 
     <!-- Common UI strings -->
-    <string name="loading">ஏற்றுகிறது...</string>
-    <string name="error">பிழை</string>
-    <string name="success">வெற்றி</string>
+
     <string name="retry">மீண்டும் முயற்சிக்கவும்</string>
-    <string name="cancel">ரத்து செய்</string>
     <string name="confirm">உறுதிப்படுத்து</string>
-    <string name="delete">நீக்கு</string>
-    <string name="edit">திருத்து</string>
-    <string name="save">சேமி</string>
-    <string name="search">தேடு</string>
     <string name="filter">வடிகட்டு</string>
     <string name="sort">வரிசைப்படுத்து</string>
     <string name="refresh">புதுப்பிக்கவும்</string>
-    <string name="back">பின்</string>
     <string name="next">அடுத்து</string>
     <string name="previous">முந்தைய</string>
     <string name="close">மூடு</string>

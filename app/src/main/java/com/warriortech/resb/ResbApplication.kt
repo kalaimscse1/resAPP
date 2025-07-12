@@ -16,7 +16,6 @@ import dagger.hilt.android.HiltAndroidApp
 import timber.log.BuildConfig
 import timber.log.Timber
 import javax.inject.Inject
-import android.content.res.Configuration
 import com.warriortech.resb.util.LocaleHelper
 
 @HiltAndroidApp
@@ -60,7 +59,7 @@ class ResbApplication : Application(), Configuration.Provider {
         super.attachBaseContext(LocaleHelper.onAttach(base ?: this))
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
         LocaleHelper.onAttach(this)
     }

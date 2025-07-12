@@ -146,16 +146,8 @@
     <string name="back">Back</string>
     
     <!-- Common UI strings -->
-    <string name="loading">Loading...</string>
-    <string name="error">Error</string>
-    <string name="success">Success</string>
     <string name="retry">Retry</string>
-    <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
-    <string name="delete">Delete</string>
-    <string name="edit">Edit</string>
-    <string name="save">Save</string>
-    <string name="search">Search</string>
     <string name="filter">Filter</string>
     <string name="sort">Sort</string>
     <string name="refresh">Refresh</string>
