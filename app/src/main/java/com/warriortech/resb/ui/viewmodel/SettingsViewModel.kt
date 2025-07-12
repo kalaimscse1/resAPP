@@ -279,6 +279,7 @@ class SettingsViewModel @Inject constructor(
                     SettingsModule.Staff -> TODO()
                     SettingsModule.Tax -> TODO()
                     SettingsModule.TaxSplit -> TODO()
+                    SettingsModule.Language -> TODO()
                 }
                 _uiState.value = SettingsUiState.Success(items)
             } catch (e: Exception) {
@@ -450,6 +451,7 @@ class SettingsViewModel @Inject constructor(
                     SettingsModule.Staff -> TODO()
                     SettingsModule.Tax -> TODO()
                     SettingsModule.TaxSplit -> TODO()
+                    SettingsModule.Language -> TODO()
                 }
                 loadModuleData(module) // Refresh data
             } catch (e: Exception) {

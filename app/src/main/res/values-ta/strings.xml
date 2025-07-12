@@ -1,6 +1,7 @@
+
 <resources>
     <string name="app_name">RESB</string>
-
+    
     <!-- Common -->
     <string name="ok">சரி</string>
     <string name="cancel">ரத்து</string>
@@ -12,6 +13,7 @@
     <string name="loading">ஏற்றுகிறது...</string>
     <string name="error">பிழை</string>
     <string name="success">வெற்றி</string>
+    <string name="screen">திரைகள்</string>
 
     <!-- Navigation -->
     <string name="dashboard">முதன்மை பலகை</string>

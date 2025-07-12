@@ -4,122 +4,38 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.warriortech.resb.R
 import com.warriortech.resb.ui.viewmodel.MenuViewModel
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MenuScreen(
-    navController: NavController,
-    viewModel: MenuViewModel = hiltViewModel()
-) {
-    val menuItems by viewModel.menuItems.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.menu_title)) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(menuItems) { menuItem ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Text(
-                                text = menuItem.name,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = stringResource(R.string.price_format, menuItem.price),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            if (menuItem.description.isNotEmpty()) {
-                                Text(
-                                    text = menuItem.description,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.theme.TextPrimary
-import com.warriortech.resb.ui.viewmodel.MenuViewModel
 import kotlinx.coroutines.launch
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
@@ -276,9 +192,9 @@ fun MenuScreen(
                                 navController.navigate("billing_screen/${viewModel.existingOrderId.value?.toLong() ?: 0}") {
                                     launchSingleTop = true
                                 }
-//                                onBillPlaced(viewModel.orderDetailsResponse.value,
-//                                    viewModel.existingOrderId.value?.toLong()!!
-//                                )
+                                onBillPlaced(viewModel.orderDetailsResponse.value,
+                                    viewModel.existingOrderId.value?.toLong()!!
+                                )
                                 },
                             enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
                             text = "Bill",

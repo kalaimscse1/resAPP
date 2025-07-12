@@ -96,7 +96,8 @@ fun SettingsMainScreen(
 			SettingsModule.RestaurantProfile,
 			SettingsModule.GeneralSettings,
 			SettingsModule.CreateVoucher,
-			SettingsModule.Counter
+			SettingsModule.Counter,
+            SettingsModule.Language
         )
     }
 
@@ -206,6 +207,9 @@ fun SettingsModuleScreen(
 
         is SettingsModule.Staff -> {
             navController.navigate("staff_setting")
+        }
+        is SettingsModule.Language -> {
+            navController.navigate("language_setting")
         }
 
         else -> {
@@ -493,6 +497,13 @@ sealed class SettingsModule(
         "Manage counter",
         Icons.Default.PointOfSale,
         listOf("name")
+    )
+    object Language : SettingsModule(
+        "language",
+        "Language",
+        "Manage application languages",
+        Icons.Default.Language,
+        listOf("name", "code")
     )
 }
 

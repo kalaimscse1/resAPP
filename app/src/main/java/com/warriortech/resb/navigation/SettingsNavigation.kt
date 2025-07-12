@@ -1,35 +1,48 @@
 
 package com.warriortech.resb.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.warriortech.resb.screens.settings.*
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingsNavigation(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "settings_main") {
         composable("area_settings") {
-            AreaSettingsScreen(navController)
+            AreaSettingsScreen(onBackPressed = {
+                navController.popBackStack()
+            })
         }
         composable("table_settings") {
-            TableSettingsScreen(navController)
+            TableSettingsScreen(onBackPressed = {
+                navController.popBackStack()
+            })
         }
         composable("menu_settings") {
-            MenuSettingsScreen(navController)
+            MenuSettingsScreen(onBackPressed = {
+                navController.popBackStack()
+            })
         }
         composable("menu_category_settings") {
-            MenuCategorySettingsScreen(navController)
+            MenuCategorySettingsScreen()
         }
         composable("menu_item_settings") {
-            MenuItemSettingsScreen(navController)
+            MenuItemSettingsScreen()
         }
         composable("customer_settings") {
-            CustomerSettingsScreen(navController)
+            CustomerSettingsScreen(onBackPressed = {
+                navController.popBackStack()
+            })
         }
         composable("staff_settings") {
-            StaffSettingsScreen(navController)
+            StaffSettingsScreen(onBackPressed = {
+                navController.popBackStack()
+            })
         }
         composable("language_settings") {
             LanguageSettingsScreen(navController)

@@ -83,6 +83,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.content.edit
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.navigation.SettingsNavigation
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
@@ -99,6 +100,7 @@ import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.screens.settings.CustomerSettingsScreen
+import com.warriortech.resb.screens.settings.LanguageSettingsScreen
 import com.warriortech.resb.screens.settings.MenuCategorySettingsScreen
 import com.warriortech.resb.screens.settings.MenuItemSettingsScreen
 import com.warriortech.resb.screens.settings.MenuSettingsScreen
@@ -475,6 +477,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 navController = navController,
                 templateId = templateId
             )
+        }
+        composable("language_setting") {
+            // Language selection screen can be implemented here
+            // For now, we can just navigate back to the previous screen
+            LanguageSettingsScreen(navController = navController)
         }
     }
 }

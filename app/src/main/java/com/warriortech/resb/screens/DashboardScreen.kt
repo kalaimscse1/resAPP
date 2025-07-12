@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,7 @@ import com.warriortech.resb.ui.viewmodel.DashboardViewModel
 import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
 import kotlinx.coroutines.launch
+import com.warriortech.resb.R
 
 /**
  * DashboardScreen displays the main dashboard with real-time metrics,
@@ -53,7 +55,7 @@ fun DashboardScreen(
                 title = {
                     Column {
                         Text(
-                            "Dashboard",
+                            stringResource(R.string.dashboard),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
