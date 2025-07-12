@@ -1,6 +1,8 @@
 package com.warriortech.resb
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -110,6 +112,16 @@ import com.warriortech.resb.util.LocaleHelper
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase ?: this))
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        LocaleHelper.onAttach(this)
+        recreate()
+    }
 
     @Inject
     lateinit var networkMonitor: NetworkMonitor

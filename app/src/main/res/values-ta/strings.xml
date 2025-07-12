@@ -1,7 +1,6 @@
-
 <resources>
     <string name="app_name">RESB</string>
-    
+
     <!-- Common -->
     <string name="ok">சரி</string>
     <string name="cancel">ரத்து</string>
@@ -128,6 +127,31 @@
     <string name="payment_digital">டிஜிட்டல் பணம் செலுத்துதல்</string>
     <string name="processing_payment">செயலாக்கம்…</string>
     <string name="confirm_payment">பணம் செலுத்துதலை உறுதிப்படுத்து</string>
+    <string name="payment_successful">பணம் செலுத்துதல் வெற்றிகரமானது</string>
+    <string name="payment_failed">பணம் செலுத்துதல் தோல்வியடைந்தது</string>
+    <string name="processing_payment">பணம் செலுத்துதல் செயலாக்கம்...</string>
+
+    <!-- Common UI strings -->
+    <string name="loading">ஏற்றுகிறது...</string>
+    <string name="error">பிழை</string>
+    <string name="success">வெற்றி</string>
+    <string name="retry">மீண்டும் முயற்சிக்கவும்</string>
+    <string name="cancel">ரத்து செய்</string>
+    <string name="confirm">உறுதிப்படுத்து</string>
+    <string name="delete">நீக்கு</string>
+    <string name="edit">திருத்து</string>
+    <string name="save">சேமி</string>
+    <string name="search">தேடு</string>
+    <string name="filter">வடிகட்டு</string>
+    <string name="sort">வரிசைப்படுத்து</string>
+    <string name="refresh">புதுப்பிக்கவும்</string>
+    <string name="back">பின்</string>
+    <string name="next">அடுத்து</string>
+    <string name="previous">முந்தைய</string>
+    <string name="close">மூடு</string>
+    <string name="open">திற</string>
+    <string name="yes">ஆம்</string>
+    <string name="no">இல்லை</string>
 
     <!-- Login Screen -->
     <string name="app_logo">ஆப் லோகோ</string>
