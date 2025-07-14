@@ -25,13 +25,87 @@
 
     <!-- Settings -->
     <string name="language_settings">Language Settings</string>
-    <string name="language">Language</string>
+    <string name="select_language">Select Language</string>
     <string name="english">English</string>
     <string name="tamil">Tamil</string>
-    <string name="select_language">Select Language</string>
-    <string name="language_changed">Language changed successfully</string>
 
-    <!-- Settings Modules -->
+    <!-- Role Settings -->
+    <string name="role_settings">Role Settings</string>
+    <string name="add_role">Add Role</string>
+    <string name="edit_role">Edit Role</string>
+    <string name="role">Role</string>
+    <string name="permissions">Permissions</string>
+
+    <!-- Printer Settings -->
+    <string name="printer_settings">Printer Settings</string>
+    <string name="add_printer">Add Printer</string>
+    <string name="edit_printer">Edit Printer</string>
+    <string name="printer">Printer</string>
+    <string name="ip_address">IP Address</string>
+    <string name="port">Port</string>
+    <string name="printer_type">Printer Type</string>
+
+    <!-- Counter Settings -->
+    <string name="counter_settings">Counter Settings</string>
+    <string name="add_counter">Add Counter</string>
+    <string name="edit_counter">Edit Counter</string>
+    <string name="counter">Counter</string>
+    <string name="current_value">Current Value</string>
+    <string name="prefix">Prefix</string>
+    <string name="suffix">Suffix</string>
+
+    <!-- Voucher Settings -->
+    <string name="voucher_settings">Voucher Settings</string>
+    <string name="add_voucher">Add Voucher</string>
+    <string name="edit_voucher">Edit Voucher</string>
+    <string name="voucher">Voucher</string>
+    <string name="code">Code</string>
+    <string name="value">Value</string>
+    <string name="min_amount">Minimum Amount</string>
+    <string name="max_discount">Maximum Discount</string>
+    <string name="valid_from">Valid From</string>
+    <string name="valid_to">Valid To</string>
+
+    <!-- Tax Settings -->
+    <string name="tax_settings">Tax Settings</string>
+    <string name="add_tax">Add Tax</string>
+    <string name="edit_tax">Edit Tax</string>
+    <string name="tax">Tax</string>
+    <string name="rate">Rate</string>
+    <string name="tax_type">Tax Type</string>
+    <string name="inclusive">Inclusive</string>
+
+    <!-- Tax Split Settings -->
+    <string name="tax_split_settings">Tax Split Settings</string>
+    <string name="add_tax_split">Add Tax Split</string>
+    <string name="edit_tax_split">Edit Tax Split</string>
+    <string name="tax_split">Tax Split</string>
+    <string name="split_type">Split Type</string>
+    <string name="percentage">Percentage</string>
+    <string name="amount">Amount</string>
+
+    <!-- Restaurant Profile -->
+    <string name="restaurant_profile">Restaurant Profile</string>
+    <string name="restaurant_name">Restaurant Name</string>
+    <string name="address">Address</string>
+    <string name="phone">Phone</string>
+    <string name="email">Email</string>
+    <string name="website">Website</string>
+    <string name="gst_number">GST Number</string>
+    <string name="fssai_number">FSSAI Number</string>
+
+    <!-- General Settings -->
+    <string name="general_settings">General Settings</string>
+    <string name="date_format">Date Format</string>
+    <string name="time_format">Time Format</string>
+    <string name="currency">Currency</string>
+    <string name="decimal_places">Decimal Places</string>
+    <string name="tax_calculation">Tax Calculation</string>
+    <string name="auto_backup">Auto Backup</string>
+    <string name="backup_frequency">Backup Frequency</string>
+    <string name="print_receipt">Print Receipt</string>
+    <string name="print_kot">Print KOT</string>
+
     <string name="area_settings">Area Settings</string>
     <string name="table_settings">Table Settings</string>
     <string name="menu_settings">Menu Settings</string>
@@ -144,7 +218,7 @@
 
     <!-- Common -->
     <string name="back">Back</string>
-    
+
     <!-- Common UI strings -->
     <string name="retry">Retry</string>
     <string name="confirm">Confirm</string>

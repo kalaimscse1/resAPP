@@ -1,0 +1,232 @@
+
+package com.warriortech.resb.screens.settings
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.warriortech.resb.R
+import com.warriortech.resb.model.Role
+import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.viewmodel.RoleSettingsViewModel
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RoleSettingsScreen(
+    viewModel: RoleSettingsViewModel = hiltViewModel(),
+    onBackPressed: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showAddDialog by remember { mutableStateOf(false) }
+    var editingRole by remember { mutableStateOf<Role?>(null) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadRoles()
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.role_settings)) },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showAddDialog = true }) {
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_role))
+                    }
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(uiState.roles) { role ->
+                        RoleCard(
+                            role = role,
+                            onEdit = { editingRole = role },
+                            onDelete = { 
+                                scope.launch {
+                                    viewModel.deleteRole(role.id)
+                                    snackbarHostState.showSnackbar("Role deleted")
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showAddDialog) {
+        RoleDialog(
+            role = null,
+            onDismiss = { showAddDialog = false },
+            onSave = { role ->
+                viewModel.addRole(role)
+                showAddDialog = false
+            }
+        )
+    }
+
+    editingRole?.let { role ->
+        RoleDialog(
+            role = role,
+            onDismiss = { editingRole = null },
+            onSave = { updatedRole ->
+                viewModel.updateRole(updatedRole)
+                editingRole = null
+            }
+        )
+    }
+
+    uiState.error?.let { error ->
+        LaunchedEffect(error) {
+            snackbarHostState.showSnackbar(error)
+        }
+    }
+}
+
+@Composable
+fun RoleCard(
+    role: Role,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    MobileOptimizedCard(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = role.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = role.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Permissions: ${role.permissions.size}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RoleDialog(
+    role: Role?,
+    onDismiss: () -> Unit,
+    onSave: (Role) -> Unit
+) {
+    var name by remember { mutableStateOf(role?.name ?: "") }
+    var description by remember { mutableStateOf(role?.description ?: "") }
+    var isActive by remember { mutableStateOf(role?.isActive ?: true) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (role == null) stringResource(R.string.add_role) else stringResource(R.string.edit_role)) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.name)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text(stringResource(R.string.description)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = isActive,
+                        onCheckedChange = { isActive = it }
+                    )
+                    Text(stringResource(R.string.active))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val newRole = role?.copy(
+                        name = name,
+                        description = description,
+                        isActive = isActive
+                    ) ?: Role(
+                        name = name,
+                        description = description,
+                        isActive = isActive
+                    )
+                    onSave(newRole)
+                }
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}

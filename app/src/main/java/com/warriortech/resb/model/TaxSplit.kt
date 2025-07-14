@@ -1,18 +1,14 @@
 
 package com.warriortech.resb.model
 
-data class Role(
-    var role_id: Long,
-    var role:String,
-    var is_active:Long
-)
-package com.warriortech.resb.model
-
-data class Role(
+data class TaxSplit(
     val id: Int = 0,
     val name: String,
     val description: String,
-    val permissions: List<String> = emptyList(),
+    val splitType: String, // "equal", "percentage", "amount"
+    val percentage: Double = 0.0,
+    val amount: Double = 0.0,
+    val taxIds: List<Int> = emptyList(),
     val isActive: Boolean = true,
     val createdAt: String = "",
     val updatedAt: String = ""

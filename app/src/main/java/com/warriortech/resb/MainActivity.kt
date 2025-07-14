@@ -97,16 +97,24 @@ import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.AIAssistantScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
-import com.warriortech.resb.screens.settings.StaffSettingsScreen
-import com.warriortech.resb.screens.TemplateScreen
-import com.warriortech.resb.screens.TemplateEditorScreen
-import com.warriortech.resb.screens.TemplatePreviewScreen
+import com.warriortech.resb.screens.settings.CounterSettingsScreen
 import com.warriortech.resb.screens.settings.CustomerSettingsScreen
+import com.warriortech.resb.screens.settings.GeneralSettingsScreen
 import com.warriortech.resb.screens.settings.LanguageSettingsScreen
 import com.warriortech.resb.screens.settings.MenuCategorySettingsScreen
 import com.warriortech.resb.screens.settings.MenuItemSettingsScreen
 import com.warriortech.resb.screens.settings.MenuSettingsScreen
+import com.warriortech.resb.screens.settings.PrinterSettingsScreen
+import com.warriortech.resb.screens.settings.RestaurantProfileScreen
+import com.warriortech.resb.screens.settings.RoleSettingsScreen
+import com.warriortech.resb.screens.settings.StaffSettingsScreen
 import com.warriortech.resb.screens.settings.TableSettingsScreen
+import com.warriortech.resb.screens.settings.TaxSettingsScreen
+import com.warriortech.resb.screens.settings.TaxSplitSettingsScreen
+import com.warriortech.resb.screens.settings.VoucherSettingsScreen
+import com.warriortech.resb.screens.TemplateScreen
+import com.warriortech.resb.screens.TemplateEditorScreen
+import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
 
 
@@ -491,9 +499,31 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             )
         }
         composable("language_setting") {
-            // Language selection screen can be implemented here
-            // For now, we can just navigate back to the previous screen
             LanguageSettingsScreen(navController = navController)
+        }
+        composable("role_setting") {
+            RoleSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("printer_setting") {
+            PrinterSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("tax_setting") {
+            TaxSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("tax_split_setting") {
+            TaxSplitSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("restaurant_profile_setting") {
+            RestaurantProfileScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("general_settings") {
+            GeneralSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("voucher_setting") {
+            VoucherSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("counter_setting") {
+            CounterSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
     }
 }

@@ -73,3 +73,55 @@ class CounterRepository @Inject constructor() {
         }
     }
 }
+package com.warriortech.resb.data.repository
+
+import com.warriortech.resb.data.api.ApiService
+import com.warriortech.resb.model.Counter
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class CounterRepository @Inject constructor(
+    private val apiService: ApiService
+) {
+    suspend fun getAllCounters(): List<Counter> {
+        return try {
+            apiService.getCounters()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun getCounterById(id: Int): Counter? {
+        return try {
+            apiService.getCounterById(id)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun createCounter(counter: Counter): Counter? {
+        return try {
+            apiService.createCounter(counter)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun updateCounter(counter: Counter): Counter? {
+        return try {
+            apiService.updateCounter(counter.id, counter)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun deleteCounter(id: Int): Boolean {
+        return try {
+            apiService.deleteCounter(id)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+}

@@ -24,11 +24,86 @@
 
     <!-- Settings -->
     <string name="language_settings">மொழி அமைப்புகள்</string>
-    <string name="language">மொழி</string>
+    <string name="select_language">மொழியைத் தேர்ந்தெடுக்கவும்</string>
     <string name="english">ஆங்கிலம்</string>
     <string name="tamil">தமிழ்</string>
-    <string name="select_language">மொழியைத் தேர்ந்தெடுக்கவும்</string>
-    <string name="language_changed">மொழி வெற்றிகரமாக மாற்றப்பட்டது</string>
+
+    <!-- Role Settings -->
+    <string name="role_settings">பணி அமைப்புகள்</string>
+    <string name="add_role">பணி சேர்க்கவும்</string>
+    <string name="edit_role">பணி திருத்தவும்</string>
+    <string name="role">பணி</string>
+    <string name="permissions">அனுமதிகள்</string>
+
+    <!-- Printer Settings -->
+    <string name="printer_settings">அச்சுப்பொறி அமைப்புகள்</string>
+    <string name="add_printer">அச்சுப்பொறி சேர்க்கவும்</string>
+    <string name="edit_printer">அச்சுப்பொறி திருத்தவும்</string>
+    <string name="printer">அச்சுப்பொறி</string>
+    <string name="ip_address">ஐபி முகவரி</string>
+    <string name="port">போர்ட்</string>
+    <string name="printer_type">அச்சுப்பொறி வகை</string>
+
+    <!-- Counter Settings -->
+    <string name="counter_settings">கணக்கீட்டாளர் அமைப்புகள்</string>
+    <string name="add_counter">கணக்கீட்டாளர் சேர்க்கவும்</string>
+    <string name="edit_counter">கணக்கீட்டாளர் திருத்தவும்</string>
+    <string name="counter">கணக்கீட்டாளர்</string>
+    <string name="current_value">தற்போதைய மதிப்பு</string>
+    <string name="prefix">முன்னொட்டு</string>
+    <string name="suffix">பின்னொட்டு</string>
+
+    <!-- Voucher Settings -->
+    <string name="voucher_settings">வவுச்சர் அமைப்புகள்</string>
+    <string name="add_voucher">வவுச்சர் சேர்க்கவும்</string>
+    <string name="edit_voucher">வவுச்சர் திருத்தவும்</string>
+    <string name="voucher">வவுச்சர்</string>
+    <string name="code">குறியீடு</string>
+    <string name="value">மதிப்பு</string>
+    <string name="min_amount">குறைந்தபட்ச தொகை</string>
+    <string name="max_discount">அதிகபட்ச தள்ளுபடி</string>
+    <string name="valid_from">செல்லுபடியாகும் தேதி</string>
+    <string name="valid_to">செல்லுபடியாகும் கடைசி தேதி</string>
+
+    <!-- Tax Settings -->
+    <string name="tax_settings">வரி அமைப்புகள்</string>
+    <string name="add_tax">வரி சேர்க்கவும்</string>
+    <string name="edit_tax">வரி திருத்தவும்</string>
+    <string name="tax">வரி</string>
+    <string name="rate">விகிதம்</string>
+    <string name="tax_type">வரி வகை</string>
+    <string name="inclusive">உள்ளடக்கம்</string>
+
+    <!-- Tax Split Settings -->
+    <string name="tax_split_settings">வரி பிரிப்பு அமைப்புகள்</string>
+    <string name="add_tax_split">வரி பிரிப்பு சேர்க்கவும்</string>
+    <string name="edit_tax_split">வரி பிரிப்பு திருத்தவும்</string>
+    <string name="tax_split">வரி பிரிப்பு</string>
+    <string name="split_type">பிரிப்பு வகை</string>
+    <string name="percentage">சதவீதம்</string>
+    <string name="amount">தொகை</string>
+
+    <!-- Restaurant Profile -->
+    <string name="restaurant_profile">உணவகம் விவரங்கள்</string>
+    <string name="restaurant_name">உணவகம் பெயர்</string>
+    <string name="address">முகவரி</string>
+    <string name="phone">தொலைபேசி</string>
+    <string name="email">மின்னஞ்சல்</string>
+    <string name="website">இணையதளம்</string>
+    <string name="gst_number">ஜிஎஸ்டி எண்</string>
+    <string name="fssai_number">எஃப்எஸ்எஸ்ஏஐ எண்</string>
+
+    <!-- General Settings -->
+    <string name="general_settings">பொது அமைப்புகள்</string>
+    <string name="date_format">தேதி வடிவம்</string>
+    <string name="time_format">நேர வடிவம்</string>
+    <string name="currency">நாணயம்</string>
+    <string name="decimal_places">தசம இடங்கள்</string>
+    <string name="tax_calculation">வரி கணக்கீடு</string>
+    <string name="auto_backup">தானியங்கு காப்புப்பிரதி</string>
+    <string name="backup_frequency">காப்புப்பிரதி அதிர்வெண்</string>
+    <string name="print_receipt">ரசீது அச்சிடவும்</string>
+    <string name="print_kot">கேஓடி அச்சிடவும்</string>
 
     <!-- Settings Modules -->
     <string name="area_settings">பகுதி அமைப்புகள்</string>

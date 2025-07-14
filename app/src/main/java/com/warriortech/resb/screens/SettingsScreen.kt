@@ -208,6 +208,30 @@ fun SettingsModuleScreen(
         is SettingsModule.Staff -> {
             navController.navigate("staff_setting")
         }
+        is SettingsModule.Role -> {
+            navController.navigate("role_setting")
+        }
+        is SettingsModule.Printer -> {
+            navController.navigate("printer_setting")
+        }
+        is SettingsModule.Tax -> {
+            navController.navigate("tax_setting")
+        }
+        is SettingsModule.TaxSplit -> {
+            navController.navigate("tax_split_setting")
+        }
+        is SettingsModule.RestaurantProfile -> {
+            navController.navigate("restaurant_profile_setting")
+        }
+        is SettingsModule.GeneralSettings -> {
+            navController.navigate("general_settings")
+        }
+        is SettingsModule.CreateVoucher -> {
+            navController.navigate("voucher_setting")
+        }
+        is SettingsModule.Counter -> {
+            navController.navigate("counter_setting")
+        }
         is SettingsModule.Language -> {
             navController.navigate("language_setting")
         }
