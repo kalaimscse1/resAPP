@@ -2,6 +2,7 @@
 package com.warriortech.resb.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +20,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.warriortech.resb.model.ReceiptTemplate
 import com.warriortech.resb.model.ReceiptType
+import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.LightBackground
+import com.warriortech.resb.ui.theme.TextSecondary
 import com.warriortech.resb.ui.viewmodel.TemplateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +72,10 @@ fun TemplateScreen(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Add Template")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->
@@ -75,8 +83,9 @@ fun TemplateScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(TextSecondary)
         ) {
-            TabRow(
+            SecondaryTabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -107,7 +116,7 @@ fun TemplateScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(uiState.templates) { template ->
                         TemplateCard(
@@ -146,7 +155,10 @@ fun TemplateCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = LightBackground
+        )
     ) {
         Column(
             modifier = Modifier

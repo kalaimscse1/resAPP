@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Customer
 import com.warriortech.resb.model.TblStaff
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
 import com.warriortech.resb.ui.viewmodel.StaffViewModel
 import kotlinx.coroutines.launch
@@ -57,7 +58,10 @@ fun StaffSettingsScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         },
         floatingActionButton = {

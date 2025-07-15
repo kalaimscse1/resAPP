@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -18,105 +19,135 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.MenuItemSettingsViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuItemSettingsScreen(
+    onBackPressed: () -> Unit,
     viewModel: MenuItemSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var editingMenuItem by remember { mutableStateOf<MenuItem?>(null) }
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Button(
-            onClick = { showAddDialog = true },
-            modifier = Modifier.fillMaxWidth()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("MenuCategory Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Area")
+            }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Menu Item")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (uiState) {
-            is MenuItemSettingsUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+            Button(
+                onClick = { showAddDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add Menu Item")
             }
-            is MenuItemSettingsUiState.Success -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items((uiState as MenuItemSettingsUiState.Success).menuItems) { menuItem ->
-                        MenuItemCard(
-                            menuItem = menuItem,
-                            onEdit = { editingMenuItem = menuItem },
-                            onDelete = { 
-                                scope.launch {
-                                    viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-            is MenuItemSettingsUiState.Error -> {
 
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Error: ${(uiState as MenuItemSettingsUiState.Error).message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Button(
-                        onClick = { viewModel.loadMenuItems() },
-                        modifier = Modifier.padding(top = 16.dp)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (uiState) {
+                is MenuItemSettingsUiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Retry")
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is MenuItemSettingsUiState.Success -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items((uiState as MenuItemSettingsUiState.Success).menuItems) { menuItem ->
+                            MenuItemCard(
+                                menuItem = menuItem,
+                                onEdit = { editingMenuItem = menuItem },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                is MenuItemSettingsUiState.Error -> {
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Error: ${(uiState as MenuItemSettingsUiState.Error).message}",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(
+                            onClick = { viewModel.loadMenuItems() },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text("Retry")
+                        }
                     }
                 }
             }
         }
-    }
 
-    if (showAddDialog || editingMenuItem != null) {
-        MenuItemDialog(
-            menuItem = editingMenuItem,
-            onDismiss = { 
-                showAddDialog = false
-                editingMenuItem = null
-            },
-            onSave = { menuItem ->
-                scope.launch {
-                    if (editingMenuItem != null) {
-                        viewModel.updateMenuItem(menuItem)
-                    } else {
-                        viewModel.addMenuItem(menuItem)
-                    }
+        if (showAddDialog || editingMenuItem != null) {
+            MenuItemDialog(
+                menuItem = editingMenuItem,
+                onDismiss = {
                     showAddDialog = false
                     editingMenuItem = null
+                },
+                onSave = { menuItem ->
+                    scope.launch {
+                        if (editingMenuItem != null) {
+                            viewModel.updateMenuItem(menuItem)
+                        } else {
+                            viewModel.addMenuItem(menuItem)
+                        }
+                        showAddDialog = false
+                        editingMenuItem = null
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }
 

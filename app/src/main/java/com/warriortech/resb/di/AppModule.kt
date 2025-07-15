@@ -15,10 +15,15 @@ import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.SettingsRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.data.repository.CounterRepository
+import com.warriortech.resb.data.repository.GeneralSettingsRepository
 import com.warriortech.resb.data.repository.PrinterRepository
+import com.warriortech.resb.data.repository.RestaurantProfileRepository
 import com.warriortech.resb.data.repository.RoleRepository
 import com.warriortech.resb.data.repository.StaffRepository
+import com.warriortech.resb.data.repository.TaxRepository
+import com.warriortech.resb.data.repository.TaxSplitRepository
 import com.warriortech.resb.data.repository.TemplateRepository
+import com.warriortech.resb.data.repository.VoucherRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.service.PrintService
@@ -55,7 +60,8 @@ object AppModule {
     fun provideTableDao(database: RestaurantDatabase): TableDao {
         return database.tableDao()
     }
-//
+
+    //
     @Provides
     @Singleton
     fun provideMenuItemDao(database: RestaurantDatabase): MenuItemDao {
@@ -137,7 +143,7 @@ object AppModule {
     fun provideOrderRepository(
         apiService: ApiService,
     ): OrderRepository {
-        return OrderRepository( apiService)
+        return OrderRepository(apiService)
     }
 
     @Provides
@@ -172,8 +178,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideCounterRepository(): CounterRepository {
-        return CounterRepository()
+    fun provideCounterRepository(
+        apiService: ApiService
+    ): CounterRepository {
+        return CounterRepository(
+            apiService = apiService
+        )
     }
 
     @Provides
@@ -198,14 +208,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRoleRepository(): RoleRepository {
-        return RoleRepository()
+    fun provideRoleRepository(
+        apiService: ApiService
+    ): RoleRepository {
+        return RoleRepository(
+            apiService = apiService
+        )
     }
 
     @Provides
     @Singleton
-    fun providePrinterRepository(): PrinterRepository {
-        return PrinterRepository()
+    fun providePrinterRepository(
+        apiService: ApiService
+    ): PrinterRepository {
+        return PrinterRepository(
+            apiService = apiService
+        )
     }
 
     @Provides
@@ -221,5 +239,55 @@ object AppModule {
         templateRepository: TemplateRepository
     ): PrintService {
         return PrintService(context, templateRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTaxRepository(
+        apiService: ApiService
+    ): TaxRepository {
+        return TaxRepository(
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideTaxSplitRepository(
+        apiService: ApiService
+    ): TaxSplitRepository {
+        return TaxSplitRepository(
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideGeneralSettingsRepository(
+        apiService: ApiService
+    ): GeneralSettingsRepository {
+        return GeneralSettingsRepository(
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideRestaurantProfileRepository(
+        apiService: ApiService
+    ): RestaurantProfileRepository {
+        return RestaurantProfileRepository(
+            apiService = apiService
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideVoucherRepository(
+        apiService: ApiService
+    ): VoucherRepository {
+        return VoucherRepository(
+            apiService = apiService
+        )
     }
 }

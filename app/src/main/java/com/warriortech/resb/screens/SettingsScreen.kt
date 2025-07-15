@@ -1,16 +1,14 @@
 package com.warriortech.resb.screens
 
-import android.annotation.SuppressLint
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,11 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.viewmodel.SettingsViewModel
+import com.warriortech.resb.ui.theme.GradientStart
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,10 +29,8 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     onBackPressed: () -> Unit,
     drawerState: DrawerState,
-    viewModel: SettingsViewModel = hiltViewModel(),
     navController: NavController
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedModule by remember { mutableStateOf<SettingsModule?>(null) }
     val scope = rememberCoroutineScope()
     Scaffold(
@@ -54,10 +48,14 @@ fun SettingsScreen(
                     }) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->
+
         if (selectedModule == null) {
             SettingsMainScreen(
                 modifier = Modifier.padding(paddingValues),
@@ -66,12 +64,11 @@ fun SettingsScreen(
         } else {
             SettingsModuleScreen(
                 module = selectedModule!!,
-                uiState = uiState,
-                viewModel = viewModel,
                 modifier = Modifier.padding(paddingValues),
-                navController
+                navController = navController
             )
         }
+
     }
 }
 
@@ -97,7 +94,8 @@ fun SettingsMainScreen(
 			SettingsModule.GeneralSettings,
 			SettingsModule.CreateVoucher,
 			SettingsModule.Counter,
-            SettingsModule.Language
+            SettingsModule.Language,
+            SettingsModule.PrinterSetting
         )
     }
 
@@ -175,8 +173,6 @@ fun SettingsModuleCard(
 @Composable
 fun SettingsModuleScreen(
     module: SettingsModule,
-    uiState: SettingsUiState,
-    viewModel: SettingsViewModel,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -235,167 +231,11 @@ fun SettingsModuleScreen(
         is SettingsModule.Language -> {
             navController.navigate("language_setting")
         }
-
-        else -> {
-            // Fallback for modules that don't have dedicated screens yet
-            var showAddDialog by remember { mutableStateOf(false) }
-
-            LaunchedEffect(module) {
-                viewModel.loadModuleData(module)
-            }
-
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                // Add button
-                Button(
-                    onClick = { showAddDialog = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add ${module.title}")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                when (uiState) {
-                    is SettingsUiState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-
-                    is SettingsUiState.Success -> {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(uiState.items) { item ->
-                                SettingsItemCard(
-                                    item = item,
-                                    onEdit = { viewModel.editItem(item) },
-                                    onDelete = { viewModel.deleteItem(item) }
-                                )
-                            }
-                        }
-                    }
-
-                    is SettingsUiState.Error -> {
-                        Text(
-                            text = uiState.message,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-
-            if (showAddDialog) {
-                AddItemDialog(
-                    module = module,
-                    onDismiss = { showAddDialog = false },
-                    onConfirm = { data ->
-                        viewModel.addItem(module, data)
-                        showAddDialog = false
-                    }
-                )
-            }
+        is SettingsModule.PrinterSetting -> {
+            navController.navigate("template_screen")
         }
     }
 }
-
-        @Composable
-        fun SettingsItemCard(
-            item: SettingsItem,
-            onEdit: () -> Unit,
-            onDelete: () -> Unit
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        if (item.description.isNotEmpty()) {
-                            Text(
-                                text = item.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    Row {
-                        IconButton(onClick = onEdit) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit")
-                        }
-                        IconButton(onClick = onDelete) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-            @SuppressLint("MutableCollectionMutableState")
-        @Composable
-        fun AddItemDialog(
-            module: SettingsModule,
-            onDismiss: () -> Unit,
-            onConfirm: (Map<String, String>) -> Unit
-        ) {
-            var formData by remember { mutableStateOf(mutableMapOf<String, String>()) }
-
-            AlertDialog(
-                onDismissRequest = onDismiss,
-                title = { Text("Add ${module.title}") },
-                text = {
-                    LazyColumn {
-                        items(module.fields) { field ->
-                            OutlinedTextField(
-                                value = formData[field] ?: "",
-                                onValueChange = { formData[field] = it },
-                                label = { Text(field.replaceFirstChar { it.uppercase() }) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                            )
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { onConfirm(formData) }
-                    ) {
-                        Text("Add")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
-                    }
-                }
-            )
-        }
 
 sealed class SettingsModule(
     val id: String,
@@ -528,6 +368,13 @@ sealed class SettingsModule(
         "Manage application languages",
         Icons.Default.Language,
         listOf("name", "code")
+    )
+    object PrinterSetting : SettingsModule(
+        "printer_setting",
+        "Receipt Template",
+        "Manage receipt templates",
+        Icons.Default.Kitchen,
+        listOf("name", "ip_address", "port", "type", "location")
     )
 }
 

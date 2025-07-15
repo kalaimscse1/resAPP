@@ -21,16 +21,3 @@ data class CounterSession(
     val totalAmount: Double = 0.0,
     val isActive: Boolean = true
 )
-package com.warriortech.resb.model
-
-data class Counter(
-    val id: Int = 0,
-    val name: String,
-    val description: String = "",
-    val isActive: Boolean = true,
-    val currentValue: Int = 0,
-    val prefix: String = "",
-    val suffix: String = "",
-    val createdAt: String = "",
-    val updatedAt: String = ""
-)

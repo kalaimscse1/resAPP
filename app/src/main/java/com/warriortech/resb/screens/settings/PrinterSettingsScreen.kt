@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Printer
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.PrinterSettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,7 +48,10 @@ fun PrinterSettingsScreen(
                     IconButton(onClick = { showAddDialog = true }) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_printer))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->
@@ -81,19 +85,19 @@ fun PrinterSettingsScreen(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = printer.name,
+                                        text = printer.printer_name,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Medium
                                     )
                                     Text(
-                                        text = "${printer.ipAddress}:${printer.port}",
+                                        text = printer.ip_address,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
-                                        text = "Type: ${printer.type}",
+                                        text = if (printer.is_active) "ACTIVE" else "INACTIVE",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = if (printer.is_active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                                     )
                                 }
 
@@ -101,7 +105,7 @@ fun PrinterSettingsScreen(
                                     IconButton(onClick = { editingPrinter = printer }) {
                                         Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
                                     }
-                                    IconButton(onClick = { viewModel.deletePrinter(printer.id) }) {
+                                    IconButton(onClick = { viewModel.deletePrinter(printer.printer_id) }) {
                                         Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
                                     }
                                 }
@@ -143,11 +147,9 @@ fun PrinterDialog(
     onDismiss: () -> Unit,
     onSave: (Printer) -> Unit
 ) {
-    var name by remember { mutableStateOf(printer?.name ?: "") }
-    var ipAddress by remember { mutableStateOf(printer?.ipAddress ?: "") }
-    var port by remember { mutableStateOf(printer?.port?.toString() ?: "9100") }
-    var type by remember { mutableStateOf(printer?.type ?: "thermal") }
-    var isActive by remember { mutableStateOf(printer?.isActive ?: true) }
+    var name by remember { mutableStateOf(printer?.printer_name ?: "") }
+    var ipAddress by remember { mutableStateOf(printer?.ip_address ?: "") }
+    var isActive by remember { mutableStateOf(printer?.is_active ?: true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -159,7 +161,7 @@ fun PrinterDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(R.string.printer)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
@@ -168,26 +170,15 @@ fun PrinterDialog(
                     label = { Text(stringResource(R.string.ip_address)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = port,
-                    onValueChange = { port = it },
-                    label = { Text(stringResource(R.string.port)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = type,
-                    onValueChange = { type = it },
-                    label = { Text(stringResource(R.string.printer_type)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
+                    Switch(
                         checked = isActive,
                         onCheckedChange = { isActive = it }
                     )
-                    Text(stringResource(R.string.active))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Active")
                 }
             }
         },
@@ -195,17 +186,15 @@ fun PrinterDialog(
             TextButton(
                 onClick = {
                     val newPrinter = printer?.copy(
-                        name = name,
-                        ipAddress = ipAddress,
-                        port = port.toIntOrNull() ?: 9100,
-                        type = type,
-                        isActive = isActive
+                       printer_name = name,
+                        ip_address = ipAddress,
+                        is_active = isActive
                     ) ?: Printer(
-                        name = name,
-                        ipAddress = ipAddress,
-                        port = port.toIntOrNull() ?: 9100,
-                        type = type,
-                        isActive = isActive
+                       printer_id = 0, // Use 0 for new printers
+                        printer_name = name,
+                        kitchen_cat_id = 0, // Default or selected category ID
+                        ip_address = ipAddress,
+                        is_active = isActive
                     )
                     onSave(newPrinter)
                 }

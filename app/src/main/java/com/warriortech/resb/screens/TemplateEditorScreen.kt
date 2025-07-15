@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.warriortech.resb.model.*
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.TemplateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +55,10 @@ fun TemplateEditorScreen(
                     ) {
                         Text("Save")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->

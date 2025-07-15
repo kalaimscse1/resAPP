@@ -44,3 +44,9 @@ data class KOTUpdateResponse(
     val message: String,
     val kotId: Int?
 )
+
+data class KitchenCategory(
+    val kitchen_cat_id: Long,
+    val kitchen_cat_name: String,
+    val is_active: Boolean
+)

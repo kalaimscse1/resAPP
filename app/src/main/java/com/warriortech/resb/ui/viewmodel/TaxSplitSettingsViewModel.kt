@@ -70,7 +70,7 @@ class TaxSplitSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deleteTaxSplit(id: Int) {
+    fun deleteTaxSplit(id: Long) {
         viewModelScope.launch {
             try {
                 val success = taxSplitRepository.deleteTaxSplit(id)

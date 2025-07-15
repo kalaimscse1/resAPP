@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.*
 import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.ReportViewModel
 import com.warriortech.resb.ui.viewmodel.ReportUiState
 import java.text.NumberFormat
@@ -77,7 +78,10 @@ fun ReportScreen(
                         }) {
                             Icon(Icons.Default.Download, contentDescription = "Export")
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = GradientStart
+                    )
                 )
             }
         ) { paddingValues ->

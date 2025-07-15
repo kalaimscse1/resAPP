@@ -1,8 +1,8 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
 import com.warriortech.resb.model.TaxSplit
+import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +42,7 @@ class TaxSplitRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteTaxSplit(id: Int): Boolean {
+    suspend fun deleteTaxSplit(id: Long): Boolean {
         return try {
             apiService.deleteTaxSplit(id)
             true

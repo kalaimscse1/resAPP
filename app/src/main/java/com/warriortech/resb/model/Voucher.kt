@@ -2,7 +2,7 @@
 package com.warriortech.resb.model
 
 data class Voucher(
-    val id: Int = 0,
+    val id: Long = 0,
     val name: String,
     val code: String,
     val type: String, // "percentage", "fixed"

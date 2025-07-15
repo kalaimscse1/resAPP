@@ -3,6 +3,7 @@ package com.warriortech.resb.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TblTable
 
 @Entity(tableName = "tables")
 data class TableEntity(
@@ -13,14 +14,13 @@ data class TableEntity(
     val is_ac: String,
     val table_status: String,
     val area_id:Long,
-    val area_name:String,
     val table_availabiltiy:String,
     val is_active: Boolean ,
     val syncStatus: SyncStatus = SyncStatus.SYNCED,
     val lastModified: Long = System.currentTimeMillis()
 ) {
     companion object {
-        fun fromModel(table: Table, syncStatus: SyncStatus = SyncStatus.SYNCED): TableEntity {
+        fun fromModel(table: TblTable, syncStatus: SyncStatus = SyncStatus.SYNCED): TableEntity {
             return TableEntity(
                 table_id = table.table_id,
                 table_name = table.table_name,
@@ -29,23 +29,22 @@ data class TableEntity(
                 table_status = table.table_status,
                 syncStatus = syncStatus,
                 area_id = table.area_id,
-                area_name = table.area_name,
                 table_availabiltiy = table.table_availability,
                 is_active = true
             )
         }
     }
     
-    fun toModel(): Table {
-        return Table(
+    fun toModel(): TblTable {
+        return TblTable(
             table_id = this.table_id,
             table_name = this.table_name,
             seating_capacity = this.seating_capacity,
             is_ac = this.is_ac,
             table_status = this.table_status,
             area_id = this.area_id,
-            area_name = this.area_name,
-            table_availability = this.table_availabiltiy
+            table_availability = this.table_availabiltiy,
+            is_active = this.is_active
         )
     }
 }

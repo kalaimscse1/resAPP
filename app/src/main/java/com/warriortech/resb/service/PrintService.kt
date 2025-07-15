@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PrintService @Inject constructor(
-    private val context: Context,
+    context: Context,
     private val templateRepository: TemplateRepository
 ) {
     private val printerHelper = PrinterHelper(context)

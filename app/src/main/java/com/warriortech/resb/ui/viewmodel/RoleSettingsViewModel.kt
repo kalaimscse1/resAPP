@@ -70,7 +70,7 @@ class RoleSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deleteRole(id: Int) {
+    fun deleteRole(id: Long) {
         viewModelScope.launch {
             try {
                 val success = roleRepository.deleteRole(id)

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.warriortech.resb.model.*
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.TemplateViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -71,7 +72,10 @@ fun TemplatePreviewScreen(
                     ) {
                         Icon(Icons.Default.Print, contentDescription = "Print")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->

@@ -1,6 +1,5 @@
 package com.warriortech.resb.network
 
-import android.content.SyncRequest
 import com.warriortech.resb.model.*
 import retrofit2.Response
 import retrofit2.http.*
@@ -59,7 +58,7 @@ interface ApiService {
     suspend fun getAllTables(): Response<List<Table>>
 
     @GET("table/table/getTableByAreaId/{area_id}")
-    suspend fun getTablesBySection(@Path("area_id") section: Long): List<Table>
+    suspend fun getTablesBySection(@Path("area_id") section: Long): Response<List<Table>>
 
     @GET("table/table/getTable/{table_id}")
     suspend fun getTablesByStatus(@Path("table_id") tableId: Long): Table
@@ -72,12 +71,12 @@ interface ApiService {
 
     @POST("table/table/addTable")
     suspend fun createTable(
-        @Body table: Table) : Response<Table>
+        @Body table: TblTable) : Response<Table>
 
     @PUT("table/table/updateTables/{table_id}")
     suspend fun updateTable(
         @Path("table_id") lng: Long,
-        @Body table: Table) : Response<Int>
+        @Body table: TblTable) : Response<Int>
 
     @DELETE("table/table/deleteTableById/{table_id}")
     suspend fun deleteTable(lng: Long) : Response<Int>
@@ -292,4 +291,115 @@ interface ApiService {
         @Path("kotId") kotId: Int,
         @Body statusUpdate: KOTStatusUpdate
     ): Response<KOTUpdateResponse>
+
+
+    // Role endpoints
+    @GET("roles")
+    suspend fun getRoles(): List<Role>
+
+    @GET("roles/{id}")
+    suspend fun getRoleById(@Path("id") id: Int): Role
+
+    @POST("roles")
+    suspend fun createRole(@Body role: Role): Role
+
+    @PUT("roles/{id}")
+    suspend fun updateRole(@Path("id") id: Long, @Body role: Role): Role
+
+    @DELETE("roles/{id}")
+    suspend fun deleteRole(@Path("id") id: Long)
+
+    // Printer endpoints
+    @GET("printers")
+    suspend fun getPrinters(): List<Printer>
+
+    @GET("printers/{id}")
+    suspend fun getPrinterById(@Path("id") id: Int): Printer
+
+    @POST("printers")
+    suspend fun createPrinter(@Body printer: Printer): Printer
+
+    @PUT("printers/{id}")
+    suspend fun updatePrinter(@Path("id") id: Long, @Body printer: Printer): Printer
+
+    @DELETE("printers/{id}")
+    suspend fun deletePrinter(@Path("id") id: Long)
+
+    // Counter endpoints
+    @GET("counters")
+    suspend fun getCounters(): List<Counter>
+
+    @GET("counters/{id}")
+    suspend fun getCounterById(@Path("id") id: Int): Counter
+
+    @POST("counters")
+    suspend fun createCounter(@Body counter: Counter): Counter
+
+    @PUT("counters/{id}")
+    suspend fun updateCounter(@Path("id") id: Long, @Body counter: Counter): Counter
+
+    @DELETE("counters/{id}")
+    suspend fun deleteCounter(@Path("id") id: Int)
+
+    // Voucher endpoints
+    @GET("vouchers")
+    suspend fun getVouchers(): List<Voucher>
+
+    @GET("vouchers/{id}")
+    suspend fun getVoucherById(@Path("id") id: Int): Voucher
+
+    @POST("vouchers")
+    suspend fun createVoucher(@Body voucher: Voucher): Voucher
+
+    @PUT("vouchers/{id}")
+    suspend fun updateVoucher(@Path("id") id: Long, @Body voucher: Voucher): Voucher
+
+    @DELETE("vouchers/{id}")
+    suspend fun deleteVoucher(@Path("id") id: Long)
+
+    // Tax endpoints
+    @GET("taxes")
+    suspend fun getTaxes(): List<Tax>
+
+    @GET("taxes/{id}")
+    suspend fun getTaxById(@Path("id") id: Int): Tax
+
+    @POST("taxes")
+    suspend fun createTax(@Body tax: Tax): Tax
+
+    @PUT("taxes/{id}")
+    suspend fun updateTax(@Path("id") id: Long, @Body tax: Tax): Tax
+
+    @DELETE("taxes/{id}")
+    suspend fun deleteTax(@Path("id") id: Long)
+
+    // TaxSplit endpoints
+    @GET("tax-splits")
+    suspend fun getTaxSplits(): List<TaxSplit>
+
+    @GET("tax-splits/{id}")
+    suspend fun getTaxSplitById(@Path("id") id: Int): TaxSplit
+
+    @POST("tax-splits")
+    suspend fun createTaxSplit(@Body taxSplit: TaxSplit): TaxSplit
+
+    @PUT("tax-splits/{id}")
+    suspend fun updateTaxSplit(@Path("id") id: Long, @Body taxSplit: TaxSplit): TaxSplit
+
+    @DELETE("tax-splits/{id}")
+    suspend fun deleteTaxSplit(@Path("id") id: Long)
+
+    // Restaurant Profile endpoints
+    @GET("restaurant-profile")
+    suspend fun getRestaurantProfile(): RestaurantProfile
+
+    @PUT("restaurant-profile")
+    suspend fun updateRestaurantProfile(@Body profile: RestaurantProfile): RestaurantProfile
+
+    // General Settings endpoints
+    @GET("settings/generalSetting/getAllGeneralSetting")
+    suspend fun getGeneralSettings(): Response<List<GeneralSettings>>
+
+    @PUT("settings/generalSetting/updateSetting/{id}")
+    suspend fun updateGeneralSettings(@Path("id") id: Long,@Body settings: GeneralSettings): GeneralSettings
 }

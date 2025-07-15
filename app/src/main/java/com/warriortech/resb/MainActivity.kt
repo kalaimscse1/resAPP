@@ -85,7 +85,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.content.edit
 import com.warriortech.resb.model.TblOrderDetailsResponse
-import com.warriortech.resb.navigation.SettingsNavigation
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
@@ -170,6 +169,7 @@ class MainActivity : ComponentActivity() {
                 val drawerWidth = when {
                     isTablet -> if (isCollapsed.value) 80.dp else 320.dp
                     isLargeScreen -> if (isCollapsed.value) 72.dp else 280.dp
+                    isLandscape -> if (isCollapsed.value) 72.dp else (screenWidth * 0.6f).dp.coerceAtMost(300.dp)
                     else -> if (isCollapsed.value) 72.dp else (screenWidth * 0.8f).dp.coerceAtMost(300.dp)
                 }
                 val animatedDrawerWidth by animateDpAsState(targetValue = drawerWidth)
@@ -403,10 +403,18 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             )
         }
         composable("menu_item_setting") {
-            MenuItemSettingsScreen()
+            MenuItemSettingsScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable ("menu_Category_setting") {
-            MenuCategorySettingsScreen()
+            MenuCategorySettingsScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable("staff_setting") {
             StaffSettingsScreen(
@@ -677,15 +685,7 @@ fun DrawerContent(
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Templates") else Text("") },
-                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
-                selected = currentDestination?.route == "template_screen",
-                onClick = {
-                    onDestinationClicked("template_screen")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
+
 
             Spacer(modifier = Modifier.weight(1f))
 

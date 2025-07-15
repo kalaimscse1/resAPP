@@ -4,16 +4,6 @@ package com.warriortech.resb.model
 data class Role(
     var role_id: Long,
     var role:String,
-    var is_active:Long
+    var is_active: Boolean
 )
-package com.warriortech.resb.model
 
-data class Role(
-    val id: Int = 0,
-    val name: String,
-    val description: String,
-    val permissions: List<String> = emptyList(),
-    val isActive: Boolean = true,
-    val createdAt: String = "",
-    val updatedAt: String = ""
-)

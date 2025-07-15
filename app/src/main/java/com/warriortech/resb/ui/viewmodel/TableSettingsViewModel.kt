@@ -3,7 +3,9 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TableRepository
+import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.screens.settings.TableSettingsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,12 +21,16 @@ class TableSettingsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<TableSettingsUiState>(TableSettingsUiState.Loading)
     val uiState: StateFlow<TableSettingsUiState> = _uiState.asStateFlow()
+    private val _area = MutableStateFlow<List<Area>>(emptyList())
+    val areas: StateFlow<List<Area>> = _area
 
     fun loadTables() {
         viewModelScope.launch {
             try {
                 _uiState.value = TableSettingsUiState.Loading
                 val tables = tableRepository.getAllTables()
+                val areas = tableRepository.getAllAreas()
+                _area.value= areas
                 tables.collect { result ->
                     result.map {
                             Table(
@@ -35,7 +41,8 @@ class TableSettingsViewModel @Inject constructor(
                                 seating_capacity = it.seating_capacity,
                                 is_ac = it.is_ac,
                                 table_status = it.table_status,
-                                table_availability = it.table_availability
+                                table_availability = it.table_availability,
+                                is_active = it.is_active
                             )
                     }.let { list ->
                         _uiState.value = TableSettingsUiState.Success(tables = list)
@@ -47,7 +54,7 @@ class TableSettingsViewModel @Inject constructor(
         }
     }
 
-    fun addTable(table: Table) {
+    fun addTable(table: TblTable) {
         viewModelScope.launch {
             try {
                 tableRepository.insertTable(table)
@@ -60,7 +67,7 @@ class TableSettingsViewModel @Inject constructor(
 
 
 
-    fun updateTable(table: Table) {
+    fun updateTable(table: TblTable) {
         viewModelScope.launch {
             try {
                 tableRepository.updateTable(table)

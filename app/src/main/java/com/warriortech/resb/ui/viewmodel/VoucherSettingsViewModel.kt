@@ -70,7 +70,7 @@ class VoucherSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deleteVoucher(id: Int) {
+    fun deleteVoucher(id: Long) {
         viewModelScope.launch {
             try {
                 val success = voucherRepository.deleteVoucher(id)

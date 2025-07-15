@@ -39,6 +39,7 @@ import com.warriortech.resb.ui.theme.TextPrimary
 import kotlinx.coroutines.launch
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.theme.GradientStart
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
@@ -151,7 +152,10 @@ fun MenuScreen(
                             contentDescription = "Clear Cart"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         },
         bottomBar = {

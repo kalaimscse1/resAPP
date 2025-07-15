@@ -131,7 +131,7 @@ fun LanguageSettingsScreen(
     if (showConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showConfirmDialog = false },
-            title = { Text(stringResource(R.string.language)) },
+            title = { Text("Language") },
             text = { Text("Are you sure you want to change the language? The app will restart.") },
             confirmButton = {
                 TextButton(

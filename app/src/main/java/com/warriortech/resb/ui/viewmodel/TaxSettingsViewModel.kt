@@ -70,7 +70,7 @@ class TaxSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deleteTax(id: Int) {
+    fun deleteTax(id: Long) {
         viewModelScope.launch {
             try {
                 val success = taxRepository.deleteTax(id)

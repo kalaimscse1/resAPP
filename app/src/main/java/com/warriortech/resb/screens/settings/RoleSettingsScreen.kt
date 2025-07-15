@@ -79,7 +79,7 @@ fun RoleSettingsScreen(
                             onEdit = { editingRole = role },
                             onDelete = { 
                                 scope.launch {
-                                    viewModel.deleteRole(role.id)
+                                    viewModel.deleteRole(role.role_id)
                                     snackbarHostState.showSnackbar("Role deleted")
                                 }
                             }
@@ -136,19 +136,14 @@ fun RoleCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = role.name,
+                    text = role.role,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = role.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Permissions: ${role.permissions.size}",
+                    text = if (role.is_active) "ACTIVE" else "INACTIVE",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (role.is_active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 )
             }
 
@@ -171,9 +166,8 @@ fun RoleDialog(
     onDismiss: () -> Unit,
     onSave: (Role) -> Unit
 ) {
-    var name by remember { mutableStateOf(role?.name ?: "") }
-    var description by remember { mutableStateOf(role?.description ?: "") }
-    var isActive by remember { mutableStateOf(role?.isActive ?: true) }
+    var name by remember { mutableStateOf(role?.role ?: "") }
+    var isActive by remember { mutableStateOf(role?.is_active ?: true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -185,37 +179,32 @@ fun RoleDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.name)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text(stringResource(R.string.description)) },
+                    label = { Text(stringResource(R.string.role)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
+                    Switch(
                         checked = isActive,
                         onCheckedChange = { isActive = it }
                     )
-                    Text(stringResource(R.string.active))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Active")
                 }
+
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
                     val newRole = role?.copy(
-                        name = name,
-                        description = description,
-                        isActive = isActive
+                        role= name,
+                        is_active = isActive
                     ) ?: Role(
-                        name = name,
-                        description = description,
-                        isActive = isActive
+                        role_id = 0,
+                        role= name,
+                        is_active = isActive
                     )
                     onSave(newRole)
                 }

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -8,38 +7,34 @@ import com.warriortech.resb.model.GeneralSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class GeneralSettingsUiState(
-    val settings: GeneralSettings? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
+
 
 @HiltViewModel
 class GeneralSettingsViewModel @Inject constructor(
     private val generalSettingsRepository: GeneralSettingsRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GeneralSettingsUiState())
-    val uiState: StateFlow<GeneralSettingsUiState> = _uiState
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val generalSettings: List<GeneralSettings>) : UiState()
+        data class Error(val message: String) : UiState()
+    }
 
     fun loadSettings() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
             try {
+                _uiState.value = UiState.Loading
                 val settings = generalSettingsRepository.getGeneralSettings()
-                _uiState.value = _uiState.value.copy(
-                    settings = settings,
-                    isLoading = false,
-                    error = null
-                )
+               _uiState.value = UiState.Success(settings)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -49,10 +44,10 @@ class GeneralSettingsViewModel @Inject constructor(
             try {
                 val updatedSettings = generalSettingsRepository.updateGeneralSettings(settings)
                 if (updatedSettings != null) {
-                    _uiState.value = _uiState.value.copy(settings = updatedSettings)
+                   loadSettings()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to update settings")
             }
         }
     }

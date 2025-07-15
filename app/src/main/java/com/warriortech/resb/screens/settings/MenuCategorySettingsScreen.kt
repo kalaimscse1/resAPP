@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -16,96 +17,134 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.MenuCategorySettingsViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuCategorySettingsScreen(
+    onBackPressed: () -> Unit,
     viewModel: MenuCategorySettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<MenuCategory?>(null) }
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadCategories()
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Button(
-            onClick = { showAddDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Category")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (uiState) {
-            is MenuCategorySettingsViewModel.UiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("MenuCategory Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add MenuCategory")
             }
-            is MenuCategorySettingsViewModel.UiState.Success -> {
-                LazyColumn {
-                    items((uiState as MenuCategorySettingsViewModel.UiState.Success).categories) { category ->
-                        CategoryCard(
-                            category = category,
-                            onEdit = { editingCategory = it },
-                            onDelete = { 
-                                scope.launch { 
-                                    viewModel.deleteCategory(it.item_cat_id)
-                                }
-                            }
-                        )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Button(
+                onClick = { showAddDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add Category")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (val state=uiState) {
+                is MenuCategorySettingsViewModel.UiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
-            }
-            is MenuCategorySettingsViewModel.UiState.Error -> {
-                Text(
-                    text = (uiState as MenuCategorySettingsViewModel.UiState.Error).message,
-                    color = MaterialTheme.colorScheme.error
-                )
+
+                is MenuCategorySettingsViewModel.UiState.Success -> {
+                    if (state.categories.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No categories found", style = MaterialTheme.typography.bodyLarge)
+                        }
+                        return@Column
+                    }else{
+                    LazyColumn {
+                        items(state.categories) { category ->
+                            CategoryCard(
+                                category = category,
+                                onEdit = { editingCategory = it },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteCategory(it.item_cat_id)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                  }
+                }
+
+                is MenuCategorySettingsViewModel.UiState.Error -> {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
-    }
 
-    if (showAddDialog) {
-        CategoryDialog(
-            category = null,
-            onDismiss = { showAddDialog = false },
-            onConfirm = { name, description, sortOrder ->
-                scope.launch {
-                    viewModel.addCategory(name, description, sortOrder)
-                    showAddDialog = false
+        if (showAddDialog) {
+            CategoryDialog(
+                category = null,
+                onDismiss = { showAddDialog = false },
+                onConfirm = { name, description, sortOrder ->
+                    scope.launch {
+                        viewModel.addCategory(name, description, sortOrder)
+                        showAddDialog = false
+                    }
                 }
-            }
-        )
-    }
+            )
+        }
 
-    editingCategory?.let { category ->
-        CategoryDialog(
-            category = category,
-            onDismiss = { editingCategory = null },
-            onConfirm = { name, description, sortOrder ->
-                scope.launch {
-                    viewModel.updateCategory(category.item_cat_id, name, description, sortOrder)
-                    editingCategory = null
+        editingCategory?.let { category ->
+            CategoryDialog(
+                category = category,
+                onDismiss = { editingCategory = null },
+                onConfirm = { name, description, sortOrder ->
+                    scope.launch {
+                        viewModel.updateCategory(category.item_cat_id, name, description, sortOrder)
+                        editingCategory = null
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }
 
@@ -131,15 +170,6 @@ fun CategoryCard(
                     text = category.item_cat_name,
                     style = MaterialTheme.typography.titleMedium
                 )
-//                Text(
-//                    text = category.,
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant
-//                )
-//                Text(
-//                    text = "Sort Order: ${category.sortOrder}",
-//                    style = MaterialTheme.typography.bodySmall
-//                )
             }
 
             IconButton(onClick = { onEdit(category) }) {

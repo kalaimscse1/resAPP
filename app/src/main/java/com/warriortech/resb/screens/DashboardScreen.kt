@@ -26,6 +26,7 @@ import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
 import kotlinx.coroutines.launch
 import com.warriortech.resb.R
+import com.warriortech.resb.ui.theme.GradientStart
 
 /**
  * DashboardScreen displays the main dashboard with real-time metrics,
@@ -88,7 +89,10 @@ fun DashboardScreen(
                             contentDescription = "Refresh"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->

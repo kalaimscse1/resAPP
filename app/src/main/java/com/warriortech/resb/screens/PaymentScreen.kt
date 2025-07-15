@@ -32,6 +32,7 @@ import com.warriortech.resb.ui.viewmodel.PaymentProcessingState
 import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.theme.GradientStart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,7 +99,7 @@ fun PaymentScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = GradientStart,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )

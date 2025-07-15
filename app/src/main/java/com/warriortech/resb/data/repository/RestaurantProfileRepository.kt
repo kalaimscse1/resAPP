@@ -1,8 +1,9 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
+
 import com.warriortech.resb.model.RestaurantProfile
+import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 

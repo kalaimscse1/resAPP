@@ -4,6 +4,7 @@ import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TableEntity
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor
@@ -24,21 +25,18 @@ class TableRepository @Inject constructor(
     private val connectionState = networkMonitor.isOnline
 
     // Offline-first approach: Always return local data immediately, sync in background
-    fun getAllTables(): Flow<List<Table>> {
-        return tableDao.getAllTables()
-            .map { entities -> entities.map { it.toModel() } }
-            .onStart {
-                // Try to sync in background when flow starts
-                if (isOnline()) {
-                    syncTablesFromRemote()
-                }
+    suspend fun getAllTables(): Flow<List<Table>> = flow {
+        try {
+            val  response  = apiService.getAllTables()
+            if (response.isSuccessful){
+                emit(response.body()!!)
+            }else {
+                throw Exception("Failed to fetch table: ${response.message()}")
             }
+        } catch (e: Exception) {
+            throw e
+        }
     }
-
-
-
-
-
     suspend fun deleteTable(tableId: Int) {
         val response = apiService.deleteTable(tableId)
         if (!response.isSuccessful) {
@@ -56,14 +54,18 @@ class TableRepository @Inject constructor(
         }
     }
 
-    fun getTablesBySection(section: Long): Flow<List<Table>> {
-        return tableDao.getTablesBySection(section)
-            .map { entities -> entities.map { it.toModel() } }
-            .onStart {
-                if (isOnline()) {
-                    syncTablesFromRemote()
-                }
+    fun getTablesBySection(section: Long): Flow<List<Table>> =flow {
+        try {
+            val response = apiService.getTablesBySection(section)
+            if (response.isSuccessful) {
+
+            emit(response.body()!!)
+            } else {
+                throw Exception("Failed to fetch tables: ${response.message()}")
             }
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     suspend fun updateTableStatus(tableId: Long, status: String): Boolean {
@@ -96,7 +98,17 @@ class TableRepository @Inject constructor(
         safeApiCall(
             onSuccess = { remoteTables: List<Table> ->
                 withContext(Dispatchers.IO) {
-                    val entities = remoteTables.map { it.toEntity() }
+                    val entities = remoteTables.map { TableEntity(
+                        table_id = it.table_id,
+                        table_name = it.table_name,
+                        seating_capacity = it.seating_capacity,
+                        is_ac = it.is_ac,
+                        table_status = it.table_status,
+                        area_id = it.area_id,
+                        table_availabiltiy = it.table_availability,
+                        is_active = it.is_active,
+                        syncStatus = SyncStatus.SYNCED
+                    ) }
                     tableDao.insertTables(entities)
                 }
             },
@@ -114,7 +126,7 @@ class TableRepository @Inject constructor(
         val data =apiService.getTablesByStatus(tableId)
         return data.is_ac
     }
-    suspend fun insertTable(table: Table) {
+    suspend fun insertTable(table: TblTable) {
         safeApiCall {
             val entity = table.toEntity()
             tableDao.insertTable(entity)
@@ -127,7 +139,7 @@ class TableRepository @Inject constructor(
 
     // Get tables that need to be synced
     suspend fun getPendingSyncTables() = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
-    suspend fun updateTable(table: Table) {
+    suspend fun updateTable(table: TblTable) {
         safeApiCall {
             val entity = table.toEntity()
             tableDao.updateTable(entity)
@@ -148,12 +160,12 @@ class TableRepository @Inject constructor(
     }
 
     suspend fun getTableById(tableId: Long): Table? {
-        return tableDao.getTableById(tableId)?.toModel()
+        return tableDao.getTableById(tableId)?.toModel() as Table?
     }
 }
 
 // Extension functions for entity conversion
-private fun Table.toEntity() = TableEntity(
+private fun TblTable.toEntity() = TableEntity(
     table_id = table_id,
     table_name = table_name,
     table_status = table_status,
@@ -161,18 +173,17 @@ private fun Table.toEntity() = TableEntity(
     syncStatus = SyncStatus.SYNCED,
     seating_capacity = seating_capacity,
     is_ac = is_ac,
-    area_name = area_name,
     table_availabiltiy = table_availability,
-    is_active = true
+    is_active = is_active
 )
 
-private fun TableEntity.toModel() = Table(
+private fun TableEntity.toModel() = TblTable(
     table_id = table_id,
     table_name = table_name,
     table_status = table_status,
     area_id = area_id,
-    area_name = area_name,
     seating_capacity = seating_capacity,
     is_ac = is_ac,
-    table_availability = table_availabiltiy
+    table_availability = table_availabiltiy,
+    is_active = is_active
 )

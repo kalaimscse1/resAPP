@@ -24,6 +24,7 @@ import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.ui.theme.GradientStart
 
 //fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
@@ -140,7 +141,10 @@ fun BillingScreen(
                             )
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         },
         bottomBar = {

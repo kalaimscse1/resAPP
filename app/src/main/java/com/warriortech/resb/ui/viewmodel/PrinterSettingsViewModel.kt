@@ -70,7 +70,7 @@ class PrinterSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deletePrinter(id: Int) {
+    fun deletePrinter(id: Long) {
         viewModelScope.launch {
             try {
                 val success = printerRepository.deletePrinter(id)

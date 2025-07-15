@@ -1,8 +1,9 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
+
 import com.warriortech.resb.model.Voucher
+import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +43,7 @@ class VoucherRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteVoucher(id: Int): Boolean {
+    suspend fun deleteVoucher(id: Long): Boolean {
         return try {
             apiService.deleteVoucher(id)
             true

@@ -1,8 +1,9 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
+
 import com.warriortech.resb.model.Tax
+import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +43,7 @@ class TaxRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteTax(id: Int): Boolean {
+    suspend fun deleteTax(id: Long): Boolean {
         return try {
             apiService.deleteTax(id)
             true
