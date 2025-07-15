@@ -25,6 +25,7 @@ import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.GeneralSettings
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblTable
+import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.util.AreaDropdown
 import com.warriortech.resb.util.StringDropdown
@@ -88,11 +89,27 @@ fun GeneralSettingsScreen(
                 } else{
                     LazyColumn {
                         items(state.generalSettings) { setting ->
-                          GeneralSettingItem(
+//                          GeneralSettingItem(
+//                                setting = setting,
+//                                onEdit = {
+//                                    editingTable = setting
+//                                    showAddDialog = true
+//                                }
+//                            )
+
+                            GeneralSettingDialog(
                                 setting = setting,
-                                onEdit = {
-                                    editingTable = setting
-                                    showAddDialog = true
+                                onDismiss = {
+                                    showAddDialog = false
+                                    editingTable = null
+                                },
+                                onSave = { newSetting ->
+                                    scope.launch {
+                                        viewModel.updateSettings(newSetting)
+                                        snackbarHostState.showSnackbar("General Settings updated successfully")
+                                    }
+                                    showAddDialog = false
+                                    editingTable = null
                                 }
                             )
                         }
@@ -120,29 +137,29 @@ fun GeneralSettingsScreen(
                 }
             }
           }
-         if (showAddDialog || editingTable != null) {
-            GeneralSettingDialog(
-                setting = editingTable,
-                onDismiss = {
-                    showAddDialog = false
-                    editingTable = null
-                },
-                onSave = { newSetting ->
-                    scope.launch {
-                        try {
-                            if (editingTable != null) {
-                                viewModel.updateSettings(newSetting)
-                                snackbarHostState.showSnackbar("General Settings updated successfully")
-                            }
-                        } catch (e: Exception) {
-                            snackbarHostState.showSnackbar("Error: ${e.message}")
-                        }
-                    }
-                    showAddDialog = false
-                    editingTable = null
-                }
-            )
-         }
+//         if (showAddDialog || editingTable != null) {
+//            GeneralSettingDialog(
+//                setting = editingTable,
+//                onDismiss = {
+//                    showAddDialog = false
+//                    editingTable = null
+//                },
+//                onSave = { newSetting ->
+//                    scope.launch {
+//                        try {
+//                            if (editingTable != null) {
+//                                viewModel.updateSettings(newSetting)
+//                                snackbarHostState.showSnackbar("General Settings updated successfully")
+//                            }
+//                        } catch (e: Exception) {
+//                            snackbarHostState.showSnackbar("Error: ${e.message}")
+//                        }
+//                    }
+//                    showAddDialog = false
+//                    editingTable = null
+//                }
+//            )
+//         }
 
        }
     }
@@ -220,6 +237,7 @@ fun GeneralSettingItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GeneralSettingDialog(
     setting: GeneralSettings?,
@@ -235,121 +253,113 @@ fun GeneralSettingDialog(
     var discBy by remember { mutableStateOf(setting?.disc_by?.toString() ?: "") }
     var discAmt by remember { mutableStateOf(setting?.disc_amt?.toString() ?: "") }
     var isTendered by remember { mutableStateOf(setting?.is_tendered ?: false) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (setting != null) "Edit Setting" else "Add Setting") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = companyNameFont,
-                    onValueChange = { companyNameFont = it },
-                    label = { Text("Company Name Font") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = addressFont,
-                    onValueChange = { addressFont = it },
-                    label = { Text("Address Font") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isTax,
-                        onCheckedChange = { isTax = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Is Tax")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isTaxIncluded,
-                        onCheckedChange = { isTaxIncluded = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("IS Tax Included")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isRoundOff,
-                        onCheckedChange = { isRoundOff = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("IS Round Off")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isAllowedDisc,
-                        onCheckedChange = { isAllowedDisc = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("IS Allowed Discount")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = discBy,
-                    onValueChange = { discBy = it },
-                    label = { Text("Address Font") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = discAmt,
-                    onValueChange = { discAmt = it },
-                    label = { Text("Address Font") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isTendered,
-                        onCheckedChange = { isTendered = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("IS Tendered")
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val newSetting = GeneralSettings(
-                        id = setting?.id ?: 0,
-                        company_name_font = companyNameFont.toInt(),
-                        address_font = addressFont.toInt(),
-                        is_tax = isTax,
-                        is_tax_included = isTaxIncluded,
-                        is_round_off = isRoundOff,
-                        is_allowed_disc = isAllowedDisc,
-                        disc_by = discBy.toIntOrNull() ?: 0,
-                        disc_amt = discAmt.toDoubleOrNull() ?: 0.0,
-                        is_tendered = isTendered
-                    )
-                    onSave(newSetting)
-                },
-                enabled = companyNameFont.isNotBlank() && addressFont.isNotBlank()
-            ) {
-                Text(if (setting != null) "Update" else "Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+
+    Column {
+        OutlinedTextField(
+            value = companyNameFont,
+            onValueChange = { companyNameFont = it },
+            label = { Text("Company Name Font") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = addressFont,
+            onValueChange = { addressFont = it },
+            label = { Text("Address Font") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isTax,
+                onCheckedChange = { isTax = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Is Tax")
         }
-    )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isTaxIncluded,
+                onCheckedChange = { isTaxIncluded = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS Tax Included")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isRoundOff,
+                onCheckedChange = { isRoundOff = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS Round Off")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isAllowedDisc,
+                onCheckedChange = { isAllowedDisc = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS Allowed Discount")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = discBy,
+            onValueChange = { discBy = it },
+            label = { Text("Discount By") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = discAmt,
+            onValueChange = { discAmt = it },
+            label = { Text("Discount Amount") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isTendered,
+                onCheckedChange = { isTendered = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS Tendered")
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = {
+                val newSetting = GeneralSettings(
+                    id = setting?.id ?: 0,
+                    company_name_font = companyNameFont.toInt(),
+                    address_font = addressFont.toInt(),
+                    is_tax = isTax,
+                    is_tax_included = isTaxIncluded,
+                    is_round_off = isRoundOff,
+                    is_allowed_disc = isAllowedDisc,
+                    disc_by = discBy.toIntOrNull() ?: 0,
+                    disc_amt = discAmt.toDoubleOrNull() ?: 0.0,
+                    is_tendered = isTendered
+                )
+                onSave(newSetting)
+            }
+        ){
+            Text(
+                text = if (setting == null) "Add Setting" else "Update ",
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
 }

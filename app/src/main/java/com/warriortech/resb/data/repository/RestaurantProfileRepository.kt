@@ -4,6 +4,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.RestaurantProfile
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +14,7 @@ class RestaurantProfileRepository @Inject constructor(
 ) {
     suspend fun getRestaurantProfile(): RestaurantProfile? {
         return try {
-            apiService.getRestaurantProfile()
+            apiService.getRestaurantProfile(SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -21,7 +22,7 @@ class RestaurantProfileRepository @Inject constructor(
 
     suspend fun updateRestaurantProfile(profile: RestaurantProfile): RestaurantProfile? {
         return try {
-            apiService.updateRestaurantProfile(profile)
+            apiService.updateRestaurantProfile(SessionManager.getCompanyCode()?:"",profile)
         } catch (e: Exception) {
             null
         }

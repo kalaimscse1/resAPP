@@ -390,11 +390,11 @@ interface ApiService {
     suspend fun deleteTaxSplit(@Path("id") id: Long)
 
     // Restaurant Profile endpoints
-    @GET("restaurant-profile")
-    suspend fun getRestaurantProfile(): RestaurantProfile
+    @GET("company/getCompany/{company_code}")
+    suspend fun getRestaurantProfile(@Path("company_code") companyCode:String): RestaurantProfile
 
-    @PUT("restaurant-profile")
-    suspend fun updateRestaurantProfile(@Body profile: RestaurantProfile): RestaurantProfile
+    @PUT("company/updateCompany/{company_code}")
+    suspend fun updateRestaurantProfile(@Path("company_code") companyCode:String,@Body profile: RestaurantProfile): RestaurantProfile
 
     // General Settings endpoints
     @GET("settings/generalSetting/getAllGeneralSetting")

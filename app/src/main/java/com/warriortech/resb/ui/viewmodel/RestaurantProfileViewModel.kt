@@ -4,42 +4,38 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RestaurantProfileRepository
+import com.warriortech.resb.model.GeneralSettings
 import com.warriortech.resb.model.RestaurantProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class RestaurantProfileUiState(
-    val profile: RestaurantProfile? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
+
 
 @HiltViewModel
 class RestaurantProfileViewModel @Inject constructor(
     private val restaurantProfileRepository: RestaurantProfileRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RestaurantProfileUiState())
-    val uiState: StateFlow<RestaurantProfileUiState> = _uiState
-
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val profile: RestaurantProfile) : UiState()
+        data class Error(val message: String) : UiState()
+    }
     fun loadProfile() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+
             try {
+                _uiState.value = UiState.Loading
                 val profile = restaurantProfileRepository.getRestaurantProfile()
-                _uiState.value = _uiState.value.copy(
-                    profile = profile,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = UiState.Success(profile!!)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -49,10 +45,10 @@ class RestaurantProfileViewModel @Inject constructor(
             try {
                 val updatedProfile = restaurantProfileRepository.updateRestaurantProfile(profile)
                 if (updatedProfile != null) {
-                    _uiState.value = _uiState.value.copy(profile = updatedProfile)
+                    loadProfile()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to update profile")
             }
         }
     }
