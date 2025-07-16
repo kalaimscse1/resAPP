@@ -1,13 +1,19 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.BillRepository
 import com.warriortech.resb.data.repository.OrderRepository
+import com.warriortech.resb.model.Bill
+import com.warriortech.resb.model.BillItem
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.service.PrintService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,7 +70,7 @@ class BillingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val billRepository: BillRepository,
      private val orderRepository: OrderRepository,
-    private val printService: com.warriortech.resb.service.PrintService
+    private val printService: PrintService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
@@ -294,6 +300,7 @@ class BillingViewModel @Inject constructor(
         _uiState.update { it.copy(amountToPay = amount) }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun processPayment() {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
@@ -316,7 +323,7 @@ class BillingViewModel @Inject constructor(
                 // 1. Calling a payment gateway SDK or your backend API.
                 // 2. Handling success/failure responses.
                 // 3. If successful, creating an Order record and saving it.
-                kotlinx.coroutines.delay(2000) // Simulate network delay
+                delay(2000) // Simulate network delay
 
                 // Example: If payment is successful
                 val transactionId = UUID.randomUUID().toString()
@@ -333,11 +340,51 @@ class BillingViewModel @Inject constructor(
                     transactionId = transactionId,
                     timestamp = System.currentTimeMillis()
                 )
-                // orderRepository.saveOrder(paidOrder) // Save the order
-
                 _uiState.update {
                     it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
                 }
+                billRepository.placeBill(
+                    orderMasterId = currentState.orderMasterId ?: 0L,
+                    paymentMethod = paymentMethod,
+                    receivedAmt = currentState.amountReceived
+                ).collect { result->
+                    result.fold(
+                        onSuccess = { response ->
+                            var sn = 1
+                            val billItems = currentState.billedItems.map { (menuItem, qty) ->
+                                BillItem(
+                                    sn = sn,
+                                    itemName = menuItem.menu_item_name,
+                                    qty = qty,
+                                    price = menuItem.rate,
+                                    amount = qty * menuItem.rate,
+                                    sgstPercent = menuItem.tax_percentage.toDouble()/ 2,
+                                    cgstPercent = menuItem.tax_percentage.toDouble()/ 2,
+                                    igstPercent = 0.0,
+                                    cessPercent = 0.0,
+                                    sgst = TODO(),
+                                    cgst = TODO(),
+                                    igst = TODO(),
+                                    cess = TODO(),
+                                    cess_specific = TODO()
+                                )
+                                sn = sn + 1
+                            }
+                            // Handle successful payment response
+                            // For example, you might want to update the UI or save the order
+
+                        },
+                        onFailure = { error ->
+                            // Handle payment failure
+                            _uiState.update {
+                                it.copy(paymentProcessingState = PaymentProcessingState.Error("Payment failed: ${error.message}"))
+                            }
+                        }
+                    )
+                }
+                // orderRepository.saveOrder(paidOrder) // Save the order
+
+
 
             } catch (e: Exception) {
                 // Log the exception e
@@ -347,6 +394,12 @@ class BillingViewModel @Inject constructor(
             }
         }
     }
+    private fun printBill(bill : Bill) {
+        viewModelScope.launch {
+
+        }
+    }
+
 
     fun updatePaymentMethod(paymentMethodName: String) {
         val paymentMethod = _uiState.value.availablePaymentMethods.find { it.name == paymentMethodName }

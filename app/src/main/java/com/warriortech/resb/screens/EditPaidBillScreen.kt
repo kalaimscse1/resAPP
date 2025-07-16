@@ -16,10 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.R
 import com.warriortech.resb.model.PaidBill
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
 import com.warriortech.resb.util.getLocalizedString
+import com.warriortech.resb.util.stringResource
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -55,7 +57,7 @@ fun EditPaidBillScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(getLocalizedString("edit_bill")) },
+                title = { Text(stringResource(R.string.edit_bill)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -93,7 +95,7 @@ fun EditPaidBillScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(getLocalizedString("bill_not_found"))
+                    Text(stringResource(R.string.bill_not_found))
                 }
             }
         }
@@ -127,18 +129,18 @@ fun EditBillContent(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = getLocalizedString("bill_information"),
+                    text = stringResource(R.string.bill_information),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                BillInfoRow(getLocalizedString("bill_number"), bill.billNo)
-                BillInfoRow(getLocalizedString("order_id"), bill.orderMasterId.toString())
-                BillInfoRow(getLocalizedString("table_number"), bill.tableNo)
-                BillInfoRow(getLocalizedString("payment_date"), dateFormatter.format(bill.paymentDate))
-                BillInfoRow(getLocalizedString("payment_method"), bill.paymentMethod)
-                BillInfoRow(getLocalizedString("status"), bill.status)
+                BillInfoRow(stringResource(R.string.bill_number), bill.billNo)
+                BillInfoRow(stringResource(R.string.order_id), bill.orderMasterId.toString())
+                BillInfoRow(stringResource(R.string.table_number), bill.tableNo)
+                BillInfoRow(stringResource(R.string.payment_date), dateFormatter.format(bill.paymentDate))
+                BillInfoRow(stringResource(R.string.payment_method), bill.paymentMethod)
+                BillInfoRow(stringResource(R.string.status), bill.status)
             }
         }
 
@@ -150,7 +152,7 @@ fun EditBillContent(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = getLocalizedString("customer_information"),
+                    text = stringResource(R.string.customer_information),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -159,7 +161,7 @@ fun EditBillContent(
                 OutlinedTextField(
                     value = customerName,
                     onValueChange = { customerName = it },
-                    label = { Text(getLocalizedString("customer_name")) },
+                    label = { Text(stringResource(R.string.customer_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -168,7 +170,7 @@ fun EditBillContent(
                 OutlinedTextField(
                     value = customerPhone,
                     onValueChange = { customerPhone = it },
-                    label = { Text(getLocalizedString("customer_phone")) },
+                    label = { Text(stringResource(R.string.customer_phone)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -182,7 +184,7 @@ fun EditBillContent(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = getLocalizedString("bill_items"),
+                    text = stringResource(R.string.bill_items),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -201,12 +203,12 @@ fun EditBillContent(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                 }
-                
+
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
                 
-                BillInfoRow(getLocalizedString("subtotal"), "₹${bill.subtotal}")
-                BillInfoRow(getLocalizedString("tax"), "₹${bill.taxAmount}")
-                BillInfoRow(getLocalizedString("discount"), "₹${bill.discountAmount}")
+                BillInfoRow(stringResource(R.string.subtotal), "₹${bill.subtotal}")
+                BillInfoRow(stringResource(R.string.tax), "₹${bill.taxAmount}")
+                BillInfoRow(stringResource(R.string.discount), "₹${bill.discountAmount}")
                 
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
                 
@@ -215,7 +217,7 @@ fun EditBillContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = getLocalizedString("total"),
+                        text = stringResource(R.string.total),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -236,7 +238,7 @@ fun EditBillContent(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = getLocalizedString("notes"),
+                    text = stringResource(R.string.notes),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -245,7 +247,7 @@ fun EditBillContent(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text(getLocalizedString("add_notes")) },
+                    label = { Text(stringResource(R.string.add_notes)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5
@@ -267,7 +269,7 @@ fun EditBillContent(
         ) {
             Icon(Icons.Default.Save, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(getLocalizedString("save_changes"))
+            Text(stringResource(R.string.save_changes))
         }
     }
 }

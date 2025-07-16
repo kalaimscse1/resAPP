@@ -18,10 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.R
 import com.warriortech.resb.model.PaidBillSummary
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
 import com.warriortech.resb.util.getLocalizedString
+import com.warriortech.resb.util.stringResource
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -73,7 +75,7 @@ fun PaidBillsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(getLocalizedString("paid_bills")) },
+                title = { Text(stringResource(R.string.paid_bills)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -119,8 +121,8 @@ fun PaidBillsScreen(
                 ) {
                     Text(
                         text = if (uiState.searchQuery.isBlank()) 
-                            getLocalizedString("no_paid_bills") 
-                        else getLocalizedString("no_bills_found"),
+                            stringResource(R.string.no_paid_bills)
+                        else stringResource(R.string.no_bills_found),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -157,7 +159,7 @@ fun SearchBar(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier,
-        placeholder = { Text(getLocalizedString("search_bills")) },
+        placeholder = { Text(stringResource(R.string.search_bills)) },
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = null)
         },
@@ -244,7 +246,7 @@ fun PaidBillCard(
                 ) {
                     Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(getLocalizedString("view"))
+                    Text(stringResource(R.string.view))
                 }
                 
                 OutlinedButton(
@@ -253,7 +255,7 @@ fun PaidBillCard(
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(getLocalizedString("edit"))
+                    Text(stringResource(R.string.edit))
                 }
                 
                 OutlinedButton(
@@ -262,7 +264,7 @@ fun PaidBillCard(
                 ) {
                     Icon(Icons.Default.Undo, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(getLocalizedString("refund"))
+                    Text(stringResource(R.string.refund))
                 }
                 
                 OutlinedButton(
@@ -274,7 +276,7 @@ fun PaidBillCard(
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(getLocalizedString("delete"))
+                    Text(stringResource(R.string.delete))
                 }
             }
         }
@@ -289,9 +291,9 @@ fun DeleteBillDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(getLocalizedString("delete_bill")) },
+        title = { Text(stringResource(R.string.delete_bill)) },
         text = {
-            Text(getLocalizedString("delete_bill_confirmation", bill.billNo))
+            Text(stringResource(R.string.delete_bill_confirmation, bill.billNo))
         },
         confirmButton = {
             TextButton(
@@ -300,12 +302,12 @@ fun DeleteBillDialog(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text(getLocalizedString("delete"))
+                Text(stringResource(R.string.delete))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(getLocalizedString("cancel"))
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -322,16 +324,16 @@ fun RefundBillDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(getLocalizedString("refund_bill")) },
+        title = { Text(stringResource(R.string.refund_bill)) },
         text = {
             Column {
-                Text(getLocalizedString("refund_bill_info", bill.billNo))
+                Text(stringResource(R.string.refund_bill_info, bill.billNo))
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 OutlinedTextField(
                     value = refundAmount,
                     onValueChange = { refundAmount = it },
-                    label = { Text(getLocalizedString("refund_amount")) },
+                    label = { Text(stringResource(R.string.refund_amount)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 
@@ -340,7 +342,7 @@ fun RefundBillDialog(
                 OutlinedTextField(
                     value = reason,
                     onValueChange = { reason = it },
-                    label = { Text(getLocalizedString("reason")) },
+                    label = { Text(stringResource(R.string.reason)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -358,12 +360,12 @@ fun RefundBillDialog(
                          refundAmount.toDoubleOrNull()!! > 0 && 
                          reason.isNotBlank()
             ) {
-                Text(getLocalizedString("refund"))
+                Text(stringResource(R.string.refund))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(getLocalizedString("cancel"))
+                Text(stringResource(R.string.cancel))
             }
         }
     )

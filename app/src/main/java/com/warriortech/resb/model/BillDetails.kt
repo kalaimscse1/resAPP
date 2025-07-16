@@ -65,15 +65,7 @@ data class BillItem(
     val itemName: String,
     val qty: Int,
     val price: Double,
-    val amount: Double
-)
-
-data class Bill(
-    val company_code: String,
-    val items: List<BillItem>,
-    val subtotal: Double,
-    val billNo: String,
-    val date: String,
+    val amount: Double,
     val sgstPercent: Double,
     val cgstPercent: Double,
     val igstPercent: Double,
@@ -83,11 +75,12 @@ data class Bill(
     val igst: Double,
     val cess: Double,
     val cess_specific: Double,
-    val deliveryCharge: Double,
-    val discount: Double,
-    val roundedAmount: Double,
-    val total: Double,
-    val paperWidth: Int = 48,
+)
+
+data class Bill(
+    val company_code: String,
+    val billNo: String,
+    val date: String,
     val time:String,
     val orderNo:Long,
     val counter:String,
@@ -95,5 +88,12 @@ data class Bill(
     val custName:String,
     val custNo:String,
     val custAddress:String,
-    val custGstin:String
+    val custGstin:String ,
+    val items: List<BillItem>,
+    val subtotal: Double,
+    val deliveryCharge: Double,
+    val discount: Double,
+    val roundOff: Double,
+    val total: Double,
+    val paperWidth: Int = 48,
 )

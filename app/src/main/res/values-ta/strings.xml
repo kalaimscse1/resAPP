@@ -3,10 +3,7 @@
 
     <!-- Common -->
     <string name="ok">சரி</string>
-    <string name="cancel">ரத்து</string>
-    <string name="save">சேமி</string>
-    <string name="delete">நீக்கு</string>
-    <string name="edit">திருத்து</string>
+    <string name="save">சேமி</string>>
     <string name="add">சேர்</string>
     <string name="search">தேடு</string>
     <string name="loading">ஏற்றுகிறது…</string>
@@ -253,16 +250,11 @@
     <string name="bill_information">பில் தகவல்</string>
     <string name="bill_number">பில் எண்</string>
     <string name="order_id">ஆர்டர் ஐடி</string>
-    <string name="table_number">மேசை எண்</string>
     <string name="payment_date">பணம் செலுத்திய தேதி</string>
-    <string name="payment_method">பணம் செலுத்தும் முறை</string>
     <string name="status">நிலை</string>
     <string name="customer_information">வாடிக்கையாளர் தகவல்</string>
-    <string name="customer_name">வாடிக்கையாளர் பெயர்</string>
-    <string name="customer_phone">வாடிக்கையாளர் தொலைபேசி</string>
     <string name="bill_items">பில் பொருட்கள்</string>
     <string name="subtotal">துணை மொத்தம்</string>
-    <string name="tax">வரி</string>
     <string name="discount">தள்ளுபடி</string>
     <string name="total">மொத்தம்</string>
     <string name="notes">குறிப்புகள்</string>

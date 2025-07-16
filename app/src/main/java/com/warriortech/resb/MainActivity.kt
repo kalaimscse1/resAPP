@@ -527,7 +527,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             RestaurantProfileScreen(onBackPressed = { navController.popBackStack() })
         }
         composable("general_settings") {
-            GeneralSettingsScreen(navController = navController)
+            GeneralSettingsScreen(
+                onBackPressed = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable("paid_bills") {
@@ -647,6 +651,15 @@ fun DrawerContent(
                 selected = currentDestination?.route == "orders",
                 onClick = {
                     onDestinationClicked("orders")
+                },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+            NavigationDrawerItem(
+                label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                selected = currentDestination?.route == "paid_bills",
+                onClick = {
+                    onDestinationClicked("paid_bills")
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )

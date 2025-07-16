@@ -343,6 +343,24 @@ interface ApiService {
     @POST("payment/addPayment")
     suspend fun addPayment(@Body paymentRequest: TblBillingRequest): Response<TblBillingResponse>
 
+    @GET("paid-bills")
+    suspend fun getAllPaidBills(): Response<List<PaidBillSummary>>
+
+    @GET("paid-bills/{id}")
+    suspend fun getPaidBillById(@Path("id") id: Long): Response<PaidBill>
+
+    @PUT("paid-bills/{id}")
+    suspend fun updatePaidBill(@Path("id") id: Long, @Body billData: PaidBill): Response<PaidBill>
+
+    @DELETE("paid-bills/{id}")
+    suspend fun deletePaidBill(@Path("id") id: Long): Response<Unit>
+
+    @POST("paid-bills/{id}/refund")
+    suspend fun refundBill(@Path("id") id: Long, @Body refundData: Map<String, Any>): Response<PaidBill>
+
+    @GET("paid-bills/search")
+    suspend fun searchPaidBills(@Query("q") query: String): Response<List<PaidBillSummary>>
+
 
 
     /**

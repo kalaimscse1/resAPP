@@ -175,7 +175,7 @@ class PaidBillsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Error deleting bill: ${e.message()}",
+                        errorMessage = "Error deleting bill: ${e.message}",
                         showDeleteDialog = false
                     )
                 }
@@ -212,7 +212,7 @@ class PaidBillsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Error refunding bill: ${e.message()}",
+                        errorMessage = "Error refunding bill: ${e.message}",
                         showRefundDialog = false
                     )
                 }

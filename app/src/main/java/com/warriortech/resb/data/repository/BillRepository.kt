@@ -38,7 +38,7 @@ class BillRepository@Inject constructor(
 
     // Add more methods as needed for your application
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun placeBill(orderMasterId: Long,paymentMethod: PaymentMethod,
+    suspend fun placeBill(orderMasterId: Long,paymentMethod: PaymentMethod,receivedAmt: Double
     ): Flow<Result<TblBillingResponse>> = flow {
         try {
             val billNo= apiService.getBillNoByCounterId(SessionManager.getUser()?.counter_id!!).body()
@@ -66,9 +66,9 @@ class BillRepository@Inject constructor(
                 upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total} else 0.0,
                 due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total} else 0.0,
                 others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total} else 0.0,
-                received_amt = 0.0,
-                pending_amt = 0.0,
-                change = 0.0,
+                received_amt = if (paymentMethod.name != "DUE") receivedAmt else 0.0,
+                pending_amt = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total} else 0.0,
+                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total} else 0.0,
                 note = "",
                 is_active = 1L
             )
