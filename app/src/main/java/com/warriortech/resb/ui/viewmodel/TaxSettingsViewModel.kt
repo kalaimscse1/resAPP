@@ -1,45 +1,41 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TaxRepository
+import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.model.Tax
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TaxSettingsUiState(
-    val taxes: List<Tax> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 @HiltViewModel
 class TaxSettingsViewModel @Inject constructor(
     private val taxRepository: TaxRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TaxSettingsUiState())
-    val uiState: StateFlow<TaxSettingsUiState> = _uiState
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val taxes: List<Tax>) : UiState()
+        data class Error(val message: String) : UiState()
+    }
 
     fun loadTaxes() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+
             try {
+                _uiState.value = UiState.Loading
                 val taxes = taxRepository.getAllTaxes()
-                _uiState.value = _uiState.value.copy(
-                    taxes = taxes,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = UiState.Success(taxes)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -52,7 +48,7 @@ class TaxSettingsViewModel @Inject constructor(
                     loadTaxes()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to add tax")
             }
         }
     }
@@ -65,7 +61,7 @@ class TaxSettingsViewModel @Inject constructor(
                     loadTaxes()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to update tax")
             }
         }
     }
@@ -78,7 +74,7 @@ class TaxSettingsViewModel @Inject constructor(
                     loadTaxes()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to delete tax")
             }
         }
     }

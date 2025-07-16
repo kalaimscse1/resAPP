@@ -4,42 +4,45 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TaxSplitRepository
+import com.warriortech.resb.model.Area
+import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TaxSplit
+import com.warriortech.resb.model.TblTaxSplit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TaxSplitSettingsUiState(
-    val taxSplits: List<TaxSplit> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
+
 
 @HiltViewModel
 class TaxSplitSettingsViewModel @Inject constructor(
     private val taxSplitRepository: TaxSplitRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TaxSplitSettingsUiState())
-    val uiState: StateFlow<TaxSplitSettingsUiState> = _uiState
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val _tax = MutableStateFlow<List<Tax>>(emptyList())
+    val taxes: StateFlow<List<Tax>> = _tax
 
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val taxSplits: List<TblTaxSplit>) : UiState()
+        data class Error(val message: String) : UiState()
+    }
     fun loadTaxSplits() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+
             try {
+                _tax.value = taxSplitRepository.getTaxes()
+                _uiState.value = UiState.Loading
                 val taxSplits = taxSplitRepository.getAllTaxSplits()
-                _uiState.value = _uiState.value.copy(
-                    taxSplits = taxSplits,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = UiState.Success(taxSplits)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -52,7 +55,7 @@ class TaxSplitSettingsViewModel @Inject constructor(
                     loadTaxSplits()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to add tax split")
             }
         }
     }
@@ -65,7 +68,7 @@ class TaxSplitSettingsViewModel @Inject constructor(
                     loadTaxSplits()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to update tax split")
             }
         }
     }
@@ -78,7 +81,7 @@ class TaxSplitSettingsViewModel @Inject constructor(
                     loadTaxSplits()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to delete tax split")
             }
         }
     }

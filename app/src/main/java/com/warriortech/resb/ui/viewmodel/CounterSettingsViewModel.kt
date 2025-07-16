@@ -4,47 +4,42 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.CounterRepository
-import com.warriortech.resb.model.Counter
+import com.warriortech.resb.model.TblCounter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class CounterSettingsUiState(
-    val counters: List<Counter> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 @HiltViewModel
 class CounterSettingsViewModel @Inject constructor(
     private val counterRepository: CounterRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CounterSettingsUiState())
-    val uiState: StateFlow<CounterSettingsUiState> = _uiState
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val counters: List<TblCounter>) : UiState()
+        data class Error(val message: String) : UiState()
+    }
 
     fun loadCounters() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
             try {
+                _uiState.value = UiState.Loading
                 val counters = counterRepository.getAllCounters()
-                _uiState.value = _uiState.value.copy(
-                    counters = counters,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = UiState.Success(counters)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    fun addCounter(counter: Counter) {
+    fun addCounter(counter: TblCounter) {
         viewModelScope.launch {
             try {
                 val newCounter = counterRepository.createCounter(counter)
@@ -52,12 +47,12 @@ class CounterSettingsViewModel @Inject constructor(
                     loadCounters()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to add counter")
             }
         }
     }
 
-    fun updateCounter(counter: Counter) {
+    fun updateCounter(counter: TblCounter) {
         viewModelScope.launch {
             try {
                 val updatedCounter = counterRepository.updateCounter(counter)
@@ -65,12 +60,12 @@ class CounterSettingsViewModel @Inject constructor(
                     loadCounters()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to update counter")
             }
         }
     }
 
-    fun deleteCounter(id: Int) {
+    fun deleteCounter(id: Long) {
         viewModelScope.launch {
             try {
                 val success = counterRepository.deleteCounter(id)
@@ -78,7 +73,7 @@ class CounterSettingsViewModel @Inject constructor(
                     loadCounters()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = UiState.Error(e.message ?: "Failed to delete counter")
             }
         }
     }

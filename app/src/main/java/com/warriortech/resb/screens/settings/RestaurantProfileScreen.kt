@@ -66,25 +66,24 @@ fun RestaurantProfileScreen(
                     }
                 }
                 is RestaurantProfileViewModel.UiState.Success -> {
-
-                                GeneralSettingDialog(
-                                    setting = state.profile,
-                                    onDismiss = {
-                                        showAddDialog = false
-                                        editingTable = null
-                                    },
-                                    onSave = { newSetting ->
-                                        scope.launch {
-                                            viewModel.updateSettings(newSetting)
-                                            snackbarHostState.showSnackbar("General Settings updated successfully")
-                                        }
-                                        showAddDialog = false
-                                        editingTable = null
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        item {
+                            CompanySettingDialog(
+                                setting = state.profile,
+                                onSave = { newSetting ->
+                                    scope.launch {
+                                        viewModel.updateProfile(newSetting)
+                                        snackbarHostState.showSnackbar("General Settings updated successfully")
                                     }
-                                )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
 
-
-
+                    }
                 }
                 is RestaurantProfileViewModel.UiState.Error -> {
                     Column(
@@ -99,7 +98,7 @@ fun RestaurantProfileScreen(
                             color = MaterialTheme.colorScheme.error
                         )
                         Button(
-                            onClick = { viewModel.loadSettings() },
+                            onClick = { viewModel.loadProfile() },
                             modifier = Modifier.padding(top = 16.dp)
                         ) {
                             Text("Retry")
@@ -116,7 +115,6 @@ fun RestaurantProfileScreen(
 @Composable
 fun CompanySettingDialog(
     setting: RestaurantProfile?,
-    onDismiss: () -> Unit,
     onSave: (RestaurantProfile) -> Unit
 ) {
     var companyName by remember { mutableStateOf(setting?.company_name ?: "") }
@@ -132,7 +130,6 @@ fun CompanySettingDialog(
     var currency by remember { mutableStateOf(setting?.currency ?: "") }
     var taxNo by remember { mutableStateOf(setting?.tax_no ?: "") }
     var decimalPoint by remember { mutableStateOf(setting?.decimal_point?.toString() ?: "2") }
-
 
     Column {
         OutlinedTextField(
@@ -191,27 +188,66 @@ fun CompanySettingDialog(
             label = { Text("Mail Id") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = country,
+            onValueChange = { country = it },
+            label = { Text("Country") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = state,
+            onValueChange = { state = it },
+            label = { Text("State") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = currency,
+            onValueChange = { currency = it },
+            label = { Text("Currency") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = taxNo,
+            onValueChange = { taxNo = it },
+            label = { Text("Tax No") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = decimalPoint,
+            onValueChange = { decimalPoint = it },
+            label = { Text("Decimal Point") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
             onClick = {
-                val newSetting = GeneralSettings(
-                    id = setting?.id ?: 0,
-                    company_name_font = companyNameFont.toInt(),
-                    address_font = addressFont.toInt(),
-                    is_tax = isTax,
-                    is_tax_included = isTaxIncluded,
-                    is_round_off = isRoundOff,
-                    is_allowed_disc = isAllowedDisc,
-                    disc_by = discBy.toIntOrNull() ?: 0,
-                    disc_amt = discAmt.toDoubleOrNull() ?: 0.0,
-                    is_tendered = isTendered
+                val newSetting = RestaurantProfile(
+                    company_code = setting?.company_code ?: "",
+                    company_name = companyName,
+                    owner_name = ownerName,
+                    address1 = address1,
+                    address2 = address2,
+                    place = place,
+                    pincode = pincode,
+                    contact_no = contactNo,
+                    mail_id = mailId,
+                    country = country,
+                    state = state,
+                    currency = currency,
+                    tax_no = taxNo,
+                    decimal_point = decimalPoint.toLongOrNull() ?: 2L
                 )
                 onSave(newSetting)
             }
         ){
             Text(
-                text = if (setting == null) "Add Setting" else "Update ",
+                text = if (setting == null) "Add" else "Update",
                 fontWeight = FontWeight.Bold
             )
         }

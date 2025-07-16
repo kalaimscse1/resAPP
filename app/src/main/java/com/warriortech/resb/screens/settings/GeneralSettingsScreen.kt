@@ -87,7 +87,10 @@ fun GeneralSettingsScreen(
                     }
                     return@Column
                 } else{
-                    LazyColumn {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
                         items(state.generalSettings) { setting ->
 //                          GeneralSettingItem(
 //                                setting = setting,

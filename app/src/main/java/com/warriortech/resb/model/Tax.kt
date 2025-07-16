@@ -2,12 +2,9 @@
 package com.warriortech.resb.model
 
 data class Tax(
-    val id: Long = 0,
-    val name: String,
-    val rate: Double,
-    val type: String, // "percentage", "fixed"
-    val isActive: Boolean = true,
-    val isInclusive: Boolean = false,
-    val createdAt: String = "",
-    val updatedAt: String = ""
+    val tax_id: Long,
+    val tax_name: String,
+    val tax_percentage: Double,
+    val cess_percentage: Double,
+    val is_active: Boolean,
 )

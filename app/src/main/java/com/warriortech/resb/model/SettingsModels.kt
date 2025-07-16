@@ -29,8 +29,3 @@ data class Printer(
 
 
 
-data class Counter(
-    val id: Long,
-    val name: String,
-    val isActive: Boolean
-)

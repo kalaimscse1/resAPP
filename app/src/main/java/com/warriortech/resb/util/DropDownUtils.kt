@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.warriortech.resb.model.Area
+import com.warriortech.resb.model.Tax
 import kotlin.collections.forEach
 
 
@@ -64,6 +65,62 @@ fun AreaDropdown(
                         text = { Text(area.area_name) },
                         onClick = {
                             onAreaSelected(area)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaxDropdown(
+    taxes: List<Tax>,
+    selectedTax: Tax?,
+    onTaxSelected: (Tax) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Tax"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedTax?.tax_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (taxes.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Taxes available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                taxes.forEach { tax ->
+                    DropdownMenuItem(
+                        text = { Text(tax.tax_name) },
+                        onClick = {
+                            onTaxSelected(tax)
                             expanded = false
                         }
                     )

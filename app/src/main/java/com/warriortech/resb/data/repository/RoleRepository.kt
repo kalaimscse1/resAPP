@@ -12,7 +12,7 @@ class RoleRepository @Inject constructor(
 ) {
     suspend fun getAllRoles(): List<Role> {
         return try {
-            apiService.getRoles()
+            apiService.getRoles().body()!!
         } catch (e: Exception) {
             emptyList()
         }
@@ -20,7 +20,7 @@ class RoleRepository @Inject constructor(
 
     suspend fun getRoleById(id: Int): Role? {
         return try {
-            apiService.getRoleById(id)
+            apiService.getRoleById(id).body()!!
         } catch (e: Exception) {
             null
         }
@@ -28,15 +28,15 @@ class RoleRepository @Inject constructor(
 
     suspend fun createRole(role: Role): Role? {
         return try {
-            apiService.createRole(role)
+            apiService.createRole(role).body()
         } catch (e: Exception) {
             null
         }
     }
 
-    suspend fun updateRole(role: Role): Role? {
+    suspend fun updateRole(role: Role): Int? {
         return try {
-            apiService.updateRole(role.role_id, role)
+            apiService.updateRole(role.role_id, role).body()!!
         } catch (e: Exception) {
             null
         }

@@ -47,16 +47,21 @@ fun MenuCategorySettingsScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = GradientStart
-                )
+                ),
+                actions = {
+                    IconButton(onClick = { showAddDialog = true }) {
+                        Icon(Icons.Default.Add, contentDescription = "Add MenuCategory")
+                    }
+                }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddDialog = true }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add MenuCategory")
-            }
-        },
+//        floatingActionButton = {
+//            FloatingActionButton(
+//                onClick = { showAddDialog = true }
+//            ) {
+//                Icon(Icons.Default.Add, contentDescription = "Add MenuCategory")
+//            }
+//        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
@@ -64,16 +69,16 @@ fun MenuCategorySettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Button(
-                onClick = { showAddDialog = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Add Category")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+//            Button(
+//                onClick = { showAddDialog = true },
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Icon(Icons.Default.Add, contentDescription = null)
+//                Spacer(modifier = Modifier.width(8.dp))
+//                Text("Add Category")
+//            }
+//
+//            Spacer(modifier = Modifier.height(16.dp))
 
             when (val state=uiState) {
                 is MenuCategorySettingsViewModel.UiState.Loading -> {

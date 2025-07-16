@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Role
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.RoleSettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -50,7 +51,10 @@ fun RoleSettingsScreen(
                     IconButton(onClick = { showAddDialog = true }) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_role))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

@@ -193,11 +193,145 @@ interface ApiService {
      * Settings Management
      */
 
+    /**
+     * CounterSettings Management
+     */
+
+    @GET("settings/counter/getCounterByIsActive")
+    suspend fun getCounters(): List<TblCounter>
+
+    @GET("settings/counter/getCounter/{counter_id}")
+    suspend fun getCounterById(@Path("counter_id") id: Long): TblCounter
+
+    @POST("settings/counter/addCounter")
+    suspend fun createCounter(@Body counter: TblCounter): TblCounter
+
+    @PUT("settings/counter/updateCounter/{counter_id}")
+    suspend fun updateCounter(@Path("counter_id") id: Long, @Body counter: TblCounter): Int
+
+    @DELETE("settings/counter/deleteCounterById/{counter_id}")
+    suspend fun deleteCounter(@Path("id") id: Long)
+
+    /**
+     * RoleSettings Management
+     */
+
+    @GET("role/getRoleByIsActive")
+    suspend fun getRoles(): Response<List<Role>>
+
+    @GET("role/{role_id}")
+    suspend fun getRoleById(@Path("role_id") id: Int): Response<Role>
+
+    @POST("role/addRole")
+    suspend fun createRole(@Body role: Role): Response<Role>
+
+    @PUT("roles/{role_id}")
+    suspend fun updateRole(@Path("role_id") id: Long, @Body role: Role): Response<Int>
+
+    @DELETE("roles/{role_id}")
+    suspend fun deleteRole(@Path("role_id") id: Long)
+
+    /**
+     * TaxSettings Management
+     */
+
+    @GET("settings/tax/getTaxByIsActive")
+    suspend fun getTaxes(): List<Tax>
+
+    @GET("settings/tax/getTax/{tax_id}")
+    suspend fun getTaxById(@Path("tax_id") id: Int): Tax
+
+    @POST("settings/tax/addTax")
+    suspend fun createTax(@Body tax: Tax): Tax
+
+    @PUT("settings/tax/updateTax/{id}")
+    suspend fun updateTax(@Path("id") id: Long, @Body tax: Tax): Int
+
+    @DELETE("settings/tax/deleteTaxById/{id}")
+    suspend fun deleteTax(@Path("id") id: Long)
+
+    /**
+     * TaxSplitSettings Management
+     */
+
+    @GET("settings/tax/taxSplit/getTaxSplitByIsActive")
+    suspend fun getTaxSplits(): Response<List<TblTaxSplit>>
+
+    @GET("settings/tax/taxSplit/getTaxSplit/{tax_split_id}")
+    suspend fun getTaxSplitById(@Path("tax_split_id") id: Int): Response<TblTaxSplit>
+
+    @POST("settings/tax/taxSplit/addTaxSplit")
+    suspend fun createTaxSplit(@Body taxSplit: TaxSplit): Response<TblTaxSplit>
+
+    @PUT("settings/tax/taxSplit/updateTaxSplit/{tax_split_id}")
+    suspend fun updateTaxSplit(@Path("tax_split_id") id: Long, @Body taxSplit: TaxSplit): Response<Int>
+
+    @DELETE("settings/tax/taxSplit/deleteTaxSplitById/{tax_split_id}")
+    suspend fun deleteTaxSplit(@Path("tax_split_id") id: Long)
+
+    @GET("settings/tax/taxSplit/getTaxSplitByTaxId/{tax_id}")
+    suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
+
+    /**
+     * RestaurantProfileSettings Management
+     */
+
+    @GET("company/getCompany/{company_code}")
+    suspend fun getRestaurantProfile(@Path("company_code") companyCode:String): RestaurantProfile
+
+    @PUT("company/updateCompany/{company_code}")
+    suspend fun updateRestaurantProfile(@Path("company_code") companyCode:String,@Body profile: RestaurantProfile): RestaurantProfile
+
+    /**
+     * GeneralSettings Management
+     */
+
+    @GET("settings/generalSetting/getAllGeneralSetting")
+    suspend fun getGeneralSettings(): Response<List<GeneralSettings>>
+
+    @PUT("settings/generalSetting/updateSetting/{id}")
+    suspend fun updateGeneralSettings(@Path("id") id: Long,@Body settings: GeneralSettings): GeneralSettings
+
+    /**
+     * VoucherSettings Management
+     */
+
+    @GET("vouchers")
+    suspend fun getVouchers(): List<Voucher>
+
+    @GET("vouchers/{id}")
+    suspend fun getVoucherById(@Path("id") id: Int): Voucher
+
+    @POST("vouchers")
+    suspend fun createVoucher(@Body voucher: Voucher): Voucher
+
+    @PUT("vouchers/{id}")
+    suspend fun updateVoucher(@Path("id") id: Long, @Body voucher: Voucher): Voucher
+
+    @DELETE("vouchers/{id}")
+    suspend fun deleteVoucher(@Path("id") id: Long)
+
     @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
     suspend fun getVoucherByCounterId(@Path("counter_id") counterId: Long): Response<TblVoucherResponse>
 
-    @GET("settings/tax/getTaxSplitByTaxId/{tax_id}")
-    suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
+    /**
+     * PrinterSettings Management
+     */
+
+    @GET("printers")
+    suspend fun getPrinters(): List<Printer>
+
+    @GET("printers/{id}")
+    suspend fun getPrinterById(@Path("id") id: Int): Printer
+
+    @POST("printers")
+    suspend fun createPrinter(@Body printer: Printer): Printer
+
+    @PUT("printers/{id}")
+    suspend fun updatePrinter(@Path("id") id: Long, @Body printer: Printer): Printer
+
+    @DELETE("printers/{id}")
+    suspend fun deletePrinter(@Path("id") id: Long)
 
     /**
      * Payment Management
@@ -294,112 +428,24 @@ interface ApiService {
 
 
     // Role endpoints
-    @GET("roles")
-    suspend fun getRoles(): List<Role>
-
-    @GET("roles/{id}")
-    suspend fun getRoleById(@Path("id") id: Int): Role
-
-    @POST("roles")
-    suspend fun createRole(@Body role: Role): Role
-
-    @PUT("roles/{id}")
-    suspend fun updateRole(@Path("id") id: Long, @Body role: Role): Role
-
-    @DELETE("roles/{id}")
-    suspend fun deleteRole(@Path("id") id: Long)
 
     // Printer endpoints
-    @GET("printers")
-    suspend fun getPrinters(): List<Printer>
 
-    @GET("printers/{id}")
-    suspend fun getPrinterById(@Path("id") id: Int): Printer
-
-    @POST("printers")
-    suspend fun createPrinter(@Body printer: Printer): Printer
-
-    @PUT("printers/{id}")
-    suspend fun updatePrinter(@Path("id") id: Long, @Body printer: Printer): Printer
-
-    @DELETE("printers/{id}")
-    suspend fun deletePrinter(@Path("id") id: Long)
 
     // Counter endpoints
-    @GET("counters")
-    suspend fun getCounters(): List<Counter>
 
-    @GET("counters/{id}")
-    suspend fun getCounterById(@Path("id") id: Int): Counter
-
-    @POST("counters")
-    suspend fun createCounter(@Body counter: Counter): Counter
-
-    @PUT("counters/{id}")
-    suspend fun updateCounter(@Path("id") id: Long, @Body counter: Counter): Counter
-
-    @DELETE("counters/{id}")
-    suspend fun deleteCounter(@Path("id") id: Int)
 
     // Voucher endpoints
-    @GET("vouchers")
-    suspend fun getVouchers(): List<Voucher>
 
-    @GET("vouchers/{id}")
-    suspend fun getVoucherById(@Path("id") id: Int): Voucher
-
-    @POST("vouchers")
-    suspend fun createVoucher(@Body voucher: Voucher): Voucher
-
-    @PUT("vouchers/{id}")
-    suspend fun updateVoucher(@Path("id") id: Long, @Body voucher: Voucher): Voucher
-
-    @DELETE("vouchers/{id}")
-    suspend fun deleteVoucher(@Path("id") id: Long)
 
     // Tax endpoints
-    @GET("taxes")
-    suspend fun getTaxes(): List<Tax>
 
-    @GET("taxes/{id}")
-    suspend fun getTaxById(@Path("id") id: Int): Tax
-
-    @POST("taxes")
-    suspend fun createTax(@Body tax: Tax): Tax
-
-    @PUT("taxes/{id}")
-    suspend fun updateTax(@Path("id") id: Long, @Body tax: Tax): Tax
-
-    @DELETE("taxes/{id}")
-    suspend fun deleteTax(@Path("id") id: Long)
 
     // TaxSplit endpoints
-    @GET("tax-splits")
-    suspend fun getTaxSplits(): List<TaxSplit>
 
-    @GET("tax-splits/{id}")
-    suspend fun getTaxSplitById(@Path("id") id: Int): TaxSplit
-
-    @POST("tax-splits")
-    suspend fun createTaxSplit(@Body taxSplit: TaxSplit): TaxSplit
-
-    @PUT("tax-splits/{id}")
-    suspend fun updateTaxSplit(@Path("id") id: Long, @Body taxSplit: TaxSplit): TaxSplit
-
-    @DELETE("tax-splits/{id}")
-    suspend fun deleteTaxSplit(@Path("id") id: Long)
 
     // Restaurant Profile endpoints
-    @GET("company/getCompany/{company_code}")
-    suspend fun getRestaurantProfile(@Path("company_code") companyCode:String): RestaurantProfile
-
-    @PUT("company/updateCompany/{company_code}")
-    suspend fun updateRestaurantProfile(@Path("company_code") companyCode:String,@Body profile: RestaurantProfile): RestaurantProfile
 
     // General Settings endpoints
-    @GET("settings/generalSetting/getAllGeneralSetting")
-    suspend fun getGeneralSettings(): Response<List<GeneralSettings>>
 
-    @PUT("settings/generalSetting/updateSetting/{id}")
-    suspend fun updateGeneralSettings(@Path("id") id: Long,@Body settings: GeneralSettings): GeneralSettings
 }

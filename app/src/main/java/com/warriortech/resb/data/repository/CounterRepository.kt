@@ -2,9 +2,9 @@
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.network.ApiService
-import com.warriortech.resb.model.Counter
 import com.warriortech.resb.model.CounterSession
 import com.warriortech.resb.model.Counters
+import com.warriortech.resb.model.TblCounter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class CounterRepository @Inject constructor(
     private val apiService: ApiService
 ) {
-    suspend fun getAllCounters(): List<Counter> {
+    suspend fun getAllCounters(): List<TblCounter> {
         return try {
             apiService.getCounters()
         } catch (e: Exception) {
@@ -22,7 +22,7 @@ class CounterRepository @Inject constructor(
         }
     }
 
-    suspend fun getCounterById(id: Int): Counter? {
+    suspend fun getCounterById(id: Long): TblCounter? {
         return try {
             apiService.getCounterById(id)
         } catch (e: Exception) {
@@ -30,7 +30,8 @@ class CounterRepository @Inject constructor(
         }
     }
 
-    suspend fun createCounter(counter: Counter): Counter? {
+
+    suspend fun createCounter(counter: TblCounter): TblCounter? {
         return try {
             apiService.createCounter(counter)
         } catch (e: Exception) {
@@ -38,15 +39,15 @@ class CounterRepository @Inject constructor(
         }
     }
 
-    suspend fun updateCounter(counter: Counter): Counter? {
+    suspend fun updateCounter(counter: TblCounter): Int? {
         return try {
-            apiService.updateCounter(counter.id, counter)
+            apiService.updateCounter(counter.counter_id, counter)
         } catch (e: Exception) {
             null
         }
     }
 
-    suspend fun deleteCounter(id: Int): Boolean {
+    suspend fun deleteCounter(id: Long): Boolean {
         return try {
             apiService.deleteCounter(id)
             true

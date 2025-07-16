@@ -1,15 +1,19 @@
 
 package com.warriortech.resb.model
 
+data class TblTaxSplit(
+    var tax_split_id: Long,
+    var tax_id:Long,
+    var tax_name:String,
+    var tax_split_name:String,
+    var tax_split_percentage:String,
+    var is_active: Boolean
+)
+
 data class TaxSplit(
-    val id: Long = 0,
-    val name: String,
-    val description: String,
-    val splitType: String, // "equal", "percentage", "amount"
-    val percentage: Double = 0.0,
-    val amount: Double = 0.0,
-    val taxIds: List<Int> = emptyList(),
-    val isActive: Boolean = true,
-    val createdAt: String = "",
-    val updatedAt: String = ""
+    var tax_split_id: Long ,
+    var tax_id: Long ,
+    var tax_split_name: String ,
+    var tax_split_percentage: String ,
+    var is_active: Boolean
 )

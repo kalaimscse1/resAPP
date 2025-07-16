@@ -35,9 +35,9 @@ class TaxRepository @Inject constructor(
         }
     }
 
-    suspend fun updateTax(tax: Tax): Tax? {
+    suspend fun updateTax(tax: Tax): Int? {
         return try {
-            apiService.updateTax(tax.id, tax)
+            apiService.updateTax(tax.tax_id, tax)
         } catch (e: Exception) {
             null
         }

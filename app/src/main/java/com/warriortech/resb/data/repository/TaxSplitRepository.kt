@@ -1,7 +1,9 @@
 
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TaxSplit
+import com.warriortech.resb.model.TblTaxSplit
 import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,33 +12,33 @@ import javax.inject.Singleton
 class TaxSplitRepository @Inject constructor(
     private val apiService: ApiService
 ) {
-    suspend fun getAllTaxSplits(): List<TaxSplit> {
+    suspend fun getAllTaxSplits(): List<TblTaxSplit> {
         return try {
-            apiService.getTaxSplits()
+            apiService.getTaxSplits().body()?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
     }
 
-    suspend fun getTaxSplitById(id: Int): TaxSplit? {
+    suspend fun getTaxSplitById(id: Int): TblTaxSplit? {
         return try {
-            apiService.getTaxSplitById(id)
+            apiService.getTaxSplitById(id).body()
         } catch (e: Exception) {
             null
         }
     }
 
-    suspend fun createTaxSplit(taxSplit: TaxSplit): TaxSplit? {
+    suspend fun createTaxSplit(taxSplit: TaxSplit): TblTaxSplit? {
         return try {
-            apiService.createTaxSplit(taxSplit)
+            apiService.createTaxSplit(taxSplit).body()
         } catch (e: Exception) {
             null
         }
     }
 
-    suspend fun updateTaxSplit(taxSplit: TaxSplit): TaxSplit? {
+    suspend fun updateTaxSplit(taxSplit: TaxSplit): Int? {
         return try {
-            apiService.updateTaxSplit(taxSplit.id, taxSplit)
+            apiService.updateTaxSplit(taxSplit.tax_split_id, taxSplit).body()
         } catch (e: Exception) {
             null
         }
@@ -48,6 +50,14 @@ class TaxSplitRepository @Inject constructor(
             true
         } catch (e: Exception) {
             false
+        }
+    }
+
+    suspend fun getTaxes():List<Tax>{
+        return try {
+            apiService.getTaxes()
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }

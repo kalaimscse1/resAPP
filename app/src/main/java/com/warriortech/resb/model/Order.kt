@@ -8,14 +8,7 @@ data class OrderItem(
     val quantity: Int,
     val notes: String? = null
 )
-data class TblTaxSplit(
-    var tax_split_id: Long,
-    var tax_id:Long,
-    var tax_name:String,
-    var tax_split_name:String,
-    var tax_split_percentage:String,
-    var is_active:Long
-)
+
 /**
  * Order model that matches the server response format
  * Updated to use Int for ids and Long for timestamp to match backend

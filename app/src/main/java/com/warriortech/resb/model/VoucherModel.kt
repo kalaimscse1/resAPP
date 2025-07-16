@@ -21,13 +21,6 @@ data class TblVoucherResponse(
     var is_active:Long
 )
 
-data class TblCounter(
-    var counter_id: Long,
-    var counter_name:String,
-    var ip_address:String,
-    var is_active:Long
-)
-
 data class TblVoucher(
     var voucher_id: Long,
     var counter:TblCounter,
