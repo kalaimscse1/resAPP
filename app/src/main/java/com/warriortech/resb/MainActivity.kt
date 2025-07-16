@@ -115,6 +115,8 @@ import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
+import com.warriortech.resb.screens.PaidBillsScreen
+import com.warriortech.resb.screens.EditPaidBillScreen
 
 
 @AndroidEntryPoint
@@ -525,7 +527,22 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             RestaurantProfileScreen(onBackPressed = { navController.popBackStack() })
         }
         composable("general_settings") {
-            GeneralSettingsScreen(onBackPressed = { navController.popBackStack() })
+            GeneralSettingsScreen(navController = navController)
+        }
+
+        composable("paid_bills") {
+            PaidBillsScreen(navController = navController)
+        }
+
+        composable("edit_paid_bill/{billId}") { backStackEntry ->
+            val billId = backStackEntry.arguments?.getString("billId")?.toLongOrNull() ?: 0L
+            EditPaidBillScreen(navController = navController, billId = billId)
+        }
+
+        composable("view_paid_bill/{billId}") { backStackEntry ->
+            val billId = backStackEntry.arguments?.getString("billId")?.toLongOrNull() ?: 0L
+            // You can create a ViewPaidBillScreen similar to EditPaidBillScreen but read-only
+            EditPaidBillScreen(navController = navController, billId = billId) // For now, reuse edit screen
         }
         composable("voucher_setting") {
             VoucherSettingsScreen(onBackPressed = { navController.popBackStack() })

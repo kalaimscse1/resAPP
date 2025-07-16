@@ -231,4 +231,41 @@
     <string name="open">Open</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <!-- Paid Bills -->
+    <string name="paid_bills">Paid Bills</string>
+    <string name="no_paid_bills">No paid bills found</string>
+    <string name="no_bills_found">No bills found matching your search</string>
+    <string name="search_bills">Search bills by number, customer, or payment method</string>
+    <string name="view">View</string>
+    <string name="edit">Edit</string>
+    <string name="refund">Refund</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_bill">Delete Bill</string>
+    <string name="delete_bill_confirmation">Are you sure you want to delete bill %1$s? This action cannot be undone.</string>
+    <string name="refund_bill">Refund Bill</string>
+    <string name="refund_bill_info">Refund for bill %1$s</string>
+    <string name="refund_amount">Refund Amount</string>
+    <string name="reason">Reason</string>
+    <string name="edit_bill">Edit Bill</string>
+    <string name="bill_not_found">Bill not found</string>
+    <string name="bill_information">Bill Information</string>
+    <string name="bill_number">Bill Number</string>
+    <string name="order_id">Order ID</string>
+    <string name="table_number">Table Number</string>
+    <string name="payment_date">Payment Date</string>
+    <string name="payment_method">Payment Method</string>
+    <string name="status">Status</string>
+    <string name="customer_information">Customer Information</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="customer_phone">Customer Phone</string>
+    <string name="bill_items">Bill Items</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="tax">Tax</string>
+    <string name="discount">Discount</string>
+    <string name="total">Total</string>
+    <string name="notes">Notes</string>
+    <string name="add_notes">Add notes</string>
+    <string name="save_changes">Save Changes</string>
 </resources>
