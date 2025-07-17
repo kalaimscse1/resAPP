@@ -40,7 +40,7 @@ class TaxSplitSettingsViewModel @Inject constructor(
                 _tax.value = taxSplitRepository.getTaxes()
                 _uiState.value = UiState.Loading
                 val taxSplits = taxSplitRepository.getAllTaxSplits()
-                _uiState.value = UiState.Success(taxSplits)
+                _uiState.value = UiState.Success(taxSplits.filter { it.tax_split_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

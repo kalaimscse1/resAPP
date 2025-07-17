@@ -33,7 +33,7 @@ class TaxSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val taxes = taxRepository.getAllTaxes()
-                _uiState.value = UiState.Success(taxes)
+                _uiState.value = UiState.Success(taxes.filter { it.tax_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

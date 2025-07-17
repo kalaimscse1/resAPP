@@ -31,7 +31,7 @@ class RoleSettingsViewModel @Inject constructor(
             try {
                 val roles = roleRepository.getAllRoles()
                 _uiState.value = _uiState.value.copy(
-                    roles = roles,
+                    roles = roles.filter { it.role != "--" },
                     isLoading = false,
                     error = null
                 )

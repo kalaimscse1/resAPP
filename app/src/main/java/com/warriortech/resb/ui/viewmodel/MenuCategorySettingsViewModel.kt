@@ -31,7 +31,7 @@ class MenuCategorySettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val categories = categoryRepository.getAllCategories()
-                _uiState.value = UiState.Success(categories)
+                _uiState.value = UiState.Success(categories.filter { it.item_cat_name !="--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

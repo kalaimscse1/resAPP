@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,16 +20,9 @@ import com.warriortech.resb.R
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.GeneralSettingsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.GeneralSettings
-import com.warriortech.resb.model.Table
-import com.warriortech.resb.model.TblTable
-import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.util.AreaDropdown
-import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
-import kotlin.collections.find
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

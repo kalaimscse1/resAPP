@@ -31,7 +31,7 @@ class MenuSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val menus = menuRepository.getAllMenus()
-                _uiState.value = UiState.Success(menus)
+                _uiState.value = UiState.Success(menus.filter { it.menu_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

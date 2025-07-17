@@ -32,7 +32,7 @@ class CounterSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val counters = counterRepository.getAllCounters()
-                _uiState.value = UiState.Success(counters)
+                _uiState.value = UiState.Success(counters.filter { it.counter_name !="--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
