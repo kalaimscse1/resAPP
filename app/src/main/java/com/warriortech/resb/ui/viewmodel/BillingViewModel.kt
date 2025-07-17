@@ -423,6 +423,26 @@ class BillingViewModel @Inject constructor(
             )
         }
     }
+
+    fun updateDiscount(discount: Double) {
+        _uiState.value = _uiState.value.copy(discount = discount)
+    }
+
+    fun updateItemQuantity(menuItem: MenuItem, newQuantity: Int) {
+        val currentItems = _uiState.value.billedItems.toMutableMap()
+        if (newQuantity > 0) {
+            currentItems[menuItem] = newQuantity
+        } else {
+            currentItems.remove(menuItem)
+        }
+        _uiState.value = _uiState.value.copy(billedItems = currentItems)
+    }
+
+    fun removeItem(menuItem: MenuItem) {
+        val currentItems = _uiState.value.billedItems.toMutableMap()
+        currentItems.remove(menuItem)
+        _uiState.value = _uiState.value.copy(billedItems = currentItems)
+    }
 }
 
 // Assume Order model exists (simplified)

@@ -7,6 +7,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -161,7 +164,13 @@ fun BillingScreen(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
             onUpdateTax = { viewModel.updateTaxPercentage(it) },
-            onUpdateDiscount = { viewModel.updateDiscountFlat(it) }
+            onUpdateDiscount = { viewModel.updateDiscountFlat(it) },
+            onUpdateQuantity = { menuItem, newQuantity -> 
+                viewModel.updateItemQuantity(menuItem, newQuantity)
+            },
+            onRemoveItem = { menuItem ->
+                viewModel.removeItem(menuItem)
+            }
         )
     }
 }
@@ -171,7 +180,9 @@ fun BillingContent(
     modifier: Modifier = Modifier,
     uiState: BillingPaymentUiState,
     onUpdateTax: (Double) -> Unit,
-    onUpdateDiscount: (Double) -> Unit
+    onUpdateDiscount: (Double) -> Unit,
+    onUpdateQuantity: (MenuItem, Int) -> Unit,
+    onRemoveItem: (MenuItem) -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
 
@@ -192,7 +203,13 @@ fun BillingContent(
                     menuItem = menuItem,
                     quantity = quantity,
                     tableStatus = uiState.tableStatus,
-                    currencyFormatter = currencyFormatter
+                    currencyFormatter = currencyFormatter,
+                    onQuantityChange = { newQuantity ->
+                        onUpdateQuantity(menuItem, newQuantity)
+                    },
+                    onRemoveItem = {
+                        onRemoveItem(menuItem)
+                    }
                 )
             }
             item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
@@ -272,31 +289,98 @@ fun BilledItemRow(
     quantity: Int,
     tableStatus: String,
     currencyFormatter: NumberFormat,
-    kotNumber: Int? = null
+    onQuantityChange: (Int) -> Unit,
+    onRemoveItem: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val itemPrice = when (tableStatus) {
-        "AC" -> menuItem.ac_rate
-        "TAKEAWAY", "DELIVERY" -> menuItem.parcel_rate
-        else -> menuItem.rate
-    }
-    val itemTotal = itemPrice * quantity
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text("${menuItem.menu_item_name} x $quantity")
-            if (kotNumber != null) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    "KOT #$kotNumber",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    text = menuItem.menu_item_name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                if (tableStatus == "AC") {
+                    Text(
+                        text = "Table Service",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = currencyFormatter.format(menuItem.rate * quantity),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
+
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                // Quantity controls
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = { 
+                            if (quantity > 1) {
+                                onQuantityChange(quantity - 1)
+                            }
+                        },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Remove,
+                            contentDescription = "Decrease quantity"
+                        )
+                    }
+
+                    Text(
+                        text = quantity.toString(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.widthIn(min = 24.dp),
+                        textAlign = TextAlign.Center
+                    )
+
+                    IconButton(
+                        onClick = { onQuantityChange(quantity + 1) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Increase quantity"
+                        )
+                    }
+                }
+
+                // Remove item button
+                IconButton(
+                    onClick = onRemoveItem,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Remove item",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
-        Text(currencyFormatter.format(itemTotal))
     }
 }
 
