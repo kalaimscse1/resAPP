@@ -409,19 +409,19 @@ fun BillPreview(template: ReceiptTemplate) {
             )
         }
         
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Tax (${sampleBillData.cgstPercent + sampleBillData.sgstPercent}%):",
-                fontSize = template.bodySettings.fontSize.sp
-            )
-            Text(
-                text = "₹${sampleBillData.sgst + sampleBillData.cgst}",
-                fontSize = template.bodySettings.fontSize.sp
-            )
-        }
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            Text(
+//                text = "Tax (${sampleBillData.cgstPercent + sampleBillData.sgstPercent}%):",
+//                fontSize = template.bodySettings.fontSize.sp
+//            )
+//            Text(
+//                text = "₹${sampleBillData.sgst + sampleBillData.cgst}",
+//                fontSize = template.bodySettings.fontSize.sp
+//            )
+//        }
         
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -482,25 +482,41 @@ fun createSampleBillData(): Bill {
         date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
         tableNo = "Table 5",
         items = listOf(
-            BillItem(1, "Margherita Pizza", 2, 350.0, 700.0),
-            BillItem(2, "Caesar Salad", 1, 180.0, 180.0),
-            BillItem(3, "Coca Cola", 2, 50.0, 100.0)
+            BillItem(1, "Margherita Pizza", 2, 350.0, 700.0,sgstPercent = 0.0,
+                cgstPercent = 0.0,
+                igstPercent = 0.0,
+                cessPercent = 0.0,
+                sgst = 0.0,
+                cgst = 0.0,
+                igst = 0.0,
+                cess = 0.0,
+                cess_specific = 0.0,),
+            BillItem(2, "Caesar Salad", 1, 180.0, 180.0,sgstPercent = 0.0,
+                cgstPercent = 0.0,
+                igstPercent = 0.0,
+                cessPercent = 0.0,
+                sgst = 0.0,
+                cgst = 0.0,
+                igst = 0.0,
+                cess = 0.0,
+                cess_specific = 0.0,),
+            BillItem(3, "Coca Cola", 2, 50.0, 100.0,sgstPercent = 0.0,
+                cgstPercent = 0.0,
+                igstPercent = 0.0,
+                cessPercent = 0.0,
+                sgst = 0.0,
+                cgst = 0.0,
+                igst = 0.0,
+                cess = 0.0,
+                cess_specific = 0.0,)
         ),
         subtotal = 980.0,
         total = 1156.4,
         company_code = "",
-        sgstPercent = 0.0,
-        cgstPercent = 0.0,
-        igstPercent = 0.0,
-        cessPercent = 0.0,
-        sgst = 0.0,
-        cgst = 0.0,
-        igst = 0.0,
-        cess = 0.0,
-        cess_specific = 0.0,
+
         deliveryCharge = 0.0,
         discount = 0.0,
-        roundedAmount = 0.0,
+        roundOff = 0.0,
         paperWidth = 48,
         time = "",
         orderNo = 1L,

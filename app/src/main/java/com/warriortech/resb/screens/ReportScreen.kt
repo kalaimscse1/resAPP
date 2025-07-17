@@ -6,18 +6,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,15 +32,14 @@ import com.warriortech.resb.model.*
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.ReportViewModel
-import com.warriortech.resb.ui.viewmodel.ReportUiState
+import com.warriortech.resb.ui.viewmodel.ReportViewModel.ReportUiState
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
-import java.util.*
 import java.util.*
 import kotlin.collections.forEach
 import kotlin.collections.last
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ReportScreen(
     navController: NavHostController,
@@ -51,6 +52,11 @@ fun ReportScreen(
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val snackbarHostState = remember { SnackbarHostState() }
     val selectedDate = remember { mutableStateOf(dateFormatter.format(Date())) }
+    val datePickerState = rememberDatePickerState()
+    val confirmEnabled = remember {
+        derivedStateOf { datePickerState.selectedDateMillis != null }
+    }
+    val snackScope = rememberCoroutineScope()
 
     LaunchedEffect(pullToRefreshState) {
         if (pullToRefreshState.isAnimating) {
@@ -58,6 +64,8 @@ fun ReportScreen(
             pullToRefreshState.animateToHidden()
         }
     }
+
+
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -88,8 +96,8 @@ fun ReportScreen(
                 )
             }
         ) { paddingValues ->
-            when (uiState) {
-                is ReportUiState.Loading -> {
+            when ( val state=uiState) {
+                is ReportViewModel.ReportUiState.Loading -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -100,7 +108,7 @@ fun ReportScreen(
                     }
                 }
 
-                is ReportUiState.Error -> {
+                is ReportViewModel.ReportUiState.Error -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -110,7 +118,7 @@ fun ReportScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = (uiState as ReportUiState.Error).message,
+                            text = state.message,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center
@@ -123,11 +131,16 @@ fun ReportScreen(
                     }
                 }
 
-                is ReportUiState.Success -> {
+                is ReportViewModel.ReportUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .pullToRefresh(
+                                state = pullToRefreshState,
+                                isRefreshing = uiState is ReportUiState.Loading,
+                                onRefresh = { viewModel.refreshReports() }
+                            ),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -138,65 +151,101 @@ fun ReportScreen(
                             )
                         }
 
-                        val successState = uiState as ReportUiState.Success
 
-                        successState.todaySalesMetrics?.let { todaySalesMetrics ->
+
+//
+//                        successState.todaySalesMetrics?.let { todaySalesMetrics ->
+//                            item {
+//                                TodaySalesCard(
+//                                    metrics = todaySalesMetrics,
+//                                    currencyFormatter = currencyFormatter
+//                                )
+//                            }
+//                        }
+
+                        state.gstSummary?.let {
                             item {
-                                TodaySalesCard(
-                                    metrics = todaySalesMetrics,
-                                    currencyFormatter = currencyFormatter
-                                )
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(16.dp)
+                                    ) {
+                                        Text(
+                                            text = "GST Summary",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(bottom = 12.dp)
+                                        )
+                                        TaxRow(
+                                            label = "Total GST Collected",
+                                            amount = it.totalCGST,
+                                            currencyFormatter = currencyFormatter,
+                                            isTotal = true
+                                        )
+                                        TaxRow(
+                                            label = "Total CESS Collected",
+                                            amount = it.totalCGST,
+                                            currencyFormatter = currencyFormatter,
+                                            isTotal = true
+                                        )
+                                    }
+                                }
                             }
                         }
+                        state.todaySales?.let { todaySalesReport ->
 
-                        successState.todaySalesReport?.let { todaySalesReport ->
-                            item {
-                                GstBreakdownCard(
-                                    gstBreakdown = todaySalesReport.gstBreakdown,
-                                    currencyFormatter = currencyFormatter
-                                )
-                            }
-                            item {
-                                CessCard(
-                                    cessTotal = todaySalesReport.cessTotal,
-                                    currencyFormatter = currencyFormatter
-                                )
-                            }
-                            item {
-                                HsnSummaryCard(
-                                    hsnList = todaySalesReport.hsnSummary,
-                                    currencyFormatter = currencyFormatter
-                                )
-                            }
+//                            item {
+//                                GstBreakdownCard(
+//                                    gstBreakdown = todaySalesReport.gstBreakdown,
+//                                    currencyFormatter = currencyFormatter
+//                                )
+//                            }
+//                            item {
+//                                CessCard(
+//                                    cessTotal = todaySalesReport.cessTotal,
+//                                    currencyFormatter = currencyFormatter
+//                                )
+//                            }
+//                            item {
+//                                HsnSummaryCard(
+//                                    hsnList = todaySalesReport.hsnSummary,
+//                                    currencyFormatter = currencyFormatter
+//                                )
+//                            }
                         }
                     }
                 }
             }
         }
 
-        PullToRefreshContainer(
-            modifier = Modifier.align(Alignment.TopCenter),
-            state = pullToRefreshState,
-        )
-
         if (showDatePicker) {
             DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
+                onDismissRequest = {
+                    showDatePicker = false
+                },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.selectDate(viewModel.selectedDate.value)
                             showDatePicker = false
-                            selectedDate.value = dateFormatter.format(viewModel.selectedDate.value)
-                        }
+                            selectedDate.value = dateFormatter.format(selectedDate.value)
+                            viewModel.loadReportsForDate(datePickerState.selectableDates.toString())
+                        },
+                        enabled = confirmEnabled.value
                     ) {
                         Text("OK")
                     }
                 },
-                content = {
-
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
                 }
-            )
+            ) {
+                DatePicker(
+                    state = datePickerState,
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                )
+            }
         }
     }
 }

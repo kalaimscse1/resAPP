@@ -11,6 +11,7 @@ import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.BillItem
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -52,6 +53,7 @@ data class BillingPaymentUiState(
     val totalAmount: Double = 0.0,
     val orderDetails: List<TblOrderDetailsResponse> = emptyList(),
     val orderMasterId: Long? = null,
+    val discount: Double = 0.0, // Flat discount amount
     val selectedKotNumber: Int? = null,
     // Payment Details
     val availablePaymentMethods: List<PaymentMethod> = emptyList(),
@@ -75,6 +77,7 @@ class BillingViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
     val uiState: StateFlow<BillingPaymentUiState> = _uiState.asStateFlow()
+
 
     private val _originalOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
     private val _filteredOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
@@ -351,8 +354,9 @@ class BillingViewModel @Inject constructor(
                     result.fold(
                         onSuccess = { response ->
                             var sn = 1
-                            val billItems = currentState.billedItems.map { (menuItem, qty) ->
-                                BillItem(
+                            val bill = MutableStateFlow<List<BillItem>>(emptyList())
+                            currentState.billedItems.map { (menuItem, qty) ->
+                                bill.value += BillItem(
                                     sn = sn,
                                     itemName = menuItem.menu_item_name,
                                     qty = qty,
@@ -362,14 +366,34 @@ class BillingViewModel @Inject constructor(
                                     cgstPercent = menuItem.tax_percentage.toDouble()/ 2,
                                     igstPercent = 0.0,
                                     cessPercent = 0.0,
-                                    sgst = TODO(),
-                                    cgst = TODO(),
-                                    igst = TODO(),
-                                    cess = TODO(),
-                                    cess_specific = TODO()
+                                    sgst = 0.0,
+                                    cgst = 0.0,
+                                    igst = 0.0,
+                                    cess = 0.0,
+                                    cess_specific = 0.0
                                 )
                                 sn = sn + 1
                             }
+                            val billDetails = Bill(
+                                company_code = SessionManager.getCompanyCode() ?: "",
+                                billNo = response.bill_no,
+                                date = response.bill_date.toString(),
+                                time = response.bill_create_time.toString(),
+                                orderNo = response.order_master.order_master_id?.toLong() ?: 0L,
+                                counter = "Counter1",
+                                tableNo = "Table1",
+                                custName = "Customer Name",
+                                custNo = "1234567890",
+                                custAddress = "Customer Address",
+                                custGstin = "GSTIN123456",
+                                items = bill.value,
+                                subtotal = response.order_amt,
+                                deliveryCharge = 0.0, // Assuming no delivery charge
+                                discount = response.disc_amt,
+                                roundOff = response.round_off,
+                                total = response.grand_total,
+                            )
+                            printBill(billDetails)
                             // Handle successful payment response
                             // For example, you might want to update the UI or save the order
 

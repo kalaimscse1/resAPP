@@ -1,13 +1,11 @@
 package com.warriortech.resb.ui.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.ReportRepository
 import com.warriortech.resb.model.*
 import com.warriortech.resb.util.ExportUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,25 +14,26 @@ import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.fold
+import android.content.Context
 
-sealed interface ReportUiState {
-    object Loading : ReportUiState
-    data class Success(
-        val todaySales: TodaySalesReport?,
-        val gstSummary: GSTSummaryReport?,
-        val salesSummary: SalesSummaryReport?
-    ) : ReportUiState
-    data class Error(val message: String) : ReportUiState
-}
 
 @HiltViewModel
 class ReportViewModel @Inject constructor(
-    private val reportRepository: ReportRepository,
-    @ApplicationContext private val context: Context
+    private val reportRepository: ReportRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ReportUiState>(ReportUiState.Loading)
     val uiState: StateFlow<ReportUiState> = _uiState.asStateFlow()
+
+    sealed interface ReportUiState {
+        object Loading : ReportUiState
+        data class Success(
+            val todaySales: TodaySalesReport?,
+            val gstSummary: GSTSummaryReport?,
+            val salesSummary: SalesSummaryReport?
+        ) : ReportUiState
+        data class Error(val message: String) : ReportUiState
+    }
 
     init {
         loadReports()
@@ -52,7 +51,7 @@ class ReportViewModel @Inject constructor(
                 reportRepository.getTodaySales().collect { result ->
                     result.fold(
                         onSuccess = { data -> todaySales = data },
-                        onFailure = { /* Log error but continue */ }
+                        onFailure = { ReportUiState.Error("Failed to load reports: ") }
                     )
                 }
 
@@ -60,7 +59,7 @@ class ReportViewModel @Inject constructor(
                 reportRepository.getGSTSummary().collect { result ->
                     result.fold(
                         onSuccess = { data -> gstSummary = data },
-                        onFailure = { /* Log error but continue */ }
+                        onFailure = { ReportUiState.Error("Failed to load reports: ") }
                     )
                 }
 
@@ -69,7 +68,7 @@ class ReportViewModel @Inject constructor(
                 reportRepository.getSalesSummaryByDate(today).collect { result ->
                     result.fold(
                         onSuccess = { data -> salesSummary = data },
-                        onFailure = { /* Log error but continue */ }
+                        onFailure = { ReportUiState.Error("Failed to load reports: ") }
                     )
                 }
 
@@ -100,7 +99,7 @@ class ReportViewModel @Inject constructor(
                 reportRepository.getTodaySales().collect { result ->
                     result.fold(
                         onSuccess = { data -> todaySales = data },
-                        onFailure = { /* Log error but continue */ }
+                        onFailure = { ReportUiState.Error("Failed to load reports for $date: ") }
                     )
                 }
 
@@ -108,7 +107,7 @@ class ReportViewModel @Inject constructor(
                 reportRepository.getGSTSummary().collect { result ->
                     result.fold(
                         onSuccess = { data -> gstSummary = data },
-                        onFailure = { /* Log error but continue */ }
+                        onFailure = { ReportUiState.Error("Failed to load reports for $date: ") }
                     )
                 }
 
@@ -116,7 +115,7 @@ class ReportViewModel @Inject constructor(
                 reportRepository.getSalesSummaryByDate(date).collect { result ->
                     result.fold(
                         onSuccess = { data -> salesSummary = data },
-                        onFailure = { /* Log error but continue */ }
+                        onFailure = { ReportUiState.Error("Failed to load reports for $date: ") }
                     )
                 }
 
@@ -130,8 +129,8 @@ class ReportViewModel @Inject constructor(
             }
         }
     }
-    
-    fun exportToPDF(selectedDate: String) {
+
+    fun exportToPDF(selectedDate: String, context: Context) {
         viewModelScope.launch {
             val currentState = _uiState.value
             if (currentState is ReportUiState.Success) {
@@ -148,8 +147,8 @@ class ReportViewModel @Inject constructor(
             }
         }
     }
-    
-    fun exportToExcel(selectedDate: String) {
+
+    fun exportToExcel(selectedDate: String, context: Context) {
         viewModelScope.launch {
             val currentState = _uiState.value
             if (currentState is ReportUiState.Success) {

@@ -117,8 +117,46 @@ import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
+import com.warriortech.resb.ui.components.ModernDivider
 
 
+/**
+ * MainActivity is the entry point of the RESB application.
+ * It sets up the main UI and handles navigation between different screens.
+ * It also initializes the network monitor and sync manager to manage network state and data synchronization.
+ * * The activity uses Jetpack Compose for UI rendering and Hilt for dependency injection.
+ * * @property networkMonitor Monitors the network state to determine if the device is online or offline.
+ * * @property syncManager Manages data synchronization tasks when the device is online.
+ * * @constructor Creates an instance of MainActivity.
+ * * * This activity handles the main navigation of the app, including login, dashboard, menu, orders, settings, and more.
+ * * It also manages the responsive design for different screen sizes and orientations.
+ * * * The activity uses a drawer for navigation on larger screens and a modal drawer on smaller screens.
+ * * It also handles language changes and configuration changes gracefully.
+ * * @see [ResbTheme] for theming
+ * * @see [NetworkMonitor] for network state monitoring
+ * * @see [SyncManager] for data synchronization
+ * * @see [LocaleHelper] for handling locale changes
+ * * @see [AppNavigation] for setting up the navigation graph
+ * * @see [DrawerContent] for the navigation drawer UI
+ * * @see [NetworkStatusBar] for displaying network status
+ * * @see [SessionManager] for managing user sessions
+ * * @see [Table] for representing tables in the restaurant
+ * * @see [TblOrderDetailsResponse] for order details response model
+ * * * This activity is annotated with @AndroidEntryPoint to enable Hilt dependency injection.
+ * * @AndroidEntryPoint annotation is used to enable Hilt dependency injection in this activity.
+ * * @see [Hilt Android documentation](https://developer.android.com/training/dependency-injection/hilt-android)
+ * * @see [Hilt Navigation Compose documentation](https://developer.android.com/training/dependency-injection/hilt-android#navigation-compose)
+ * * @see [Jetpack Compose documentation](https://developer.android.com/jetpack/compose)
+ * * @see [Navigation Compose documentation](https://developer.android.com/jetpack/compose/navigation)
+ * * @see [Material Design Components](https://material.io/develop/android/components/)
+ * * @see [AndroidX Compose documentation](https://developer.android.com/jetpack/compose/documentation)
+ * * @see [AndroidX Navigation documentation](https://developer.android.com/jetpack/androidx/releases/navigation)
+ * * @see [AndroidX Hilt documentation](https://developer.android.com/jetpack/androidx/releases/hilt)
+ * * @see [AndroidX Lifecycle documentation](https://developer.android.com/jetpack/androidx/releases/lifecycle)
+ * * @see [AndroidX Core documentation](https://developer.android.com/jetpack/androidx/releases/core)
+ * * @see [AndroidX Compose Material documentation](https://developer.android.com/jetpack/androidx/releases/compose-material)
+ * * @see [AndroidX Compose Material3 documentation](https://developer.android.com/jetpack/androidx/releases/compose-material3)
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -138,9 +176,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var syncManager: SyncManager
 
-
     @SuppressLint("ConfigurationScreenWidthHeight")
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SessionManager.init(this)
@@ -152,6 +188,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        // Set the content view with the main theme
         setContent {
             ResbTheme(darkTheme = isSystemInDarkTheme()) {
                 val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -167,6 +204,7 @@ class MainActivity : ComponentActivity() {
                 val isLandscape = screenWidth > screenHeight
                 val isCollapsed = remember { mutableStateOf(false) }
 
+
                 // Responsive drawer width based on screen size
                 val drawerWidth = when {
                     isTablet -> if (isCollapsed.value) 80.dp else 320.dp
@@ -178,7 +216,7 @@ class MainActivity : ComponentActivity() {
 
                 val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
                 val showDrawer = currentRoute != "login"
-
+                // Drawer content composable
                 val drawerContent = @Composable {
                     DrawerContent(
                         isCollapsed = isCollapsed.value,
@@ -210,6 +248,7 @@ class MainActivity : ComponentActivity() {
 
                 if (showDrawer) {
                     if (isLargeScreen) {
+                        // Use PermanentNavigationDrawer for large screens
                         PermanentNavigationDrawer(drawerContent = drawerContent) {
                             Surface(
                                 modifier = Modifier.fillMaxSize(),
@@ -226,6 +265,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     } else {
+                        // Use ModalNavigationDrawer for smaller screens
                         ModalNavigationDrawer(
                             drawerState = drawerState,
                             drawerContent = drawerContent,
@@ -247,6 +287,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 } else {
+                    // No drawer, just show the main content
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         elevation = 2.dp,
@@ -266,7 +307,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+/**
+ * Main navigation composable that sets up the app's navigation graph.
+ * * @param drawerState The state of the navigation drawer.
+ * * @param navController The NavHostController for managing navigation.
+ * * This function defines the navigation structure of the app, including all screens and their transitions.
+ * * It handles user authentication, table selection, menu navigation, billing, and various settings.
+ * * It also manages the state of selected tables, takeaway options, order details, and user login status.
+ */
+
 @Composable
 fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
@@ -290,15 +339,6 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("selects") {
             SelectionScreen(
-//                onDinePressed = { navController.navigate("selects") },
-//                onTakeAwayPressed = {
-//                    navController.navigate("menu")
-//                    isTakeaway = "TAKEAWAY"
-//                },
-//                onDeliverPressed = {
-//                    navController.navigate("menu")
-//                    isTakeaway = "DELIVERY"
-//                },
                 onTableSelected = { table ->
                     isTakeaway = "TABLE"
                     selectedTable = table
@@ -350,11 +390,13 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 orderMasterId = backStackEntry.arguments?.getString("orderMasterId")?.toLong() ?: 0L
             )
         }
+
         composable("payment_screen/{amountToPayFromRoute}") {
             PaymentScreen(navController = navController,
                 amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")?.toDoubleOrNull() ?: 0.0
             )
         }
+
         composable("report_screen") {
             ReportScreen(navController = navController)
         }
@@ -387,16 +429,19 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 navController= navController
             )
         }
+
         composable("area_setting") {
             AreaSettingsScreen(
                 onBackPressed = { navController.popBackStack() }
             )
         }
+
         composable("table_setting") {
             TableSettingsScreen(onBackPressed = {
                 navController.popBackStack()
             })
         }
+
         composable("menu_setting"){
             MenuSettingsScreen(
                 onBackPressed = {
@@ -404,6 +449,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 }
             )
         }
+
         composable("menu_item_setting") {
             MenuItemSettingsScreen(
                 onBackPressed = {
@@ -411,6 +457,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 }
             )
         }
+
         composable ("menu_Category_setting") {
             MenuCategorySettingsScreen(
                 onBackPressed = {
@@ -418,17 +465,18 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 }
             )
         }
+
         composable("staff_setting") {
             StaffSettingsScreen(
                 onBackPressed = { navController.popBackStack() }
             )
         }
+
         composable("customer_setting") {
            CustomerSettingsScreen(
                 onBackPressed = { navController.popBackStack() }
             )
         }
-
 
         composable("counter_selection") {
             CounterSelectionScreen(
@@ -449,7 +497,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                     // Convert counter items to billing format
                     val billingItems = items.mapKeys { it.key }.mapValues { it.value }
                     // Navigate to billing with counter items
-                    navController.navigate("billing_screen/${billingItems.values ?: 0L}") {
+                    navController.navigate("billing_screen/${billingItems.values}") {
                         popUpTo("counter/${counterId}") { inclusive = true }
                     }
                 },
@@ -465,7 +513,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                     // Convert counter items to billing format
                     val billingItems = items.mapKeys { it.key }.mapValues { it.value }
                     // Navigate to billing with counter items
-                    navController.navigate("billing_screen/${billingItems.values ?: 0L}") {
+                    navController.navigate("billing_screen/${billingItems.values}") {
                         popUpTo("counter") { inclusive = true }
                     }
                 },
@@ -482,6 +530,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onNavigateToBilling = {navController.navigate("counter")}
             )
         }
+
         composable("report_screen") {
             ReportScreen(navController = navController)
         }
@@ -508,24 +557,31 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 templateId = templateId
             )
         }
+
         composable("language_setting") {
             LanguageSettingsScreen(navController = navController)
         }
+
         composable("role_setting") {
             RoleSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
+
         composable("printer_setting") {
             PrinterSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
+
         composable("tax_setting") {
             TaxSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
+
         composable("tax_split_setting") {
             TaxSplitSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
+
         composable("restaurant_profile_setting") {
             RestaurantProfileScreen(onBackPressed = { navController.popBackStack() })
         }
+
         composable("general_settings") {
             GeneralSettingsScreen(
                 onBackPressed = {
@@ -545,12 +601,13 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("view_paid_bill/{billId}") { backStackEntry ->
             val billId = backStackEntry.arguments?.getString("billId")?.toLongOrNull() ?: 0L
-            // You can create a ViewPaidBillScreen similar to EditPaidBillScreen but read-only
-            EditPaidBillScreen(navController = navController, billId = billId) // For now, reuse edit screen
+            EditPaidBillScreen(navController = navController, billId = billId)
         }
+
         composable("voucher_setting") {
             VoucherSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
+
         composable("counter_setting") {
             CounterSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
@@ -599,7 +656,7 @@ fun DrawerContent(
                 }
             }
 
-            Divider()
+            ModernDivider()
             Spacer(modifier = Modifier.height(8.dp))
 
             NavigationDrawerItem(
@@ -654,6 +711,7 @@ fun DrawerContent(
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
+
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
                 icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
@@ -704,7 +762,6 @@ fun DrawerContent(
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
-            // Show Kitchen for chef, admin and superadmin roles
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Kitchen") else Text("") },
                 icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
@@ -715,11 +772,9 @@ fun DrawerContent(
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
-
-
             Spacer(modifier = Modifier.weight(1f))
 
-            Divider()
+            ModernDivider()
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Logout") else Text("") },

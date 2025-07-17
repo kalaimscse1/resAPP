@@ -1,4 +1,4 @@
-package com.warriortech.resb.screens // Or your preferred screen package
+package com.warriortech.resb.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -27,10 +27,37 @@ import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
 
-//fun Double.format(digits: Int) = "%.${digits}f".format(this)
-
+/**
+ * BillingScreen is a composable function that displays the billing summary for an order.
+ * It allows users to view billed items, apply taxes and discounts, and proceed to payment.
+ * It includes a top app bar for navigation and actions, a bottom bar for payment actions,
+ * and a dialog for selecting KOT numbers.
+ * It uses a ViewModel to manage the billing state and updates the UI accordingly.
+ * @param navController The NavHostController for navigation.
+ * @param viewModel The BillingViewModel instance to manage billing state.
+ * @param orderDetailsResponse Optional list of order details to initialize the billing state.
+ * @param orderMasterId Optional order master ID to load specific billing details.
+ * This screen is designed to be responsive and optimized for mobile devices.
+ * It handles various billing operations such as updating item quantities,
+ * removing items, and calculating totals.
+ * It also supports filtering items by KOT number through a dialog.
+ * @see BillingViewModel
+ * @see BillingPaymentUiState
+ * @param onKotSelected Callback function to handle KOT selection.
+ * @param onDismiss Callback function to dismiss the KOT selection dialog.
+ * This function is part of the billing feature in the restaurant management application.
+ * @author WarriorTech
+ * @version 1.0
+ * @since 2025-07-17
+ * This function is responsible for displaying the billing summary,
+ * updating item quantities, applying taxes and discounts,
+ * and proceeding to payment.
+ * It uses a ViewModel to manage the billing state and updates the UI accordingly.
+ * It also includes a dialog for selecting KOT numbers to filter items.
+ */
 
 @Composable
 fun KotSelectionDialog(
@@ -98,7 +125,6 @@ fun BillingScreen(
 
     // Load billing details from TblOrderDetailsResponse or initial items
     LaunchedEffect(key1 = orderDetailsResponse, key2 = orderMasterId) {
-        Log.d("BillingScreen", "Loading billing details for orderMasterId: $orderMasterId,$orderDetailsResponse")
         when {
             orderDetailsResponse != null && orderMasterId != null -> {
                 viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId,)
@@ -152,10 +178,6 @@ fun BillingScreen(
         },
         bottomBar = {
             BillingBottomBar(uiState = uiState,orderMasterId = orderMasterId) {
-                // Navigate to Payment Screen, passing necessary info
-                // Option 1: Pass total amount via route (simple)
-                // navController.navigate("payment/${uiState.totalAmount}")
-                // Option 2: ViewModel holds state, PaymentScreen also uses it (better for complex state)
                 navController.navigate("payment_screen/${uiState.totalAmount}")
             }
         }
@@ -163,8 +185,6 @@ fun BillingScreen(
         BillingContent(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
-            onUpdateTax = { viewModel.updateTaxPercentage(it) },
-            onUpdateDiscount = { viewModel.updateDiscountFlat(it) },
             onUpdateQuantity = { menuItem, newQuantity -> 
                 viewModel.updateItemQuantity(menuItem, newQuantity)
             },
@@ -179,8 +199,6 @@ fun BillingScreen(
 fun BillingContent(
     modifier: Modifier = Modifier,
     uiState: BillingPaymentUiState,
-    onUpdateTax: (Double) -> Unit,
-    onUpdateDiscount: (Double) -> Unit,
     onUpdateQuantity: (MenuItem, Int) -> Unit,
     onRemoveItem: (MenuItem) -> Unit
 ) {
@@ -212,7 +230,7 @@ fun BillingContent(
                     }
                 )
             }
-            item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
+            item { ModernDivider(modifier = Modifier.padding(vertical = 8.dp)) }
         } else {
             item {
                 Text(
@@ -384,27 +402,7 @@ fun BilledItemRow(
     }
 }
 
-@Composable
-fun OrderDetailRow(
-    orderDetail: TblOrderDetailsResponse,
-    currencyFormatter: NumberFormat
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text("${orderDetail.menuItem.menu_item_name} x ${orderDetail.qty}")
-            Text(
-                "KOT #${orderDetail.kot_number}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-        Text(currencyFormatter.format(orderDetail.total))
-    }
-}
+
 
 @Composable
 fun BillingSummaryRow(
@@ -438,7 +436,6 @@ fun EditableBillingRow(
     amount: Double,
     currencyFormatter: NumberFormat
 ) {
-//    var textValue by remember(currentValue) { mutableStateOf(currentValue.format(if (isCurrencyInput) 2 else 1)) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),

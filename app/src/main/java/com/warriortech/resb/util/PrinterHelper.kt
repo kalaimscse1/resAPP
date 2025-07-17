@@ -260,7 +260,7 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
         stringBuilder.append("Subtotal: ${String.format("%.2f", billData.subtotal)}\n")
-        stringBuilder.append("Tax: ${String.format("%.2f", billData.cgst+billData.sgst)}\n")
+//        stringBuilder.append("Tax: ${String.format("%.2f", billData.+billData.sgst)}\n")
         stringBuilder.append("Total: ${String.format("%.2f", billData.total)}\n")
 
         // Footer with template settings

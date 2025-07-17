@@ -1,6 +1,6 @@
-
 package com.warriortech.resb.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,9 +10,8 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
-import com.itextpdf.layout.property.TextAlignment
+import com.itextpdf.layout.properties.TextAlignment
 import com.warriortech.resb.model.*
-import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
@@ -23,7 +22,9 @@ import java.util.*
 object ExportUtils {
     
     private val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    @SuppressLint("ConstantLocale")
     private val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    @SuppressLint("ConstantLocale")
     private val timeFormatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
     
     fun exportToPDF(
@@ -61,13 +62,13 @@ object ExportUtils {
                 salesTable.addCell("Total Orders")
                 salesTable.addCell(sales.totalOrders.toString())
                 salesTable.addCell("Total Amount")
-                salesTable.addCell(currencyFormatter.format(sales.totalAmount))
-                salesTable.addCell("Cash Sales")
-                salesTable.addCell(currencyFormatter.format(sales.cashSales))
-                salesTable.addCell("Card Sales")
-                salesTable.addCell(currencyFormatter.format(sales.cardSales))
-                salesTable.addCell("UPI Sales")
-                salesTable.addCell(currencyFormatter.format(sales.upiSales))
+                salesTable.addCell(currencyFormatter.format(sales.totalSales))
+//                salesTable.addCell("Cash Sales")
+//                salesTable.addCell(currencyFormatter.format(sales.cashSales))
+//                salesTable.addCell("Card Sales")
+//                salesTable.addCell(currencyFormatter.format(sales.cardSales))
+//                salesTable.addCell("UPI Sales")
+//                salesTable.addCell(currencyFormatter.format(sales.upiSales))
                 
                 document.add(salesTable)
                 document.add(Paragraph(" "))
@@ -86,15 +87,15 @@ object ExportUtils {
                 gstTable.addCell("Taxable Amount")
                 gstTable.addCell("Tax Amount")
                 
-                gst.gstBreakdown.forEach { breakdown ->
-                    gstTable.addCell("${breakdown.gstRate}%")
-                    gstTable.addCell(currencyFormatter.format(breakdown.taxableAmount))
-                    gstTable.addCell(currencyFormatter.format(breakdown.taxAmount))
-                }
+//                gst.gstBreakdown.forEach { breakdown ->
+//                    gstTable.addCell("${breakdown.gstRate}%")
+//                    gstTable.addCell(currencyFormatter.format(breakdown.taxableAmount))
+//                    gstTable.addCell(currencyFormatter.format(breakdown.taxAmount))
+//                }
                 
                 gstTable.addCell("Total")
-                gstTable.addCell(currencyFormatter.format(gst.totalTaxableAmount))
-                gstTable.addCell(currencyFormatter.format(gst.totalTaxAmount))
+//                gstTable.addCell(currencyFormatter.format(gst.totalTaxableAmount))
+//                gstTable.addCell(currencyFormatter.format(gst.totalTaxAmount))
                 
                 document.add(gstTable)
                 document.add(Paragraph(" "))
@@ -114,12 +115,12 @@ object ExportUtils {
                 summaryTable.addCell("Amount")
                 summaryTable.addCell("Payment Method")
                 
-                summary.sales.forEach { sale ->
-                    summaryTable.addCell(sale.billNo)
-                    summaryTable.addCell(timeFormatter.format(sale.timestamp))
-                    summaryTable.addCell(currencyFormatter.format(sale.amount))
-                    summaryTable.addCell(sale.paymentMethod)
-                }
+//                summary.sales.forEach { sale ->
+//                    summaryTable.addCell(sale.billNo)
+//                    summaryTable.addCell(timeFormatter.format(sale.timestamp))
+//                    summaryTable.addCell(currencyFormatter.format(sale.amount))
+//                    summaryTable.addCell(sale.paymentMethod)
+//                }
                 
                 document.add(summaryTable)
             }
@@ -165,22 +166,22 @@ object ExportUtils {
                     createCell(0).setCellValue("Total Orders")
                     createCell(1).setCellValue(sales.totalOrders.toDouble())
                 }
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("Total Amount")
-                    createCell(1).setCellValue(sales.totalAmount)
-                }
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("Cash Sales")
-                    createCell(1).setCellValue(sales.cashSales)
-                }
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("Card Sales")
-                    createCell(1).setCellValue(sales.cardSales)
-                }
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("UPI Sales")
-                    createCell(1).setCellValue(sales.upiSales)
-                }
+//                summarySheet.createRow(rowIndex++).apply {
+//                    createCell(0).setCellValue("Total Amount")
+//                    createCell(1).setCellValue(sales.totalAmount)
+//                }
+//                summarySheet.createRow(rowIndex++).apply {
+//                    createCell(0).setCellValue("Cash Sales")
+//                    createCell(1).setCellValue(sales.cashSales)
+//                }
+//                summarySheet.createRow(rowIndex++).apply {
+//                    createCell(0).setCellValue("Card Sales")
+//                    createCell(1).setCellValue(sales.cardSales)
+//                }
+//                summarySheet.createRow(rowIndex++).apply {
+//                    createCell(0).setCellValue("UPI Sales")
+//                    createCell(1).setCellValue(sales.upiSales)
+//                }
                 rowIndex++ // Empty row
             }
             
@@ -193,19 +194,19 @@ object ExportUtils {
                     createCell(2).setCellValue("Tax Amount")
                 }
                 
-                gst.gstBreakdown.forEach { breakdown ->
-                    summarySheet.createRow(rowIndex++).apply {
-                        createCell(0).setCellValue("${breakdown.gstRate}%")
-                        createCell(1).setCellValue(breakdown.taxableAmount)
-                        createCell(2).setCellValue(breakdown.taxAmount)
-                    }
-                }
-                
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("Total")
-                    createCell(1).setCellValue(gst.totalTaxableAmount)
-                    createCell(2).setCellValue(gst.totalTaxAmount)
-                }
+//                gst.gstBreakdown.forEach { breakdown ->
+//                    summarySheet.createRow(rowIndex++).apply {
+//                        createCell(0).setCellValue("${breakdown.gstRate}%")
+//                        createCell(1).setCellValue(breakdown.taxableAmount)
+//                        createCell(2).setCellValue(breakdown.taxAmount)
+//                    }
+//                }
+//
+//                summarySheet.createRow(rowIndex++).apply {
+//                    createCell(0).setCellValue("Total")
+//                    createCell(1).setCellValue(gst.totalTaxableAmount)
+//                    createCell(2).setCellValue(gst.totalTaxAmount)
+//                }
             }
             
             // Detailed Sales Sheet
@@ -222,14 +223,14 @@ object ExportUtils {
                 }
                 
                 // Data
-                summary.sales.forEach { sale ->
-                    salesSheet.createRow(salesRowIndex++).apply {
-                        createCell(0).setCellValue(sale.billNo)
-                        createCell(1).setCellValue(timeFormatter.format(sale.timestamp))
-                        createCell(2).setCellValue(sale.amount)
-                        createCell(3).setCellValue(sale.paymentMethod)
-                    }
-                }
+//                summary.sales.forEach { sale ->
+//                    salesSheet.createRow(salesRowIndex++).apply {
+//                        createCell(0).setCellValue(sale.billNo)
+//                        createCell(1).setCellValue(timeFormatter.format(sale.timestamp))
+//                        createCell(2).setCellValue(sale.amount)
+//                        createCell(3).setCellValue(sale.paymentMethod)
+//                    }
+//                }
             }
             
             // Write to file
