@@ -21,9 +21,11 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.R
 import com.warriortech.resb.model.*
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.theme.GradientStart
@@ -31,6 +33,7 @@ import com.warriortech.resb.ui.viewmodel.ReportViewModel
 import com.warriortech.resb.ui.viewmodel.ReportUiState
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.util.*
 import java.util.*
 import kotlin.collections.forEach
 import kotlin.collections.last
@@ -56,15 +59,13 @@ fun ReportScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll()
+        modifier = Modifier.fillMaxSize()
     ) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
-                    title = { Text("Reports") },
+                    title = { Text(stringResource(R.string.reports)) },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")

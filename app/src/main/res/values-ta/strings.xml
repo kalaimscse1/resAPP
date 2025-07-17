@@ -260,4 +260,7 @@
     <string name="notes">குறிப்புகள்</string>
     <string name="add_notes">குறிப்புகள் சேர்</string>
     <string name="save_changes">மாற்றங்களைச் சேமிக்கவும்</string>
+    <string name="edit_paid_bill">பணம் செலுத்திய பில் திருத்து</string>
+    <string name="delete_paid_bill">பணம் செலுத்திய பில் நீக்கு</string>
+    <string name="reports">அறிக்கைகள்</string>
 </resources>
