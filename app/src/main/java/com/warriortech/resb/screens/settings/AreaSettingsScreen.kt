@@ -21,6 +21,18 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.AreaViewModel
 
+/**
+ * Screen for managing areas in the application.
+ * This screen allows users to view, add, edit, and delete areas.
+ * It uses a [Scaffold] to provide a top app bar and a snackbar for messages.
+ * The areas are displayed in a [LazyColumn] with each area represented by an [AreaCard].
+ * The user can add a new area using an [AddAreaDialog] and edit existing areas with an [EditAreaDialog].
+ * Handles loading states and displays progress indicators when necessary.
+ * Messages are shown using a [SnackbarHost] to inform the user of success or error states.
+ * @param onBackPressed Callback to handle back navigation.
+ * @param viewModel The [AreaViewModel] instance to manage the area data.
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AreaSettingsScreen(

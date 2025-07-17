@@ -20,6 +20,17 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.viewmodel.AIAssistantViewModel
 
+/**
+ * Screen for the AI Assistant feature in the restaurant management application.
+ * This screen allows users to interact with various AI-powered features such as menu enhancement,
+ * smart upselling, sales analytics, and customer recommendations.
+ * It also provides a dialog for configuring the OpenAI API key required for these features.
+ *
+ * @param onBackPressed Callback to handle back navigation.
+ * @param viewModel The [AIAssistantViewModel] instance to manage the AI assistant state.
+ * @OptIn ExperimentalMaterial3Api is used for Material 3 components.
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AIAssistantScreen(

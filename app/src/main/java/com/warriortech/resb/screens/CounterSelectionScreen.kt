@@ -26,6 +26,29 @@ import com.warriortech.resb.model.Counters
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.CounterSelectionViewModel
 
+/**
+ * CounterSelectionScreen is a composable function that displays a list of counters
+ * for the user to select from. It uses a ViewModel to manage the state of the counters
+ * and handles loading, success, and error states.
+ * It features a top app bar with a menu icon that opens a drawer,
+ * and displays a loading indicator while counters are being fetched.
+ * When counters are successfully loaded, they are displayed in a list,
+ * and the user can select a counter to proceed.
+ * If an error occurs while loading counters, an error message is displayed
+ * along with a retry button to reload the counters.
+ * * @param onCounterSelected Callback function to handle the selection of a counter.
+ * @param drawerState The state of the navigation drawer.
+ * @param viewModel The ViewModel instance for managing counter selection state.
+ * @see CounterSelectionViewModel
+ * @see Counters
+ * * This screen is part of the billing system and allows users to choose a counter
+ * to start billing operations.
+ * * @since 1.0
+ * @author WarriorTech
+ * @version 1.0
+ * @date 2025-07-17
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CounterSelectionScreen(

@@ -39,6 +39,7 @@ import com.warriortech.resb.ui.theme.TextPrimary
 import kotlinx.coroutines.launch
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -483,7 +484,7 @@ fun MenuItemCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
+                    ModernDivider()
                     Spacer(modifier = Modifier.height(8.dp))
 
                     if (isExistingOrder && existingQuantity > 0) {
@@ -581,7 +582,7 @@ fun OrderConfirmationDialog(
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

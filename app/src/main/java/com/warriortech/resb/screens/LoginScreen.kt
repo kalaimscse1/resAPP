@@ -44,7 +44,36 @@ import kotlinx.coroutines.launch
 
 /**
  * LoginScreen is the main entry point for user authentication.
+ * It provides a user interface for entering login credentials,
+ * including company code, username, and password.
+ * It handles login attempts, displays error messages,
+ * and navigates to the next screen upon successful login.
+ * This screen is optimized for mobile devices
+ * and uses a responsive design approach.
+ * @param onLoginSuccess Callback function to be invoked when login is successful.
+ * @param viewModel The [LoginViewModel] instance to manage the login state and actions.
+ * * This ViewModel is injected using Hilt for dependency injection.
+ * * The screen includes a logo, welcome message, and a form for user input.
+ * It also features a snackbar for displaying error messages.
+ * * The login form includes fields for company code, username, and password,
+ * with appropriate icons and validation.
+ * * The password field includes a toggle for visibility.
+ * * The login button is disabled while a login attempt is in progress,
+ * and shows a loading state when clicked.
+ * * The screen uses a vertical gradient background for visual appeal.
+ * * The login process is handled asynchronously,
+ * and the keyboard is hidden upon successful login or button press.
+ * * @see LoginViewModel
+ * * This screen is designed to be responsive and user-friendly,
+ * making it suitable for mobile devices.
+ * @since 1.0
+ * @author WarriorTech
+ * @version 1.0
+ * @note This screen is part of the ResB application,
+ * which is a restaurant management system.
+ * * It is built using Jetpack Compose for modern UI development.
  */
+
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
@@ -6,19 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import com.warriortech.resb.R
 import com.warriortech.resb.ui.viewmodel.CounterViewModel
 import kotlinx.coroutines.launch
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,11 +31,42 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.TextPrimary
 
 
-@RequiresApi(Build.VERSION_CODES.O)
+/**
+ * CounterScreen is a composable function that displays the counter billing interface.
+ * It allows users to view menu items, select quantities, and proceed to billing.
+ * It includes a top app bar with navigation and action buttons,
+ * a bottom app bar showing total items and amount,
+ * and a floating action button for quick access to billing.
+ * It uses a ViewModel to manage the state of menu items and selected items.
+ * It also handles loading states and errors gracefully,
+ * showing appropriate messages to the user.
+ * @param onBackPressed Callback to handle back navigation.
+ * @param onProceedToBilling Callback to handle proceeding to billing with selected items.
+ * @param viewModel The CounterViewModel instance to manage the counter data.
+ * @param drawerState The state of the navigation drawer.
+ * @param counterId Optional ID of the counter to load specific data.
+ * This function is annotated with @Composable to indicate it is a composable function
+ * and uses various Compose UI components to build the user interface.
+ * It also uses the Hilt dependency injection library to provide the ViewModel instance.
+ * It is optimized for mobile devices with appropriate padding and layout adjustments.
+ * It uses the Material3 design system for consistent styling and theming.
+ * It includes a snackbar for displaying messages to the user.
+ * It supports dynamic updates to the UI based on user interactions,
+ * such as adding or removing items from the order.
+ * It also includes a loading state that shows a progress indicator while data is being fetched.
+ * It uses a LazyColumn to display the list of menu items,
+ * allowing for efficient scrolling and rendering of items.
+ * It includes a tab row for filtering menu items by category,
+ * allowing users to easily navigate through different types of items.
+ * It provides a clear and user-friendly interface for managing orders at a counter,
+ * making it suitable for restaurant or cafe applications.
+ */
+
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,6 +115,14 @@ fun CounterScreen(
                     }
                 },
                 actions = {
+//                    IconButton(onClick = {
+//                        onBackPressed() // Reset category filter
+//                    }) {
+//                        Icon(
+//                            imageVector = Icons.Default.Menu,
+//                            contentDescription = "All Categories"
+//                        )
+//                    }
                     IconButton(onClick = {
                         viewModel.clearOrder()
                     }) {
@@ -366,7 +398,7 @@ fun CounterMenuItemCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
+                    ModernDivider()
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(

@@ -183,7 +183,7 @@ fun MobileOptimizedTextField(
 @Composable
 fun MobileOptimizedCard(
     onClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     elevated: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {

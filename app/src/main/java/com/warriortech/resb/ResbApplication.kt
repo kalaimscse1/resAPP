@@ -7,11 +7,8 @@ import androidx.work.Configuration
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.data.sync.SyncWorker
 import com.warriortech.resb.network.RetrofitClient.apiService
-import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.util.NetworkMonitor
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.BuildConfig
 import timber.log.Timber
@@ -65,11 +62,7 @@ class ResbApplication : Application(), Configuration.Provider {
     }
 }
 
-class CustomWorkerFactory @Inject constructor(
-    private val syncManager: SyncManager,
-    private val sessionManager: SessionManager,
-    private val networkMonitor: NetworkMonitor
-) : WorkerFactory() {
+class CustomWorkerFactory @Inject constructor() : WorkerFactory() {
 
     override fun createWorker(
         appContext: Context,
