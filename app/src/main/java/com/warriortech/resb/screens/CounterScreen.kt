@@ -1,3 +1,4 @@
+
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
@@ -11,13 +12,17 @@ import com.warriortech.resb.ui.viewmodel.CounterViewModel
 import kotlinx.coroutines.launch
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ScrollableTabRow
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,398 +30,378 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.warriortech.resb.R
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.components.ResponsiveText
+import com.warriortech.resb.ui.components.OptimizedInit
 import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.ui.theme.TextPrimary
+import com.warriortech.resb.util.getDeviceInfo
+import com.warriortech.resb.util.getScreenSizeInfo
 
-
-/**
- * CounterScreen is a composable function that displays the counter billing interface.
- * It allows users to view menu items, select quantities, and proceed to billing.
- * It includes a top app bar with navigation and action buttons,
- * a bottom app bar showing total items and amount,
- * and a floating action button for quick access to billing.
- * It uses a ViewModel to manage the state of menu items and selected items.
- * It also handles loading states and errors gracefully,
- * showing appropriate messages to the user.
- * @param onBackPressed Callback to handle back navigation.
- * @param onProceedToBilling Callback to handle proceeding to billing with selected items.
- * @param viewModel The CounterViewModel instance to manage the counter data.
- * @param drawerState The state of the navigation drawer.
- * @param counterId Optional ID of the counter to load specific data.
- * This function is annotated with @Composable to indicate it is a composable function
- * and uses various Compose UI components to build the user interface.
- * It also uses the Hilt dependency injection library to provide the ViewModel instance.
- * It is optimized for mobile devices with appropriate padding and layout adjustments.
- * It uses the Material3 design system for consistent styling and theming.
- * It includes a snackbar for displaying messages to the user.
- * It supports dynamic updates to the UI based on user interactions,
- * such as adding or removing items from the order.
- * It also includes a loading state that shows a progress indicator while data is being fetched.
- * It uses a LazyColumn to display the list of menu items,
- * allowing for efficient scrolling and rendering of items.
- * It includes a tab row for filtering menu items by category,
- * allowing users to easily navigate through different types of items.
- * It provides a clear and user-friendly interface for managing orders at a counter,
- * making it suitable for restaurant or cafe applications.
- */
-
-@SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CounterScreen(
-    onBackPressed: () -> Unit,
-    onProceedToBilling: (Map<MenuItem, Int>) -> Unit,
-    viewModel: CounterViewModel = hiltViewModel(),
-    drawerState: DrawerState,
-    counterId: Long? = null
+    onNavigateToPayment: () -> Unit,
+    viewModel: CounterViewModel = hiltViewModel()
 ) {
-    val menuState by viewModel.menuState.collectAsStateWithLifecycle()
-    val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.loadMenuItems()
-    }
+    OptimizedInit()
     
-    LaunchedEffect(counterId) {
-        if (counterId != null) {
-            // Load counter information by ID
-            // This would typically come from a repository call
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    val currentCounter by viewModel.currentCounter.collectAsStateWithLifecycle()
-                    Text(
-                        if (currentCounter != null) 
-                            "Counter Billing - ${currentCounter!!.code}" 
-                        else 
-                            "Counter Billing"
-                    ) 
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        scope.launch { drawerState.open() }
-                    }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                    }
-                },
-                actions = {
-//                    IconButton(onClick = {
-//                        onBackPressed() // Reset category filter
-//                    }) {
-//                        Icon(
-//                            imageVector = Icons.Default.Menu,
-//                            contentDescription = "All Categories"
-//                        )
-//                    }
-                    IconButton(onClick = {
-                        viewModel.clearOrder()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.RemoveShoppingCart,
-                            contentDescription = "Clear Cart"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+    val deviceInfo = getDeviceInfo()
+    val screenInfo = getScreenSizeInfo()
+    
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    
+    // Adaptive layout based on screen size
+    if (screenInfo.isExpanded && screenInfo.isLandscape) {
+        // Large tablet landscape: Side-by-side layout
+        Row(modifier = Modifier.fillMaxSize()) {
+            // Menu section
+            Box(
+                modifier = Modifier
+                    .weight(0.6f)
+                    .fillMaxHeight()
+            ) {
+                MenuSection(
+                    categories = uiState.categories,
+                    selectedCategory = uiState.selectedCategory,
+                    menuItems = uiState.menuItems,
+                    cartItems = uiState.cartItems,
+                    onCategorySelected = viewModel::selectCategory,
+                    onAddToCart = viewModel::addToCart,
+                    onRemoveFromCart = viewModel::removeFromCart,
+                    deviceInfo = deviceInfo,
+                    isCompactLayout = false
                 )
-            )
-        },
-        bottomBar = {
-            BottomAppBar {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val totalItemCount = selectedItems.values.sum()
-                    val totalAmount = viewModel.getOrderTotal()
-
-                    Column {
-                        Text(
-                            text = "Total Items: $totalItemCount",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "Total: ₹${String.format("%.2f", totalAmount)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    MobileOptimizedButton(
-                        onClick = { onProceedToBilling(selectedItems) },
-                        enabled = selectedItems.isNotEmpty(),
-                        text = "Proceed to Bill",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
             }
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(data.visuals.message)
-                }
-            }
-        },
-        floatingActionButton = {
-            if (selectedItems.isNotEmpty()) {
-                FloatingActionButton(
-                    onClick = { onProceedToBilling(selectedItems) }
-                ) {
-                    val itemCount = selectedItems.values.sum()
-                    Text("$itemCount")
-                }
+            
+            // Cart section
+            Box(
+                modifier = Modifier
+                    .weight(0.4f)
+                    .fillMaxHeight()
+                    .padding(start = 8.dp)
+            ) {
+                CartSection(
+                    cartItems = uiState.cartItems,
+                    totalAmount = uiState.totalAmount,
+                    onRemoveFromCart = viewModel::removeFromCart,
+                    onNavigateToPayment = onNavigateToPayment,
+                    deviceInfo = deviceInfo,
+                    isCompactLayout = false
+                )
             }
         }
-    ) { paddingValues ->
-
-        when (val currentMenuState = menuState) {
-            is CounterViewModel.MenuUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+    } else {
+        // Mobile and tablet portrait: Tabbed layout
+        var selectedTab by remember { mutableIntStateOf(0) }
+        
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Tab row
+            ScrollableTabRow(
+                selectedTabIndex = selectedTab,
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = {
+                        ResponsiveText(
+                            text = stringResource(R.string.menu),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = {
+                        ResponsiveText(
+                            text = "${stringResource(R.string.cart)} (${uiState.cartItems.size})",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                )
             }
-
-            is CounterViewModel.MenuUiState.Success -> {
-                val menuItems = currentMenuState.menuItems
-                val filteredMenuItems = if (selectedCategory != null) {
-                    menuItems.filter { it.item_cat_name == selectedCategory }
-                } else {
-                    menuItems
-                }
-
-                if (menuItems.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No menu items available")
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .background(color = Color.White)
-                    ) {
-                        // Categories TabRow
-                        if (categories.isNotEmpty()) {
-                            ScrollableTabRow(
-                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
-                                backgroundColor = Color.White,
-                                contentColor = TextPrimary
-                            ) {
-                                categories.forEachIndexed { index, category ->
-                                    Tab(
-                                        selected = selectedCategory == category,
-                                        onClick = { viewModel.selectedCategory.value = category },
-                                        text = { androidx.compose.material.Text(category) }
-                                    )
-                                }
-                            }
-                        }
-
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 2.dp)
-                                .background(color = Color.White),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            item { Spacer(modifier = Modifier.padding(top = 5.dp)) }
-
-                            items(filteredMenuItems, key = { it.menu_item_id }) { menuItem ->
-                                CounterMenuItemCard(
-                                    menuItem = menuItem,
-                                    quantity = selectedItems[menuItem] ?: 0,
-                                    onAddItem = { viewModel.addItemToOrder(menuItem) },
-                                    onRemoveItem = { viewModel.removeItemFromOrder(menuItem) }
-                                )
-                            }
-                            item { Spacer(modifier = Modifier.height(80.dp)) }
-                        }
-                    }
-                }
+            
+            // Tab content
+            AnimatedVisibility(
+                visible = selectedTab == 0,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
+                MenuSection(
+                    categories = uiState.categories,
+                    selectedCategory = uiState.selectedCategory,
+                    menuItems = uiState.menuItems,
+                    cartItems = uiState.cartItems,
+                    onCategorySelected = viewModel::selectCategory,
+                    onAddToCart = viewModel::addToCart,
+                    onRemoveFromCart = viewModel::removeFromCart,
+                    deviceInfo = deviceInfo,
+                    isCompactLayout = true
+                )
             }
-
-            is CounterViewModel.MenuUiState.Error -> {
-                val errorMessage = (menuState as CounterViewModel.MenuUiState.Error).message
-
-                LaunchedEffect(errorMessage) {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(errorMessage)
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Failed to load menu items")
-                }
+            
+            AnimatedVisibility(
+                visible = selectedTab == 1,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
+                CartSection(
+                    cartItems = uiState.cartItems,
+                    totalAmount = uiState.totalAmount,
+                    onRemoveFromCart = viewModel::removeFromCart,
+                    onNavigateToPayment = onNavigateToPayment,
+                    deviceInfo = deviceInfo,
+                    isCompactLayout = true
+                )
             }
         }
     }
 }
 
-@SuppressLint("DefaultLocale")
 @Composable
-fun CounterMenuItemCard(
-    menuItem: MenuItem,
+private fun MenuSection(
+    categories: List<String>,
+    selectedCategory: String,
+    menuItems: List<MenuItem>,
+    cartItems: Map<String, Int>,
+    onCategorySelected: (String) -> Unit,
+    onAddToCart: (MenuItem) -> Unit,
+    onRemoveFromCart: (MenuItem) -> Unit,
+    deviceInfo: com.warriortech.resb.util.DeviceInfo,
+    isCompactLayout: Boolean
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = deviceInfo.optimalSpacing)
+    ) {
+        // Categories
+        if (categories.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier.height(if (deviceInfo.isTablet) 60.dp else 50.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(categories) { category ->
+                    FilterChip(
+                        onClick = { onCategorySelected(category) },
+                        label = {
+                            ResponsiveText(
+                                text = category,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        selected = category == selectedCategory,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        
+        // Menu items grid
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(deviceInfo.optimalColumnCount),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(deviceInfo.optimalSpacing),
+            verticalArrangement = Arrangement.spacedBy(deviceInfo.optimalSpacing)
+        ) {
+            items(menuItems) { item ->
+                MenuItemCard(
+                    item = item,
+                    quantity = cartItems[item.id] ?: 0,
+                    onAddToCart = { onAddToCart(item) },
+                    onRemoveFromCart = { onRemoveFromCart(item) },
+                    deviceInfo = deviceInfo
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MenuItemCard(
+    item: MenuItem,
     quantity: Int,
-    onAddItem: () -> Unit,
-    onRemoveItem: () -> Unit
+    onAddToCart: () -> Unit,
+    onRemoveFromCart: () -> Unit,
+    deviceInfo: com.warriortech.resb.util.DeviceInfo
 ) {
     MobileOptimizedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .height(if (deviceInfo.isTablet) 200.dp else 180.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = menuItem.menu_item_name,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    if (menuItem.menu_item_name_tamil.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = menuItem.menu_item_name_tamil,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
+            // Item info
+            Column {
+                ResponsiveText(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                ResponsiveText(
+                    text = "₹${item.price}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = GradientStart,
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                if (item.description.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "₹${String.format("%.2f", menuItem.rate)}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                if (menuItem.is_available == "YES") {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = onRemoveItem
-                        ) {
-                            Icon(
-                                Icons.Default.Remove,
-                                contentDescription = "Remove",
-                                tint = Color.Red
-                            )
-                        }
-
-                        if (quantity > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                        RoundedCornerShape(4.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = quantity.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        } else {
-                            Spacer(modifier = Modifier.width(36.dp))
-                        }
-
-                        IconButton(
-                            onClick = onAddItem
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Add",
-                                tint = Color.Green
-                            )
-                        }
-                    }
-                } else {
-                    Text(
-                        text = "Not Available",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error
+                    ResponsiveText(
+                        text = item.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-
-            AnimatedVisibility(visible = quantity > 0) {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
+            
+            // Quantity controls
+            if (quantity > 0) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    ModernDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
+                    IconButton(
+                        onClick = onRemoveFromCart,
+                        modifier = Modifier.size(if (deviceInfo.isTablet) 48.dp else 40.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Remove,
+                            contentDescription = "Remove",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    
+                    ResponsiveText(
+                        text = quantity.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    IconButton(
+                        onClick = onAddToCart,
+                        modifier = Modifier.size(if (deviceInfo.isTablet) 48.dp else 40.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Add",
+                            tint = GradientStart
+                        )
+                    }
+                }
+            } else {
+                MobileOptimizedButton(
+                    onClick = onAddToCart,
+                    text = stringResource(R.string.add),
+                    icon = Icons.Default.Add,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
 
+@Composable
+private fun CartSection(
+    cartItems: Map<String, Int>,
+    totalAmount: Double,
+    onRemoveFromCart: (MenuItem) -> Unit,
+    onNavigateToPayment: () -> Unit,
+    deviceInfo: com.warriortech.resb.util.DeviceInfo,
+    isCompactLayout: Boolean
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = deviceInfo.optimalSpacing)
+    ) {
+        if (cartItems.isEmpty()) {
+            // Empty cart state
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    Icons.Default.RemoveShoppingCart,
+                    contentDescription = null,
+                    modifier = Modifier.size(if (deviceInfo.isTablet) 72.dp else 64.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                ResponsiveText(
+                    text = stringResource(R.string.empty_cart),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+        } else {
+            // Cart items
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Cart items would be displayed here
+                // Implementation depends on your cart item structure
+            }
+            
+            // Total and checkout
+            Column {
+                MobileOptimizedCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = "$quantity × ₹${String.format("%.2f", menuItem.rate)}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-
-                        Text(
-                            text = "₹${String.format("%.2f", quantity * menuItem.rate)}",
-                            style = MaterialTheme.typography.bodyMedium,
+                        ResponsiveText(
+                            text = stringResource(R.string.total),
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
+                        )
+                        ResponsiveText(
+                            text = "₹${String.format("%.2f", totalAmount)}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = GradientStart
                         )
                     }
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                MobileOptimizedButton(
+                    onClick = onNavigateToPayment,
+                    text = stringResource(R.string.proceed_to_payment),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = cartItems.isNotEmpty()
+                )
             }
         }
     }

@@ -1,43 +1,133 @@
+
 package com.warriortech.resb.ui.components
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.ripple
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.warriortech.resb.util.getDeviceInfo
+import com.warriortech.resb.util.getScreenSizeInfo
 
-data class ScreenSizeInfo(
-    val heightDp: Int,
-    val widthDp: Int,
-    val isCompact: Boolean,
-    val isMedium: Boolean,
-    val isExpanded: Boolean
-)
-
-@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
-fun getScreenSizeInfo(): ScreenSizeInfo {
-    val configuration = LocalConfiguration.current
-    return ScreenSizeInfo(
-        heightDp = configuration.screenHeightDp,
-        widthDp = configuration.screenWidthDp,
-        isCompact = configuration.screenWidthDp < 600,
-        isMedium = configuration.screenWidthDp in 600..839,
-        isExpanded = configuration.screenWidthDp >= 840
+fun MobileOptimizedCard(
+    onClick: (() -> Unit)? = null,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
+    elevated: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val deviceInfo = getDeviceInfo()
+    val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
+    val elevation = if (elevated) {
+        if (deviceInfo.isTablet) 16.dp else 12.dp
+    } else {
+        if (deviceInfo.isTablet) 6.dp else 4.dp
+    }
+    val padding = if (deviceInfo.isTablet) 24.dp else 20.dp
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        indication = ripple(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onClick() }
+                } else Modifier
+            ),
+        shape = RoundedCornerShape(cornerRadius),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                        )
+                    )
+                )
+                .padding(padding),
+            content = content
+        )
+    }
+}
+
+@Composable
+fun MobileOptimizedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    singleLine: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE
+) {
+    val deviceInfo = getDeviceInfo()
+    val textFieldHeight = if (deviceInfo.isTablet) 72.dp else 64.dp
+    val cornerRadius = if (deviceInfo.isTablet) 20.dp else 16.dp
+    val fontSize = if (deviceInfo.isTablet) 18.sp else 16.sp
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { 
+            Text(
+                label, 
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = fontSize
+                )
+            ) 
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .height(textFieldHeight),
+        enabled = enabled,
+        isError = isError,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        shape = RoundedCornerShape(cornerRadius),
+        singleLine = singleLine,
+        maxLines = maxLines,
+        textStyle = LocalTextStyle.current.copy(fontSize = fontSize),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+        )
     )
 }
 
@@ -48,10 +138,27 @@ fun MobileOptimizedButton(
     enabled: Boolean = true,
     icon: ImageVector? = null,
     text: String,
-    isPrimary: Boolean = true
+    isPrimary: Boolean = true,
+    isLoading: Boolean = false
 ) {
     val screenInfo = getScreenSizeInfo()
-    val buttonHeight = if (screenInfo.isCompact) 56.dp else 64.dp
+    val buttonHeight = when {
+        screenInfo.isExpanded -> 72.dp
+        screenInfo.isMedium -> 64.dp
+        else -> 56.dp
+    }
+    
+    val cornerRadius = when {
+        screenInfo.isExpanded -> 20.dp
+        screenInfo.isMedium -> 18.dp
+        else -> 16.dp
+    }
+    
+    val fontSize = when {
+        screenInfo.isExpanded -> 18.sp
+        screenInfo.isMedium -> 16.sp
+        else -> 14.sp
+    }
     
     val gradientColors = if (isPrimary) {
         if (enabled) {
@@ -85,254 +192,129 @@ fun MobileOptimizedButton(
             .height(buttonHeight)
             .shadow(
                 elevation = if (enabled) 8.dp else 0.dp,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(cornerRadius),
                 ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             )
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                brush = Brush.linearGradient(gradientColors)
-            )
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(brush = Brush.verticalGradient(gradientColors))
             .clickable(
-                enabled = enabled,
-                indication = ripple(
-                    color = if (isPrimary) Color.White.copy(alpha = 0.3f) 
-                           else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                ),
+                enabled = enabled && !isLoading,
+                indication = ripple(color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary),
                 interactionSource = remember { MutableInteractionSource() }
-            ) { onClick() },
+            ) { if (!isLoading) onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = if (isPrimary) {
-                        if (enabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    } else {
-                        if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    }
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = if (isPrimary) {
-                    if (enabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                } else {
-                    if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                }
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
             )
-        }
-    }
-}
-
-@Composable
-fun MobileOptimizedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    isError: Boolean = false,
-    leadingIcon: (@Composable () -> Unit)? = null,
-    trailingIcon: (@Composable () -> Unit)? = null
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { 
-            Text(
-                label, 
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium
-                )
-            ) 
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp),
-        enabled = enabled,
-        isError = isError,
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon,
-        shape = RoundedCornerShape(16.dp),
-        singleLine = true,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            focusedLabelColor = MaterialTheme.colorScheme.primary,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-        ),
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Medium
-        )
-    )
-}
-
-@Composable
-fun MobileOptimizedCard(
-    onClick: (() -> Unit)? = null,
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
-    elevated: Boolean = true,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(
-                        indication = ripple(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onClick() }
-                } else Modifier
-            ),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (elevated) 12.dp else 4.dp
-        ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-                        )
-                    )
-                )
-                .padding(20.dp),
-            content = content
-        )
-    }
-}
-
-@Composable
-fun ResponsiveGrid(
-    items: List<Any>,
-    modifier: Modifier = Modifier,
-    content: @Composable (Any) -> Unit
-) {
-    val screenInfo = getScreenSizeInfo()
-    val columns = when {
-        screenInfo.isExpanded -> 3
-        screenInfo.isMedium -> 2
-        else -> 1
-    }
-    
-    Column(modifier = modifier) {
-        items.chunked(columns).forEach { rowItems ->
+        } else {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                rowItems.forEach { item ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        content(item)
-                    }
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(if (screenInfo.isExpanded) 24.dp else 20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
-                // Fill remaining space if row is not complete
-                repeat(columns - rowItems.size) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+                Text(
+                    text = text,
+                    color = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = fontSize
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun ModernSectionHeader(
-    title: String,
+fun AdaptiveGrid(
     modifier: Modifier = Modifier,
-    subtitle: String? = null
+    content: @Composable () -> Unit
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth()
+    val deviceInfo = getDeviceInfo()
+    
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(deviceInfo.optimalColumnCount),
+        modifier = modifier,
+        contentPadding = PaddingValues(deviceInfo.optimalSpacing),
+        horizontalArrangement = Arrangement.spacedBy(deviceInfo.optimalSpacing),
+        verticalArrangement = Arrangement.spacedBy(deviceInfo.optimalSpacing)
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        subtitle?.let {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        // Grid items would be added here
     }
 }
 
 @Composable
 fun ModernDivider(
     modifier: Modifier = Modifier,
-    thickness: androidx.compose.ui.unit.Dp = 1.dp
+    thickness: androidx.compose.ui.unit.Dp = 1.dp,
+    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
 ) {
     HorizontalDivider(
         modifier = modifier,
         thickness = thickness,
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        color = color
     )
 }
 
 @Composable
-fun GlassCard(
+fun OptimizedLazyColumn(
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
+    val deviceInfo = getDeviceInfo()
+    val padding = if (deviceInfo.isTablet) 16.dp else 12.dp
+    
+    Column(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
+            .padding(
+                horizontal = padding,
+                vertical = padding
+            )
             .then(
-                if (onClick != null) {
-                    Modifier.clickable(
-                        indication = ripple(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onClick() }
+                if (contentPadding != PaddingValues(0.dp)) {
+                    Modifier.padding(contentPadding)
                 } else Modifier
             ),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.radialGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-                        ),
-                        radius = 800f
-                    )
-                )
-                .padding(24.dp),
-            content = content
-        )
+        content = content
+    )
+}
+
+@Composable
+fun ResponsiveText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyMedium,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+    val deviceInfo = getDeviceInfo()
+    val scaleFactor = when {
+        deviceInfo.isLargeTablet -> 1.2f
+        deviceInfo.isTablet -> 1.1f
+        else -> 1.0f
     }
+    
+    Text(
+        text = text,
+        modifier = modifier,
+        style = style.copy(fontSize = style.fontSize * scaleFactor),
+        maxLines = maxLines,
+        overflow = overflow
+    )
 }
