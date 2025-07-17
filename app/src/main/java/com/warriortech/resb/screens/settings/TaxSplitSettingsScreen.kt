@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens.settings
 
 import androidx.compose.foundation.layout.*
@@ -21,17 +20,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
-import com.warriortech.resb.model.Area
-import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TaxSplit
-import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.model.TblTaxSplit
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.TaxSplitSettingsViewModel
-import com.warriortech.resb.util.AreaDropdown
-import com.warriortech.resb.util.StringDropdown
 import com.warriortech.resb.util.TaxDropdown
 import kotlinx.coroutines.launch
 import kotlin.collections.find

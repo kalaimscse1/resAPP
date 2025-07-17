@@ -1,6 +1,5 @@
 package com.warriortech.resb.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -290,7 +289,7 @@ fun BillingContent(
 
         // Total
         item {
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
             BillingSummaryRow(
                 label = "Total Amount",
                 amount = uiState.totalAmount,

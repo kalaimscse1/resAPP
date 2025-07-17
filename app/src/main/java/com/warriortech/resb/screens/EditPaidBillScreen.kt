@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
@@ -20,7 +19,6 @@ import com.warriortech.resb.R
 import com.warriortech.resb.model.PaidBill
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
-import com.warriortech.resb.util.getLocalizedString
 import com.warriortech.resb.util.stringResource
 import java.text.SimpleDateFormat
 import java.util.*

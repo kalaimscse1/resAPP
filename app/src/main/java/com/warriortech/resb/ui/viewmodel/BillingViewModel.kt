@@ -1,7 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -303,7 +302,6 @@ class BillingViewModel @Inject constructor(
         _uiState.update { it.copy(amountToPay = amount) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun processPayment() {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod

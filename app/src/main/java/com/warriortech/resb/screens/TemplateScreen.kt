@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import android.util.Log
