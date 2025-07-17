@@ -204,7 +204,7 @@ fun TableDialog(
     onSave: (TblTable) -> Unit,
     areas: List<Area>
 ) {
-    val acOptions = listOf("YES", "NO")
+    val acOptions = listOf("AC", "NON-AC")
     val tableStatusOptions = listOf("ACTIVE", "INACTIVE")
     var tableNumber by remember { mutableStateOf(table?.table_name ?: "") }
     var capacity by remember { mutableStateOf(table?.seating_capacity?.toString()?:"1") }
@@ -272,7 +272,7 @@ fun TableDialog(
                         seating_capacity = table?.seating_capacity?: capacity.toInt(),
                         is_ac = table?.is_ac ?: isAc.toString(),
                         table_status = table?.table_status ?: tableStatus.toString(),
-                        table_availability = table?.table_availability ?: "Available",
+                        table_availability = table?.table_availability ?: "AVAILABLE",
                         is_active = table?.is_active ?: true
                     )
                     onSave(newTable)

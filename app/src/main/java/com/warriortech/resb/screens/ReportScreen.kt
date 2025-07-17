@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,17 +48,17 @@ fun ReportScreen(
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-//    LaunchedEffect(pullToRefreshState.isRefreshing) {
-//        if (pullToRefreshState.isRefreshing) {
-//            viewModel.refreshReports()
-//            pullToRefreshState.endRefresh()
-//        }
-//    }
+    LaunchedEffect(pullToRefreshState) {
+        if (pullToRefreshState.isAnimating) {
+            viewModel.refreshReports()
+            pullToRefreshState.animateToHidden()
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-//            .nestedScroll(pullToRefreshState.nestedScrollConnection)
+            .nestedScroll()
     ) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -136,56 +137,65 @@ fun ReportScreen(
                         }
 
                         val successState = uiState as ReportUiState.Success
-//
-//                        successState.todaySalesMetrics?.let { todaySalesMetrics ->
-//                            item {
-//                                TodaySalesCard(
-//                                    metrics = todaySalesMetrics,
-//                                    currencyFormatter = currencyFormatter
-//                                )
-//                            }
-//                        }
-//
-//                        successState.todaySalesReport?.let { todaySalesReport ->
-//                            item {
-//                                GstBreakdownCard(
-//                                    gstBreakdown = todaySalesReport.gstBreakdown,
-//                                    currencyFormatter = currencyFormatter
-//                                )
-//                            }
-//                            item {
-//                                CessCard(
-//                                    cessTotal = todaySalesReport.cessTotal,
-//                                    currencyFormatter = currencyFormatter
-//                                )
-//                            }
-//                            item {
-//                                HsnSummaryCard(
-//                                    hsnList = todaySalesReport.hsnSummary,
-//                                    currencyFormatter = currencyFormatter
-//                                )
-//                            }
-//                        }
+
+                        successState.todaySalesMetrics?.let { todaySalesMetrics ->
+                            item {
+                                TodaySalesCard(
+                                    metrics = todaySalesMetrics,
+                                    currencyFormatter = currencyFormatter
+                                )
+                            }
+                        }
+
+                        successState.todaySalesReport?.let { todaySalesReport ->
+                            item {
+                                GstBreakdownCard(
+                                    gstBreakdown = todaySalesReport.gstBreakdown,
+                                    currencyFormatter = currencyFormatter
+                                )
+                            }
+                            item {
+                                CessCard(
+                                    cessTotal = todaySalesReport.cessTotal,
+                                    currencyFormatter = currencyFormatter
+                                )
+                            }
+                            item {
+                                HsnSummaryCard(
+                                    hsnList = todaySalesReport.hsnSummary,
+                                    currencyFormatter = currencyFormatter
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
 
-//        PullToRefreshContainer(
-//            modifier = Modifier.align(Alignment.TopCenter),
-//            state = pullToRefreshState,
-//        )
+        PullToRefreshContainer(
+            modifier = Modifier.align(Alignment.TopCenter),
+            state = pullToRefreshState,
+        )
+
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {,
+                    TextButton(
+                        onClick = {
+                            viewModel.selectDate(viewModel.selectedDate.value)
+                            showDatePicker = false
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                content = {
+
+                }
+            )
+        }
     }
-//
-//    if (showDatePicker) {
-//        DatePickerDialog(
-//            onDateSelected = { date ->
-//                viewModel.loadReportsForDate(dateFormatter.format(date))
-//                showDatePicker = false
-//            },
-//            onDismiss = { showDatePicker = false }
-//        )
-//    }
 }
 
 @Composable

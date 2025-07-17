@@ -86,8 +86,11 @@ fun CounterSettingsScreen(
                     }else
                     {
                         LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(state.counters) { counter ->
                                 CounterItem(
