@@ -263,4 +263,7 @@
     <string name="edit_paid_bill">பணம் செலுத்திய பில் திருத்து</string>
     <string name="delete_paid_bill">பணம் செலுத்திய பில் நீக்கு</string>
     <string name="reports">அறிக்கைகள்</string>
+    <string name="export_pdf">PDF ஏற்றுமதி</string>
+    <string name="export_excel">Excel ஏற்றுமதி</string>
+    <string name="export">ஏற்றுமதி</string>
 </resources>

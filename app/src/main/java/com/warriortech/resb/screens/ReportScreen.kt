@@ -50,6 +50,7 @@ fun ReportScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val selectedDate = remember { mutableStateOf(dateFormatter.format(Date())) }
 
     LaunchedEffect(pullToRefreshState) {
         if (pullToRefreshState.isAnimating) {
@@ -132,7 +133,7 @@ fun ReportScreen(
                     ) {
                         this.item {
                             DateHeaderCard(
-                                selectedDate = dateFormatter.format(Date()),
+                                selectedDate = selectedDate.value,
                                 onDateClick = { showDatePicker = true }
                             )
                         }
@@ -181,11 +182,12 @@ fun ReportScreen(
         if (showDatePicker) {
             DatePickerDialog(
                 onDismissRequest = { showDatePicker = false },
-                confirmButton = {,
+                confirmButton = {
                     TextButton(
                         onClick = {
                             viewModel.selectDate(viewModel.selectedDate.value)
                             showDatePicker = false
+                            selectedDate.value = dateFormatter.format(viewModel.selectedDate.value)
                         }
                     ) {
                         Text("OK")

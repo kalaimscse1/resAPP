@@ -91,13 +91,23 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.v181)
     implementation(libs.androidx.material.icons.extended)
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // PDF and Excel export
+    implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation("org.apache.poi:poi:5.2.4")
+    implementation("org.apache.poi:poi-ooxml:5.2.4")
 
     // AI Integration dependencies
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    
+
     // Performance optimizations
     implementation("androidx.compose.runtime:runtime-tracing:1.0.0-beta01")
     implementation("androidx.profileinstaller:profileinstaller:1.3.1")

@@ -1,10 +1,13 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.ReportRepository
 import com.warriortech.resb.model.*
+import com.warriortech.resb.util.ExportUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +29,8 @@ sealed interface ReportUiState {
 
 @HiltViewModel
 class ReportViewModel @Inject constructor(
-    private val reportRepository: ReportRepository
+    private val reportRepository: ReportRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ReportUiState>(ReportUiState.Loading)
@@ -123,6 +127,42 @@ class ReportViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 _uiState.value = ReportUiState.Error("Failed to load reports for $date: ${e.message}")
+            }
+        }
+    }
+    
+    fun exportToPDF(selectedDate: String) {
+        viewModelScope.launch {
+            val currentState = _uiState.value
+            if (currentState is ReportUiState.Success) {
+                val file = ExportUtils.exportToPDF(
+                    context = context,
+                    todaySales = currentState.todaySales,
+                    gstSummary = currentState.gstSummary,
+                    salesSummary = currentState.salesSummary,
+                    selectedDate = selectedDate
+                )
+                file?.let {
+                    ExportUtils.shareFile(context, it)
+                }
+            }
+        }
+    }
+    
+    fun exportToExcel(selectedDate: String) {
+        viewModelScope.launch {
+            val currentState = _uiState.value
+            if (currentState is ReportUiState.Success) {
+                val file = ExportUtils.exportToExcel(
+                    context = context,
+                    todaySales = currentState.todaySales,
+                    gstSummary = currentState.gstSummary,
+                    salesSummary = currentState.salesSummary,
+                    selectedDate = selectedDate
+                )
+                file?.let {
+                    ExportUtils.shareFile(context, it)
+                }
             }
         }
     }
