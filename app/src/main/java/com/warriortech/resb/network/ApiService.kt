@@ -22,6 +22,7 @@ interface ApiService {
     /**
      * Dashboard Management
      */
+
     @GET("dashboard/metrics")
     suspend fun getDashboardMetrics(): Response<DashboardMetrics>
 
@@ -54,6 +55,7 @@ interface ApiService {
     /**
      * Table Management
      */
+
     @GET("table/table/getTablesByIsActive")
     suspend fun getAllTables(): Response<List<Table>>
 
@@ -147,6 +149,7 @@ interface ApiService {
     /**
      * Order Management
      */
+
     @POST("order/addOrder")
     suspend fun createOrder(@Body orderRequest: OrderMaster): Response<TblOrderResponse>
 
@@ -225,10 +228,10 @@ interface ApiService {
     @POST("role/addRole")
     suspend fun createRole(@Body role: Role): Response<Role>
 
-    @PUT("roles/{role_id}")
+    @PUT("role/updateRole/{role_id}")
     suspend fun updateRole(@Path("role_id") id: Long, @Body role: Role): Response<Int>
 
-    @DELETE("roles/{role_id}")
+    @DELETE("role/deleteRoleById/{role_id}")
     suspend fun deleteRole(@Path("role_id") id: Long)
 
     /**
@@ -254,22 +257,22 @@ interface ApiService {
      * TaxSplitSettings Management
      */
 
-    @GET("settings/tax/taxSplit/getTaxSplitByIsActive")
+    @GET("settings/tax/getTaxSplitByIsActive")
     suspend fun getTaxSplits(): Response<List<TblTaxSplit>>
 
-    @GET("settings/tax/taxSplit/getTaxSplit/{tax_split_id}")
+    @GET("settings/tax/getTaxSplit/{tax_split_id}")
     suspend fun getTaxSplitById(@Path("tax_split_id") id: Int): Response<TblTaxSplit>
 
-    @POST("settings/tax/taxSplit/addTaxSplit")
+    @POST("settings/tax/addTaxSplit")
     suspend fun createTaxSplit(@Body taxSplit: TaxSplit): Response<TblTaxSplit>
 
-    @PUT("settings/tax/taxSplit/updateTaxSplit/{tax_split_id}")
+    @PUT("settings/tax/updateTaxSplit/{tax_split_id}")
     suspend fun updateTaxSplit(@Path("tax_split_id") id: Long, @Body taxSplit: TaxSplit): Response<Int>
 
-    @DELETE("settings/tax/taxSplit/deleteTaxSplitById/{tax_split_id}")
+    @DELETE("settings/tax/deleteTaxSplitById/{tax_split_id}")
     suspend fun deleteTaxSplit(@Path("tax_split_id") id: Long)
 
-    @GET("settings/tax/taxSplit/getTaxSplitByTaxId/{tax_id}")
+    @GET("settings/tax/getTaxSplitByTaxId/{tax_id}")
     suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
 
     /**
@@ -361,8 +364,6 @@ interface ApiService {
     @GET("paid-bills/search")
     suspend fun searchPaidBills(@Query("q") query: String): Response<List<PaidBillSummary>>
 
-
-
     /**
      * Reports Management
      */
@@ -376,21 +377,20 @@ interface ApiService {
     @GET("reports/sales-summary/{date}")
     suspend fun getSalesSummaryByDate(@Path("date") date: String): Response<SalesSummaryReport>
 
-
     /**
      * Customers Management
      */
 
-    @GET("customers")
+    @GET("customer")
     suspend fun getAllCustomers(): Response<List<Customer>>
 
-    @POST("customers")
+    @POST("customer")
     suspend fun createCustomer(@Body customer: Customer): Response<Customer>
 
-    @PUT("customers/{id}")
+    @PUT("customer/{id}")
     suspend fun updateCustomer(@Path("id") id: Long, @Body customer: Customer): Response<Customer>
 
-    @DELETE("customers/{id}")
+    @DELETE("customer/{id}")
     suspend fun deleteCustomer(@Path("id") id: Long): Response<Unit>
 
     /**
@@ -443,27 +443,5 @@ interface ApiService {
         @Path("kotId") kotId: Int,
         @Body statusUpdate: KOTStatusUpdate
     ): Response<KOTUpdateResponse>
-
-
-    // Role endpoints
-
-    // Printer endpoints
-
-
-    // Counter endpoints
-
-
-    // Voucher endpoints
-
-
-    // Tax endpoints
-
-
-    // TaxSplit endpoints
-
-
-    // Restaurant Profile endpoints
-
-    // General Settings endpoints
-
+    
 }
