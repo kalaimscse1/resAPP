@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+importandroidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -93,6 +93,7 @@ import com.warriortech.resb.screens.DashboardScreen
 import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
+import com.warriortech.resb.screens.RegistrationScreen
 import com.warriortech.resb.screens.AIAssistantScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
@@ -534,6 +535,13 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         composable("report_screen") {
             ReportScreen(navController = navController)
         }
+        composable("reports") {
+                            ReportScreen(navController = navController)
+                        }
+
+                        composable("registration") {
+                            RegistrationScreen(navController = navController)
+                        }
 
         composable("ai_assistant") {
             AIAssistantScreen(
@@ -751,6 +759,26 @@ fun DrawerContent(
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
+            NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Reports") else Text("") },
+        icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                        selected = currentDestination?.route == "report_screen",
+                        onClick = {
+                            onDestinationClicked("report_screen")
+                        },
+
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Registration") else Text("") },
+                        selected = currentDestination?.route == "registration",
+                        onClick = {
+                            onDestinationClicked("registration")
+                        },
+                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("AI Assistant") else Text("") },

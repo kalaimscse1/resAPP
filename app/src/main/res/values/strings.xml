@@ -263,7 +263,5 @@
     <string name="edit_paid_bill">Edit Paid Bill</string>
     <string name="delete_paid_bill">Delete Paid Bill</string>
     <string name="reports">Reports</string>
-    <string name="export_pdf">Export PDF</string>
-    <string name="export_excel">Export Excel</string>
-    <string name="export">Export</string>
+    <string name="registration">Registration</string>
 </resources>
