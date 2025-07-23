@@ -44,7 +44,7 @@ fun RegistrationScreen(
     )
 
     LaunchedEffect(Unit) {
-        viewModel.registerCompany()
+        viewModel.loadCompanyCode()
     }
     // Handle registration result
     LaunchedEffect(registrationResult) {
@@ -58,7 +58,7 @@ fun RegistrationScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.registration)) },
+                title = { Text(stringResource(R.string.register)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")

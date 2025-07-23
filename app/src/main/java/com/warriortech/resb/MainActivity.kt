@@ -760,7 +760,7 @@ fun DrawerContent(
             )
             NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Reports") else Text("") },
-        icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                         icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                         selected = currentDestination?.route == "report_screen",
                         onClick = {
                             onDestinationClicked("report_screen")
@@ -769,15 +769,6 @@ fun DrawerContent(
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
 
-                    NavigationDrawerItem(
-                        label = { if (!isCollapsed) Text("Registration") else Text("") },
-                        selected = currentDestination?.route == "registration",
-                        onClick = {
-                            onDestinationClicked("registration")
-                        },
-                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
