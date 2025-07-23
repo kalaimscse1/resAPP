@@ -77,6 +77,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onRegisterClick: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel() // Inject ViewModel
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -239,6 +240,19 @@ fun LoginScreen(
                         text = if (uiState.isLoading) "Logging in..." else "Login",
                         icon = if (uiState.isLoading) null else Icons.Default.Login
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Register button
+                    OutlinedButton(
+                        onClick = onRegisterClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isLoading
+                    ) {
+                        Text(
+                            text = stringResource(R.string.register),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
         }

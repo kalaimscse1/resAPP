@@ -263,5 +263,5 @@
     <string name="edit_paid_bill">பணம் செலுத்திய பில் திருத்து</string>
     <string name="delete_paid_bill">பணம் செலுத்திய பில் நீக்கு</string>
     <string name="reports">அறிக்கைகள்</string>
-    <string name="registration">பதிவு</string>
+    <string name="register">பதிவு செய்யுங்கள்</string>
 </resources>

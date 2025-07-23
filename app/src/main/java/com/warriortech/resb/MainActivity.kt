@@ -3,13 +3,11 @@ package com.warriortech.resb
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -17,7 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-importandroidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -38,9 +36,7 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -334,6 +330,9 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                     navController.navigate("dashboard") {
                         popUpTo("login") { inclusive = true }
                     }
+                },
+                onRegisterClick = {
+                    navController.navigate("registration")
                 }
             )
         }
