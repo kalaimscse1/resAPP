@@ -762,15 +762,15 @@ fun DrawerContent(
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
 
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Kitchen") else Text("") },
-                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
-                selected = currentDestination?.route == "kitchen",
-                onClick = {
-                    onDestinationClicked("kitchen")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
+//            NavigationDrawerItem(
+//                label = { if (!isCollapsed) Text("Kitchen") else Text("") },
+//                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+//                selected = currentDestination?.route == "kitchen",
+//                onClick = {
+//                    onDestinationClicked("kitchen")
+//                },
+//                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+//            )
 
             Spacer(modifier = Modifier.weight(1f))
 

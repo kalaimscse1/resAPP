@@ -18,7 +18,7 @@ class DashboardRepository @Inject constructor(
     suspend fun getDashboardMetrics(): DashboardMetrics {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getDashboardMetrics()
+                val response = apiService.getDashboardMetrics(SessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful && response.body() != null) {
                     response.body()!!
                 } else {
@@ -45,7 +45,7 @@ class DashboardRepository @Inject constructor(
     suspend fun getRunningOrders(): List<RunningOrder> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getRunningOrders()
+                val response = apiService.getRunningOrders(SessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful && response.body() != null) {
                     response.body()!!
                 } else {
@@ -60,7 +60,7 @@ class DashboardRepository @Inject constructor(
     suspend fun getRecentActivity(): List<String> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getRecentActivity()
+                val response = apiService.getRecentActivity(SessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful && response.body() != null) {
                     response.body()!!
                 } else {

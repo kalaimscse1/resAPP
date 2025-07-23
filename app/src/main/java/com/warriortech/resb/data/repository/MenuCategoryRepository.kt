@@ -3,6 +3,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,7 +13,7 @@ class MenuCategoryRepository @Inject constructor(
 ) {
 
     suspend fun getAllCategories(): List<MenuCategory> {
-        val response = apiService.getAllMenuCategories()
+        val response = apiService.getAllMenuCategories(SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyList()
         } else {
@@ -21,7 +22,7 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun insertCategory(category: MenuCategory): MenuCategory {
-        val response = apiService.createMenuCategory(category)
+        val response = apiService.createMenuCategory(category,SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create category")
         } else {
@@ -30,7 +31,7 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun updateCategory(category: MenuCategory): MenuCategory {
-        val response = apiService.updateMenuCategory(category.item_cat_id, category)
+        val response = apiService.updateMenuCategory(category.item_cat_id, category,SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update category")
         } else {
@@ -39,7 +40,7 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun deleteCategory(categoryId: Long) {
-        val response = apiService.deleteMenuCategory(categoryId)
+        val response = apiService.deleteMenuCategory(categoryId,SessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete category: ${response.message()}")
         }

@@ -6,6 +6,7 @@ import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,7 @@ class TableRepository @Inject constructor(
     // Offline-first approach: Always return local data immediately, sync in background
     suspend fun getAllTables(): Flow<List<Table>> = flow {
         try {
-            val  response  = apiService.getAllTables()
+            val  response  = apiService.getAllTables(SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful){
                 emit(response.body()!!)
             }else {
@@ -38,7 +39,7 @@ class TableRepository @Inject constructor(
         }
     }
     suspend fun deleteTable(tableId: Int) {
-        val response = apiService.deleteTable(tableId)
+        val response = apiService.deleteTable(tableId,SessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete table: ${response.message()}")
         }
@@ -46,7 +47,7 @@ class TableRepository @Inject constructor(
     suspend fun getAllAreas(): List<Area> {
         return if (isOnline()) {
             safeApiCall(
-                apiCall = { apiService.getAllAreas().body()!! }
+                apiCall = { apiService.getAllAreas(SessionManager.getCompanyCode()?:"").body()!! }
             ) ?: emptyList()
         } else {
             // Return cached areas or empty list if offline
@@ -56,7 +57,7 @@ class TableRepository @Inject constructor(
 
     fun getTablesBySection(section: Long): Flow<List<Table>> =flow {
         try {
-            val response = apiService.getTablesBySection(section)
+            val response = apiService.getTablesBySection(section,SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
 
             emit(response.body()!!)
@@ -76,7 +77,7 @@ class TableRepository @Inject constructor(
             // Try to sync with remote if online
             if (isOnline()) {
                 val success = safeApiCall(
-                    apiCall = { apiService.updateTableStatus(tableId, status) }
+                    apiCall = { apiService.updateTableStatus(tableId, status,SessionManager.getCompanyCode()?:"") }
                 ) != null
 
                 if (success) {
@@ -112,7 +113,7 @@ class TableRepository @Inject constructor(
                     tableDao.insertTables(entities)
                 }
             },
-            apiCall = { apiService.getAllTables().body()!! }
+            apiCall = { apiService.getAllTables(SessionManager.getCompanyCode()?:"").body()!! }
         )
     }
 
@@ -123,7 +124,7 @@ class TableRepository @Inject constructor(
     }
 
     suspend fun getstatus(tableId: Long):String{
-        val data =apiService.getTablesByStatus(tableId)
+        val data =apiService.getTablesByStatus(tableId,SessionManager.getCompanyCode()?:"")
         return data.is_ac
     }
     suspend fun insertTable(table: TblTable) {
@@ -132,7 +133,7 @@ class TableRepository @Inject constructor(
             tableDao.insertTable(entity)
             if (isOnline()) {
                 // Sync with remote if online
-                apiService.createTable(table)
+                apiService.createTable(table,SessionManager.getCompanyCode()?:"")
             }
         }
     }
@@ -145,7 +146,7 @@ class TableRepository @Inject constructor(
             tableDao.updateTable(entity)
             if (isOnline()) {
                 // Sync with remote if online
-                apiService.updateTable(table.table_id, table)
+                apiService.updateTable(table.table_id, table,SessionManager.getCompanyCode()?:"")
             }
         }
     }
@@ -154,7 +155,7 @@ class TableRepository @Inject constructor(
             tableDao.deleteTable(lng)
             if (isOnline()) {
                 // Sync with remote if online
-                apiService.deleteTable(lng)
+                apiService.deleteTable(lng,SessionManager.getCompanyCode()?:"")
             }
         }
     }

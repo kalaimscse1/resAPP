@@ -82,11 +82,12 @@ class LoginViewModel @Inject constructor() : ViewModel() { // Assuming you might
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.apiService.login(
-                    LoginRequest(
+                    request=LoginRequest(
                         companyCode = uiState.companyCode,
                         user_name = uiState.username,
                         password = uiState.password
-                    )
+                    ),
+                    tenantId = uiState.companyCode
                 )
 
                 if (response.success && response.data != null) {

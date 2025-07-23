@@ -3,6 +3,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.*
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -16,7 +17,7 @@ class ReportRepository @Inject constructor(
 
     suspend fun getTodaySales(): Flow<Result<TodaySalesReport>> = flow {
         try {
-            val response = apiService.getTodaySales()
+            val response = apiService.getTodaySales(SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!))
             } else {
@@ -29,7 +30,7 @@ class ReportRepository @Inject constructor(
 
     suspend fun getGSTSummary(): Flow<Result<GSTSummaryReport>> = flow {
         try {
-            val response = apiService.getGSTSummary()
+            val response = apiService.getGSTSummary(SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!))
             } else {
@@ -42,7 +43,7 @@ class ReportRepository @Inject constructor(
 
     suspend fun getSalesSummaryByDate(date: String): Flow<Result<SalesSummaryReport>> = flow {
         try {
-            val response = apiService.getSalesSummaryByDate(date)
+            val response = apiService.getSalesSummaryByDate(date,SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!))
             } else {

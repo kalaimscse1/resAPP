@@ -5,6 +5,7 @@ import com.warriortech.resb.model.KitchenKOT
 import com.warriortech.resb.model.KOTStatus
 import com.warriortech.resb.model.KOTStatusUpdate
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +17,7 @@ class KitchenRepository @Inject constructor(
 
     suspend fun getKitchenKOTs(): Flow<Result<List<KitchenKOT>>> = flow {
         try {
-            val response = apiService.getKitchenKOTs()
+            val response = apiService.getKitchenKOTs(SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 val kotResponse = response.body()
                 if (kotResponse?.success == true && kotResponse.data != null) {
@@ -36,7 +37,7 @@ class KitchenRepository @Inject constructor(
     suspend fun updateKOTStatus(kotId: Int, status: KOTStatus): Flow<Result<Unit>> = flow {
         try {
             val statusUpdate = KOTStatusUpdate(kotId, status)
-            val response = apiService.updateKOTStatus(kotId, statusUpdate)
+            val response = apiService.updateKOTStatus(kotId, statusUpdate,SessionManager.getCompanyCode()?:"")
 
             if (response.isSuccessful) {
                 val updateResponse = response.body()

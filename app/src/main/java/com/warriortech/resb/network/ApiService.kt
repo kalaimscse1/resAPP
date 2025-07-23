@@ -16,6 +16,7 @@ interface ApiService {
 
     @POST("auth/staff")
     suspend fun login(
+        @Header("X-Tenant-ID") tenantId: String,
         @Body request: LoginRequest
     ): ApiResponse<AuthResponse>
 
@@ -24,13 +25,13 @@ interface ApiService {
      */
 
     @GET("dashboard/metrics")
-    suspend fun getDashboardMetrics(): Response<DashboardMetrics>
+    suspend fun getDashboardMetrics(@Header("X-Tenant-ID") tenantId: String): Response<DashboardMetrics>
 
     @GET("dashboard/running-orders")
-    suspend fun getRunningOrders(): Response<List<RunningOrder>>
+    suspend fun getRunningOrders(@Header("X-Tenant-ID") tenantId: String): Response<List<RunningOrder>>
 
     @GET("dashboard/recent-activity")
-    suspend fun getRecentActivity(): Response<List<String>>
+    suspend fun getRecentActivity(@Header("X-Tenant-ID") tenantId: String): Response<List<String>>
 
 
     /**
@@ -38,158 +39,188 @@ interface ApiService {
      */
 
     @GET("table/area/getAreasByIsActive")
-    suspend fun getAllAreas(): Response<List<Area>>
+    suspend fun getAllAreas(@Header("X-Tenant-ID") tenantId: String): Response<List<Area>>
 
     @POST("table/area/addArea")
-    suspend fun createArea(@Body area: Area) : Response<Area>
+    suspend fun createArea(@Body area: Area,@Header("X-Tenant-ID") tenantId: String) : Response<Area>
 
     @PUT("table/area/updateArea/{area_id}")
     suspend fun updateArea(
         @Path("area_id") lng: Long,
-        @Body area: Area) : Response<Int>
+        @Body area: Area,
+        @Header("X-Tenant-ID") tenantId: String) : Response<Int>
 
     @DELETE("table/area/deleteAreaById/{area_id}")
     suspend fun deleteArea(
-        @Path("area_id") lng: Long) : Response<Int>
+        @Path("area_id") lng: Long,
+        @Header("X-Tenant-ID") tenantId: String) : Response<Int>
 
     /**
      * Table Management
      */
 
     @GET("table/table/getTablesByIsActive")
-    suspend fun getAllTables(): Response<List<Table>>
+    suspend fun getAllTables(@Header("X-Tenant-ID") tenantId: String): Response<List<Table>>
 
     @GET("table/table/getTableByAreaId/{area_id}")
-    suspend fun getTablesBySection(@Path("area_id") section: Long): Response<List<Table>>
+    suspend fun getTablesBySection(@Path("area_id") section: Long,@Header("X-Tenant-ID") tenantId: String): Response<List<Table>>
 
     @GET("table/table/getTable/{table_id}")
-    suspend fun getTablesByStatus(@Path("table_id") tableId: Long): Table
+    suspend fun getTablesByStatus(@Path("table_id") tableId: Long,@Header("X-Tenant-ID") tenantId: String): Table
 
     @PUT("tables/{id}/status")
     suspend fun updateTableStatus(
         @Path("id") tableId: Long,
-        @Query("status") status: String
+        @Query("status") status: String,
+        @Header("X-Tenant-ID") tenantId: String
     ): Response<Void>
 
     @POST("table/table/addTable")
     suspend fun createTable(
-        @Body table: TblTable) : Response<Table>
+        @Body table: TblTable,
+        @Header("X-Tenant-ID") tenantId: String) : Response<Table>
 
     @PUT("table/table/updateTables/{table_id}")
     suspend fun updateTable(
         @Path("table_id") lng: Long,
-        @Body table: TblTable) : Response<Int>
+        @Body table: TblTable,
+        @Header("X-Tenant-ID") tenantId: String) : Response<Int>
 
     @DELETE("table/table/deleteTableById/{table_id}")
-    suspend fun deleteTable(lng: Long) : Response<Int>
+    suspend fun deleteTable( @Path("table_id") lng: Long,
+                             @Header("X-Tenant-ID") tenantId: String) : Response<Int>
 
     @GET("table/table/updateTableAvailabilityByTableId/{table_id}")
     suspend fun updateTableAvailability(
         @Path("table_id") tableId: Long,
-        @Query("table_availability") status: String
+        @Query("table_availability") status: String,
+        @Header("X-Tenant-ID") tenantId: String
     ): Int
 
     @DELETE("table/table/deleteTableById/{table_id}")
-    suspend fun deleteTable(@Path("table_id") id: Int): Response<Unit>
+    suspend fun deleteTable(@Path("table_id") id: Int,
+                            @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
     /**
      * Menu Management
      */
 
     @GET("menu/getMenusByIsActive")
-    suspend fun getAllMenus(): Response<List<Menu>>
+    suspend fun getAllMenus(@Header("X-Tenant-ID") tenantId: String): Response<List<Menu>>
 
     @POST("menu/addMenu")
-    suspend fun createMenu(@Body menu: Menu): Response<Menu>
+    suspend fun createMenu(@Body menu: Menu,
+                           @Header("X-Tenant-ID") tenantId: String): Response<Menu>
 
     @PUT("menu/updateMenus/{menu_id}")
-    suspend fun updateMenu(@Path("menu_id") id: Long, @Body menu: Menu): Response<Int>
+    suspend fun updateMenu(@Path("menu_id") id: Long,
+                           @Body menu: Menu,
+                           @Header("X-Tenant-ID") tenantId: String): Response<Int>
 
     @DELETE("menu/deleteMenuById/{menu_id}")
-    suspend fun deleteMenu(@Path("menu_id") id: Long): Response<Int>
+    suspend fun deleteMenu(@Path("menu_id") id: Long,
+                           @Header("X-Tenant-ID") tenantId: String): Response<Int>
 
     /**
      * MenuCategory Management
      */
 
     @GET("menu/itemCategory/getItemCategoryByIsActive")
-    suspend fun getAllMenuCategories(): Response<List<MenuCategory>>
+    suspend fun getAllMenuCategories(@Header("X-Tenant-ID") tenantId: String): Response<List<MenuCategory>>
 
     @POST("menu/itemCategory/addItemCategory")
-    suspend fun createMenuCategory(@Body category: MenuCategory): Response<MenuCategory>
+    suspend fun createMenuCategory(@Body category: MenuCategory,
+                                   @Header("X-Tenant-ID") tenantId: String): Response<MenuCategory>
 
     @PUT("menu/itemCategory/updateItemCategory/{item_cat_id}")
-    suspend fun updateMenuCategory(@Path("item_cat_id") id: Long, @Body category: MenuCategory): Response<MenuCategory>
+    suspend fun updateMenuCategory(@Path("item_cat_id") id: Long,
+                                   @Body category: MenuCategory,
+                                   @Header("X-Tenant-ID") tenantId: String): Response<MenuCategory>
 
     @DELETE("menu/itemCategory/deleteItemCategoryById/{item_cat_id}")
-    suspend fun deleteMenuCategory(@Path("item_cat_id") id: Long): Response<Unit>
+    suspend fun deleteMenuCategory(@Path("item_cat_id") id: Long,
+                                   @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
     /**
      * MenuItem Management
      */
 
     @POST("menu/menuItem/addMenuItem")
-    suspend fun createMenuItem(@Body menuItem: MenuItem): Response<MenuItem>
+    suspend fun createMenuItem(@Body menuItem: MenuItem,
+                               @Header("X-Tenant-ID") tenantId: String): Response<MenuItem>
 
     @PUT("menu/menuItem/updateMenuItems/{menu_item_id}")
-    suspend fun updateMenuItem(@Path("id") id: Long, @Body menuItem: MenuItem): Response<MenuItem>
+    suspend fun updateMenuItem(@Path("id") id: Long,
+                               @Body menuItem: MenuItem,
+                               @Header("X-Tenant-ID") tenantId: String): Response<MenuItem>
 
     @DELETE("menu/deleteMenuItemById/{menu_item_id}")
-    suspend fun deleteMenuItem(@Path("id") id: Int): Response<Unit>
+    suspend fun deleteMenuItem(@Path("id") id: Int,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
-    suspend fun getMenuItems(): Response<List<MenuItem>>
+    suspend fun getMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
-    suspend fun getAllMenuItems(): Response<List<MenuItem>>
+    suspend fun getAllMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
 
     @GET("menu/menuItem/search")
-    suspend fun searchMenuItems(@Query("query") query: String): Response<List<MenuItem>>
+    suspend fun searchMenuItems(@Query("query") query: String,
+                                @Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
 
     /**
      * Order Management
      */
 
     @POST("order/addOrder")
-    suspend fun createOrder(@Body orderRequest: OrderMaster): Response<TblOrderResponse>
+    suspend fun createOrder(@Body orderRequest: OrderMaster,
+                            @Header("X-Tenant-ID") tenantId: String): Response<TblOrderResponse>
 
     @GET("order/getOrder/{order_master_id}")
-    suspend fun getOrderMasterById(@Path("order_master_id") orderId: Long): Response<TblOrderResponse>
+    suspend fun getOrderMasterById(@Path("order_master_id") orderId: Long,
+                                   @Header("X-Tenant-ID") tenantId: String): Response<TblOrderResponse>
 
     @POST("order/orderDetails/addAllOrderDetails")
-    suspend fun createOrderDetails(@Body orderRequest: List<OrderDetails>): Response<List<TblOrderDetailsResponse>>
+    suspend fun createOrderDetails(@Body orderRequest: List<OrderDetails>,
+                                   @Header("X-Tenant-ID") tenantId: String): Response<List<TblOrderDetailsResponse>>
 
     @GET("order/getOrderByTableId/{table_id}")
-    suspend fun getOpenOrderMasterForTable(@Path("table_id") tableId: Long): Response<TblOrderResponse>
+    suspend fun getOpenOrderMasterForTable(@Path("table_id") tableId: Long,
+                                           @Header("X-Tenant-ID") tenantId: String): Response<TblOrderResponse>
 
     @GET("order/getOrderNO")
-    suspend fun getOrderNo(): Map<String, Int>
+    suspend fun getOrderNo(@Header("X-Tenant-ID") tenantId: String): Map<String, Int>
 
     @GET("order/orderDetails/getKotNO")
-    suspend fun getKotNo(): Map<String, Int>
+    suspend fun getKotNo(@Header("X-Tenant-ID") tenantId: String): Map<String, Int>
 
     @GET("order/getOrdersByRunning")
-    suspend fun getAllOrders(): Response<List<TblOrderResponse>>
+    suspend fun getAllOrders(@Header("X-Tenant-ID") tenantId: String): Response<List<TblOrderResponse>>
 
     @GET("order/getRunningOrderAmount/{order_master_id}")
-    suspend fun getRunningOrderAmount(@Path("order_master_id") orderId: Long): Response<Map<String,Double>>
+    suspend fun getRunningOrderAmount(@Path("order_master_id") orderId: Long,
+                                      @Header("X-Tenant-ID") tenantId: String): Response<Map<String,Double>>
 
     @GET("order/getOrderNoForEdit/{table_id}")
-    suspend fun getOpenOrderItemsForTable(@Path("table_id") tableId: Long):Response<Map<String, Int>>
+    suspend fun getOpenOrderItemsForTable(@Path("table_id") tableId: Long,
+                                          @Header("X-Tenant-ID") tenantId: String):Response<Map<String, Int>>
 
     @GET("order/orderDetails/getOrdersDetailsByOrderIdApp/{order_master_id}")
-    suspend fun getOpenOrderDetailsForTable(@Path("order_master_id") tableId: Long?):Response<List<TblOrderDetailsResponse>>
+    suspend fun getOpenOrderDetailsForTable(@Path("order_master_id") tableId: Long?,
+                                            @Header("X-Tenant-ID") tenantId: String):Response<List<TblOrderDetailsResponse>>
 
     @GET("order/orderDetails/getOrdersDetailsByIsActive")
-    suspend fun getAllOrderDetails(): Response<List<TblOrderDetailsResponse>>
+    suspend fun getAllOrderDetails(@Header("X-Tenant-ID") tenantId: String): Response<List<TblOrderDetailsResponse>>
 
     @POST("print/kot")
-    suspend fun printKOT(@Body orderRequest: KOTRequest): Response<Map<String, String>>
+    suspend fun printKOT(@Body orderRequest: KOTRequest,
+                         @Header("X-Tenant-ID") tenantId: String): Response<Map<String, String>>
 
     @PUT("orders/{orderId}")
     suspend fun updateOrderStatus(
         @Path("orderId") orderId: Int,
-        @Body statusUpdate: Map<String, String>
+        @Body statusUpdate: Map<String, String>,
+        @Header("X-Tenant-ID") tenantId: String
     ): Response<Order>
 
     /**
@@ -201,247 +232,308 @@ interface ApiService {
      */
 
     @GET("settings/counter/getCounterByIsActive")
-    suspend fun getCounters(): List<TblCounter>
+    suspend fun getCounters(@Header("X-Tenant-ID") tenantId: String): List<TblCounter>
 
     @GET("settings/counter/getCounter/{counter_id}")
-    suspend fun getCounterById(@Path("counter_id") id: Long): TblCounter
+    suspend fun getCounterById(@Path("counter_id") id: Long,
+                               @Header("X-Tenant-ID") tenantId: String): TblCounter
 
     @POST("settings/counter/addCounter")
-    suspend fun createCounter(@Body counter: TblCounter): TblCounter
+    suspend fun createCounter(@Body counter: TblCounter,
+                              @Header("X-Tenant-ID") tenantId: String): TblCounter
 
     @PUT("settings/counter/updateCounter/{counter_id}")
-    suspend fun updateCounter(@Path("counter_id") id: Long, @Body counter: TblCounter): Int
+    suspend fun updateCounter(@Path("counter_id") id: Long,
+                              @Body counter: TblCounter,
+                              @Header("X-Tenant-ID") tenantId: String): Int
 
     @DELETE("settings/counter/deleteCounterById/{counter_id}")
-    suspend fun deleteCounter(@Path("id") id: Long)
+    suspend fun deleteCounter(@Path("id") id: Long,
+                              @Header("X-Tenant-ID") tenantId: String)
 
     /**
      * RoleSettings Management
      */
 
     @GET("role/getRoleByIsActive")
-    suspend fun getRoles(): Response<List<Role>>
+    suspend fun getRoles(@Header("X-Tenant-ID") tenantId: String): Response<List<Role>>
 
     @GET("role/{role_id}")
-    suspend fun getRoleById(@Path("role_id") id: Int): Response<Role>
+    suspend fun getRoleById(@Path("role_id") id: Int,
+                            @Header("X-Tenant-ID") tenantId: String): Response<Role>
 
     @POST("role/addRole")
-    suspend fun createRole(@Body role: Role): Response<Role>
+    suspend fun createRole(@Body role: Role,
+                           @Header("X-Tenant-ID") tenantId: String): Response<Role>
 
     @PUT("role/updateRole/{role_id}")
-    suspend fun updateRole(@Path("role_id") id: Long, @Body role: Role): Response<Int>
+    suspend fun updateRole(@Path("role_id") id: Long,
+                           @Body role: Role,
+                           @Header("X-Tenant-ID") tenantId: String): Response<Int>
 
     @DELETE("role/deleteRoleById/{role_id}")
-    suspend fun deleteRole(@Path("role_id") id: Long)
+    suspend fun deleteRole(@Path("role_id") id: Long,
+                           @Header("X-Tenant-ID") tenantId: String)
 
     /**
      * TaxSettings Management
      */
 
     @GET("settings/tax/getTaxByIsActive")
-    suspend fun getTaxes(): List<Tax>
+    suspend fun getTaxes(@Header("X-Tenant-ID") tenantId: String): List<Tax>
 
     @GET("settings/tax/getTax/{tax_id}")
-    suspend fun getTaxById(@Path("tax_id") id: Int): Tax
+    suspend fun getTaxById(@Path("tax_id") id: Int,
+                           @Header("X-Tenant-ID") tenantId: String): Tax
 
     @POST("settings/tax/addTax")
-    suspend fun createTax(@Body tax: Tax): Tax
+    suspend fun createTax(@Body tax: Tax,
+                          @Header("X-Tenant-ID") tenantId: String): Tax
 
     @PUT("settings/tax/updateTax/{id}")
-    suspend fun updateTax(@Path("id") id: Long, @Body tax: Tax): Int
+    suspend fun updateTax(@Path("id") id: Long,
+                          @Body tax: Tax,
+                          @Header("X-Tenant-ID") tenantId: String): Int
 
     @DELETE("settings/tax/deleteTaxById/{id}")
-    suspend fun deleteTax(@Path("id") id: Long)
+    suspend fun deleteTax(@Path("id") id: Long,
+                          @Header("X-Tenant-ID") tenantId: String)
 
     /**
      * TaxSplitSettings Management
      */
 
     @GET("settings/tax/getTaxSplitByIsActive")
-    suspend fun getTaxSplits(): Response<List<TblTaxSplit>>
+    suspend fun getTaxSplits(@Header("X-Tenant-ID") tenantId: String): Response<List<TblTaxSplit>>
 
     @GET("settings/tax/getTaxSplit/{tax_split_id}")
-    suspend fun getTaxSplitById(@Path("tax_split_id") id: Int): Response<TblTaxSplit>
+    suspend fun getTaxSplitById(@Path("tax_split_id") id: Int,
+                                @Header("X-Tenant-ID") tenantId: String): Response<TblTaxSplit>
 
     @POST("settings/tax/addTaxSplit")
-    suspend fun createTaxSplit(@Body taxSplit: TaxSplit): Response<TblTaxSplit>
+    suspend fun createTaxSplit(@Body taxSplit: TaxSplit,
+                               @Header("X-Tenant-ID") tenantId: String): Response<TblTaxSplit>
 
     @PUT("settings/tax/updateTaxSplit/{tax_split_id}")
-    suspend fun updateTaxSplit(@Path("tax_split_id") id: Long, @Body taxSplit: TaxSplit): Response<Int>
+    suspend fun updateTaxSplit(@Path("tax_split_id") id: Long,
+                               @Body taxSplit: TaxSplit,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Int>
 
     @DELETE("settings/tax/deleteTaxSplitById/{tax_split_id}")
-    suspend fun deleteTaxSplit(@Path("tax_split_id") id: Long)
+    suspend fun deleteTaxSplit(@Path("tax_split_id") id: Long,
+                               @Header("X-Tenant-ID") tenantId: String)
 
     @GET("settings/tax/getTaxSplitByTaxId/{tax_id}")
-    suspend fun getTaxSplit(@Path("tax_id") taxId: Long): List<TblTaxSplit>
+    suspend fun getTaxSplit(@Path("tax_id") taxId: Long,
+                            @Header("X-Tenant-ID") tenantId: String): List<TblTaxSplit>
 
     /**
      * RestaurantProfileSettings Management
      */
 
     @GET("company/getCompany/{company_code}")
-    suspend fun getRestaurantProfile(@Path("company_code") companyCode:String): RestaurantProfile
+    suspend fun getRestaurantProfile(@Path("company_code") companyCode:String,
+                                     @Header("X-Tenant-ID") tenantId: String): RestaurantProfile
 
     @PUT("company/updateCompany/{company_code}")
-    suspend fun updateRestaurantProfile(@Path("company_code") companyCode:String,@Body profile: RestaurantProfile): RestaurantProfile
+    suspend fun updateRestaurantProfile(@Path("company_code") companyCode:String,
+                                        @Body profile: RestaurantProfile,
+                                        @Header("X-Tenant-ID") tenantId: String): RestaurantProfile
 
     /**
      * GeneralSettings Management
      */
 
     @GET("settings/generalSetting/getAllGeneralSetting")
-    suspend fun getGeneralSettings(): Response<List<GeneralSettings>>
+    suspend fun getGeneralSettings(@Header("X-Tenant-ID") tenantId: String): Response<List<GeneralSettings>>
 
     @PUT("settings/generalSetting/updateSetting/{id}")
-    suspend fun updateGeneralSettings(@Path("id") id: Long,@Body settings: GeneralSettings): GeneralSettings
+    suspend fun updateGeneralSettings(@Path("id") id: Long,@Body settings: GeneralSettings,
+                                      @Header("X-Tenant-ID") tenantId: String): GeneralSettings
 
     /**
      * VoucherSettings Management
      */
 
     @GET("vouchers")
-    suspend fun getVouchers(): List<Voucher>
+    suspend fun getVouchers(@Header("X-Tenant-ID") tenantId: String): List<Voucher>
 
     @GET("vouchers/{id}")
-    suspend fun getVoucherById(@Path("id") id: Int): Voucher
+    suspend fun getVoucherById(@Path("id") id: Int,
+                               @Header("X-Tenant-ID") tenantId: String): Voucher
 
     @POST("vouchers")
-    suspend fun createVoucher(@Body voucher: Voucher): Voucher
+    suspend fun createVoucher(@Body voucher: Voucher,
+                              @Header("X-Tenant-ID") tenantId: String): Voucher
 
     @PUT("vouchers/{id}")
-    suspend fun updateVoucher(@Path("id") id: Long, @Body voucher: Voucher): Voucher
+    suspend fun updateVoucher(@Path("id") id: Long,
+                              @Body voucher: Voucher,
+                              @Header("X-Tenant-ID") tenantId: String): Voucher
 
     @DELETE("vouchers/{id}")
-    suspend fun deleteVoucher(@Path("id") id: Long)
+    suspend fun deleteVoucher(@Path("id") id: Long,
+                              @Header("X-Tenant-ID") tenantId: String)
 
     @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
-    suspend fun getVoucherByCounterId(@Path("counter_id") counterId: Long): Response<TblVoucherResponse>
+    suspend fun getVoucherByCounterId(@Path("counter_id") counterId: Long,
+                                      @Header("X-Tenant-ID") tenantId: String): Response<TblVoucherResponse>
 
     /**
      * PrinterSettings Management
      */
 
     @GET("printers")
-    suspend fun getPrinters(): List<Printer>
+    suspend fun getPrinters(@Header("X-Tenant-ID") tenantId: String): List<Printer>
 
     @GET("printers/{id}")
-    suspend fun getPrinterById(@Path("id") id: Int): Printer
+    suspend fun getPrinterById(@Path("id") id: Int,
+                               @Header("X-Tenant-ID") tenantId: String): Printer
 
     @POST("printers")
-    suspend fun createPrinter(@Body printer: Printer): Printer
+    suspend fun createPrinter(@Body printer: Printer,
+                              @Header("X-Tenant-ID") tenantId: String): Printer
 
     @PUT("printers/{id}")
-    suspend fun updatePrinter(@Path("id") id: Long, @Body printer: Printer): Printer
+    suspend fun updatePrinter(@Path("id") id: Long,
+                              @Body printer: Printer,
+                              @Header("X-Tenant-ID") tenantId: String): Printer
 
     @DELETE("printers/{id}")
-    suspend fun deletePrinter(@Path("id") id: Long)
+    suspend fun deletePrinter(@Path("id") id: Long,
+                              @Header("X-Tenant-ID") tenantId: String)
 
     /**
      * Payment Management
      */
 
     @GET("payment/getBillNoByCounterId")
-    suspend fun getBillNoByCounterId(@Query("counter_id") counterId: Long): Response<Map<String, String>>
+    suspend fun getBillNoByCounterId(@Query("counter_id") counterId: Long,
+                                     @Header("X-Tenant-ID") tenantId: String): Response<Map<String, String>>
 
     @POST("payment/addPayment")
-    suspend fun addPayment(@Body paymentRequest: TblBillingRequest): Response<TblBillingResponse>
+    suspend fun addPayment(@Body paymentRequest: TblBillingRequest,
+                           @Header("X-Tenant-ID") tenantId: String): Response<TblBillingResponse>
 
     @GET("paid-bills")
-    suspend fun getAllPaidBills(): Response<List<PaidBillSummary>>
+    suspend fun getAllPaidBills(@Header("X-Tenant-ID") tenantId: String): Response<List<PaidBillSummary>>
 
     @GET("paid-bills/{id}")
-    suspend fun getPaidBillById(@Path("id") id: Long): Response<PaidBill>
+    suspend fun getPaidBillById(@Path("id") id: Long,
+                                @Header("X-Tenant-ID") tenantId: String): Response<PaidBill>
 
     @PUT("paid-bills/{id}")
-    suspend fun updatePaidBill(@Path("id") id: Long, @Body billData: PaidBill): Response<PaidBill>
+    suspend fun updatePaidBill(@Path("id") id: Long,
+                               @Body billData: PaidBill,
+                               @Header("X-Tenant-ID") tenantId: String): Response<PaidBill>
 
     @DELETE("paid-bills/{id}")
-    suspend fun deletePaidBill(@Path("id") id: Long): Response<Unit>
+    suspend fun deletePaidBill(@Path("id") id: Long,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
     @POST("paid-bills/{id}/refund")
-    suspend fun refundBill(@Path("id") id: Long, @Body refundData: Map<String, Any>): Response<PaidBill>
+    suspend fun refundBill(@Path("id") id: Long,
+                           @Body refundData: Map<String, Any>,
+                           @Header("X-Tenant-ID") tenantId: String): Response<PaidBill>
 
     @GET("paid-bills/search")
-    suspend fun searchPaidBills(@Query("q") query: String): Response<List<PaidBillSummary>>
+    suspend fun searchPaidBills(@Query("q") query: String,
+                                @Header("X-Tenant-ID") tenantId: String): Response<List<PaidBillSummary>>
 
     /**
      * Reports Management
      */
 
     @GET("reports/today-sales")
-    suspend fun getTodaySales(): Response<TodaySalesReport>
+    suspend fun getTodaySales(@Header("X-Tenant-ID") tenantId: String): Response<TodaySalesReport>
 
     @GET("reports/gst-summary")
-    suspend fun getGSTSummary(): Response<GSTSummaryReport>
+    suspend fun getGSTSummary(@Header("X-Tenant-ID") tenantId: String): Response<GSTSummaryReport>
 
     @GET("reports/sales-summary/{date}")
-    suspend fun getSalesSummaryByDate(@Path("date") date: String): Response<SalesSummaryReport>
+    suspend fun getSalesSummaryByDate(@Path("date") date: String,
+                                      @Header("X-Tenant-ID") tenantId: String): Response<SalesSummaryReport>
 
     /**
      * Customers Management
      */
 
     @GET("customer")
-    suspend fun getAllCustomers(): Response<List<Customer>>
+    suspend fun getAllCustomers(@Header("X-Tenant-ID") tenantId: String): Response<List<Customer>>
 
     @POST("customer")
-    suspend fun createCustomer(@Body customer: Customer): Response<Customer>
+    suspend fun createCustomer(@Body customer: Customer,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Customer>
 
     @PUT("customer/{id}")
-    suspend fun updateCustomer(@Path("id") id: Long, @Body customer: Customer): Response<Customer>
+    suspend fun updateCustomer(@Path("id") id: Long,
+                               @Body customer: Customer,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Customer>
 
     @DELETE("customer/{id}")
-    suspend fun deleteCustomer(@Path("id") id: Long): Response<Unit>
+    suspend fun deleteCustomer(@Path("id") id: Long,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
     /**
      * Staff Management
      */
 
     @GET("auth/getStaffByIsActive")
-    suspend fun getAllStaff(): Response<List<TblStaff>>
+    suspend fun getAllStaff(@Header("X-Tenant-ID") tenantId: String): Response<List<TblStaff>>
 
     @POST("auth/addStaff")
-    suspend fun createStaff(@Body staff: TblStaff): Response<TblStaff>
+    suspend fun createStaff(@Body staff: TblStaff,
+                            @Header("X-Tenant-ID") tenantId: String): Response<TblStaff>
 
     @PUT("auth/updateStaff/{staff_id}")
-    suspend fun updateStaff(@Path("staff_id") id: Long, @Body staff: TblStaff): Response<TblStaff>
+    suspend fun updateStaff(@Path("staff_id") id: Long,
+                            @Body staff: TblStaff,
+                            @Header("X-Tenant-ID") tenantId: String): Response<TblStaff>
 
     @DELETE("auth/deleteStaffById/{staff_id}")
-    suspend fun deleteStaff(@Path("staff_id") id: Long): Response<Unit>
+    suspend fun deleteStaff(@Path("staff_id") id: Long,
+                            @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
     /**
      * Modifiers Management
      */
 
     @GET("modifiers")
-    suspend fun getAllModifiers(): Response<List<Modifiers>>
+    suspend fun getAllModifiers(@Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     @GET("modifiers/category/{categoryId}")
-    suspend fun getModifiersByCategory(@Path("categoryId") categoryId: Long): List<Modifiers>
+    suspend fun getModifiersByCategory(@Path("categoryId") categoryId: Long,
+                                       @Header("X-Tenant-ID") tenantId: String): List<Modifiers>
 
     @GET("modifiers/menu-item/{menuItemId}")
-    suspend fun getModifiersByMenuItem(@Path("menuItemId") menuItemId: Long): List<Modifiers>
+    suspend fun getModifiersByMenuItem(@Path("menuItemId") menuItemId: Long,
+                                       @Header("X-Tenant-ID") tenantId: String): List<Modifiers>
 
     @POST("modifiers")
-    suspend fun createModifier(@Body modifier: Modifiers): Response<Modifiers>
+    suspend fun createModifier(@Body modifier: Modifiers,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Modifiers>
 
     @PUT("modifiers/{id}")
-    suspend fun updateModifier(@Path("id") id: Long, @Body modifier: Modifiers): Response<Modifiers>
+    suspend fun updateModifier(@Path("id") id: Long,
+                               @Body modifier: Modifiers,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Modifiers>
 
     @DELETE("modifiers/{id}")
-    suspend fun deleteModifier(@Path("id") id: Long): Response<Int>
+    suspend fun deleteModifier(@Path("id") id: Long,
+                               @Header("X-Tenant-ID") tenantId: String): Response<Int>
 
     /**
      * Kitchen KOT Management
      */
 
     @GET("kitchen/kots")
-    suspend fun getKitchenKOTs(): Response<KitchenKOTResponse>
+    suspend fun getKitchenKOTs(@Header("X-Tenant-ID") tenantId: String): Response<KitchenKOTResponse>
 
     @PUT("kitchen/kot/{kotId}/status")
     suspend fun updateKOTStatus(
         @Path("kotId") kotId: Int,
-        @Body statusUpdate: KOTStatusUpdate
+        @Body statusUpdate: KOTStatusUpdate,
+        @Header("X-Tenant-ID") tenantId: String
     ): Response<KOTUpdateResponse>
     
 }

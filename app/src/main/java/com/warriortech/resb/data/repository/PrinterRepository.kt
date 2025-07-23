@@ -2,6 +2,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.Printer
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,7 +12,7 @@ class PrinterRepository @Inject constructor(
 ) {
     suspend fun getAllPrinters(): List<Printer> {
         return try {
-            apiService.getPrinters()
+            apiService.getPrinters(SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }
@@ -19,7 +20,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun getPrinterById(id: Int): Printer? {
         return try {
-            apiService.getPrinterById(id)
+            apiService.getPrinterById(id,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -27,7 +28,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun createPrinter(printer: Printer): Printer? {
         return try {
-            apiService.createPrinter(printer)
+            apiService.createPrinter(printer,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -35,7 +36,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun updatePrinter(printer: Printer): Printer? {
         return try {
-            apiService.updatePrinter(printer.printer_id, printer)
+            apiService.updatePrinter(printer.printer_id, printer,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -43,7 +44,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun deletePrinter(id: Long): Boolean {
         return try {
-            apiService.deletePrinter(id)
+            apiService.deletePrinter(id,SessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

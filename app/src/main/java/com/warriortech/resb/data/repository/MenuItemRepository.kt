@@ -5,6 +5,7 @@ import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -32,7 +33,7 @@ class MenuItemRepository @Inject constructor(
     suspend fun getMenuItems(category: String? = null): Flow<Result<List<MenuItem>>> = flow {
         try {
             getAllMenuItems()
-            val response = apiService.getMenuItems()
+            val response = apiService.getMenuItems(SessionManager.getCompanyCode()?:"")
 
             if (response.isSuccessful) {
                 val menuItems = response.body()
@@ -72,7 +73,7 @@ class MenuItemRepository @Inject constructor(
                     menuItemDao.insertMenuItems(entities)
                 }
             },
-            apiCall = { apiService.getAllMenuItems().body()!! }
+            apiCall = { apiService.getAllMenuItems(SessionManager.getCompanyCode()?:"").body()!! }
         )
     }
 
@@ -84,7 +85,7 @@ class MenuItemRepository @Inject constructor(
 
 
     suspend fun insertMenuItem(menuItem: MenuItem): MenuItem {
-        val response = apiService.createMenuItem(menuItem)
+        val response = apiService.createMenuItem(menuItem,SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create menu item")
         } else {
@@ -93,7 +94,7 @@ class MenuItemRepository @Inject constructor(
     }
 
     suspend fun updateMenuItem(menuItem: MenuItem): MenuItem {
-        val response = apiService.updateMenuItem(menuItem.menu_item_id, menuItem)
+        val response = apiService.updateMenuItem(menuItem.menu_item_id, menuItem,SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update menu item")
         } else {
@@ -102,7 +103,7 @@ class MenuItemRepository @Inject constructor(
     }
 
     suspend fun deleteMenuItem(menuItemId: Int) {
-        val response = apiService.deleteMenuItem(menuItemId)
+        val response = apiService.deleteMenuItem(menuItemId,SessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete menu item: ${response.message()}")
         }

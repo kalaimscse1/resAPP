@@ -11,6 +11,7 @@ import com.warriortech.resb.model.ModifierType
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.OrderItemModifier
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -76,7 +77,7 @@ class ModifierRepository @Inject constructor(
 
     suspend fun syncData() {
         try {
-            val response = apiService.getAllModifiers()
+            val response = apiService.getAllModifiers(SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 response.body()?.let { modifiers ->
                     val modifierEntities = modifiers.map { it.toEntity() }
@@ -91,7 +92,7 @@ class ModifierRepository @Inject constructor(
     suspend fun createModifier(modifier: Modifiers): Result<Modifiers> {
         return try {
             if (isOnline()) {
-                val response = apiService.createModifier(modifier)
+                val response = apiService.createModifier(modifier,SessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     response.body()?.let { createdModifier ->
                         modifierDao.insertModifier(createdModifier.toEntity())
@@ -115,7 +116,7 @@ class ModifierRepository @Inject constructor(
     suspend fun updateModifier(modifier: Modifiers): Result<Modifiers> {
         return try {
             if (isOnline()) {
-                val response = apiService.updateModifier(modifier.modifier_id, modifier)
+                val response = apiService.updateModifier(modifier.modifier_id, modifier,SessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     response.body()?.let { updatedModifier ->
                         modifierDao.updateModifier(updatedModifier.toEntity())
@@ -137,7 +138,7 @@ class ModifierRepository @Inject constructor(
     suspend fun deleteModifier(modifierId: Long): Result<Unit> {
         return try {
             if (isOnline()) {
-                val response = apiService.deleteModifier(modifierId)
+                val response = apiService.deleteModifier(modifierId,SessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     modifierDao.getModifierById(modifierId)?.let { entity ->
                         modifierDao.deleteModifier(entity)

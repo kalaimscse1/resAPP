@@ -14,7 +14,7 @@ class RestaurantProfileRepository @Inject constructor(
 ) {
     suspend fun getRestaurantProfile(): RestaurantProfile? {
         return try {
-            apiService.getRestaurantProfile(SessionManager.getCompanyCode()?:"")
+            apiService.getRestaurantProfile(SessionManager.getCompanyCode()?:"",SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -22,7 +22,7 @@ class RestaurantProfileRepository @Inject constructor(
 
     suspend fun updateRestaurantProfile(profile: RestaurantProfile): RestaurantProfile? {
         return try {
-            apiService.updateRestaurantProfile(SessionManager.getCompanyCode()?:"",profile)
+            apiService.updateRestaurantProfile(SessionManager.getCompanyCode()?:"",profile,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }

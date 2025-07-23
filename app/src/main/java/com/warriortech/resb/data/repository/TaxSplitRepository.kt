@@ -5,6 +5,7 @@ import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TaxSplit
 import com.warriortech.resb.model.TblTaxSplit
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,7 +15,7 @@ class TaxSplitRepository @Inject constructor(
 ) {
     suspend fun getAllTaxSplits(): List<TblTaxSplit> {
         return try {
-            apiService.getTaxSplits().body()?: emptyList()
+            apiService.getTaxSplits(SessionManager.getCompanyCode()?:"").body()?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -22,7 +23,7 @@ class TaxSplitRepository @Inject constructor(
 
     suspend fun getTaxSplitById(id: Int): TblTaxSplit? {
         return try {
-            apiService.getTaxSplitById(id).body()
+            apiService.getTaxSplitById(id,SessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
             null
         }
@@ -30,7 +31,7 @@ class TaxSplitRepository @Inject constructor(
 
     suspend fun createTaxSplit(taxSplit: TaxSplit): TblTaxSplit? {
         return try {
-            apiService.createTaxSplit(taxSplit).body()
+            apiService.createTaxSplit(taxSplit,SessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
             null
         }
@@ -38,7 +39,7 @@ class TaxSplitRepository @Inject constructor(
 
     suspend fun updateTaxSplit(taxSplit: TaxSplit): Int? {
         return try {
-            apiService.updateTaxSplit(taxSplit.tax_split_id, taxSplit).body()
+            apiService.updateTaxSplit(taxSplit.tax_split_id, taxSplit,SessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
             null
         }
@@ -46,7 +47,7 @@ class TaxSplitRepository @Inject constructor(
 
     suspend fun deleteTaxSplit(id: Long): Boolean {
         return try {
-            apiService.deleteTaxSplit(id)
+            apiService.deleteTaxSplit(id,SessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false
@@ -55,7 +56,7 @@ class TaxSplitRepository @Inject constructor(
 
     suspend fun getTaxes():List<Tax>{
         return try {
-            apiService.getTaxes()
+            apiService.getTaxes(SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }

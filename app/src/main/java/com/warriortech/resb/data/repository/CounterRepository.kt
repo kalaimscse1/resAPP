@@ -5,6 +5,7 @@ import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.model.CounterSession
 import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.TblCounter
+import com.warriortech.resb.network.SessionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -16,7 +17,7 @@ class CounterRepository @Inject constructor(
 ) {
     suspend fun getAllCounters(): List<TblCounter> {
         return try {
-            apiService.getCounters()
+            apiService.getCounters(SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }
@@ -24,7 +25,7 @@ class CounterRepository @Inject constructor(
 
     suspend fun getCounterById(id: Long): TblCounter? {
         return try {
-            apiService.getCounterById(id)
+            apiService.getCounterById(id,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -33,7 +34,7 @@ class CounterRepository @Inject constructor(
 
     suspend fun createCounter(counter: TblCounter): TblCounter? {
         return try {
-            apiService.createCounter(counter)
+            apiService.createCounter(counter,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -41,7 +42,7 @@ class CounterRepository @Inject constructor(
 
     suspend fun updateCounter(counter: TblCounter): Int? {
         return try {
-            apiService.updateCounter(counter.counter_id, counter)
+            apiService.updateCounter(counter.counter_id, counter,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -49,7 +50,7 @@ class CounterRepository @Inject constructor(
 
     suspend fun deleteCounter(id: Long): Boolean {
         return try {
-            apiService.deleteCounter(id)
+            apiService.deleteCounter(id,SessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

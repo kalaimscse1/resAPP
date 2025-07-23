@@ -4,6 +4,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.Voucher
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +14,7 @@ class VoucherRepository @Inject constructor(
 ) {
     suspend fun getAllVouchers(): List<Voucher> {
         return try {
-            apiService.getVouchers()
+            apiService.getVouchers(SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }
@@ -21,7 +22,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun getVoucherById(id: Int): Voucher? {
         return try {
-            apiService.getVoucherById(id)
+            apiService.getVoucherById(id,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -29,7 +30,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun createVoucher(voucher: Voucher): Voucher? {
         return try {
-            apiService.createVoucher(voucher)
+            apiService.createVoucher(voucher,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -37,7 +38,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun updateVoucher(voucher: Voucher): Voucher? {
         return try {
-            apiService.updateVoucher(voucher.id, voucher)
+            apiService.updateVoucher(voucher.id, voucher,SessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -45,7 +46,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun deleteVoucher(id: Long): Boolean {
         return try {
-            apiService.deleteVoucher(id)
+            apiService.deleteVoucher(id,SessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

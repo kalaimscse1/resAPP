@@ -5,6 +5,7 @@ import com.warriortech.resb.model.Customer
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 
 @Singleton
 class CustomerRepository @Inject constructor(
@@ -12,7 +13,7 @@ class CustomerRepository @Inject constructor(
 ) {
 
     suspend fun getAllCustomers(): List<Customer> {
-        val response = apiService.getAllCustomers()
+        val response = apiService.getAllCustomers(SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyList()
         } else {
@@ -21,7 +22,7 @@ class CustomerRepository @Inject constructor(
     }
 
     suspend fun insertCustomer(customer: Customer): Customer {
-        val response = apiService.createCustomer(customer)
+        val response = apiService.createCustomer(customer,SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create customer")
         } else {
@@ -30,7 +31,7 @@ class CustomerRepository @Inject constructor(
     }
 
     suspend fun updateCustomer(customer: Customer): Customer {
-        val response = apiService.updateCustomer(customer.customer_id, customer)
+        val response = apiService.updateCustomer(customer.customer_id, customer,SessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update customer")
         } else {
@@ -39,7 +40,7 @@ class CustomerRepository @Inject constructor(
     }
 
     suspend fun deleteCustomer(customerId: Long) {
-        val response = apiService.deleteCustomer(customerId)
+        val response = apiService.deleteCustomer(customerId,SessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete customer: ${response.message()}")
         }

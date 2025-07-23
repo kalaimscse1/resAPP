@@ -41,9 +41,9 @@ class BillRepository@Inject constructor(
     suspend fun placeBill(orderMasterId: Long,paymentMethod: PaymentMethod,receivedAmt: Double
     ): Flow<Result<TblBillingResponse>> = flow {
         try {
-            val billNo= apiService.getBillNoByCounterId(SessionManager.getUser()?.counter_id!!).body()
-            val voucher= apiService.getVoucherByCounterId(SessionManager.getUser()?.counter_id!!).body()
-            val orderMaster= apiService.getOpenOrderDetailsForTable(orderMasterId).body()!!
+            val billNo= apiService.getBillNoByCounterId(SessionManager.getUser()?.counter_id!!,SessionManager.getCompanyCode()?:"").body()
+            val voucher= apiService.getVoucherByCounterId(SessionManager.getUser()?.counter_id!!,SessionManager.getCompanyCode()?:"").body()
+            val orderMaster= apiService.getOpenOrderDetailsForTable(orderMasterId,SessionManager.getCompanyCode()?:"").body()!!
             val request = TblBillingRequest(
                 bill_no = billNo?.get("bill_no")!!,
                 bill_date = getCurrentDateModern(),
@@ -72,7 +72,7 @@ class BillRepository@Inject constructor(
                 note = "",
                 is_active = 1L
             )
-            val response = apiService.addPayment(request)
+            val response = apiService.addPayment(request,SessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 response.body()?.let { billResponse ->
                     emit(Result.success(billResponse))

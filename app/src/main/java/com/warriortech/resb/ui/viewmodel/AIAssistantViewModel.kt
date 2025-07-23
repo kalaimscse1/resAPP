@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 
 
 @HiltViewModel
@@ -74,7 +75,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample order items for demonstration
-                val sampleOrderItems = apiService.getAllOrderDetails().body()!!
+                val sampleOrderItems = apiService.getAllOrderDetails(SessionManager.getCompanyCode()?:"").body()!!
                 
                 val result = aiRepository.suggestUpsells(sampleOrderItems)
                 result.onSuccess { suggestions ->
@@ -110,7 +111,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample sales data for demonstration
-                 val sampleSalesData = apiService.getAllOrderDetails().body()!!
+                 val sampleSalesData = apiService.getAllOrderDetails(SessionManager.getCompanyCode()?:"").body()!!
                 
                 val result = aiRepository.analyzeSalesData(sampleSalesData)
                 result.onSuccess { analysis ->
@@ -146,7 +147,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample customer order history
-                val customerHistory =apiService.getAllOrderDetails().body()!!
+                val customerHistory =apiService.getAllOrderDetails(SessionManager.getCompanyCode()?:"").body()!!
                 
                 val result = aiRepository.generateCustomerRecommendations(customerHistory)
                 result.onSuccess { recommendations ->
