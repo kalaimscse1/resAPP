@@ -535,5 +535,16 @@ interface ApiService {
         @Body statusUpdate: KOTStatusUpdate,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<KOTUpdateResponse>
+
+
+    /**
+     * Register Management
+     */
+
+    @POST("companyMaster/createCompanyMaster")
+    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest): RegistrationResponse
+
+    @GET("companyMaster/getCompanyCode")
+    suspend fun getCompanyCode(): Map<String, String>
     
 }

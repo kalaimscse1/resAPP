@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,7 @@ fun RegistrationScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val registrationResult by viewModel.registrationResult.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val configuration = LocalConfiguration.current
+    val configuration = LocalContext.current
     val isTablet = MobileUtils.isTablet(configuration)
     
     var showInstallDatePicker by remember { mutableStateOf(false) }
@@ -42,6 +43,9 @@ fun RegistrationScreen(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
 
+    LaunchedEffect(Unit) {
+        viewModel.registerCompany()
+    }
     // Handle registration result
     LaunchedEffect(registrationResult) {
         registrationResult?.let { message ->

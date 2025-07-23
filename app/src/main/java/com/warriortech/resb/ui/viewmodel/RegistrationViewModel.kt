@@ -102,6 +102,12 @@ class RegistrationViewModel @Inject constructor(
         _registrationResult.value = null
     }
 
+    fun loadCompanyCode(){
+        viewModelScope.launch {
+            val companyCode = registrationRepository.getCompanyCode()
+            _uiState.value = _uiState.value.copy(companyMasterCode = companyCode["company_master_code"].toString())
+        }
+    }
     fun registerCompany() {
         val state = _uiState.value
         

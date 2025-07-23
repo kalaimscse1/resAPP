@@ -1,9 +1,10 @@
 
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.api.ApiService
+
 import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RegistrationResponse
+import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,4 +23,9 @@ class RegistrationRepository @Inject constructor(
             )
         }
     }
+
+    suspend fun getCompanyCode(): Map<String, String>{
+        return apiService.getCompanyCode()
+    }
+
 }
