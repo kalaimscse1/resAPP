@@ -14,7 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.warriortech.resb.model.Area
+import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.Tax
+import com.warriortech.resb.model.TblCounter
 import kotlin.collections.forEach
 
 
@@ -130,6 +132,61 @@ fun TaxDropdown(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CounterDropdown(
+    counters: List<TblCounter>,
+    selectedCounter: TblCounter?,
+    onCounterSelected: (TblCounter) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedCounter?.counter_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (counters.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                counters.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.counter_name) },
+                        onClick = {
+                            onCounterSelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

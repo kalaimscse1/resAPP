@@ -1,5 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -81,24 +82,33 @@ class LoginViewModel @Inject constructor() : ViewModel() { // Assuming you might
         uiState = uiState.copy(isLoading = true, loginError = null)
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.apiService.login(
-                    request=LoginRequest(
-                        companyCode = uiState.companyCode,
-                        user_name = uiState.username,
-                        password = uiState.password
-                    ),
-                    tenantId = uiState.companyCode
-                )
+                val check = RetrofitClient.apiService.checkIsBlock(uiState.companyCode)
+                Log.d("checkIsBlock", check.toString())
+                if (check.data!!){
+                    val response = RetrofitClient.apiService.login(
+                        request=LoginRequest(
+                            companyCode = uiState.companyCode,
+                            user_name = uiState.username,
+                            password = uiState.password
+                        ),
+                        tenantId = uiState.companyCode
+                    )
 
-                if (response.success && response.data != null) {
-                    val authResponse = response.data
-                    SessionManager.saveAuthToken(authResponse.token)
-                    SessionManager.saveUser(authResponse.user)
-                    SessionManager.saveCompanyCode(uiState.companyCode)
-                    uiState = uiState.copy(isLoading = false, loginSuccess = true)
-                } else {
-                    uiState = uiState.copy(isLoading = false, loginError = "Login failed: ${response.message}")
+                    if (response.success && response.data != null) {
+                        val authResponse = response.data
+                        SessionManager.saveAuthToken(authResponse.token)
+                        SessionManager.saveUser(authResponse.user)
+                        SessionManager.saveCompanyCode(uiState.companyCode)
+                        uiState = uiState.copy(isLoading = false, loginSuccess = true)
+                    } else {
+                        uiState = uiState.copy(isLoading = false, loginError = "Login failed: ${response.message}")
+                    }
+
                 }
+                else{
+                    uiState = uiState.copy(isLoading = false, loginError = check.message)
+                }
+
             } catch (e: Exception) {
                 uiState = uiState.copy(isLoading = false, loginError = "Error: ${e.message ?: "Unknown error"}")
             }

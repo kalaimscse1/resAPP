@@ -4,6 +4,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RegistrationResponse
+import com.warriortech.resb.model.RestaurantProfile
 import com.warriortech.resb.network.ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,4 +29,7 @@ class RegistrationRepository @Inject constructor(
         return apiService.getCompanyCode()
     }
 
+    suspend fun addRestaurantProfile(profile: RestaurantProfile) :RestaurantProfile{
+        return apiService.addRestaurantProfile(profile,profile.company_code)
+    }
 }

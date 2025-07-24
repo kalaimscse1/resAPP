@@ -14,6 +14,9 @@ interface ApiService {
      * Authentication
      */
 
+    @GET("companyMaster/checkCompanyCode/{companyCode}")
+    suspend fun checkIsBlock(@Path("companyCode") companyCode: String): ApiResponse<Boolean>
+
     @POST("auth/staff")
     suspend fun login(
         @Header("X-Tenant-ID") tenantId: String,
@@ -42,7 +45,8 @@ interface ApiService {
     suspend fun getAllAreas(@Header("X-Tenant-ID") tenantId: String): Response<List<Area>>
 
     @POST("table/area/addArea")
-    suspend fun createArea(@Body area: Area,@Header("X-Tenant-ID") tenantId: String) : Response<Area>
+    suspend fun createArea(@Body area: Area,
+                           @Header("X-Tenant-ID") tenantId: String) : Response<Area>
 
     @PUT("table/area/updateArea/{area_id}")
     suspend fun updateArea(
@@ -63,10 +67,12 @@ interface ApiService {
     suspend fun getAllTables(@Header("X-Tenant-ID") tenantId: String): Response<List<Table>>
 
     @GET("table/table/getTableByAreaId/{area_id}")
-    suspend fun getTablesBySection(@Path("area_id") section: Long,@Header("X-Tenant-ID") tenantId: String): Response<List<Table>>
+    suspend fun getTablesBySection(@Path("area_id") section: Long,
+                                   @Header("X-Tenant-ID") tenantId: String): Response<List<Table>>
 
     @GET("table/table/getTable/{table_id}")
-    suspend fun getTablesByStatus(@Path("table_id") tableId: Long,@Header("X-Tenant-ID") tenantId: String): Table
+    suspend fun getTablesByStatus(@Path("table_id") tableId: Long,
+                                  @Header("X-Tenant-ID") tenantId: String): Table
 
     @PUT("tables/{id}/status")
     suspend fun updateTableStatus(
@@ -340,6 +346,10 @@ interface ApiService {
                                         @Body profile: RestaurantProfile,
                                         @Header("X-Tenant-ID") tenantId: String): RestaurantProfile
 
+    @GET("company/addCompany")
+    suspend fun addRestaurantProfile(@Body profile: RestaurantProfile,
+                                     @Header("X-Tenant-ID") tenantId: String) : RestaurantProfile
+
     /**
      * GeneralSettings Management
      */
@@ -355,24 +365,24 @@ interface ApiService {
      * VoucherSettings Management
      */
 
-    @GET("vouchers")
+    @GET("settings/voucher/getVoucherByIsActive")
     suspend fun getVouchers(@Header("X-Tenant-ID") tenantId: String): List<Voucher>
 
-    @GET("vouchers/{id}")
-    suspend fun getVoucherById(@Path("id") id: Int,
+    @GET("settings/voucher/getVoucher/{voucher_id}")
+    suspend fun getVoucherById(@Path("voucher_id") id: Int,
                                @Header("X-Tenant-ID") tenantId: String): Voucher
 
-    @POST("vouchers")
+    @POST("settings/voucher/addVoucher")
     suspend fun createVoucher(@Body voucher: Voucher,
                               @Header("X-Tenant-ID") tenantId: String): Voucher
 
-    @PUT("vouchers/{id}")
-    suspend fun updateVoucher(@Path("id") id: Long,
+    @PUT("settings/voucher/updateVoucher/{voucher_id}")
+    suspend fun updateVoucher(@Path("voucher_id") id: Long,
                               @Body voucher: Voucher,
                               @Header("X-Tenant-ID") tenantId: String): Voucher
 
-    @DELETE("vouchers/{id}")
-    suspend fun deleteVoucher(@Path("id") id: Long,
+    @DELETE("settings/voucher/deleteVoucherById/{voucher_id}")
+    suspend fun deleteVoucher(@Path("voucher_id") id: Long,
                               @Header("X-Tenant-ID") tenantId: String)
 
     @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
@@ -383,24 +393,24 @@ interface ApiService {
      * PrinterSettings Management
      */
 
-    @GET("printers")
+    @GET("settings/printer/getPrinterByIsActive")
     suspend fun getPrinters(@Header("X-Tenant-ID") tenantId: String): List<Printer>
 
-    @GET("printers/{id}")
-    suspend fun getPrinterById(@Path("id") id: Int,
+    @GET("settings/printer/getPrinter/{printer_id}  ")
+    suspend fun getPrinterById(@Path("printer_id") id: Int,
                                @Header("X-Tenant-ID") tenantId: String): Printer
 
-    @POST("printers")
+    @POST("settings/printer/addPrinter")
     suspend fun createPrinter(@Body printer: Printer,
                               @Header("X-Tenant-ID") tenantId: String): Printer
 
-    @PUT("printers/{id}")
-    suspend fun updatePrinter(@Path("id") id: Long,
+    @PUT("settings/printer/updatePrinter/{printer_id}")
+    suspend fun updatePrinter(@Path("printer_id") id: Long,
                               @Body printer: Printer,
                               @Header("X-Tenant-ID") tenantId: String): Printer
 
-    @DELETE("printers/{id}")
-    suspend fun deletePrinter(@Path("id") id: Long,
+    @DELETE("settings/printer/deletePrinterById/{printer_id}")
+    suspend fun deletePrinter(@Path("printer_id") id: Long,
                               @Header("X-Tenant-ID") tenantId: String)
 
     /**

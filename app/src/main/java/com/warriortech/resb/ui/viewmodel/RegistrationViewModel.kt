@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RegistrationRepository
 import com.warriortech.resb.model.RegistrationRequest
+import com.warriortech.resb.model.RestaurantProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -143,6 +144,24 @@ class RegistrationViewModel @Inject constructor(
 
                 val response = registrationRepository.registerCompany(request)
                 _registrationResult.value = if (response.success) {
+                    val data = response.data
+                    val profile = RestaurantProfile(
+                        company_code = data?.company_master_code ?: "",
+                        company_name = data?.company_name ?: "",
+                        owner_name = data?.owner_name ?: "",
+                        address1 = data?.address1 ?: "",
+                        address2 = data?.address2 ?: "",
+                        place = data?.place ?: "",
+                        pincode = data?.pincode ?: "",
+                        contact_no = data?.contact_no ?: "",
+                        mail_id = data?.mail_id ?: "",
+                        country = data?.country ?: "",
+                        state = data?.state ?: "",
+                        currency = "Rs",
+                        tax_no = "",
+                        decimal_point = 2L
+                    )
+                    registrationRepository.addRestaurantProfile(profile)
                     "Registration successful!"
                 } else {
                     response.message
