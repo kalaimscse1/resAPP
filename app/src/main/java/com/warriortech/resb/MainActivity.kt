@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Surface
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import com.warriortech.resb.ui.theme.ResbTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -249,7 +251,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 elevation = 4.dp,
                                 shape = MaterialTheme.shapes.large,
-                                color = MaterialTheme.colors.background
+                                color = MaterialTheme.colorScheme.background
                             ) {
                                 Column {
                                     NetworkStatusBar(connectionState = connectionState)
@@ -270,7 +272,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.fillMaxSize(),
                                 elevation = 2.dp,
                                 shape = MaterialTheme.shapes.large,
-                                color = MaterialTheme.colors.background
+                                color = MaterialTheme.colorScheme.background
                             ) {
                                 Column {
                                     NetworkStatusBar(connectionState = connectionState)
@@ -287,7 +289,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         elevation = 2.dp,
                         shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colors.background
+                        color = MaterialTheme.colorScheme.background
                     ) {
                         Column {
                             NetworkStatusBar(connectionState = connectionState)
@@ -630,7 +632,7 @@ fun DrawerContent(
 
     ModalDrawerSheet(
         modifier = Modifier.width(drawerWidth),
-        drawerContainerColor = MaterialTheme.colors.surface,
+        drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerTonalElevation = 4.dp
     ) {
         Column(modifier = Modifier.fillMaxHeight()) {
@@ -649,13 +651,13 @@ fun DrawerContent(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = "Profile",
                         modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colors.primary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                     if (!isCollapsed) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(SessionManager.getUser()?.staff_name?:"", fontWeight = FontWeight.Bold)
-                            Text(SessionManager.getUser()?.role?:"", style = MaterialTheme.typography.body1)
+                            Text(SessionManager.getUser()?.role?:"", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
@@ -756,27 +758,16 @@ fun DrawerContent(
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
-            NavigationDrawerItem(
-                        label = { if (!isCollapsed) Text("Reports") else Text("") },
-                         icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                        selected = currentDestination?.route == "report_screen",
-                        onClick = {
-                            onDestinationClicked("report_screen")
-                        },
-
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-
-
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
-                icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
-                selected = currentDestination?.route == "ai_assistant",
-                onClick = {
-                    onDestinationClicked("ai_assistant")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
+     
+//            NavigationDrawerItem(
+//                label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
+//                icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
+//                selected = currentDestination?.route == "ai_assistant",
+//                onClick = {
+//                    onDestinationClicked("ai_assistant")
+//                },
+//                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+//            )
 
 //            NavigationDrawerItem(
 //                label = { if (!isCollapsed) Text("Kitchen") else Text("") },

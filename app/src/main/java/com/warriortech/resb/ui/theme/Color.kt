@@ -1,41 +1,32 @@
 package com.warriortech.resb.ui.theme
 
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Primary Brand Colors
-val BluePrimary = Color(0xFF2196F3)
-val BluePrimaryDark = Color(0xFF1976D2)
-val BluePrimaryLight = Color(0xFF64B5F6)
+// Color Palette
+val PrimaryBlue = Color(0xFF1976D2)
+val PrimaryBlueDark = Color(0xFF0D47A1)
+val PrimaryBlueLight = Color(0xFF42A5F5)
+val AccentOrange = Color(0xFFFF6F00)
+val AccentOrangeLight = Color(0xFFFFB74D)
 
-// Secondary Colors
-val ReddishAccent = Color(0xFFE91E63)
-val ReddishAccentDark = Color(0xFFC2185B)
-val ReddishAccentLight = Color(0xFFF06292)
+val GradientStart = Color(0xFF667eea)
+val GradientEnd = Color(0xFF764ba2)
+val GradientSecondaryStart = Color(0xFFf093fb)
+val GradientSecondaryEnd = Color(0xFFf5576c)
 
-// Background Colors
-val LightBackground = Color(0xFFF8F9FA)
-val DarkBackground = Color(0xFF121212)
-val SurfaceLight = Color(0xFFFFFFFF)
-val SurfaceDark = Color(0xFF1E1E1E)
+val SurfaceLight = Color(0xFFFAFAFA)
+val SurfaceMedium = Color(0xFFF5F5F5)
+val SurfaceDark = Color(0xFFEEEEEE)
 
-// Text Colors
 val TextPrimary = Color(0xFF212121)
 val TextSecondary = Color(0xFF757575)
-val TextOnPrimary = Color(0xFFFFFFFF)
-val TextOnDark = Color(0xFFFFFFFF)
+val TextHint = Color(0xFFBDBDBD)
 
-// Semantic Colors
-val Success = Color(0xFF4CAF50)
-val Warning = Color(0xFFFF9800)
-val Error = Color(0xFFF44336)
-val Info = Color(0xFF2196F3)
+val SuccessGreen = Color(0xFF4CAF50)
+val WarningAmber = Color(0xFFFF9800)
+val ErrorRed = Color(0xFFF44336)
 
-// Additional UI Colors
-val DividerColor = Color(0xFFE0E0E0)
-val DividerColorDark = Color(0xFF333333)
-val CardElevation = Color(0x08000000)
-val Shadow = Color(0x1A000000)
+// Light Color Scheme
 
-// Gradient Colors
-val GradientStart = Color(0xFF2196F3)
-val GradientEnd = Color(0xFF21CBF3)

@@ -20,7 +20,7 @@ import androidx.navigation.NavController
 import com.warriortech.resb.model.ReceiptTemplate
 import com.warriortech.resb.model.ReceiptType
 import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.ui.theme.LightBackground
+import com.warriortech.resb.ui.theme.PrimaryBlueLight
 import com.warriortech.resb.ui.theme.TextSecondary
 import com.warriortech.resb.ui.viewmodel.TemplateViewModel
 
@@ -156,7 +156,7 @@ fun TemplateCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = LightBackground
+            containerColor = PrimaryBlueLight
         )
     ) {
         Column(
