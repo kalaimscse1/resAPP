@@ -119,4 +119,7 @@ dependencies {
     testImplementation(libs.hilt.android.testing)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Chart library
+    implementation("co.yml:ycharts:2.1.0")
 }

@@ -173,25 +173,27 @@ fun DashboardScreen(
                     }
 
                     /**
-                     * Running Orders Section
+                     * Payment Mode Chart Section
                      */
                     item {
-                        RunningOrdersSection(
-                            runningOrders = state.runningOrders,
-                            onOrderClick = { orderId ->
-                                // Navigate to specific order details
-                                onNavigateToOrders()
-                            }
-                        )
+                        state.metrics.chartData?.let { chartData ->
+                            PaymentModePieChart(
+                                data = chartData.paymentModeData,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
 
                     /**
-                     * Recent Activity Section
+                     * Weekly Sales Chart Section
                      */
                     item {
-                        RecentActivitySection(
-                            recentActivity = state.recentActivity
-                        )
+                        state.metrics.chartData?.let { chartData ->
+                            WeeklySalesBarChart(
+                                data = chartData.weeklySalesData,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
@@ -396,8 +398,8 @@ fun QuickActionsSection(
 
 @Composable
 fun RunningOrdersSection(
-    runningOrders: List<RunningOrder>,
-    onOrderClick: (Long) -> Unit
+    orders: List<RunningOrder>,
+    onNavigateToOrders: () -> Unit
 ) {
     Column {
         Text(
@@ -407,7 +409,7 @@ fun RunningOrdersSection(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        if (runningOrders.isEmpty()) {
+        if (orders.isEmpty()) {
             MobileOptimizedCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -425,10 +427,10 @@ fun RunningOrdersSection(
                 }
             }
         } else {
-            runningOrders.forEach { order ->
+            orders.forEach { order ->
                 RunningOrderCard(
                     order = order,
-                    onClick = { onOrderClick(order.orderId) }
+                    onClick = { onNavigateToOrders() }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -514,7 +516,7 @@ fun RunningOrderCard(
 
 @Composable
 fun RecentActivitySection(
-    recentActivity: List<String>
+    activities: List<String>
 ) {
     Column {
         Text(
@@ -530,14 +532,14 @@ fun RecentActivitySection(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                if (recentActivity.isEmpty()) {
+                if (activities.isEmpty()) {
                     Text(
                         "No recent activity",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 } else {
-                    recentActivity.forEach { activity ->
+                    activities.forEach { activity ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
