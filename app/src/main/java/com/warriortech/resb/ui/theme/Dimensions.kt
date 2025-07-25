@@ -90,3 +90,36 @@ object Dimensions {
         }
     }
 }
+package com.warriortech.resb.ui.theme
+
+import androidx.compose.ui.unit.dp
+
+object Dimensions {
+    // Spacing
+    val SpaceExtraSmall = 4.dp
+    val SpaceSmall = 8.dp
+    val SpaceMedium = 16.dp
+    val SpaceLarge = 24.dp
+    val SpaceExtraLarge = 32.dp
+    val SpaceHuge = 48.dp
+    
+    // Card and Surface
+    val CardElevation = 8.dp
+    val CardCornerRadius = 12.dp
+    val ButtonCornerRadius = 8.dp
+    
+    // Component Heights
+    val ButtonHeight = 48.dp
+    val TextFieldHeight = 56.dp
+    val AppBarHeight = 64.dp
+    
+    // Component Widths
+    val MinButtonWidth = 88.dp
+    val IconSize = 24.dp
+    val IconSizeLarge = 32.dp
+    
+    // Padding
+    val ScreenPadding = 16.dp
+    val ContentPadding = 12.dp
+    val CardPadding = 16.dp
+}

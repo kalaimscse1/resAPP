@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.components
 
 import android.annotation.SuppressLint
@@ -23,6 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.getScreenSizeInfo
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.BorderStroke
 
 @Composable
 fun MobileOptimizedCard(
@@ -143,19 +146,19 @@ fun MobileOptimizedButton(
         screenInfo.isMedium -> 64.dp
         else -> 56.dp
     }
-    
+
     val cornerRadius = when {
         screenInfo.isExpanded -> 20.dp
         screenInfo.isMedium -> 18.dp
         else -> 16.dp
     }
-    
+
     val fontSize = when {
         screenInfo.isExpanded -> 18.sp
         screenInfo.isMedium -> 16.sp
         else -> 14.sp
     }
-    
+
     val gradientColors = if (isPrimary) {
         if (enabled) {
             listOf(
@@ -181,7 +184,7 @@ fun MobileOptimizedButton(
             )
         }
     }
-    
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -241,7 +244,7 @@ fun AdaptiveGrid(
     content: @Composable () -> Unit
 ) {
     val deviceInfo = getDeviceInfo()
-    
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(deviceInfo.optimalColumnCount),
         modifier = modifier,
@@ -274,7 +277,7 @@ fun OptimizedLazyColumn(
 ) {
     val deviceInfo = getDeviceInfo()
     val padding = if (deviceInfo.isTablet) 16.dp else 12.dp
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -305,7 +308,7 @@ fun ResponsiveText(
         deviceInfo.isTablet -> 1.1f
         else -> 1.0f
     }
-    
+
     Text(
         text = text,
         modifier = modifier,
@@ -313,4 +316,112 @@ fun ResponsiveText(
         maxLines = maxLines,
         overflow = overflow
     )
+}
+@Composable
+fun MobileOptimizedButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
+    contentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onPrimary,
+    gradient: Boolean = false
+) {
+    val deviceInfo = getDeviceInfo()
+
+    val buttonModifier = if (gradient) {
+        modifier
+            .height(deviceInfo.buttonHeight)
+            .fillMaxWidth()
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    colors = listOf(
+                        androidx.compose.ui.graphics.Color(0xFF667eea),
+                        androidx.compose.ui.graphics.Color(0xFF764ba2)
+                    )
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+    } else {
+        modifier
+            .height(deviceInfo.buttonHeight)
+            .fillMaxWidth()
+    }
+
+    Button(
+        onClick = onClick,
+        modifier = buttonModifier,
+        enabled = enabled,
+        colors = if (gradient) {
+            ButtonDefaults.buttonColors(
+                containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                contentColor = contentColor
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = containerColor,
+                contentColor = contentColor
+            )
+        },
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 8.dp,
+            pressedElevation = 12.dp
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        androidx.compose.material3.Text(text = text)
+    }
+}
+
+@Composable
+fun MobileOptimizedCard(
+    modifier: Modifier = Modifier,
+    elevation: androidx.compose.ui.unit.Dp = 8.dp,
+    gradient: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val deviceInfo = getDeviceInfo()
+
+    val cardModifier = if (gradient) {
+        modifier
+            .padding(deviceInfo.cardPadding)
+            .background(
+                brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    ),
+                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(1000f, 1000f)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+    } else {
+        modifier.padding(deviceInfo.cardPadding)
+    }
+
+    Card(
+        modifier = cardModifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+        shape = RoundedCornerShape(16.dp),
+        colors = if (gradient) {
+            CardDefaults.cardColors(
+                containerColor = androidx.compose.ui.graphics.Color.Transparent
+            )
+        } else {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        },
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(deviceInfo.contentPadding * 1.2f),
+            content = content
+        )
+    }
 }
