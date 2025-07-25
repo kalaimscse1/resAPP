@@ -21,8 +21,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.R
+import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.RegistrationViewModel
 import com.warriortech.resb.util.MobileUtils
+import com.warriortech.resb.util.StringDropdown
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -42,7 +44,7 @@ fun RegistrationScreen(
     val installDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
-
+    val orderPlan = listOf("Trail", "CLosed")
     LaunchedEffect(Unit) {
         viewModel.loadCompanyCode()
     }
@@ -63,7 +65,10 @@ fun RegistrationScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
         }
     ) { paddingValues ->
@@ -250,13 +255,22 @@ fun RegistrationScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
-
-                    OutlinedTextField(
-                        value = uiState.orderPlan,
-                        onValueChange = viewModel::updateOrderPlan,
-                        label = { Text("Order Plan *") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+//
+//                    OutlinedTextField(
+//                        value = uiState.orderPlan,
+//                        onValueChange = viewModel::updateOrderPlan,
+//                        label = { Text("Order Plan *") },
+//                        modifier = Modifier.fillMaxWidth(),
+//                        singleLine = true
+//                    )
+                    StringDropdown(
+                        options = orderPlan,
+                        selectedOption = uiState.orderPlan,
+                        onOptionSelected = { selectedStatus ->
+                            viewModel.updateOrderPlan(selectedStatus) // Update your selectedStatus // Update your status state
+                        },
+                        label = "Order Plan *",
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     // Install Date with DatePicker

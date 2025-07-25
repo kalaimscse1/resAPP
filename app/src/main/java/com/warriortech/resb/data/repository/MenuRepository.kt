@@ -45,4 +45,13 @@ class MenuRepository @Inject constructor(
             throw Exception("Failed to delete menu: ${response.message()}")
         }
     }
+    suspend fun getOrderBy(): Map<String, Long>{
+        val response = apiService.getOrderBy(SessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyMap()
+        }
+        else{
+            throw Exception("Failed to get OrderBy: ${response.message()}")
+        }
+    }
 }

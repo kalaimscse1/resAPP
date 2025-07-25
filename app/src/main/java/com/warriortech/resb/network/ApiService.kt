@@ -127,6 +127,9 @@ interface ApiService {
     suspend fun deleteMenu(@Path("menu_id") id: Long,
                            @Header("X-Tenant-ID") tenantId: String): Response<Int>
 
+    @GET("menu/getMaxOrderBy")
+    suspend fun getOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
+
     /**
      * MenuCategory Management
      */
@@ -147,6 +150,9 @@ interface ApiService {
     suspend fun deleteMenuCategory(@Path("item_cat_id") id: Long,
                                    @Header("X-Tenant-ID") tenantId: String): Response<Unit>
 
+    @GET("menu/itemCategory/getMaxOrderBy")
+    suspend fun getMenuCategoryOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
+
     /**
      * MenuItem Management
      */
@@ -162,7 +168,7 @@ interface ApiService {
 
     @DELETE("menu/deleteMenuItemById/{menu_item_id}")
     suspend fun deleteMenuItem(@Path("id") id: Int,
-                               @Header("X-Tenant-ID") tenantId: String): Response<Unit>
+                               @Header("X-Tenant-ID") tenantId: String): Response<Any>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
     suspend fun getMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
@@ -173,6 +179,9 @@ interface ApiService {
     @GET("menu/menuItem/search")
     suspend fun searchMenuItems(@Query("query") query: String,
                                 @Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
+
+    @GET("menu/menuItem/getMaxOrderBy")
+    suspend fun getMenuItemOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
 
     /**
      * Order Management

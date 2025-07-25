@@ -61,8 +61,14 @@ class MenuItemSettingsViewModel @Inject constructor(
     fun deleteMenuItem(menuItemId: Int) {
         viewModelScope.launch {
             try {
-                menuItemRepository.deleteMenuItem(menuItemId)
-                loadMenuItems()
+                val response=menuItemRepository.deleteMenuItem(menuItemId)
+                if (response.isSuccessful) {
+                    loadMenuItems()
+                }
+                else{
+                    _uiState.value = MenuItemSettingsUiState.Error(response.message() ?: "Failed to delete menu item")
+                }
+
             } catch (e: Exception) {
                 _uiState.value = MenuItemSettingsUiState.Error(e.message ?: "Failed to delete menu item")
             }

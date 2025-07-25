@@ -10,6 +10,7 @@ import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -102,11 +103,12 @@ class MenuItemRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteMenuItem(menuItemId: Int) {
+    suspend fun deleteMenuItem(menuItemId: Int): Response<Any> {
         val response = apiService.deleteMenuItem(menuItemId,SessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete menu item: ${response.message()}")
         }
+        return response
     }
 }
 

@@ -25,6 +25,7 @@ fun MenuSettingsScreen(
     onBackPressed: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val order by viewModel.orderBy.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var editingMenu by remember { mutableStateOf<Menu?>(null) }
     val scope = rememberCoroutineScope()
@@ -44,7 +45,8 @@ fun MenuSettingsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showAddDialog = true }) {
+                    IconButton(onClick = { showAddDialog = true
+                        viewModel.getOrderBy() }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Menu")
                     }
                 },
@@ -112,6 +114,7 @@ fun MenuSettingsScreen(
             }
 
             if (showAddDialog) {
+                viewModel.getOrderBy()
                 MenuDialog(
                     menu = null,
                     onDismiss = { showAddDialog = false },
@@ -120,7 +123,8 @@ fun MenuSettingsScreen(
                             viewModel.addMenu(name, description, isActive)
                             showAddDialog = false
                         }
-                    }
+                    },
+                    order = order
                 )
             }
 
@@ -133,7 +137,8 @@ fun MenuSettingsScreen(
                             viewModel.updateMenu(menu.menu_id, name, description, isActive)
                             editingMenu = null
                         }
-                    }
+                    },
+                    order = order
                 )
             }
         }
@@ -189,10 +194,12 @@ fun MenuCard(
 fun MenuDialog(
     menu: Menu?,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, Boolean) -> Unit
+    onConfirm: (String, String, Boolean) -> Unit,
+    order : String
 ) {
+
     var name by remember { mutableStateOf(menu?.menu_name ?: "") }
-    var description by remember { mutableStateOf(menu?.order_by ?: "") }
+    var description by remember { mutableStateOf(menu?.order_by ?: order) }
     var isActive by remember { mutableStateOf(menu?.is_active ?: true) }
 
     AlertDialog(

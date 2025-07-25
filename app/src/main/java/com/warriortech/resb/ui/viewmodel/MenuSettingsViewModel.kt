@@ -20,6 +20,9 @@ class MenuSettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    private val _orderBy = MutableStateFlow<String>("")
+    val orderBy: StateFlow<String> = _orderBy.asStateFlow()
+
     sealed class UiState {
         object Loading : UiState()
         data class Success(val menus: List<Menu>) : UiState()
@@ -79,6 +82,17 @@ class MenuSettingsViewModel @Inject constructor(
                 loadMenus()
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to delete menu")
+            }
+        }
+    }
+    fun getOrderBy(){
+        viewModelScope.launch {
+            try {
+               val response= menuRepository.getOrderBy()
+                _orderBy.value= response["order_by"].toString()
+            }
+            catch (e: Exception){
+                _uiState.value = UiState.Error(e.message ?: "Failed to getOrderBy")
             }
         }
     }
