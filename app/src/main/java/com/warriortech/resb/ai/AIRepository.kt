@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ai
 
 import android.content.Context

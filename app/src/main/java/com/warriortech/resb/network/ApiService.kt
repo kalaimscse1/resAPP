@@ -36,6 +36,12 @@ interface ApiService {
     @GET("dashboard/recent-activity")
     suspend fun getRecentActivity(@Header("X-Tenant-ID") tenantId: String): Response<List<String>>
 
+    @GET("dashboard/getPayModeAmountApp")
+    suspend fun getPayModeAmount(@Header("X-Tenant-ID") tenantId: String) : Response<List<PaymentModeDataResponse>>
+
+    @GET("dashboard/getWeeklySales")
+    suspend fun getWeeklySales(@Header("X-Tenant-ID") tenantId: String): Response<List<WeeklySalesData>>
+
 
     /**
      * Area Management

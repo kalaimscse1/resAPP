@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.model
 
 //data class Printer(

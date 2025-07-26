@@ -23,10 +23,6 @@ import androidx.compose.ui.unit.sp
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.getScreenSizeInfo
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.foundation.BorderStroke
-
 @Composable
 fun MobileOptimizedCard(
     onClick: (() -> Unit)? = null,
@@ -373,55 +369,3 @@ fun MobileOptimizedButton(
         androidx.compose.material3.Text(text = text)
     }
 }
-//
-//@Composable
-//fun MobileOptimizedCard(
-//    modifier: Modifier = Modifier,
-//    elevation: androidx.compose.ui.unit.Dp = 8.dp,
-//    gradient: Boolean = false,
-//    content: @Composable ColumnScope.() -> Unit
-//) {
-//    val deviceInfo = getDeviceInfo()
-//
-//    val cardModifier = if (gradient) {
-//        modifier
-//            .padding(deviceInfo.optimalSpacing)
-//            .background(
-//                brush = androidx.compose.ui.graphics.Brush.linearGradient(
-//                    colors = listOf(
-//                        MaterialTheme.colorScheme.surface,
-//                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-//                    ),
-//                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
-//                    end = androidx.compose.ui.geometry.Offset(1000f, 1000f)
-//                ),
-//                shape = RoundedCornerShape(16.dp)
-//            )
-//    } else {
-//        modifier.padding(deviceInfo.optimalSpacing)
-//    }
-//
-//    Card(
-//        modifier = cardModifier,
-//        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-//        shape = RoundedCornerShape(16.dp),
-//        colors = if (gradient) {
-//            CardDefaults.cardColors(
-//                containerColor = androidx.compose.ui.graphics.Color.Transparent
-//            )
-//        } else {
-//            CardDefaults.cardColors(
-//                containerColor = MaterialTheme.colorScheme.surface
-//            )
-//        },
-//        border = BorderStroke(
-//            width = 1.dp,
-//            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
-//        )
-//    ) {
-//        Column(
-//            modifier = Modifier.padding(deviceInfo.optimalSpacing * 1.2f),
-//            content = content
-//        )
-//    }
-//}

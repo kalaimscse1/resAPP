@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.model
 
 import com.google.gson.annotations.SerializedName

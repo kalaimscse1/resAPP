@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.util
 
 import android.content.Context

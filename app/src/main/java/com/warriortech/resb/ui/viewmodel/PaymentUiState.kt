@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 data class PaymentUiState(

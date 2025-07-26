@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.DashboardMetrics
@@ -25,7 +24,7 @@ class DashboardRepository @Inject constructor(
                 if (response.isSuccessful && response.body() != null) {
                     val metrics = response.body()!!
                     val chartData = getChartData()
-                    metrics.copy(chartData = chartData)
+                    metrics
                 } else {
                     // Return default metrics if API fails
                     DashboardMetrics(
@@ -33,7 +32,6 @@ class DashboardRepository @Inject constructor(
                         pendingBills = 0,
                         totalSales = 0.0,
                         pendingDue = 0.0,
-                        chartData = getDefaultChartData()
                     )
                 }
             } catch (e: Exception) {
@@ -43,16 +41,15 @@ class DashboardRepository @Inject constructor(
                     pendingBills = 0,
                     totalSales = 0.0,
                     pendingDue = 0.0,
-                    chartData = getDefaultChartData()
                 )
             }
         }
     }
 
-    private suspend fun getChartData(): DashboardChartData {
+    suspend fun getChartData(): DashboardChartData {
         return try {
             // In a real app, these would be separate API calls
-            val paymentModeData = getPaymentModeData()
+            val paymentModeData =    getPaymentModeData()
             val weeklySalesData = getWeeklySalesData()
             DashboardChartData(paymentModeData, weeklySalesData)
         } catch (e: Exception) {
@@ -60,30 +57,49 @@ class DashboardRepository @Inject constructor(
         }
     }
 
-    private fun getPaymentModeData(): List<PaymentModeData> {
-        // Mock data - replace with actual API call
-        return listOf(
-            PaymentModeData("Cash", 15000.0, androidx.compose.ui.graphics.Color(0xFF4CAF50)),
-            PaymentModeData("Card", 25000.0, androidx.compose.ui.graphics.Color(0xFF2196F3)),
-            PaymentModeData("UPI", 18000.0, androidx.compose.ui.graphics.Color(0xFFFF9800)),
-            PaymentModeData("Others", 5000.0, androidx.compose.ui.graphics.Color(0xFF9C27B0))
-        )
+  suspend  fun getPaymentModeData(): List<PaymentModeData> {
+        val res= apiService.getPayModeAmount(SessionManager.getCompanyCode()?:"")
+      return if(res.isSuccessful && res.body()!=null){
+          val responseData = res.body()!!
+          val data = responseData.map {
+
+              PaymentModeData(it.paymentMode,it.amount,androidx.compose.ui.graphics.Color(it.color))
+
+          }
+          data
+      }
+        else {
+          // Mock data - replace with actual API call
+          listOf(
+              PaymentModeData("Cash", 15000.0, androidx.compose.ui.graphics.Color(0xFF4CAF50)),
+              PaymentModeData("Card", 25000.0, androidx.compose.ui.graphics.Color(0xFF2196F3)),
+              PaymentModeData("UPI", 18000.0, androidx.compose.ui.graphics.Color(0xFFFF9800)),
+              PaymentModeData("Others", 5000.0, androidx.compose.ui.graphics.Color(0xFF9C27B0))
+          )
+      }
     }
 
-    private fun getWeeklySalesData(): List<WeeklySalesData> {
+   suspend fun getWeeklySalesData(): List<WeeklySalesData> {
         // Mock data - replace with actual API call
-        return listOf(
-            WeeklySalesData("Mon", 8000.0),
-            WeeklySalesData("Tue", 12000.0),
-            WeeklySalesData("Wed", 15000.0),
-            WeeklySalesData("Thu", 10000.0),
-            WeeklySalesData("Fri", 18000.0),
-            WeeklySalesData("Sat", 22000.0),
-            WeeklySalesData("Sun", 16000.0)
-        )
+       val res = apiService.getWeeklySales(SessionManager.getCompanyCode()?:"")
+        return if(res.isSuccessful && res.body()!=null){
+            val responseData = res.body()!!
+            responseData
+        }
+       else {
+            listOf(
+                WeeklySalesData("Mon", 8000.0),
+                WeeklySalesData("Tue", 12000.0),
+                WeeklySalesData("Wed", 15000.0),
+                WeeklySalesData("Thu", 10000.0),
+                WeeklySalesData("Fri", 18000.0),
+                WeeklySalesData("Sat", 22000.0),
+                WeeklySalesData("Sun", 16000.0)
+            )
+        }
     }
 
-    private fun getDefaultChartData(): DashboardChartData {
+    private suspend fun getDefaultChartData(): DashboardChartData {
         return DashboardChartData(
             paymentModeData = getPaymentModeData(),
             weeklySalesData = getWeeklySalesData()

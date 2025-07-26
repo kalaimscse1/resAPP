@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.components
 
 import androidx.compose.foundation.background

@@ -1,13 +1,7 @@
 package com.warriortech.resb.network
 
-import com.google.gson.GsonBuilder
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
-import com.warriortech.resb.network.SessionManager
-import okhttp3.FormBody
 
 /**
  * Singleton object for creating and managing the Retrofit client

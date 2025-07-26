@@ -1,7 +1,5 @@
 package com.warriortech.resb.util
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime

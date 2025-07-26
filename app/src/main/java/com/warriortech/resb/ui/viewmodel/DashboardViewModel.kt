@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
@@ -7,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.DashboardRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.DashboardMetrics
+import com.warriortech.resb.model.PaymentModeData
 import com.warriortech.resb.model.RunningOrder
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.model.WeeklySalesData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +32,8 @@ class DashboardViewModel @Inject constructor(
         object Loading : UiState()
         data class Success(
             val metrics: DashboardMetrics,
-            val runningOrders: List<RunningOrder>,
-            val recentActivity: List<String>
+            val piechart: List<PaymentModeData>,
+            val barchart: List<WeeklySalesData>
         ) : UiState()
         data class Error(val message: String) : UiState()
     }
@@ -41,14 +42,15 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             try {
+                val chartData = dashboardRepository.getChartData()
                 val metrics = dashboardRepository.getDashboardMetrics()
-                val runningOrders = dashboardRepository.getRunningOrders()
-                val recentActivity = dashboardRepository.getRecentActivity()
+                val piechart = chartData.paymentModeData
+                val barchart = chartData.weeklySalesData
 
                 _uiState.value = UiState.Success(
                     metrics = metrics,
-                    runningOrders = runningOrders,
-                    recentActivity = recentActivity
+                    piechart = piechart,
+                    barchart = barchart
                 )
             } catch (e: Exception) {
                 _uiState.value = UiState.Error("Failed to load dashboard: ${e.message}")

@@ -1,6 +1,6 @@
-
 package com.warriortech.resb.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,8 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.warriortech.resb.model.PaymentModeData
 import com.warriortech.resb.model.WeeklySalesData
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
 fun PaymentModePieChart(
@@ -75,6 +73,7 @@ fun PaymentModePieChart(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun PaymentModeLegendItem(
     paymentMode: String,
@@ -171,6 +170,7 @@ fun WeeklySalesBarChart(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun BarChartItem(
     label: String,
@@ -179,13 +179,12 @@ fun BarChartItem(
     modifier: Modifier = Modifier
 ) {
     val barHeight = (amount / maxAmount * 160).dp
-    
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "₹${String.format("%.0fK", amount / 1000)}",
+            text = "₹${String.format("%.0f", amount)}",
             style = MaterialTheme.typography.bodySmall,
             fontSize = 10.sp
         )

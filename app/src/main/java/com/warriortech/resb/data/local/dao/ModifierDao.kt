@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.data.local.dao
 
 import androidx.room.*

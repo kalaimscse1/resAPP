@@ -1,10 +1,16 @@
-
 package com.warriortech.resb.model
+
+import androidx.compose.ui.graphics.Color
 
 data class PaymentModeData(
     val paymentMode: String,
     val amount: Double,
-    val color: androidx.compose.ui.graphics.Color
+    val color: Color
+)
+data class PaymentModeDataResponse(
+    val paymentMode: String,
+    val amount: Double,
+    val color: Long
 )
 
 data class WeeklySalesData(

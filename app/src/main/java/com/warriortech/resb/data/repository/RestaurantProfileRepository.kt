@@ -1,6 +1,4 @@
-
 package com.warriortech.resb.data.repository
-
 
 import com.warriortech.resb.model.RestaurantProfile
 import com.warriortech.resb.network.ApiService

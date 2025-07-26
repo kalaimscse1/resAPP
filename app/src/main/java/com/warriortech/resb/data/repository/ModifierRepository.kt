@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.data.local.dao.ModifierDao

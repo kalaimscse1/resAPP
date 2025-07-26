@@ -26,6 +26,8 @@ import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
 import kotlinx.coroutines.launch
 import com.warriortech.resb.R
+import com.warriortech.resb.ui.components.PaymentModePieChart
+import com.warriortech.resb.ui.components.WeeklySalesBarChart
 import com.warriortech.resb.ui.theme.GradientStart
 
 /**
@@ -176,24 +178,20 @@ fun DashboardScreen(
                      * Payment Mode Chart Section
                      */
                     item {
-                        state.metrics.chartData?.let { chartData ->
                             PaymentModePieChart(
-                                data = chartData.paymentModeData,
+                                data =  state.piechart,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                        }
                     }
 
                     /**
                      * Weekly Sales Chart Section
                      */
                     item {
-                        state.metrics.chartData?.let { chartData ->
                             WeeklySalesBarChart(
-                                data = chartData.weeklySalesData,
+                                data =  state.barchart,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                        }
                     }
                 }
             }

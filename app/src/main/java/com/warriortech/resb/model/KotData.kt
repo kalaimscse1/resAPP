@@ -20,5 +20,6 @@ data class KOTRequest(
 data class KOTItem(
     val name: String,
     val quantity: Int,
-    val category: String // e.g., "kitchen", "drinks"
+    val category: String,
+    val addOn: List<String>// e.g., "kitchen", "drinks"
 )

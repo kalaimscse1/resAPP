@@ -1,7 +1,5 @@
 package com.warriortech.resb.di
 
-
-
 import android.content.Context
 import androidx.room.Room
 import com.warriortech.resb.ai.AIRepository

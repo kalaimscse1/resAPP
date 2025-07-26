@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.warriortech.resb.model.Area
-import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblCounter
 import kotlin.collections.forEach

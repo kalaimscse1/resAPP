@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.data.local.entity
 
 import androidx.room.Entity

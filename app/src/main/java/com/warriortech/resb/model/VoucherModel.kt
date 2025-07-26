@@ -1,6 +1,5 @@
 package com.warriortech.resb.model
 
-
 data class TblVoucherRequest(
     var voucher_id: Long,
     var counter_id:Long,

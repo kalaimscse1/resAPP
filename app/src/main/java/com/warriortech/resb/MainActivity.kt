@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -72,7 +71,6 @@ import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.screens.LoginScreen
 import com.warriortech.resb.screens.MenuScreen
 import com.warriortech.resb.screens.SelectionScreen
-import com.warriortech.resb.ui.theme.ResbTheme
 import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor
 import com.warriortech.resb.util.NetworkStatusBar

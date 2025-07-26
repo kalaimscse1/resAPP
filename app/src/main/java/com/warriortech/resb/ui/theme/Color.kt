@@ -1,10 +1,7 @@
 package com.warriortech.resb.ui.theme
 
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Color Palette
 val PrimaryBlue = Color(0xFF1976D2)
 val PrimaryBlueDark = Color(0xFF0D47A1)
 val PrimaryBlueLight = Color(0xFF42A5F5)
@@ -27,6 +24,3 @@ val TextHint = Color(0xFFBDBDBD)
 val SuccessGreen = Color(0xFF4CAF50)
 val WarningAmber = Color(0xFFFF9800)
 val ErrorRed = Color(0xFFF44336)
-
-// Light Color Scheme
-

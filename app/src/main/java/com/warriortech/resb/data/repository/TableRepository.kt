@@ -1,4 +1,5 @@
 package com.warriortech.resb.data.repository
+
 import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TableEntity

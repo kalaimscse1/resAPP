@@ -222,7 +222,8 @@ class MenuViewModel @Inject constructor(
                                 KOTItem(
                                     it.menuItem.menu_item_name,
                                     it.quantity,
-                                    it.menuItem.kitchen_cat_name
+                                    it.menuItem.kitchen_cat_name,
+                                    emptyList()
                                 )
                             }
                             val kotRequest = KOTRequest(
@@ -262,7 +263,8 @@ class MenuViewModel @Inject constructor(
                                 KOTItem(
                                     it.menuItem.menu_item_name,
                                     it.quantity,
-                                    it.menuItem.kitchen_cat_name
+                                    it.menuItem.kitchen_cat_name,
+                                    emptyList()
                                 )
                             }
                             val kotRequest = KOTRequest(

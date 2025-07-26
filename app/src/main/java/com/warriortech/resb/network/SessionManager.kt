@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.warriortech.resb.model.User
 import com.google.gson.Gson
 import com.warriortech.resb.model.TblStaff
 import androidx.core.content.edit

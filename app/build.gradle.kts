@@ -28,6 +28,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -39,6 +40,21 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    lint {
+        // Set to true to check all issues, including those found in libraries
+        checkDependencies = true
+        // Set to true to have the build fail if errors are found
+        abortOnError = true // This is often true for release builds
+        // If true, turns off processing of vital checks on release builds
+        // checkReleaseBuilds = false // Not recommended for production quality
+        // If true, don't include descriptive text in the error output
+        // quiet = true
+        // Specifies the baseline file to use.
+        // The baseline file is created by running :app:lintDebug (or any lint task)
+        // and then copying the lint-results.xml to the baseline file location.
+        baseline = file("lint-baseline.xml") // Common location
     }
 }
 
