@@ -202,3 +202,71 @@ class ModifierRepository @Inject constructor(
         modifierDao.insertModifiers(entities)
     }
 }
+package com.warriortech.resb.data.repository
+
+import com.warriortech.resb.model.ModifierGroup
+import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class ModifierRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
+) {
+    
+    fun getModifierGroupsForMenuItem(menuItemId: Long): Flow<Result<List<ModifierGroup>>> = flow {
+        try {
+            val tenantId = sessionManager.getTenantId()
+            if (tenantId.isNullOrEmpty()) {
+                emit(Result.failure(Exception("Tenant ID not found")))
+                return@flow
+            }
+
+            val response = apiService.getModifierGroupsForMenuItem(menuItemId, tenantId)
+            if (response.isSuccessful) {
+                val modifierGroups = response.body() ?: emptyList()
+                emit(Result.success(modifierGroups))
+            } else {
+                emit(Result.failure(Exception("Failed to fetch modifier groups: ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching modifier groups")
+            emit(Result.failure(e))
+        }
+    }
+
+    // Mock data for demonstration - replace with actual API call
+    fun getMockModifierGroups(): List<ModifierGroup> {
+        return listOf(
+            ModifierGroup(
+                modifier_group_id = 1,
+                name = "Size",
+                is_required = true,
+                max_selection = 1,
+                min_selection = 1,
+                modifiers = listOf(
+                    com.warriortech.resb.model.Modifier(1, "Small", 0.0, true, 1),
+                    com.warriortech.resb.model.Modifier(2, "Medium", 50.0, true, 1),
+                    com.warriortech.resb.model.Modifier(3, "Large", 100.0, true, 1)
+                )
+            ),
+            ModifierGroup(
+                modifier_group_id = 2,
+                name = "Add-ons",
+                is_required = false,
+                max_selection = 3,
+                min_selection = 0,
+                modifiers = listOf(
+                    com.warriortech.resb.model.Modifier(4, "Extra Cheese", 30.0, true, 2),
+                    com.warriortech.resb.model.Modifier(5, "Extra Spicy", 10.0, true, 2),
+                    com.warriortech.resb.model.Modifier(6, "Extra Sauce", 20.0, true, 2)
+                )
+            )
+        )
+    }
+}

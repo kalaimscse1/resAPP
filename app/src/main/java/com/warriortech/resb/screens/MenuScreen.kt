@@ -39,6 +39,9 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.components.EnhancedCard
+import com.warriortech.resb.ui.components.GradientBackground
+import com.warriortech.resb.ui.components.ModifierSelectionDialog
 
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +68,13 @@ fun MenuScreen(
     // No longer lateinit, it will be derived inside the Success state
     // lateinit var filteredMenuItems:List<MenuItem>
     val tableStatusFromVM by viewModel.tableStatus.collectAsStateWithLifecycle() // Assuming tableStatus is part of the table info
+    val isExistingOrderLoaded by viewModel.isExistingOrderLoaded.collectAsStateWithLifecycle()
+    val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
+
+    // Modifier-related state
+    val showModifierDialog by viewModel.showModifierDialog.collectAsStateWithLifecycle()
+    val selectedMenuItemForModifier by viewModel.selectedMenuItemForModifier.collectAsStateWithLifecycle()
+    val modifierGroups by viewModel.modifierGroups.collectAsStateWithLifecycle()
 
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -305,7 +315,10 @@ fun MenuScreen(
                                     menuItem = menuItem,
                                     quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem] ?: 0 else selectedItems[menuItem] ?: 0,
                                     existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem] ?: 0 else 0,
-                                    onAddItem = { viewModel.addItemToOrder(menuItem) },
+                                    onAddItem = { 
+                                        // Show modifier dialog instead of directly adding
+                                        viewModel.showModifierDialog(menuItem)
+                                    },
                                     onRemoveItem = { viewModel.removeItemFromOrder(menuItem) },
                                     tableStatus = effectiveStatus.toString(),
                                     isExistingOrder = viewModel.isExistingOrderLoaded.value
@@ -355,6 +368,18 @@ fun MenuScreen(
                 }
             }
         }
+    }
+
+    // Modifier Selection Dialog
+    if (showModifierDialog && selectedMenuItemForModifier != null) {
+        ModifierSelectionDialog(
+            menuItem = selectedMenuItemForModifier!!,
+            modifierGroups = modifierGroups,
+            onDismiss = { viewModel.hideModifierDialog() },
+            onConfirm = { menuItemWithModifiers ->
+                viewModel.addMenuItemWithModifiers(menuItemWithModifiers)
+            }
+        )
     }
 }
 

@@ -190,6 +190,16 @@ interface ApiService {
     suspend fun getMenuItemOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
 
     /**
+     * Modifier Management
+     */
+    @GET("modifiers/groups/menu-item/{menu_item_id}")
+    suspend fun getModifierGroupsForMenuItem(@Path("menu_item_id") menuItemId: Long,
+                                           @Header("X-Tenant-ID") tenantId: String): Response<List<ModifierGroup>>
+
+    @GET("modifiers/groups")
+    suspend fun getAllModifierGroups(@Header("X-Tenant-ID") tenantId: String): Response<List<ModifierGroup>>
+
+    /**
      * Order Management
      */
 

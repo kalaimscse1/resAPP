@@ -6,9 +6,12 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.MenuItemWithModifiers
+import com.warriortech.resb.model.ModifierGroup
 import com.warriortech.resb.model.Order
 import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.data.repository.MenuItemRepository
+import com.warriortech.resb.data.repository.ModifierRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.KOTItem
@@ -26,8 +29,8 @@ import javax.inject.Inject
 class MenuViewModel @Inject constructor(
     private val menuRepository: MenuItemRepository,
     private val orderRepository: OrderRepository,
-    private val printService: com.warriortech.resb.service.PrintService,
-    private val tableRepository: TableRepository
+    private val tableRepository: TableRepository,
+    private val modifierRepository: ModifierRepository
 ) : ViewModel() {
 
     sealed class MenuUiState {
@@ -60,6 +63,15 @@ class MenuViewModel @Inject constructor(
     private val _isExistingOrderLoaded = MutableStateFlow(false)
     val isExistingOrderLoaded: StateFlow<Boolean> = _isExistingOrderLoaded.asStateFlow()
     val orderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
+
+    private val _selectedMenuItemForModifier = MutableStateFlow<MenuItem?>(null)
+    val selectedMenuItemForModifier: StateFlow<MenuItem?> = _selectedMenuItemForModifier.asStateFlow()
+
+    private val _showModifierDialog = MutableStateFlow<Boolean>(false)
+    val showModifierDialog: StateFlow<Boolean> = _showModifierDialog.asStateFlow()
+
+    private val _modifierGroups = MutableStateFlow<List<ModifierGroup>>(emptyList())
+    val modifierGroups: StateFlow<List<ModifierGroup>> = _modifierGroups.asStateFlow()
 
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
         viewModelScope.launch {
@@ -329,6 +341,52 @@ class MenuViewModel @Inject constructor(
             else
             menuItem.rate * quantity
         }
+    }
+
+    fun showModifierDialog(menuItem: MenuItem) {
+        _selectedMenuItemForModifier.value = menuItem
+        _showModifierDialog.value = true
+        loadModifierGroups(menuItem.menu_item_id)
+    }
+
+    fun hideModifierDialog() {
+        _showModifierDialog.value = false
+        _selectedMenuItemForModifier.value = null
+        _modifierGroups.value = emptyList()
+    }
+
+    private fun loadModifierGroups(menuItemId: Long) {
+        viewModelScope.launch {
+            // For now, using mock data. Replace with actual API call
+            _modifierGroups.value = modifierRepository.getMockModifierGroups()
+
+            /* Uncomment when API is ready
+            modifierRepository.getModifierGroupsForMenuItem(menuItemId).collect { result ->
+                result.fold(
+                    onSuccess = { groups ->
+                        _modifierGroups.value = groups
+                    },
+                    onFailure = { error ->
+                        Timber.e(error, "Failed to load modifier groups")
+                        _modifierGroups.value = emptyList()
+                    }
+                )
+            }
+            */
+        }
+    }
+
+    fun addMenuItemWithModifiers(menuItemWithModifiers: MenuItemWithModifiers) {
+        val currentItems = _selectedItems.value.toMutableMap()
+
+        // For simplicity, we'll treat items with modifiers as separate entries
+        // You might want to implement a more sophisticated system to handle
+        // identical items with different modifiers
+        val existingCount = currentItems[menuItemWithModifiers.menuItem] ?: 0
+        currentItems[menuItemWithModifiers.menuItem] = existingCount + 1
+
+        _selectedItems.value = currentItems
+        hideModifierDialog()
     }
 
 }
