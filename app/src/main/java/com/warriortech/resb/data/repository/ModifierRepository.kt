@@ -76,6 +76,15 @@ class ModifierRepository @Inject constructor(
         orderItemModifierDao.deleteModifiersByOrderDetailId(orderDetailId)
     }
 
+    suspend fun getAllModifiers(): List<Modifiers>{
+        val response = apiService.getAllModifiers(sessionManager.getCompanyCode()?:"")
+        return if (response.isSuccessful){
+            response.body()!!
+        }
+        else{
+            emptyList()
+        }
+    }
     suspend fun syncData() {
         try {
             val response = apiService.getAllModifiers(sessionManager.getCompanyCode()?:"")
@@ -86,7 +95,7 @@ class ModifierRepository @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            // Handle sync error - will retry later
+            Timber.e(e,"Error Sync in modifier")
         }
     }
 

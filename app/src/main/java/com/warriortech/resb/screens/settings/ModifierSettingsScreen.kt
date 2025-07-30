@@ -70,7 +70,7 @@ fun ModifierSettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (uiState) {
+            when (val state = uiState) {
                 is ModifierSettingsUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -85,7 +85,7 @@ fun ModifierSettingsScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(uiState.modifiers) { modifier ->
+                        items(state.modifiers) { modifier ->
                             ModifierCard(
                                 modifier = modifier,
                                 categories = categories,
@@ -109,7 +109,7 @@ fun ModifierSettingsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = uiState.message,
+                            text = state.message,
                             color = MaterialTheme.colorScheme.error
                         )
                     }

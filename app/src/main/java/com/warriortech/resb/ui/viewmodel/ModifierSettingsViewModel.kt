@@ -53,7 +53,7 @@ class ModifierSettingsViewModel @Inject constructor(
     fun addModifier(modifier: Modifiers) {
         viewModelScope.launch {
             try {
-                modifierRepository.insertModifier(modifier)
+                modifierRepository.createModifier(modifier)
                 loadModifiers()
             } catch (e: Exception) {
                 _uiState.value = ModifierSettingsUiState.Error(e.message ?: "Failed to add modifier")

@@ -644,6 +644,7 @@ fun DrawerContent(
     sessionManager: SessionManager
 ) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+    val role = sessionManager.getUser()?.role?:""
 
     ModalDrawerSheet(
         modifier = Modifier.width(drawerWidth),
@@ -693,7 +694,7 @@ fun DrawerContent(
                 onClick = onCollapseToggle,
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
-
+           
             Spacer(modifier = Modifier.height(8.dp))
 
             NavigationDrawerItem(

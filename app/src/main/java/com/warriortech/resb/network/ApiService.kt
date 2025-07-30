@@ -523,7 +523,7 @@ interface ApiService {
      * Modifiers Management
      */
 
-    @GET("modifiers")
+    @GET("menu/addOn/getAddOnByIsActive")
     suspend fun getAllModifiers(@Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     @GET("modifiers/category/{categoryId}")
