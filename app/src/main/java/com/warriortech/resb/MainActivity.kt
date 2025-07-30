@@ -114,6 +114,7 @@ import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
+import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.ui.components.ModernDivider
 
 
@@ -632,6 +633,12 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         ) { backStackEntry ->
             val billId = backStackEntry.arguments?.getLong("billId") ?: 0L
             BillTemplateScreen(navController, billId)
+        }
+
+        composable("change_password") {
+            ChangePasswordScreen(
+                onBackPressed = { navController.popBackStack() }
+            )
         }
     }
 }

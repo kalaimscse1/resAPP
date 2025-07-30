@@ -1,5 +1,6 @@
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.model.ChangePasswordRequest
 import com.warriortech.resb.model.TblStaff
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -43,6 +44,21 @@ class StaffRepository @Inject constructor(
         val response = apiService.deleteStaff(staffId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete staff: ${response.message()}")
+        }
+    }
+
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): Result<String> {
+        return try {
+            val request = ChangePasswordRequest(currentPassword, newPassword)
+            val response = apiService.changePassword(sessionManager.getUser()?.staff_id?:0, request,sessionManager.getCompanyCode()?:"")
+            if (response.success) {
+                Result.success(response.message)
+            } else {
+                Result.failure(Exception(response.message))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

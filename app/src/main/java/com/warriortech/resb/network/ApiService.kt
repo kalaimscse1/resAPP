@@ -23,6 +23,13 @@ interface ApiService {
         @Body request: LoginRequest
     ): ApiResponse<AuthResponse>
 
+    @PUT("auth/changePassword/{staff_id}")
+    suspend fun changePassword(
+        @Path("staff_id") staffId: Long,
+        @Body passwordRequest: ChangePasswordRequest,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : ApiResponse<Boolean>
+
     /**
      * Dashboard Management
      */
