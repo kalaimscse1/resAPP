@@ -99,6 +99,7 @@ import com.warriortech.resb.screens.settings.LanguageSettingsScreen
 import com.warriortech.resb.screens.settings.MenuCategorySettingsScreen
 import com.warriortech.resb.screens.settings.MenuItemSettingsScreen
 import com.warriortech.resb.screens.settings.MenuSettingsScreen
+import com.warriortech.resb.screens.settings.ModifierSettingsScreen
 import com.warriortech.resb.screens.settings.PrinterSettingsScreen
 import com.warriortech.resb.screens.settings.RestaurantProfileScreen
 import com.warriortech.resb.screens.settings.RoleSettingsScreen

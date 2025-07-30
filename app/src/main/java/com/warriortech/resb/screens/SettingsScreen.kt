@@ -94,7 +94,8 @@ fun SettingsMainScreen(
 			SettingsModule.CreateVoucher,
 			SettingsModule.Counter,
             SettingsModule.Language,
-            SettingsModule.PrinterSetting
+            SettingsModule.PrinterSetting,
+            SettingsModule.Modifiers
         )
     }
 
@@ -232,6 +233,9 @@ fun SettingsModuleScreen(
         }
         is SettingsModule.PrinterSetting -> {
             navController.navigate("template_screen")
+        }
+        is SettingsModule.Modifiers -> {
+            navController.navigate("modifier_setting")
         }
     }
 }
@@ -374,6 +378,13 @@ sealed class SettingsModule(
         "Manage receipt templates",
         Icons.Default.Kitchen,
         listOf("name", "ip_address", "port", "type", "location")
+    )
+    object Modifiers : SettingsModule(
+        "modifiers",
+        "Modifiers",
+        "Manage menu item modifiers",
+        Icons.Default.Add,
+        listOf("name", "price", "category")
     )
 }
 
