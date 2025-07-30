@@ -8,6 +8,16 @@ data class Modifiers(
     val is_active: Boolean = true // Specific items this modifier applies to
 )
 
+data class SaleModifiers(
+    val sale_add_on_id: Long = 0,
+    val order_master_id :Long,
+    val item_add_on_id: Long,
+    val menu_item_id: Long,
+    val status: Boolean,
+    val is_active: Boolean = true // Specific items this modifier applies to
+)
+
+
 enum class ModifierType {
     ADDITION,    // Add something (extra cheese)
     REMOVAL,     // Remove something (no onions)
