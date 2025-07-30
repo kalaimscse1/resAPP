@@ -74,8 +74,8 @@ class PrinterHelper(private val context: Context) {
      * @param kotData The KOT data to be printed
      * @return true if print successful, false otherwise
      */
-    fun printKot(kotData: KotData): Boolean {
-        Log.d(TAG, "Printing KOT #${kotData.kotNumber} for Table ${kotData.tableNumber}")
+    fun printKot(kotData: KOTRequest): Boolean {
+        Log.d(TAG, "Printing KOT #${kotData.kotId} for Table ${kotData.tableNumber}")
 
         try {
             // 1. Connect to printer (if not already connected)
@@ -285,12 +285,12 @@ class PrinterHelper(private val context: Context) {
     /**
      * Format KOT data into a proper format for printing (without template).
      */
-    private fun formatKotForPrinting(kotData: KotData): String {
-        val sectionName = when (kotData.section) {
+    private fun formatKotForPrinting(kotData: KOTRequest): String {
+        val sectionName = when (kotData.tableNumber) {
             "ac" -> "AC Hall"
             "non-ac" -> "Non-AC Hall"
             "outdoor" -> "Outdoor"
-            else -> kotData.section
+            else -> kotData.tableNumber
         }
 
         val stringBuilder = StringBuilder()
@@ -298,9 +298,9 @@ class PrinterHelper(private val context: Context) {
         // Header
         stringBuilder.append("KITCHEN ORDER TICKET\n")
         stringBuilder.append("--------------------\n")
-        stringBuilder.append("KOT #: ${kotData.kotNumber}\n")
+        stringBuilder.append("KOT #: ${kotData.kotId}\n")
         stringBuilder.append("Table: ${kotData.tableNumber} ($sectionName)\n")
-        stringBuilder.append("Time: ${kotData.createdAt}\n")
+        stringBuilder.append("Time: ${kotData.orderCreatedAt}\n")
         stringBuilder.append("--------------------\n\n")
 
         // Items

@@ -54,7 +54,7 @@ interface ApiService {
     suspend fun createArea(@Body area: Area,
                            @Header("X-Tenant-ID") tenantId: String) : Response<Area>
 
-    @PUT("table/area/updateArea/{area_id}")
+    @PUT("table/area/updateAreas/{area_id}")
     suspend fun updateArea(
         @Path("area_id") lng: Long,
         @Body area: Area,
@@ -188,16 +188,6 @@ interface ApiService {
 
     @GET("menu/menuItem/getMaxOrderBy")
     suspend fun getMenuItemOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
-
-    /**
-     * Modifier Management
-     */
-    @GET("menu/addOn/getAddOnByCategoryId/{item_cat_id}")
-    suspend fun getModifierGroupsForMenuItem(@Path("item_cat_id") menuItemId: Long,
-                                           @Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
-
-    @GET("modifiers/groups")
-    suspend fun getAllModifierGroups(@Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     /**
      * Order Management
@@ -556,6 +546,14 @@ interface ApiService {
     @DELETE("modifiers/{id}")
     suspend fun deleteModifier(@Path("id") id: Long,
                                @Header("X-Tenant-ID") tenantId: String): Response<Int>
+
+
+    @GET("menu/addOn/getAddOnByCategoryId/{item_cat_id}")
+    suspend fun getModifierGroupsForMenuItem(@Path("item_cat_id") menuItemId: Long,
+                                             @Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
+
+    @GET("modifiers/groups")
+    suspend fun getAllModifierGroups(@Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     /**
      * Kitchen KOT Management
