@@ -308,8 +308,15 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append("--------------------\n")
 
         kotData.items.forEach { item ->
-            val itemName = item.menuItem.menu_item_name.take(15).padEnd(15)
+            val itemName = item.name.take(15).padEnd(15)
             stringBuilder.append("$itemName ${item.quantity}\n")
+            
+            // Add modifiers if any
+            if (item.addOns.isNotEmpty()) {
+                item.addOns.forEach { modifier ->
+                    stringBuilder.append("  + $modifier\n")
+                }
+            }
         }
 
         // Footer

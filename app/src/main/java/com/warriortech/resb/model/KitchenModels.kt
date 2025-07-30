@@ -17,7 +17,8 @@ data class KitchenKOTItem(
     val quantity: Int,
     val category: String,
     val specialInstructions: String? = null,
-    val modifiers: List<String> = emptyList()
+    val modifiers: List<String> = emptyList(),
+    val addOns: List<String> = emptyList()
 )
 
 enum class KOTStatus {

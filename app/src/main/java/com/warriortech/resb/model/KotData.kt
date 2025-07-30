@@ -21,5 +21,5 @@ data class KOTItem(
     val name: String,
     val quantity: Int,
     val category: String,
-    val addOn: List<String>// e.g., "kitchen", "drinks"
+    val addOns: List<String>// e.g., "Extra Cheese", "No Onions"
 )

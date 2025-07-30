@@ -72,6 +72,10 @@ class MenuViewModel @Inject constructor(
     private val _modifierGroups = MutableStateFlow<List<Modifiers>>(emptyList())
     val modifierGroups: StateFlow<List<Modifiers>> = _modifierGroups.asStateFlow()
 
+    // MutableStateFlow to hold selected modifiers for each menu item
+    private val _selectedModifiers = MutableStateFlow<Map<Long, List<Modifiers>>>(emptyMap())
+    val selectedModifiers: StateFlow<Map<Long, List<Modifiers>>> = _selectedModifiers.asStateFlow()
+
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
         viewModelScope.launch {
             loadMenuItems()// Always load menu items
@@ -228,12 +232,13 @@ class MenuViewModel @Inject constructor(
                 ).collect { result ->
                     result.fold(
                         onSuccess = { order ->
-                            val kotItem = orderItems.map {
+                            val kotItem = orderItems.map { orderItem ->
+                                val modifierNames = _selectedModifiers.value[orderItem.menuItem.menu_item_id]?.map { it.add_on_name } ?: emptyList()
                                 KOTItem(
-                                    it.menuItem.menu_item_name,
-                                    it.quantity,
-                                    it.menuItem.kitchen_cat_name,
-                                    emptyList()
+                                    name = orderItem.menuItem.menu_item_name,
+                                    quantity = orderItem.quantity,
+                                    category = orderItem.menuItem.kitchen_cat_name,
+                                    addOns = modifierNames
                                 )
                             }
                             val kotRequest = KOTRequest(
@@ -269,12 +274,13 @@ class MenuViewModel @Inject constructor(
                 ).collect { result ->
                     result.fold(
                         onSuccess = { order ->
-                            val kotItem = orderItems.map {
+                            val kotItem = orderItems.map { orderItem ->
+                                val modifierNames = _selectedModifiers.value[orderItem.menuItem.menu_item_id]?.map { it.add_on_name } ?: emptyList()
                                 KOTItem(
-                                    it.menuItem.menu_item_name,
-                                    it.quantity,
-                                    it.menuItem.kitchen_cat_name,
-                                    emptyList()
+                                    name = orderItem.menuItem.menu_item_name,
+                                    quantity = orderItem.quantity,
+                                    category = orderItem.menuItem.kitchen_cat_name,
+                                    addOns = modifierNames
                                 )
                             }
                             val kotRequest = KOTRequest(
@@ -375,7 +381,7 @@ class MenuViewModel @Inject constructor(
 
     fun addMenuItemWithModifiers(menuItem: MenuItem, modifiers: List<Modifiers>) {
         val currentItems = _selectedItems.value.toMutableMap()
-        
+
         // Add the menu item to selected items
         val existingCount = currentItems[menuItem] ?: 0
         currentItems[menuItem] = existingCount + 1
@@ -405,5 +411,28 @@ class MenuViewModel @Inject constructor(
             }
         }
     }
+
+    // Function to select a modifier for a menu item
+    fun selectModifier(menuItemId: Long, modifier: Modifiers) {
+        val currentSelection = _selectedModifiers.value.toMutableMap()
+        val selectedList = currentSelection[menuItemId]?.toMutableList() ?: mutableListOf()
+
+        if (!selectedList.contains(modifier)) {
+            selectedList.add(modifier)
+        } else {
+            selectedList.remove(modifier) // Allow deselecting
+        }
+
+        currentSelection[menuItemId] = selectedList
+        _selectedModifiers.value = currentSelection
+    }
+
+    // Function to clear selected modifiers for a menu item
+    fun clearSelectedModifiers(menuItem: MenuItem) {
+        val currentSelection = _selectedModifiers.value.toMutableMap()
+        currentSelection.remove(menuItem.menu_item_id)
+        _selectedModifiers.value = currentSelection
+    }
+
 
 }
