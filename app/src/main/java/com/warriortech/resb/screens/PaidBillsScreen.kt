@@ -3,6 +3,7 @@ package com.warriortech.resb.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -138,7 +140,8 @@ fun PaidBillsScreen(
                             onEdit = { navController.navigate("edit_paid_bill/${bill.id}") },
                             onDelete = { viewModel.showDeleteDialog(bill) },
                             onRefund = { viewModel.showRefundDialog(bill) },
-                            onView = { navController.navigate("view_paid_bill/${bill.id}") }
+                            onView = { navController.navigate("view_paid_bill/${bill.id}") },
+                            onTemplate = { navController.navigate("bill_template/${bill.id}") }
                         )
                     }
                 }
@@ -181,7 +184,8 @@ fun PaidBillCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onRefund: () -> Unit,
-    onView: () -> Unit
+    onView: () -> Unit,
+    onTemplate: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -216,7 +220,7 @@ fun PaidBillCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = currencyFormatter.format(bill.totalAmount),
@@ -246,7 +250,7 @@ fun PaidBillCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(R.string.view))
                 }
-                
+
                 OutlinedButton(
                     onClick = onEdit,
                     modifier = Modifier.weight(1f)
@@ -255,7 +259,16 @@ fun PaidBillCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(R.string.edit))
                 }
-                
+
+                OutlinedButton(
+                    onClick = onTemplate,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Print, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Template")
+                }
+
                 OutlinedButton(
                     onClick = onRefund,
                     modifier = Modifier.weight(1f)
@@ -264,7 +277,7 @@ fun PaidBillCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(R.string.refund))
                 }
-                
+
                 OutlinedButton(
                     onClick = onDelete,
                     modifier = Modifier.weight(1f),
@@ -327,16 +340,16 @@ fun RefundBillDialog(
             Column {
                 Text(stringResource(R.string.refund_bill_info, bill.billNo))
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = refundAmount,
                     onValueChange = { refundAmount = it },
                     label = { Text(stringResource(R.string.refund_amount)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 OutlinedTextField(
                     value = reason,
                     onValueChange = { reason = it },
