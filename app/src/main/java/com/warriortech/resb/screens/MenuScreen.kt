@@ -376,15 +376,13 @@ fun MenuScreen(
     // Modifier Selection Dialog
     if (showModifierDialog && selectedMenuItemForModifier != null) {
         ModifierSelectionDialog(
-//            menuItem = selectedMenuItemForModifier!!,
-//            modifierGroups = modifierGroups,
-            onDismiss = { viewModel.hideModifierDialog() },
-//            onConfirm = { menuItemWithModifiers ->
-//                viewModel.addMenuItemWithModifiers(menuItemWithModifiers)
-//            },
-            availableModifiers = TODO(),
-            selectedModifiers = TODO(),
-            onModifiersSelected = TODO()
+            menuItem = selectedMenuItemForModifier!!,
+            availableModifiers = modifierGroups,
+            selectedModifiers = emptyList(),
+            onModifiersSelected = { selectedModifiers ->
+                viewModel.addMenuItemWithModifiers(selectedMenuItemForModifier!!, selectedModifiers)
+            },
+            onDismiss = { viewModel.hideModifierDialog() }
         )
     }
 }

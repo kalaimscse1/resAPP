@@ -348,7 +348,7 @@ class MenuViewModel @Inject constructor(
     fun showModifierDialog(menuItem: MenuItem) {
         _selectedMenuItemForModifier.value = menuItem
         _showModifierDialog.value = true
-        loadModifierGroups(menuItem.item_cat_id)
+        loadModifiersForMenuItem(menuItem.menu_item_id)
     }
 
     fun hideModifierDialog() {
@@ -377,17 +377,37 @@ class MenuViewModel @Inject constructor(
         }
     }
 
-    fun addMenuItemWithModifiers(menuItemWithModifiers: MenuItemWithModifiers) {
+    fun addMenuItemWithModifiers(menuItem: MenuItem, modifiers: List<Modifiers>) {
         val currentItems = _selectedItems.value.toMutableMap()
-
-        // For simplicity, we'll treat items with modifiers as separate entries
-        // You might want to implement a more sophisticated system to handle
-        // identical items with different modifiers
-        val existingCount = currentItems[menuItemWithModifiers.menuItem] ?: 0
-        currentItems[menuItemWithModifiers.menuItem] = existingCount + 1
+        
+        // Add the menu item to selected items
+        val existingCount = currentItems[menuItem] ?: 0
+        currentItems[menuItem] = existingCount + 1
 
         _selectedItems.value = currentItems
         hideModifierDialog()
+    }
+
+    fun loadModifiersForMenuItem(menuItemId: Long) {
+        viewModelScope.launch {
+            try {
+                // Load modifiers from repository
+                modifierRepository.getModifiersByMenuItem(menuItemId).collect { result ->
+                    result.fold(
+                        onSuccess = { modifiers ->
+                            _modifierGroups.value = modifiers
+                        },
+                        onFailure = { error ->
+                            Timber.e(error, "Failed to load modifiers for menu item")
+                            _modifierGroups.value = emptyList()
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error loading modifiers")
+                _modifierGroups.value = emptyList()
+            }
+        }
     }
 
 }

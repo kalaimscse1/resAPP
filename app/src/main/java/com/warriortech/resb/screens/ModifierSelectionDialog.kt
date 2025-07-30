@@ -1,12 +1,6 @@
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
@@ -17,12 +11,103 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Modifiers
-import com.warriortech.resb.model.ModifierType
-import kotlin.collections.any
-import kotlin.collections.filter
-import kotlin.collections.plus
-import kotlin.text.isNotEmpty
+import com.warriortech.resb.model.MenuItemWithModifiers
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ModifierSelectionDialog(
+    menuItem: MenuItem,
+    availableModifiers: List<Modifiers>,
+    selectedModifiers: List<Modifiers>,
+    onModifiersSelected: (List<Modifiers>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var currentSelectedModifiers by remember { mutableStateOf(selectedModifiers) }
+
+    val totalPrice = remember(currentSelectedModifiers) {
+        menuItem.rate + currentSelectedModifiers.sumOf { it.add_on_price }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 500.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Header
+                Text(
+                    text = "Customize ${menuItem.menu_item_name}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // Modifiers List
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(availableModifiers) { modifier ->
+                        ModifierItem(
+                            modifier = modifier,
+                            isSelected = currentSelectedModifiers.contains(modifier),
+                            onSelectionChanged = { isSelected ->
+                                currentSelectedModifiers = if (isSelected) {
+                                    currentSelectedModifiers + modifier
+                                } else {
+                                    currentSelectedModifiers - modifier
+                                }
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Total Price
+                Text(
+                    text = "Total: ₹%.2f".format(totalPrice),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Button(
+                        onClick = {
+                            onModifiersSelected(currentSelectedModifiers)
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Add to Order")
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun ModifierSelectionDialog(

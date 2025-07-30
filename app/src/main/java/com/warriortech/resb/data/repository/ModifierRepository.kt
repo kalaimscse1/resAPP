@@ -223,6 +223,29 @@ class ModifierRepository @Inject constructor(
         }
     }
 
+    suspend fun getModifiersByMenuItem(menuItemId: Long): Flow<Result<List<Modifiers>>> = flow {
+        try {
+            // First try to get from local database
+            modifierDao.getModifiersByMenuItem(menuItemId).collect { localModifiers ->
+                val modifiers = localModifiers.map { entity ->
+                    Modifiers(
+                        add_on_id = entity.add_on_id,
+                        item_cat_id = entity.item_cat_id,
+                        add_on_name = entity.add_on_name,
+                        add_on_price = entity.add_on_price,
+                        is_active = entity.is_active
+                    )
+                }
+                emit(Result.success(modifiers))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Error fetching modifiers for menu item")
+            emit(Result.failure(e))
+        }
+    }re(e))
+        }
+    }
+
     // Mock data for demonstration - replace with actual API call
 //
 }
