@@ -26,6 +26,7 @@ import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
 import kotlinx.coroutines.launch
 import com.warriortech.resb.R
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.PaymentModePieChart
 import com.warriortech.resb.ui.components.WeeklySalesBarChart
 import com.warriortech.resb.ui.theme.GradientStart
@@ -69,7 +70,8 @@ fun DashboardScreen(
     onNavigateToMenu: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToBilling: () -> Unit,
-    viewModel: DashboardViewModel = hiltViewModel()
+    viewModel: DashboardViewModel = hiltViewModel(),
+    sessionManager: SessionManager
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -170,7 +172,8 @@ fun DashboardScreen(
                             onNavigateToMenu = onNavigateToMenu,
                             onNavigateToOrders = onNavigateToOrders,
                             onNavigateToSettings = onNavigateToSettings,
-                            onNavigateToBilling = onNavigateToBilling
+                            onNavigateToBilling = onNavigateToBilling,
+                            sessionManager
                         )
                     }
 
@@ -348,8 +351,10 @@ fun QuickActionsSection(
     onNavigateToMenu: () -> Unit,
     onNavigateToOrders: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToBilling: () -> Unit
+    onNavigateToBilling: () -> Unit,
+    sessionManager: SessionManager
 ) {
+    val role = sessionManager.getUser()?.role?:""
     Column {
         Text(
             "Quick Actions",
@@ -376,20 +381,23 @@ fun QuickActionsSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            MobileOptimizedButton(
-                onClick = onNavigateToBilling,
-                text = "Billing",
-                modifier = Modifier.weight(1f)
-            )
-            MobileOptimizedButton(
-                onClick = onNavigateToSettings,
-                text = "Settings",
-                modifier = Modifier.weight(1f)
-            )
+        if (role == "RESBADMIN" || role == "ADMIN")
+        {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MobileOptimizedButton(
+                    onClick = onNavigateToBilling,
+                    text = "Billing",
+                    modifier = Modifier.weight(1f)
+                )
+                MobileOptimizedButton(
+                    onClick = onNavigateToSettings,
+                    text = "Settings",
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }

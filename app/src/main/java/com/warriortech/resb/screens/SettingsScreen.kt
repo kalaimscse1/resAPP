@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
 import kotlinx.coroutines.launch
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     onBackPressed: () -> Unit,
     drawerState: DrawerState,
-    navController: NavController
+    navController: NavController,
+    sessionManager: SessionManager
 ) {
     var selectedModule by remember { mutableStateOf<SettingsModule?>(null) }
     val scope = rememberCoroutineScope()
@@ -58,13 +60,15 @@ fun SettingsScreen(
         if (selectedModule == null) {
             SettingsMainScreen(
                 modifier = Modifier.padding(paddingValues),
-                onModuleSelected = { module -> selectedModule = module }
+                onModuleSelected = { module -> selectedModule = module },
+                sessionManager = sessionManager
             )
         } else {
             SettingsModuleScreen(
                 module = selectedModule!!,
                 modifier = Modifier.padding(paddingValues),
-                navController = navController
+                navController = navController,
+                sessionManager = sessionManager
             )
         }
 
@@ -74,9 +78,12 @@ fun SettingsScreen(
 @Composable
 fun SettingsMainScreen(
     modifier: Modifier = Modifier,
-    onModuleSelected: (SettingsModule) -> Unit
+    onModuleSelected: (SettingsModule) -> Unit,
+    sessionManager: SessionManager
 ) {
+    val role = sessionManager.getUser()?.role?:""
     val settingsModules = remember {
+        if(role == "RESBADMIN")
         listOf(
             SettingsModule.Area,
             SettingsModule.Table,
@@ -95,8 +102,30 @@ fun SettingsMainScreen(
 			SettingsModule.Counter,
             SettingsModule.Language,
             SettingsModule.PrinterSetting,
-            SettingsModule.Modifiers
+            SettingsModule.Modifiers,
+            SettingsModule.ChangePassword
         )
+        else
+            listOf(
+                SettingsModule.Area,
+                SettingsModule.Table,
+                SettingsModule.Menu,
+                SettingsModule.MenuCategory,
+                SettingsModule.MenuItem,
+                SettingsModule.Modifiers,
+                SettingsModule.Staff,
+                SettingsModule.Role,
+                SettingsModule.Printer,
+                SettingsModule.Tax,
+                SettingsModule.TaxSplit,
+                SettingsModule.RestaurantProfile,
+                SettingsModule.CreateVoucher,
+                SettingsModule.Counter,
+                SettingsModule.Customer,
+                SettingsModule.Language,
+                SettingsModule.ChangePassword
+
+            )
     }
 
     LazyColumn(
@@ -174,7 +203,8 @@ fun SettingsModuleCard(
 fun SettingsModuleScreen(
     module: SettingsModule,
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    sessionManager: SessionManager
 ) {
     when (module) {
         is SettingsModule.Area -> {
@@ -237,6 +267,9 @@ fun SettingsModuleScreen(
         is SettingsModule.Modifiers -> {
             navController.navigate("modifier_setting")
         }
+        is SettingsModule.ChangePassword -> {
+            navController.navigate("change_password")
+        }
     }
 }
 
@@ -255,6 +288,13 @@ sealed class SettingsModule(
         listOf("name","status")
     )
 
+    object ChangePassword: SettingsModule(
+        "change_password",
+        "Change Password",
+        "Manage Password",
+        Icons.Default.ChangeCircle,
+        listOf("oldPassword","newPassword","ConfirmPassword")
+    )
     object Table : SettingsModule(
         "table",
         "Table",

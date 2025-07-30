@@ -72,10 +72,10 @@ class DashboardRepository @Inject constructor(
         else {
           // Mock data - replace with actual API call
           listOf(
-              PaymentModeData("Cash", 15000.0, androidx.compose.ui.graphics.Color(0xFF4CAF50)),
-              PaymentModeData("Card", 25000.0, androidx.compose.ui.graphics.Color(0xFF2196F3)),
-              PaymentModeData("UPI", 18000.0, androidx.compose.ui.graphics.Color(0xFFFF9800)),
-              PaymentModeData("Others", 5000.0, androidx.compose.ui.graphics.Color(0xFF9C27B0))
+              PaymentModeData("Cash", 0.0, androidx.compose.ui.graphics.Color(0xFF4CAF50)),
+              PaymentModeData("Card", 0.0, androidx.compose.ui.graphics.Color(0xFF2196F3)),
+              PaymentModeData("UPI", 0.0, androidx.compose.ui.graphics.Color(0xFFFF9800)),
+              PaymentModeData("Others", 0.0, androidx.compose.ui.graphics.Color(0xFF9C27B0))
           )
       }
     }
@@ -89,13 +89,13 @@ class DashboardRepository @Inject constructor(
         }
        else {
             listOf(
-                WeeklySalesData("Mon", 8000.0),
-                WeeklySalesData("Tue", 12000.0),
-                WeeklySalesData("Wed", 15000.0),
-                WeeklySalesData("Thu", 10000.0),
-                WeeklySalesData("Fri", 18000.0),
-                WeeklySalesData("Sat", 22000.0),
-                WeeklySalesData("Sun", 16000.0)
+                WeeklySalesData("Mon", 0.0),
+                WeeklySalesData("Tue", 0.0),
+                WeeklySalesData("Wed", 0.0),
+                WeeklySalesData("Thu", 0.0),
+                WeeklySalesData("Fri", 0.0),
+                WeeklySalesData("Sat", 0.0),
+                WeeklySalesData("Sun", 0.0)
             )
         }
     }

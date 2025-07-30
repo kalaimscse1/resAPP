@@ -257,7 +257,7 @@ class MainActivity : ComponentActivity() {
                                 Column {
                                     NetworkStatusBar(connectionState = connectionState)
                                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        AppNavigation(drawerState, navController)
+                                        AppNavigation(drawerState, navController,sessionManager)
                                     }
                                 }
                             }
@@ -278,7 +278,7 @@ class MainActivity : ComponentActivity() {
                                 Column {
                                     NetworkStatusBar(connectionState = connectionState)
                                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        AppNavigation(drawerState, navController)
+                                        AppNavigation(drawerState, navController,sessionManager)
                                     }
                                 }
                             }
@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
                         Column {
                             NetworkStatusBar(connectionState = connectionState)
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                AppNavigation(drawerState, navController)
+                                AppNavigation(drawerState, navController,sessionManager)
                             }
                         }
                     }
@@ -315,7 +315,7 @@ class MainActivity : ComponentActivity() {
  */
 
 @Composable
-fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
+fun AppNavigation(drawerState: DrawerState, navController: NavHostController,sessionManager: SessionManager) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
@@ -427,7 +427,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
             SettingsScreen(
                 onBackPressed = { navController.popBackStack() },
                 drawerState = drawerState,
-                navController= navController
+                navController= navController,
+                sessionManager = sessionManager
             )
         }
 
@@ -528,7 +529,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
                 onNavigateToOrders = {navController.navigate("orders")},
                 onNavigateToMenu = {navController.navigate("menu")},
                 onNavigateToSettings = {navController.navigate("settings")},
-                onNavigateToBilling = {navController.navigate("counter")}
+                onNavigateToBilling = {navController.navigate("counter")},
+                sessionManager = sessionManager
             )
         }
 
@@ -538,10 +540,9 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
         composable("reports") {
                             ReportScreen(navController = navController)
                         }
-
-                        composable("registration") {
+        composable("registration") {
                             RegistrationScreen(navController = navController)
-                        }
+        }
 
         composable("ai_assistant") {
             AIAssistantScreen(
@@ -658,7 +659,8 @@ fun DrawerContent(
                     .fillMaxWidth()
                     .padding(16.dp),
                 shape = MaterialTheme.shapes.medium,
-                elevation = 1.dp) {
+                elevation = 1.dp
+            ) {
                 Row(
                     modifier = Modifier.padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -672,8 +674,14 @@ fun DrawerContent(
                     if (!isCollapsed) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            Text(sessionManager.getUser()?.staff_name?:"", fontWeight = FontWeight.Bold)
-                            Text(sessionManager.getUser()?.role?:"", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                sessionManager.getUser()?.staff_name ?: "",
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                sessionManager.getUser()?.role ?: "",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
@@ -694,76 +702,80 @@ fun DrawerContent(
                 onClick = onCollapseToggle,
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
-           
+
             Spacer(modifier = Modifier.height(8.dp))
+            if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CHEF" || role == "CASHIER") {
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Dashboard") else Text("") },
+                    icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                    selected = currentDestination?.route == "dashboard",
+                    onClick = { onDestinationClicked("dashboard") },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+            if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CASHIER") {
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Dine In") else Text("") },
+                    icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
+                    selected = currentDestination?.route == "selects",
+                    onClick = {
+                        onDestinationClicked("selects")
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
 
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Dashboard") else Text("") },
-                icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
-                selected = currentDestination?.route == "dashboard",
-                onClick = { onDestinationClicked("dashboard") },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Takeaway") else Text("") },
+                    icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
+                    selected = currentDestination?.route == "takeaway_menu",
+                    onClick = {
+                        onDestinationClicked("takeaway_menu")
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
 
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Dine In") else Text("") },
-                icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
-                selected = currentDestination?.route == "selects",
-                onClick = {
-                    onDestinationClicked("selects")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Orders") else Text("") },
+                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                    selected = currentDestination?.route == "orders",
+                    onClick = {
+                        onDestinationClicked("orders")
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+            if (role == "RESBADMIN" || role == "ADMIN") {
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                    selected = currentDestination?.route == "paid_bills",
+                    onClick = {
+                        onDestinationClicked("paid_bills")
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
 
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Takeaway") else Text("") },
-                icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
-                selected = currentDestination?.route == "takeaway_menu",
-                onClick = {
-                    onDestinationClicked("takeaway_menu")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
-
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Orders") else Text("") },
-                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = currentDestination?.route == "orders",
-                onClick = {
-                    onDestinationClicked("orders")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
-
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = currentDestination?.route == "paid_bills",
-                onClick = {
-                    onDestinationClicked("paid_bills")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
-
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Settings") else Text("") },
-                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = currentDestination?.route == "settings",
-                onClick = {
-                    onDestinationClicked("settings")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
-
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
-                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                selected = currentDestination?.route == "counter",
-                onClick = {
-                    onDestinationClicked("counter")
-                },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Settings") else Text("") },
+                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                    selected = currentDestination?.route == "settings",
+                    onClick = {
+                        onDestinationClicked("settings")
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+            if (role == "RESBADMIN" || role == "ADMIN" || role == "CASHIER")
+            {
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
+                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                    selected = currentDestination?.route == "counter",
+                    onClick = {
+                        onDestinationClicked("counter")
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
 
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Reports") else Text("") },
@@ -774,7 +786,8 @@ fun DrawerContent(
                 },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
-     
+
+        }
 //            NavigationDrawerItem(
 //                label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
 //                icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
@@ -798,7 +811,7 @@ fun DrawerContent(
             Spacer(modifier = Modifier.weight(1f))
 
             ModernDivider()
-
+        if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CHEF" || role== "CASHIER") {
             NavigationDrawerItem(
                 label = { if (!isCollapsed) Text("Logout") else Text("") },
                 icon = { Icon(Icons.Default.Logout, contentDescription = null) },
@@ -806,6 +819,8 @@ fun DrawerContent(
                 onClick = { onDestinationClicked("logout") },
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
+        }
+
         }
     }
 }
