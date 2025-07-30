@@ -12,12 +12,13 @@ import javax.inject.Singleton
 @Singleton
 class PaidBillRepository @Inject constructor(
     private val apiService: ApiService,
-    networkMonitor: NetworkMonitor
+    networkMonitor: NetworkMonitor,
+    private val sessionManager: SessionManager
 ) : OfflineFirstRepository(networkMonitor) {
 
     suspend fun getAllPaidBills(): Response<List<PaidBillSummary>> {
         return try {
-            apiService.getAllPaidBills(SessionManager.getCompanyCode()?:"")
+            apiService.getAllPaidBills(sessionManager.getCompanyCode()?:"")
         }catch (e: Exception) {
             return Response.success(emptyList())
         }
@@ -26,7 +27,7 @@ class PaidBillRepository @Inject constructor(
 
     suspend fun getPaidBillById(billId: Long): Response<PaidBill>  {
         return try {
-            apiService.getPaidBillById(billId,SessionManager.getCompanyCode()?:"")
+            apiService.getPaidBillById(billId,sessionManager.getCompanyCode()?:"")
         }catch (e: Exception) {
             Response.success(null)
         }
@@ -35,7 +36,7 @@ class PaidBillRepository @Inject constructor(
 
     suspend fun updatePaidBill(billId: Long, billData: PaidBill): Response<PaidBill> {
         return try {
-            apiService.updatePaidBill(billId, billData,SessionManager.getCompanyCode()?:"")
+            apiService.updatePaidBill(billId, billData,sessionManager.getCompanyCode()?:"")
         }catch (e: Exception) {
             Response.success(null)
         }
@@ -44,7 +45,7 @@ class PaidBillRepository @Inject constructor(
 
     suspend fun deletePaidBill(billId: Long): Response<Unit> {
         return try {
-            apiService.deletePaidBill(billId,SessionManager.getCompanyCode()?:"")
+            apiService.deletePaidBill(billId,sessionManager.getCompanyCode()?:"")
         }catch (e: Exception) {
             Response.success(Unit)
         }
@@ -55,7 +56,7 @@ class PaidBillRepository @Inject constructor(
             apiService.refundBill(billId, mapOf(
                 "refund_amount" to refundAmount,
                 "reason" to reason
-            ),SessionManager.getCompanyCode()?:"")
+            ),sessionManager.getCompanyCode()?:"")
         }catch (e: Exception) {
             Response.success(null)
         }
@@ -63,6 +64,6 @@ class PaidBillRepository @Inject constructor(
     }
 
     suspend fun searchPaidBills(query: String): Response<List<PaidBillSummary>> {
-        return  apiService.searchPaidBills(query,SessionManager.getCompanyCode()?:"")
+        return  apiService.searchPaidBills(query,sessionManager.getCompanyCode()?:"")
     }
 }

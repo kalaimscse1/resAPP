@@ -29,7 +29,9 @@ data class LoginUiState(
  * ViewModel for handling user login functionality.
  */
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() { // Assuming you might inject dependencies later
+class LoginViewModel @Inject constructor(
+    private val sessionManager: SessionManager
+) : ViewModel() { // Assuming you might inject dependencies later
 
     var uiState by mutableStateOf(LoginUiState())
         private set
@@ -96,9 +98,9 @@ class LoginViewModel @Inject constructor() : ViewModel() { // Assuming you might
 
                     if (response.success && response.data != null) {
                         val authResponse = response.data
-                        SessionManager.saveAuthToken(authResponse.token)
-                        SessionManager.saveUser(authResponse.user)
-                        SessionManager.saveCompanyCode(uiState.companyCode)
+                        sessionManager.saveAuthToken(authResponse.token)
+                        sessionManager.saveUser(authResponse.user)
+                        sessionManager.saveCompanyCode(uiState.companyCode)
                         uiState = uiState.copy(isLoading = false, loginSuccess = true)
                     } else {
                         uiState = uiState.copy(isLoading = false, loginError = "Login failed: ${response.message}")

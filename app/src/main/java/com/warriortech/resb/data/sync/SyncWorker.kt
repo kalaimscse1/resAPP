@@ -18,7 +18,8 @@ import timber.log.Timber
 class SyncWorker(
     appContext: Context,
     workerParams: WorkerParameters,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) : CoroutineWorker(appContext, workerParams) {
 
 private val database = RestaurantDatabase.getDatabase(appContext)
@@ -52,7 +53,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
         for (table in pendingTables) {
             try {
                 // Update table status on server
-                val response = apiService.updateTableStatus(table.table_id, table.table_status,SessionManager.getCompanyCode()?:"")
+                val response = apiService.updateTableStatus(table.table_id, table.table_status,sessionManager.getCompanyCode()?:"")
 
                 if (response.isSuccessful) {
                     // Mark as synced
@@ -69,7 +70,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
 
         // Get latest tables from server and update local cache
         try {
-            val remoteTables = apiService.getAllTables(SessionManager.getCompanyCode()?:"").body()!!
+            val remoteTables = apiService.getAllTables(sessionManager.getCompanyCode()?:"").body()!!
             val localTables = remoteTables.map {
                 tableDao.getTableById(it.table_id)?.let { localTable ->
                     // Preserve local sync status if it's pending or failed
@@ -90,7 +91,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
     private suspend fun syncMenuItems() {
         // Similar to tables, menu items are mostly read-only from client side
         try {
-            val remoteMenuItems = apiService.getAllMenuItems(SessionManager.getCompanyCode()?:"").body()!!
+            val remoteMenuItems = apiService.getAllMenuItems(sessionManager.getCompanyCode()?:"").body()!!
             val localMenuItems = remoteMenuItems.map {
                 menuItemDao.getMenuItemById(it.menu_item_id)?.let { localItem ->
                     // Preserve local sync status if it's pending or failed

@@ -6,14 +6,15 @@ import com.warriortech.resb.data.local.entity.OrderItemModifierEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.toModel
 import com.warriortech.resb.data.local.entity.toEntity
-import com.warriortech.resb.model.ModifierType
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.OrderItemModifier
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.collections.map
@@ -24,7 +25,8 @@ class ModifierRepository @Inject constructor(
     private val modifierDao: ModifierDao,
     private val orderItemModifierDao: OrderItemModifierDao,
     private val apiService: ApiService,
-    networkMonitor: NetworkMonitor
+    networkMonitor: NetworkMonitor,
+    private val sessionManager: SessionManager
 ) : OfflineFirstRepository(networkMonitor) {
 
     fun getAllAvailableModifiers(): Flow<List<Modifiers>> {
@@ -50,9 +52,9 @@ class ModifierRepository @Inject constructor(
         val modifierEntities = modifiers.map { modifier ->
             OrderItemModifierEntity(
                 order_detail_id = orderDetailId,
-                modifier_id = modifier.modifier_id,
-                modifier_name = modifier.modifier_name,
-                price_adjustment = modifier.price_adjustment
+                modifier_id = modifier.add_on_id,
+                modifier_name = modifier.add_on_name,
+                price_adjustment = modifier.add_on_price
             )
         }
         orderItemModifierDao.insertOrderItemModifiers(modifierEntities)
@@ -76,7 +78,7 @@ class ModifierRepository @Inject constructor(
 
     suspend fun syncData() {
         try {
-            val response = apiService.getAllModifiers(SessionManager.getCompanyCode()?:"")
+            val response = apiService.getAllModifiers(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 response.body()?.let { modifiers ->
                     val modifierEntities = modifiers.map { it.toEntity() }
@@ -91,7 +93,7 @@ class ModifierRepository @Inject constructor(
     suspend fun createModifier(modifier: Modifiers): Result<Modifiers> {
         return try {
             if (isOnline()) {
-                val response = apiService.createModifier(modifier,SessionManager.getCompanyCode()?:"")
+                val response = apiService.createModifier(modifier,sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     response.body()?.let { createdModifier ->
                         modifierDao.insertModifier(createdModifier.toEntity())
@@ -102,7 +104,7 @@ class ModifierRepository @Inject constructor(
                 }
             } else {
                 // Store locally with pending sync status
-                val localModifier = modifier.copy(modifier_id = System.currentTimeMillis())
+                val localModifier = modifier.copy(add_on_id = System.currentTimeMillis())
                 val entity = localModifier.toEntity().copy(syncStatus = SyncStatus.PENDING_SYNC)
                 modifierDao.insertModifier(entity)
                 Result.success(localModifier)
@@ -115,7 +117,7 @@ class ModifierRepository @Inject constructor(
     suspend fun updateModifier(modifier: Modifiers): Result<Modifiers> {
         return try {
             if (isOnline()) {
-                val response = apiService.updateModifier(modifier.modifier_id, modifier,SessionManager.getCompanyCode()?:"")
+                val response = apiService.updateModifier(modifier.add_on_id, modifier,sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     response.body()?.let { updatedModifier ->
                         modifierDao.updateModifier(updatedModifier.toEntity())
@@ -137,7 +139,7 @@ class ModifierRepository @Inject constructor(
     suspend fun deleteModifier(modifierId: Long): Result<Unit> {
         return try {
             if (isOnline()) {
-                val response = apiService.deleteModifier(modifierId,SessionManager.getCompanyCode()?:"")
+                val response = apiService.deleteModifier(modifierId,sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     modifierDao.getModifierById(modifierId)?.let { entity ->
                         modifierDao.deleteModifier(entity)
@@ -159,69 +161,50 @@ class ModifierRepository @Inject constructor(
     }
 
     // Predefined modifiers for common use cases
-    suspend fun initializeDefaultModifiers() {
-        val defaultModifiers = listOf(
-            Modifiers(
-                modifier_id = 1,
-                modifier_name = "Less Sugar",
-                modifier_name_tamil = "குறைந்த சர்க்கரை",
-                modifier_type = ModifierType.REMOVAL,
-                price_adjustment = 0.0
-            ),
-            Modifiers(
-                modifier_id = 2,
-                modifier_name = "No Sugar",
-                modifier_name_tamil = "சர்க்கரை இல்லாமல்",
-                modifier_type = ModifierType.REMOVAL,
-                price_adjustment = 0.0
-            ),
-            Modifiers(
-                modifier_id = 3,
-                modifier_name = "Extra Strong",
-                modifier_name_tamil = "கூடுதல் வலிமை",
-                modifier_type = ModifierType.ADDITION,
-                price_adjustment = 5.0
-            ),
-            Modifiers(
-                modifier_id = 4,
-                modifier_name = "Less Milk",
-                modifier_name_tamil = "குறைந்த பால்",
-                modifier_type = ModifierType.REMOVAL,
-                price_adjustment = 0.0
-            ),
-            Modifiers(
-                modifier_id = 5,
-                modifier_name = "Extra Hot",
-                modifier_name_tamil = "அதிக சூடு",
-                modifier_type = ModifierType.ADDITION,
-                price_adjustment = 0.0
-            )
-        )
-
-        val entities = defaultModifiers.map { it.toEntity() }
-        modifierDao.insertModifiers(entities)
-    }
-}
-package com.warriortech.resb.data.repository
-
-import com.warriortech.resb.model.ModifierGroup
-import com.warriortech.resb.network.ApiService
-import com.warriortech.resb.network.SessionManager
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
-
-@Singleton
-class ModifierRepository @Inject constructor(
-    private val apiService: ApiService,
-    private val sessionManager: SessionManager
-) {
-    
-    fun getModifierGroupsForMenuItem(menuItemId: Long): Flow<Result<List<ModifierGroup>>> = flow {
+//    suspend fun initializeDefaultModifiers() {
+//        val defaultModifiers = listOf(
+//            Modifiers(
+//                add_on_id = 1,
+//                add_on_name = "Less Sugar",
+//                modifier_type = ModifierType.REMOVAL,
+//                price_adjustment = 0.0
+//            ),
+//            Modifiers(
+//                modifier_id = 2,
+//                modifier_name = "No Sugar",
+//                modifier_name_tamil = "சர்க்கரை இல்லாமல்",
+//                modifier_type = ModifierType.REMOVAL,
+//                price_adjustment = 0.0
+//            ),
+//            Modifiers(
+//                modifier_id = 3,
+//                modifier_name = "Extra Strong",
+//                modifier_name_tamil = "கூடுதல் வலிமை",
+//                modifier_type = ModifierType.ADDITION,
+//                price_adjustment = 5.0
+//            ),
+//            Modifiers(
+//                modifier_id = 4,
+//                modifier_name = "Less Milk",
+//                modifier_name_tamil = "குறைந்த பால்",
+//                modifier_type = ModifierType.REMOVAL,
+//                price_adjustment = 0.0
+//            ),
+//            Modifiers(
+//                modifier_id = 5,
+//                modifier_name = "Extra Hot",
+//                modifier_name_tamil = "அதிக சூடு",
+//                modifier_type = ModifierType.ADDITION,
+//                price_adjustment = 0.0
+//            )
+//        )
+//
+//        val entities = defaultModifiers.map { it.toEntity() }
+//        modifierDao.insertModifiers(entities)
+//    }
+    fun getModifierGroupsForMenuItem(menuItemId: Long): Flow<Result<List<Modifiers>>> = flow {
         try {
-            val tenantId = sessionManager.getTenantId()
+            val tenantId = sessionManager.getCompanyCode()
             if (tenantId.isNullOrEmpty()) {
                 emit(Result.failure(Exception("Tenant ID not found")))
                 return@flow
@@ -241,32 +224,5 @@ class ModifierRepository @Inject constructor(
     }
 
     // Mock data for demonstration - replace with actual API call
-    fun getMockModifierGroups(): List<ModifierGroup> {
-        return listOf(
-            ModifierGroup(
-                modifier_group_id = 1,
-                name = "Size",
-                is_required = true,
-                max_selection = 1,
-                min_selection = 1,
-                modifiers = listOf(
-                    com.warriortech.resb.model.Modifier(1, "Small", 0.0, true, 1),
-                    com.warriortech.resb.model.Modifier(2, "Medium", 50.0, true, 1),
-                    com.warriortech.resb.model.Modifier(3, "Large", 100.0, true, 1)
-                )
-            ),
-            ModifierGroup(
-                modifier_group_id = 2,
-                name = "Add-ons",
-                is_required = false,
-                max_selection = 3,
-                min_selection = 0,
-                modifiers = listOf(
-                    com.warriortech.resb.model.Modifier(4, "Extra Cheese", 30.0, true, 2),
-                    com.warriortech.resb.model.Modifier(5, "Extra Spicy", 10.0, true, 2),
-                    com.warriortech.resb.model.Modifier(6, "Extra Sauce", 20.0, true, 2)
-                )
-            )
-        )
-    }
+//
 }

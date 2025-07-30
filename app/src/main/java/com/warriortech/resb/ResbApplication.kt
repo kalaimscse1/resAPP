@@ -2,6 +2,7 @@ package com.warriortech.resb
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.work.Configuration
 import androidx.work.ListenableWorker
@@ -9,6 +10,7 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.sync.SyncWorker
 import com.warriortech.resb.network.RetrofitClient.apiService
+import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.BuildConfig
 import timber.log.Timber
@@ -17,10 +19,16 @@ import com.warriortech.resb.util.LocaleHelper
 
 @HiltAndroidApp
 class ResbApplication : Application(), Configuration.Provider {
+    lateinit var sessionManager: SessionManager
+    companion object {
+        lateinit var sharedPreferences: SharedPreferences
+            private set // Make setter private to ensure it's only set here
+    }
     override fun onCreate() {
         super.onCreate()
 
         // Initialize Timber for logging
+        sessionManager = SessionManager(this)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
@@ -36,7 +44,8 @@ class ResbApplication : Application(), Configuration.Provider {
                     SyncWorker(
                         appContext,
                         workerParameters,
-                        apiService
+                        apiService,
+                        sessionManager
                     )
                 } else {
                     null
@@ -62,20 +71,21 @@ class ResbApplication : Application(), Configuration.Provider {
     }
 }
 
-class CustomWorkerFactory @Inject constructor() : WorkerFactory() {
-
-    override fun createWorker(
-        appContext: Context,
-        workerClassName: String,
-        workerParameters: WorkerParameters
-    ): ListenableWorker? {
-        return when (workerClassName) {
-            SyncWorker::class.java.name -> SyncWorker(
-                appContext,
-                workerParameters,
-                apiService
-            )
-            else -> null
-        }
-    }
-}
+//class CustomWorkerFactory @Inject constructor() : WorkerFactory() {
+//    val sessionManager = SessionManager(this)
+//    override fun createWorker(
+//        appContext: Context,
+//        workerClassName: String,
+//        workerParameters: WorkerParameters
+//    ): ListenableWorker? {
+//        return when (workerClassName) {
+//            SyncWorker::class.java.name -> SyncWorker(
+//                appContext,
+//                workerParameters,
+//                apiService,
+//                sessionManager
+//            )
+//            else -> null
+//        }
+//    }
+//}

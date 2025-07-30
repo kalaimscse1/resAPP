@@ -19,7 +19,8 @@ import com.warriortech.resb.network.SessionManager
 class AIAssistantViewModel @Inject constructor(
     private val aiRepository: AIRepository,
     private val menuItemDao: MenuItemDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AIAssistantUiState())
@@ -74,7 +75,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample order items for demonstration
-                val sampleOrderItems = apiService.getAllOrderDetails(SessionManager.getCompanyCode()?:"").body()!!
+                val sampleOrderItems = apiService.getAllOrderDetails(sessionManager.getCompanyCode()?:"").body()!!
                 
                 val result = aiRepository.suggestUpsells(sampleOrderItems)
                 result.onSuccess { suggestions ->
@@ -110,7 +111,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample sales data for demonstration
-                 val sampleSalesData = apiService.getAllOrderDetails(SessionManager.getCompanyCode()?:"").body()!!
+                 val sampleSalesData = apiService.getAllOrderDetails(sessionManager.getCompanyCode()?:"").body()!!
                 
                 val result = aiRepository.analyzeSalesData(sampleSalesData)
                 result.onSuccess { analysis ->
@@ -146,7 +147,7 @@ class AIAssistantViewModel @Inject constructor(
             
             try {
                 // Sample customer order history
-                val customerHistory =apiService.getAllOrderDetails(SessionManager.getCompanyCode()?:"").body()!!
+                val customerHistory =apiService.getAllOrderDetails(sessionManager.getCompanyCode()?:"").body()!!
                 
                 val result = aiRepository.generateCustomerRecommendations(customerHistory)
                 result.onSuccess { recommendations ->

@@ -70,7 +70,8 @@ class BillingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val billRepository: BillRepository,
      private val orderRepository: OrderRepository,
-    private val printService: PrintService
+    private val printService: PrintService,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
@@ -372,7 +373,7 @@ class BillingViewModel @Inject constructor(
                                 sn = sn + 1
                             }
                             val billDetails = Bill(
-                                company_code = SessionManager.getCompanyCode() ?: "",
+                                company_code = sessionManager.getCompanyCode() ?: "",
                                 billNo = response.bill_no,
                                 date = response.bill_date.toString(),
                                 time = response.bill_create_time.toString(),

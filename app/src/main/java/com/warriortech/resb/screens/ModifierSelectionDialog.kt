@@ -60,12 +60,12 @@ fun ModifierSelectionDialog(
                     items(availableModifiers) { modifier ->
                         ModifierItem(
                             modifier = modifier,
-                            isSelected = currentSelectedModifiers.any { it.modifier_id == modifier.modifier_id },
+                            isSelected = currentSelectedModifiers.any { it.add_on_id == modifier.add_on_id },
                             onSelectionChanged = { isSelected ->
                                 currentSelectedModifiers = if (isSelected) {
                                     currentSelectedModifiers + modifier
                                 } else {
-                                    currentSelectedModifiers.filter { it.modifier_id != modifier.modifier_id }
+                                    currentSelectedModifiers.filter { it.add_on_id != modifier.add_on_id }
                                 }
                             }
                         )
@@ -135,43 +135,43 @@ private fun ModifierItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = modifier.modifier_name,
+                    text = modifier.add_on_name,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
 
-                if (modifier.modifier_name_tamil.isNotEmpty()) {
-                    Text(
-                        text = modifier.modifier_name_tamil,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+//                if (modifier.modifier_name_tamil.isNotEmpty()) {
+//                    Text(
+//                        text = modifier.modifier_name_tamil,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant
+//                    )
+//                }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val typeText = when (modifier.modifier_type) {
-                        ModifierType.ADDITION -> "Addition"
-                        ModifierType.REMOVAL -> "Remove"
-                        ModifierType.SUBSTITUTION -> "Substitute"
-                    }
+//                    val typeText = when (modifier.modifier_type) {
+//                        ModifierType.ADDITION -> "Addition"
+//                        ModifierType.REMOVAL -> "Remove"
+//                        ModifierType.SUBSTITUTION -> "Substitute"
+//                    }
+//
+//                    Text(
+//                        text = typeText,
+//                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.secondary
+//                    )
 
-                    Text(
-                        text = typeText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-
-                    if (modifier.price_adjustment != 0.0) {
+                    if (modifier.add_on_price != 0.0) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (modifier.price_adjustment > 0)
-                                "+₹${modifier.price_adjustment}"
+                            text = if (modifier.add_on_price > 0)
+                                "+₹${modifier.add_on_price}"
                             else
-                                "₹${modifier.price_adjustment}",
+                                "₹${modifier.add_on_price}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (modifier.price_adjustment > 0)
+                            color = if (modifier.add_on_price > 0)
                                 MaterialTheme.colorScheme.error
                             else
                                 MaterialTheme.colorScheme.primary

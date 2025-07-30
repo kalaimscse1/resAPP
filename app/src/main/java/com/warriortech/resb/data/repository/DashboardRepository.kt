@@ -14,13 +14,14 @@ import javax.inject.Singleton
 
 @Singleton
 class DashboardRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
 
     suspend fun getDashboardMetrics(): DashboardMetrics {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getDashboardMetrics(SessionManager.getCompanyCode()?:"")
+                val response = apiService.getDashboardMetrics(sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful && response.body() != null) {
                     val metrics = response.body()!!
                     val chartData = getChartData()
@@ -58,7 +59,7 @@ class DashboardRepository @Inject constructor(
     }
 
   suspend  fun getPaymentModeData(): List<PaymentModeData> {
-        val res= apiService.getPayModeAmount(SessionManager.getCompanyCode()?:"")
+        val res= apiService.getPayModeAmount(sessionManager.getCompanyCode()?:"")
       return if(res.isSuccessful && res.body()!=null){
           val responseData = res.body()!!
           val data = responseData.map {
@@ -81,7 +82,7 @@ class DashboardRepository @Inject constructor(
 
    suspend fun getWeeklySalesData(): List<WeeklySalesData> {
         // Mock data - replace with actual API call
-       val res = apiService.getWeeklySales(SessionManager.getCompanyCode()?:"")
+       val res = apiService.getWeeklySales(sessionManager.getCompanyCode()?:"")
         return if(res.isSuccessful && res.body()!=null){
             val responseData = res.body()!!
             responseData
@@ -109,7 +110,7 @@ class DashboardRepository @Inject constructor(
     suspend fun getRunningOrders(): List<RunningOrder> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getRunningOrders(SessionManager.getCompanyCode()?:"")
+                val response = apiService.getRunningOrders(sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful && response.body() != null) {
                     response.body()!!
                 } else {
@@ -124,7 +125,7 @@ class DashboardRepository @Inject constructor(
     suspend fun getRecentActivity(): List<String> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getRecentActivity(SessionManager.getCompanyCode()?:"")
+                val response = apiService.getRecentActivity(sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful && response.body() != null) {
                     response.body()!!
                 } else {

@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class MenuCategoryRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
 
     suspend fun getAllCategories(): List<MenuCategory> {
-        val response = apiService.getAllMenuCategories(SessionManager.getCompanyCode()?:"")
+        val response = apiService.getAllMenuCategories(sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyList()
         } else {
@@ -21,7 +22,7 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun insertCategory(category: MenuCategory): MenuCategory {
-        val response = apiService.createMenuCategory(category,SessionManager.getCompanyCode()?:"")
+        val response = apiService.createMenuCategory(category,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create category")
         } else {
@@ -30,7 +31,7 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun updateCategory(category: MenuCategory): MenuCategory {
-        val response = apiService.updateMenuCategory(category.item_cat_id, category,SessionManager.getCompanyCode()?:"")
+        val response = apiService.updateMenuCategory(category.item_cat_id, category,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update category")
         } else {
@@ -39,7 +40,7 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun deleteCategory(categoryId: Long) {
-        val response = apiService.deleteMenuCategory(categoryId,SessionManager.getCompanyCode()?:"")
+        val response = apiService.deleteMenuCategory(categoryId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete category: ${response.message()}")
         }

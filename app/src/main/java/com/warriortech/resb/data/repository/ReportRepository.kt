@@ -10,12 +10,13 @@ import javax.inject.Singleton
 
 @Singleton
 class ReportRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
 
     suspend fun getTodaySales(): Flow<Result<TodaySalesReport>> = flow {
         try {
-            val response = apiService.getTodaySales(SessionManager.getCompanyCode()?:"")
+            val response = apiService.getTodaySales(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!))
             } else {
@@ -28,7 +29,7 @@ class ReportRepository @Inject constructor(
 
     suspend fun getGSTSummary(): Flow<Result<GSTSummaryReport>> = flow {
         try {
-            val response = apiService.getGSTSummary(SessionManager.getCompanyCode()?:"")
+            val response = apiService.getGSTSummary(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!))
             } else {
@@ -41,7 +42,7 @@ class ReportRepository @Inject constructor(
 
     suspend fun getSalesSummaryByDate(date: String): Flow<Result<SalesSummaryReport>> = flow {
         try {
-            val response = apiService.getSalesSummaryByDate(date,SessionManager.getCompanyCode()?:"")
+            val response = apiService.getSalesSummaryByDate(date,sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful && response.body() != null) {
                 emit(Result.success(response.body()!!))
             } else {

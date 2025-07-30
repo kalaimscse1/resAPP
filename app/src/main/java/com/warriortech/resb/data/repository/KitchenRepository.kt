@@ -11,12 +11,13 @@ import javax.inject.Singleton
 
 @Singleton
 class KitchenRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
 
     suspend fun getKitchenKOTs(): Flow<Result<List<KitchenKOT>>> = flow {
         try {
-            val response = apiService.getKitchenKOTs(SessionManager.getCompanyCode()?:"")
+            val response = apiService.getKitchenKOTs(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 val kotResponse = response.body()
                 if (kotResponse?.success == true && kotResponse.data != null) {
@@ -36,7 +37,7 @@ class KitchenRepository @Inject constructor(
     suspend fun updateKOTStatus(kotId: Int, status: KOTStatus): Flow<Result<Unit>> = flow {
         try {
             val statusUpdate = KOTStatusUpdate(kotId, status)
-            val response = apiService.updateKOTStatus(kotId, statusUpdate,SessionManager.getCompanyCode()?:"")
+            val response = apiService.updateKOTStatus(kotId, statusUpdate,sessionManager.getCompanyCode()?:"")
 
             if (response.isSuccessful) {
                 val updateResponse = response.body()

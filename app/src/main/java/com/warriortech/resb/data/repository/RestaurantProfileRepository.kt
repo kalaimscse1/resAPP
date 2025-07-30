@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class RestaurantProfileRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getRestaurantProfile(): RestaurantProfile? {
         return try {
-            apiService.getRestaurantProfile(SessionManager.getCompanyCode()?:"",SessionManager.getCompanyCode()?:"")
+            apiService.getRestaurantProfile(sessionManager.getCompanyCode()?:"",sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -20,7 +21,7 @@ class RestaurantProfileRepository @Inject constructor(
 
     suspend fun updateRestaurantProfile(profile: RestaurantProfile): RestaurantProfile? {
         return try {
-            apiService.updateRestaurantProfile(SessionManager.getCompanyCode()?:"",profile,SessionManager.getCompanyCode()?:"")
+            apiService.updateRestaurantProfile(sessionManager.getCompanyCode()?:"",profile,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }

@@ -3,6 +3,7 @@ package com.warriortech.resb.data.sync
 import android.content.Context
 import androidx.work.*
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +16,8 @@ import java.util.concurrent.TimeUnit
 class SyncManager(
     private val context: Context,
     private val networkMonitor: NetworkMonitor,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     private val workManager = WorkManager.getInstance(context)
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -56,7 +58,8 @@ class SyncManager(
                     SyncWorker(
                         appContext,
                         workerParameters,
-                        apiService
+                        apiService,
+                        sessionManager
                     )
                 } else {
                     null

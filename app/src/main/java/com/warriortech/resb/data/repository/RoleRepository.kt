@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class RoleRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getAllRoles(): List<Role> {
         return try {
-            apiService.getRoles(SessionManager.getCompanyCode()?:"").body()!!
+            apiService.getRoles(sessionManager.getCompanyCode()?:"").body()!!
         } catch (e: Exception) {
             emptyList()
         }
@@ -20,7 +21,7 @@ class RoleRepository @Inject constructor(
 
     suspend fun getRoleById(id: Int): Role? {
         return try {
-            apiService.getRoleById(id,SessionManager.getCompanyCode()?:"").body()!!
+            apiService.getRoleById(id,sessionManager.getCompanyCode()?:"").body()!!
         } catch (e: Exception) {
             null
         }
@@ -28,7 +29,7 @@ class RoleRepository @Inject constructor(
 
     suspend fun createRole(role: Role): Role? {
         return try {
-            apiService.createRole(role,SessionManager.getCompanyCode()?:"").body()
+            apiService.createRole(role,sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
             null
         }
@@ -36,7 +37,7 @@ class RoleRepository @Inject constructor(
 
     suspend fun updateRole(role: Role): Int? {
         return try {
-            apiService.updateRole(role.role_id, role,SessionManager.getCompanyCode()?:"").body()!!
+            apiService.updateRole(role.role_id, role,sessionManager.getCompanyCode()?:"").body()!!
         } catch (e: Exception) {
             null
         }
@@ -44,7 +45,7 @@ class RoleRepository @Inject constructor(
 
     suspend fun deleteRole(id: Long): Boolean {
         return try {
-            apiService.deleteRole(id,SessionManager.getCompanyCode()?:"")
+            apiService.deleteRole(id,sessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

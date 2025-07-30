@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class PrinterRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getAllPrinters(): List<Printer> {
         return try {
-            apiService.getPrinters(SessionManager.getCompanyCode()?:"")
+            apiService.getPrinters(sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }
@@ -20,7 +21,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun getPrinterById(id: Int): Printer? {
         return try {
-            apiService.getPrinterById(id,SessionManager.getCompanyCode()?:"")
+            apiService.getPrinterById(id,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -28,7 +29,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun createPrinter(printer: Printer): Printer? {
         return try {
-            apiService.createPrinter(printer,SessionManager.getCompanyCode()?:"")
+            apiService.createPrinter(printer,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -36,7 +37,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun updatePrinter(printer: Printer): Printer? {
         return try {
-            apiService.updatePrinter(printer.printer_id, printer,SessionManager.getCompanyCode()?:"")
+            apiService.updatePrinter(printer.printer_id, printer,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -44,7 +45,7 @@ class PrinterRepository @Inject constructor(
 
     suspend fun deletePrinter(id: Long): Boolean {
         return try {
-            apiService.deletePrinter(id,SessionManager.getCompanyCode()?:"")
+            apiService.deletePrinter(id,sessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

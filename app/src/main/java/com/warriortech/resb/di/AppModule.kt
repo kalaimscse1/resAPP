@@ -1,19 +1,23 @@
 package com.warriortech.resb.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.warriortech.resb.ai.AIRepository
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
+import com.warriortech.resb.data.local.dao.ModifierDao
+import com.warriortech.resb.data.local.dao.OrderItemModifierDao
 import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.repository.AreaRepository
 import com.warriortech.resb.data.repository.DashboardRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.data.repository.OrderRepository
-import com.warriortech.resb.data.repository.SettingsRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.data.repository.CounterRepository
 import com.warriortech.resb.data.repository.GeneralSettingsRepository
+import com.warriortech.resb.data.repository.MenuRepository
+import com.warriortech.resb.data.repository.ModifierRepository
 import com.warriortech.resb.data.repository.PrinterRepository
 import com.warriortech.resb.data.repository.RestaurantProfileRepository
 import com.warriortech.resb.data.repository.RoleRepository
@@ -24,6 +28,7 @@ import com.warriortech.resb.data.repository.TemplateRepository
 import com.warriortech.resb.data.repository.VoucherRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.util.NetworkMonitor
 import dagger.Module
@@ -53,6 +58,13 @@ object AppModule {
             .build()
     }
 
+
+    @Provides
+    @Singleton
+    fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
+        return SessionManager(context)
+    }
+
     @Provides
     @Singleton
     fun provideTableDao(database: RestaurantDatabase): TableDao {
@@ -64,6 +76,13 @@ object AppModule {
     @Singleton
     fun provideMenuItemDao(database: RestaurantDatabase): MenuItemDao {
         return database.menuItemDao()
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("YourPrefsName", Context.MODE_PRIVATE)
     }
 
 //    @Provides
@@ -118,9 +137,11 @@ object AppModule {
     fun provideTableRepository(
         tableDao: TableDao,
         apiService: ApiService,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitor,
+        sessionManager: SessionManager
     ): TableRepository {
-        return TableRepository(tableDao, apiService, networkMonitor)
+        return TableRepository(tableDao, apiService, networkMonitor,
+            sessionManager)
     }
 
     @Provides
@@ -128,11 +149,13 @@ object AppModule {
     fun provideMenuItemRepository(
         menuItemDao: MenuItemDao,
         apiService: ApiService,
-        networkMonitor: NetworkMonitor
+        networkMonitor: NetworkMonitor,
+        sessionManager: SessionManager
     ): MenuItemRepository {
         return MenuItemRepository(
             menuItemDao, apiService,
-            networkMonitor
+            networkMonitor,
+            sessionManager
         )
     }
 
@@ -140,87 +163,92 @@ object AppModule {
     @Singleton
     fun provideOrderRepository(
         apiService: ApiService,
+        sessionManager: SessionManager
     ): OrderRepository {
-        return OrderRepository(apiService)
+        return OrderRepository(apiService,sessionManager)
     }
 
     @Provides
     @Singleton
     fun dashboardRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): DashboardRepository {
         return DashboardRepository(
-            apiService
+            apiService,
+            sessionManager
         )
     }
 
-    @Provides
-    @Singleton
-    fun settingRepository(
-        apiService: ApiService
-    ): SettingsRepository {
-        return SettingsRepository(
-            apiService
-        )
-    }
 
     @Provides
     @Singleton
     fun provideSyncManager(
         @ApplicationContext context: Context,
         networkMonitor: NetworkMonitor,
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): SyncManager {
-        return SyncManager(context, networkMonitor, apiService)
+        return SyncManager(context, networkMonitor, apiService,sessionManager)
     }
 
     @Provides
     @Singleton
     fun provideCounterRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): CounterRepository {
         return CounterRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager = sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideAreaRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): AreaRepository {
         return AreaRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager = sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideStaffRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): StaffRepository {
         return StaffRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager = sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideRoleRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): RoleRepository {
         return RoleRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager = sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun providePrinterRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): PrinterRepository {
         return PrinterRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager = sessionManager
         )
     }
 
@@ -242,50 +270,89 @@ object AppModule {
     @Provides
     @Singleton
     fun provideTaxRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): TaxRepository {
         return TaxRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager = sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideTaxSplitRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): TaxSplitRepository {
         return TaxSplitRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideGeneralSettingsRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): GeneralSettingsRepository {
         return GeneralSettingsRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideRestaurantProfileRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): RestaurantProfileRepository {
         return RestaurantProfileRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager
         )
     }
 
     @Provides
     @Singleton
     fun provideVoucherRepository(
-        apiService: ApiService
+        apiService: ApiService,
+        sessionManager: SessionManager
     ): VoucherRepository {
         return VoucherRepository(
-            apiService = apiService
+            apiService = apiService,
+            sessionManager
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideModifierDao(database: RestaurantDatabase): ModifierDao {
+        return database.modifierDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideOrderItemModifierDao(database: RestaurantDatabase): OrderItemModifierDao {
+        return database.orderItemModifierDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMenuRepository(
+        apiService: ApiService,
+        sessionManager: SessionManager
+    ): MenuRepository = MenuRepository(apiService,sessionManager)
+
+    @Provides
+    @Singleton
+    fun provideModifierRepository(
+        modifierDao: ModifierDao,
+        orderItemModifierDao: OrderItemModifierDao,
+        apiService: ApiService,
+        networkMonitor: NetworkMonitor,
+        sessionManager: SessionManager
+    ): ModifierRepository = ModifierRepository(modifierDao,orderItemModifierDao,apiService,networkMonitor,sessionManager)
 }

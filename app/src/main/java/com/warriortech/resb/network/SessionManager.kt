@@ -8,18 +8,24 @@ import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.warriortech.resb.model.TblStaff
 import androidx.core.content.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 /**
  * Session manager for handling authentication and user data
  * Uses EncryptedSharedPreferences for secure storage
  */
-object SessionManager {
-    private const val TAG = "SessionManager"
-    private const val PREF_NAME = "ResbPrefs"
-    private const val KEY_AUTH_TOKEN = "auth_token"
-    private const val KEY_USER = "user"
-    private const val KEY_COMPANY_CODE = "company_code"
-    private const val KEY_LAST_SYNC = "last_sync_timestamp"
+class SessionManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    companion object {
+        private const val TAG = "SessionManager"
+        private const val PREF_NAME = "ResbPrefs"
+        private const val KEY_AUTH_TOKEN = "auth_token"
+        private const val KEY_USER = "user"
+        private const val KEY_COMPANY_CODE = "company_code"
+        private const val KEY_LAST_SYNC = "last_sync_timestamp"
+    }
     
     private lateinit var prefs: SharedPreferences
     private val gson = Gson()
@@ -28,7 +34,7 @@ object SessionManager {
      * Initialize the session manager with application context
      * Must be called from Application onCreate or a splash activity
      */
-    fun init(context: Context) {
+    init {
         try {
             // Create master key for encryption
             val masterKey = MasterKey.Builder(context)
@@ -51,6 +57,7 @@ object SessionManager {
             prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         }
     }
+
     
     /**
      * Save authentication token

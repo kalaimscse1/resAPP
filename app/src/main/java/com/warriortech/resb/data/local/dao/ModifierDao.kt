@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ModifierDao {
-    @Query("SELECT * FROM modifiers WHERE is_available = 1")
+    @Query("SELECT * FROM modifiers WHERE is_active = 1")
     fun getAllAvailableModifiers(): Flow<List<ModifierEntity>>
 
-    @Query("SELECT * FROM modifiers WHERE modifier_id = :id")
+    @Query("SELECT * FROM modifiers WHERE add_on_id = :id")
     suspend fun getModifierById(id: Long): ModifierEntity?
 
-    @Query("SELECT * FROM modifiers WHERE category_ids LIKE '%' || :categoryId || '%' AND is_available = 1")
+    @Query("SELECT * FROM modifiers WHERE add_on_id LIKE '%' || :categoryId || '%' AND is_active = 1")
     fun getModifiersByCategory(categoryId: Long): Flow<List<ModifierEntity>>
 
-    @Query("SELECT * FROM modifiers WHERE menu_item_ids LIKE '%' || :menuItemId || '%' AND is_available = 1")
+    @Query("SELECT * FROM modifiers WHERE item_cat_id LIKE '%' || :menuItemId || '%' AND is_active = 1")
     fun getModifiersByMenuItem(menuItemId: Long): Flow<List<ModifierEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

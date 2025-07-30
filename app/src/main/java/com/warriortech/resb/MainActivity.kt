@@ -174,7 +174,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SessionManager.init(this)
+         val sessionManager = SessionManager(this)
         // Initialize sync when app starts
         lifecycleScope.launch {
             networkMonitor.isOnline.collect { connectionState ->
@@ -237,7 +237,8 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         },
-                        navController = navController
+                        navController = navController,
+                        sessionManager = sessionManager
                     )
                 }
 
@@ -624,7 +625,8 @@ fun DrawerContent(
     drawerWidth: Dp,
     onCollapseToggle: () -> Unit,
     onDestinationClicked: (String) -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    sessionManager: SessionManager
 ) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
@@ -654,8 +656,8 @@ fun DrawerContent(
                     if (!isCollapsed) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            Text(SessionManager.getUser()?.staff_name?:"", fontWeight = FontWeight.Bold)
-                            Text(SessionManager.getUser()?.role?:"", style = MaterialTheme.typography.bodyMedium)
+                            Text(sessionManager.getUser()?.staff_name?:"", fontWeight = FontWeight.Bold)
+                            Text(sessionManager.getUser()?.role?:"", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }

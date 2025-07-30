@@ -17,7 +17,8 @@ import javax.inject.Inject
 
 class BillRepository@Inject constructor(
     private val apiService: ApiService,
-    networkMonitor: NetworkMonitor
+    networkMonitor: NetworkMonitor,
+    private val sessionManager: SessionManager
 ) : OfflineFirstRepository(networkMonitor) {
 
     // Implement methods for bill-related operations here
@@ -37,20 +38,19 @@ class BillRepository@Inject constructor(
 //    }
 
     // Add more methods as needed for your application
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun placeBill(orderMasterId: Long,paymentMethod: PaymentMethod,receivedAmt: Double
     ): Flow<Result<TblBillingResponse>> = flow {
         try {
-            val billNo= apiService.getBillNoByCounterId(SessionManager.getUser()?.counter_id!!,SessionManager.getCompanyCode()?:"").body()
-            val voucher= apiService.getVoucherByCounterId(SessionManager.getUser()?.counter_id!!,SessionManager.getCompanyCode()?:"").body()
-            val orderMaster= apiService.getOpenOrderDetailsForTable(orderMasterId,SessionManager.getCompanyCode()?:"").body()!!
+            val billNo= apiService.getBillNoByCounterId(sessionManager.getUser()?.counter_id!!,sessionManager.getCompanyCode()?:"").body()
+            val voucher= apiService.getVoucherByCounterId(sessionManager.getUser()?.counter_id!!,sessionManager.getCompanyCode()?:"").body()
+            val orderMaster= apiService.getOpenOrderDetailsForTable(orderMasterId,sessionManager.getCompanyCode()?:"").body()!!
             val request = TblBillingRequest(
                 bill_no = billNo?.get("bill_no")!!,
                 bill_date = getCurrentDateModern(),
                 bill_create_time = getCurrentTimeModern(),
                 order_master_id = orderMasterId,
                 voucher_id = voucher?.voucher_id ?: 0L,
-                staff_id = SessionManager.getUser()?.staff_id ?: 0L,
+                staff_id = sessionManager.getUser()?.staff_id ?: 0L,
                 customer_id = 1L,
                 order_amt = orderMaster.sumOf { it.total },
                 disc_amt = 0.0,
@@ -72,7 +72,7 @@ class BillRepository@Inject constructor(
                 note = "",
                 is_active = 1L
             )
-            val response = apiService.addPayment(request,SessionManager.getCompanyCode()?:"")
+            val response = apiService.addPayment(request,sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 response.body()?.let { billResponse ->
                     emit(Result.success(billResponse))

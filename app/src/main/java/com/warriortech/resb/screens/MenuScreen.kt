@@ -16,9 +16,15 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Icon
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.IconButton
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Text
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
@@ -39,9 +45,6 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.ui.components.EnhancedCard
-import com.warriortech.resb.ui.components.GradientBackground
-import com.warriortech.resb.ui.components.ModifierSelectionDialog
 
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,10 +155,10 @@ fun MenuScreen(
                     }
                 },
                 actions = {
-                    androidx.compose.material.IconButton(onClick = {
+                    IconButton(onClick = {
                         viewModel.clearOrder()
                     }) {
-                        androidx.compose.material.Icon(
+                        Icon(
                             imageVector = Icons.Default.RemoveShoppingCart,
                             contentDescription = "Clear Cart"
                         )
@@ -294,7 +297,7 @@ fun MenuScreen(
                                     Tab(
                                         selected = selectedCategory == category,
                                         onClick = { viewModel.selectedCategory.value = category }, // Assuming a selectCategory method in VM
-                                        text = { androidx.compose.material.Text(category) }
+                                        text = { Text(category) }
                                     )
                                 }
                             }
@@ -373,12 +376,15 @@ fun MenuScreen(
     // Modifier Selection Dialog
     if (showModifierDialog && selectedMenuItemForModifier != null) {
         ModifierSelectionDialog(
-            menuItem = selectedMenuItemForModifier!!,
-            modifierGroups = modifierGroups,
+//            menuItem = selectedMenuItemForModifier!!,
+//            modifierGroups = modifierGroups,
             onDismiss = { viewModel.hideModifierDialog() },
-            onConfirm = { menuItemWithModifiers ->
-                viewModel.addMenuItemWithModifiers(menuItemWithModifiers)
-            }
+//            onConfirm = { menuItemWithModifiers ->
+//                viewModel.addMenuItemWithModifiers(menuItemWithModifiers)
+//            },
+            availableModifiers = TODO(),
+            selectedModifiers = TODO(),
+            onModifiersSelected = TODO()
         )
     }
 }
@@ -553,6 +559,7 @@ fun MenuItemCard(
         }
     }
 }
+
 @Composable
 fun OrderConfirmationDialog(
     selectedItems: Map<MenuItem, Int>,

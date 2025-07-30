@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class VoucherRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getAllVouchers(): List<Voucher> {
         return try {
-            apiService.getVouchers(SessionManager.getCompanyCode()?:"")
+            apiService.getVouchers(sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }
@@ -20,7 +21,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun getVoucherById(id: Int): Voucher? {
         return try {
-            apiService.getVoucherById(id,SessionManager.getCompanyCode()?:"")
+            apiService.getVoucherById(id,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -28,7 +29,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun createVoucher(voucher: Voucher): Voucher? {
         return try {
-            apiService.createVoucher(voucher,SessionManager.getCompanyCode()?:"")
+            apiService.createVoucher(voucher,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -36,7 +37,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun updateVoucher(voucher: Voucher): Voucher? {
         return try {
-            apiService.updateVoucher(voucher.id, voucher,SessionManager.getCompanyCode()?:"")
+            apiService.updateVoucher(voucher.id, voucher,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -44,7 +45,7 @@ class VoucherRepository @Inject constructor(
 
     suspend fun deleteVoucher(id: Long): Boolean {
         return try {
-            apiService.deleteVoucher(id,SessionManager.getCompanyCode()?:"")
+            apiService.deleteVoucher(id,sessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

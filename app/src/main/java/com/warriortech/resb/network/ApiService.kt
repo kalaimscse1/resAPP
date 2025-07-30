@@ -194,10 +194,10 @@ interface ApiService {
      */
     @GET("modifiers/groups/menu-item/{menu_item_id}")
     suspend fun getModifierGroupsForMenuItem(@Path("menu_item_id") menuItemId: Long,
-                                           @Header("X-Tenant-ID") tenantId: String): Response<List<ModifierGroup>>
+                                           @Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     @GET("modifiers/groups")
-    suspend fun getAllModifierGroups(@Header("X-Tenant-ID") tenantId: String): Response<List<ModifierGroup>>
+    suspend fun getAllModifierGroups(@Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     /**
      * Order Management

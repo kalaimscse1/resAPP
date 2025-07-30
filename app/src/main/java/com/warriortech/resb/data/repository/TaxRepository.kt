@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class TaxRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getAllTaxes(): List<Tax> {
         return try {
-            apiService.getTaxes(SessionManager.getCompanyCode()?:"")
+            apiService.getTaxes(sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             emptyList()
         }
@@ -20,7 +21,7 @@ class TaxRepository @Inject constructor(
 
     suspend fun getTaxById(id: Int): Tax? {
         return try {
-            apiService.getTaxById(id,SessionManager.getCompanyCode()?:"")
+            apiService.getTaxById(id,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -28,7 +29,7 @@ class TaxRepository @Inject constructor(
 
     suspend fun createTax(tax: Tax): Tax? {
         return try {
-            apiService.createTax(tax,SessionManager.getCompanyCode()?:"")
+            apiService.createTax(tax,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -36,7 +37,7 @@ class TaxRepository @Inject constructor(
 
     suspend fun updateTax(tax: Tax): Int? {
         return try {
-            apiService.updateTax(tax.tax_id, tax,SessionManager.getCompanyCode()?:"")
+            apiService.updateTax(tax.tax_id, tax,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }
@@ -44,7 +45,7 @@ class TaxRepository @Inject constructor(
 
     suspend fun deleteTax(id: Long): Boolean {
         return try {
-            apiService.deleteTax(id,SessionManager.getCompanyCode()?:"")
+            apiService.deleteTax(id,sessionManager.getCompanyCode()?:"")
             true
         } catch (e: Exception) {
             false

@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class MenuRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
 
     suspend fun getAllMenus(): List<Menu> {
-        val response = apiService.getAllMenus(SessionManager.getCompanyCode()?:"")
+        val response = apiService.getAllMenus(sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyList()
         } else {
@@ -21,7 +22,7 @@ class MenuRepository @Inject constructor(
     }
 
     suspend fun insertMenu(menu: Menu): Menu {
-        val response = apiService.createMenu(menu,SessionManager.getCompanyCode()?:"")
+        val response = apiService.createMenu(menu,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create menu")
         } else {
@@ -30,7 +31,7 @@ class MenuRepository @Inject constructor(
     }
 
     suspend fun updateMenu(menu: Menu): Int {
-        val response = apiService.updateMenu(menu.menu_id, menu,SessionManager.getCompanyCode()?:"")
+        val response = apiService.updateMenu(menu.menu_id, menu,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update menu")
         } else {
@@ -39,13 +40,13 @@ class MenuRepository @Inject constructor(
     }
 
     suspend fun deleteMenu(menuId: Long) {
-        val response = apiService.deleteMenu(menuId,SessionManager.getCompanyCode()?:"")
+        val response = apiService.deleteMenu(menuId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete menu: ${response.message()}")
         }
     }
     suspend fun getOrderBy(): Map<String, Long>{
-        val response = apiService.getOrderBy(SessionManager.getCompanyCode()?:"")
+        val response = apiService.getOrderBy(sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyMap()
         }

@@ -8,11 +8,12 @@ import javax.inject.Singleton
 
 @Singleton
 class StaffRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
 
     suspend fun getAllStaff(): List<TblStaff> {
-        val response = apiService.getAllStaff(SessionManager.getCompanyCode()?:"")
+        val response = apiService.getAllStaff(sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyList()
         } else {
@@ -21,7 +22,7 @@ class StaffRepository @Inject constructor(
     }
 
     suspend fun insertStaff(staff: TblStaff): TblStaff {
-        val response = apiService.createStaff(staff,SessionManager.getCompanyCode()?:"")
+        val response = apiService.createStaff(staff,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create staff")
         } else {
@@ -30,7 +31,7 @@ class StaffRepository @Inject constructor(
     }
 
     suspend fun updateStaff(staff: TblStaff): TblStaff {
-        val response = apiService.updateStaff(staff.staff_id, staff,SessionManager.getCompanyCode()?:"")
+        val response = apiService.updateStaff(staff.staff_id, staff,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update staff")
         } else {
@@ -39,7 +40,7 @@ class StaffRepository @Inject constructor(
     }
 
     suspend fun deleteStaff(staffId: Long) {
-        val response = apiService.deleteStaff(staffId,SessionManager.getCompanyCode()?:"")
+        val response = apiService.deleteStaff(staffId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete staff: ${response.message()}")
         }

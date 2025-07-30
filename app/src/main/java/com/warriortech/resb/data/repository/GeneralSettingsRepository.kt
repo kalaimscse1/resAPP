@@ -8,10 +8,11 @@ import javax.inject.Singleton
 
 @Singleton
 class GeneralSettingsRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     suspend fun getGeneralSettings(): List<GeneralSettings> {
-            val response = apiService.getGeneralSettings(SessionManager.getCompanyCode()?:"")
+            val response = apiService.getGeneralSettings(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                return response.body() ?: emptyList()
             } else {
@@ -21,7 +22,7 @@ class GeneralSettingsRepository @Inject constructor(
 
     suspend fun updateGeneralSettings(settings: GeneralSettings): GeneralSettings? {
         return try {
-            apiService.updateGeneralSettings(settings.id.toLong(),settings,SessionManager.getCompanyCode()?:"")
+            apiService.updateGeneralSettings(settings.id.toLong(),settings,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }

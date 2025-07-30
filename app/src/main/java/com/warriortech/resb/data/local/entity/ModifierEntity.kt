@@ -13,14 +13,11 @@ import kotlin.text.toLong
 @Entity(tableName = "modifiers")
 data class ModifierEntity(
     @PrimaryKey
-    val modifier_id: Long,
-    val modifier_name: String,
-    val modifier_name_tamil: String,
-    val modifier_type: String,
-    val price_adjustment: Double,
-    val is_available: Boolean,
-    val category_ids: String, // JSON string of category IDs
-    val menu_item_ids: String, // JSON string of menu item IDs
+    val add_on_id: Long,
+    val item_cat_id: Long,
+    val add_on_name: String,
+    val add_on_price: Double,
+    val is_active: Boolean,
     val syncStatus: SyncStatus = SyncStatus.SYNCED,
     val lastModified: Long = System.currentTimeMillis()
 )
@@ -39,26 +36,20 @@ data class OrderItemModifierEntity(
 // Extension functions
 fun ModifierEntity.toModel(): Modifiers {
     return Modifiers(
-        modifier_id = this.modifier_id,
-        modifier_name = this.modifier_name,
-        modifier_name_tamil = this.modifier_name_tamil,
-        modifier_type = ModifierType.valueOf(this.modifier_type),
-        price_adjustment = this.price_adjustment,
-        is_available = this.is_available,
-        category_ids = if (category_ids.isNotEmpty()) category_ids.split(",").map { it.toLong() } else emptyList(),
-        menu_item_ids = if (menu_item_ids.isNotEmpty()) menu_item_ids.split(",").map { it.toLong() } else emptyList()
+        add_on_id = this.add_on_id,
+        item_cat_id = this.item_cat_id,
+        add_on_name = this.add_on_name,
+        add_on_price = this.add_on_price,
+        is_active = this.is_active
     )
 }
 
 fun Modifiers.toEntity(): ModifierEntity {
     return ModifierEntity(
-        modifier_id = this.modifier_id,
-        modifier_name = this.modifier_name,
-        modifier_name_tamil = this.modifier_name_tamil,
-        modifier_type = this.modifier_type.name,
-        price_adjustment = this.price_adjustment,
-        is_available = this.is_available,
-        category_ids = this.category_ids.joinToString(","),
-        menu_item_ids = this.menu_item_ids.joinToString(",")
+        add_on_id = this.add_on_id,
+        item_cat_id = this.item_cat_id,
+        add_on_name = this.add_on_name,
+        add_on_price = this.add_on_price,
+        is_active = this.is_active
     )
 }

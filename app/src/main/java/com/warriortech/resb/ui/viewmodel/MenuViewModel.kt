@@ -16,6 +16,7 @@ import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.KOTItem
 import com.warriortech.resb.model.KOTRequest
+import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +32,8 @@ class MenuViewModel @Inject constructor(
     private val menuRepository: MenuItemRepository,
     private val orderRepository: OrderRepository,
     private val tableRepository: TableRepository,
-    private val modifierRepository: ModifierRepository
+    private val modifierRepository: ModifierRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     sealed class MenuUiState {
@@ -70,8 +73,8 @@ class MenuViewModel @Inject constructor(
     private val _showModifierDialog = MutableStateFlow<Boolean>(false)
     val showModifierDialog: StateFlow<Boolean> = _showModifierDialog.asStateFlow()
 
-    private val _modifierGroups = MutableStateFlow<List<ModifierGroup>>(emptyList())
-    val modifierGroups: StateFlow<List<ModifierGroup>> = _modifierGroups.asStateFlow()
+    private val _modifierGroups = MutableStateFlow<List<Modifiers>>(emptyList())
+    val modifierGroups: StateFlow<List<Modifiers>> = _modifierGroups.asStateFlow()
 
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
         viewModelScope.launch {
@@ -205,7 +208,6 @@ class MenuViewModel @Inject constructor(
         _orderState.value = OrderUiState.Idle
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun placeOrder(tableId: Long, tableStatus1: String?) {
         viewModelScope.launch {
             if (_selectedItems.value.isEmpty()) {
@@ -242,7 +244,7 @@ class MenuViewModel @Inject constructor(
                                 tableNumber = if (tableStatus1 != "TAKEAWAY" && tableStatus1 != "DELIVERY") order.table_name else tableStatus1.toString(),
                                 kotId = order.kot_number,
                                 orderId = order.order_master_id?.toLong(),
-                                waiterName = SessionManager.getUser()?.user_name,
+                                waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
                                 items = kotItem
                             )
@@ -283,7 +285,7 @@ class MenuViewModel @Inject constructor(
                                 tableNumber = if (tableStatus1 != "TAKEAWAY" && tableStatus.value != "DELIVERY") order.table_name.toString() else tableStatus1.toString(),
                                 kotId = order.kot_number,
                                 orderId = order.order_master_id?.toLong(),
-                                waiterName = SessionManager.getUser()?.user_name,
+                                waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
                                 items = kotItem
                             )
@@ -346,7 +348,7 @@ class MenuViewModel @Inject constructor(
     fun showModifierDialog(menuItem: MenuItem) {
         _selectedMenuItemForModifier.value = menuItem
         _showModifierDialog.value = true
-        loadModifierGroups(menuItem.menu_item_id)
+        loadModifierGroups(menuItem.item_cat_id)
     }
 
     fun hideModifierDialog() {
@@ -358,9 +360,9 @@ class MenuViewModel @Inject constructor(
     private fun loadModifierGroups(menuItemId: Long) {
         viewModelScope.launch {
             // For now, using mock data. Replace with actual API call
-            _modifierGroups.value = modifierRepository.getMockModifierGroups()
+//            _modifierGroups.value = modifierRepository.getMockModifierGroups()
 
-            /* Uncomment when API is ready
+//             Uncomment when API is ready
             modifierRepository.getModifierGroupsForMenuItem(menuItemId).collect { result ->
                 result.fold(
                     onSuccess = { groups ->
@@ -372,7 +374,6 @@ class MenuViewModel @Inject constructor(
                     }
                 )
             }
-            */
         }
     }
 

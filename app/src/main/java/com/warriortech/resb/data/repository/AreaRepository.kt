@@ -10,12 +10,13 @@ import javax.inject.Singleton
 
 @Singleton
 class AreaRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
     
     fun getAllAreas(): Flow<List<Area>> = flow {
         try {
-            val response = apiService.getAllAreas(SessionManager.getCompanyCode()?:"")
+            val response = apiService.getAllAreas(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
                 emit(response.body() ?: emptyList())
             } else {
@@ -27,7 +28,7 @@ class AreaRepository @Inject constructor(
     }
 
     suspend fun insertArea(area: Area): Area {
-        val response = apiService.createArea(area,SessionManager.getCompanyCode()?:"")
+        val response = apiService.createArea(area,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create area")
         } else {
@@ -36,7 +37,7 @@ class AreaRepository @Inject constructor(
     }
 
     suspend fun updateArea(area: Area): Int {
-        val response = apiService.updateArea(area.area_id, area,SessionManager.getCompanyCode()?:"")
+        val response = apiService.updateArea(area.area_id, area,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update area")
         } else {
@@ -45,7 +46,7 @@ class AreaRepository @Inject constructor(
     }
 
     suspend fun deleteArea(areaId: Long) {
-        val response = apiService.deleteArea(areaId,SessionManager.getCompanyCode()?:"")
+        val response = apiService.deleteArea(areaId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete area: ${response.message()}")
         }
