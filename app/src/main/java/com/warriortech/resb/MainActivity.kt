@@ -89,6 +89,7 @@ import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.RegistrationScreen
 import com.warriortech.resb.screens.AIAssistantScreen
+import com.warriortech.resb.screens.BillTemplateScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
 import com.warriortech.resb.screens.settings.CounterSettingsScreen
@@ -616,6 +617,19 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController) {
 
         composable("counter_setting") {
             CounterSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+//        composable(
+//            route = "edit_paid_bill/{billId}"
+//        ) { backStackEntry ->
+//            val billId = backStackEntry.arguments?.getLong("billId") ?: 0L
+//            EditPaidBillScreen(navController, billId)
+//        }
+
+        composable(
+            route = "bill_template/{billId}"
+        ) { backStackEntry ->
+            val billId = backStackEntry.arguments?.getLong("billId") ?: 0L
+            BillTemplateScreen(navController, billId)
         }
     }
 }

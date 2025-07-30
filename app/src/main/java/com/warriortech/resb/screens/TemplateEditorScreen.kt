@@ -48,7 +48,7 @@ fun TemplateEditorScreen(
                 actions = {
                     TextButton(
                         onClick = {
-                            viewModel.saveTemplate()
+                            viewModel.saveTemplate(template)
                             navController.popBackStack()
                         }
                     ) {

@@ -80,7 +80,7 @@ class TemplateViewModel @Inject constructor(
         _editingTemplate.value = template
     }
 
-    fun saveTemplate() {
+    fun saveTemplate(updatedTemplate: ReceiptTemplate) {
         val template = _editingTemplate.value ?: return
         
         viewModelScope.launch {

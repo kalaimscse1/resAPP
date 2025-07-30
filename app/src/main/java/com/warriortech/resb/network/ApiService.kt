@@ -192,8 +192,8 @@ interface ApiService {
     /**
      * Modifier Management
      */
-    @GET("modifiers/groups/menu-item/{menu_item_id}")
-    suspend fun getModifierGroupsForMenuItem(@Path("menu_item_id") menuItemId: Long,
+    @GET("menu/addOn/getAddOnByCategoryId/{item_cat_id}")
+    suspend fun getModifierGroupsForMenuItem(@Path("item_cat_id") menuItemId: Long,
                                            @Header("X-Tenant-ID") tenantId: String): Response<List<Modifiers>>
 
     @GET("modifiers/groups")

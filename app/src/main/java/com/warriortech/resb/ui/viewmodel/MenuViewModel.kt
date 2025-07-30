@@ -1,13 +1,9 @@
 package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.MenuItem
-import com.warriortech.resb.model.MenuItemWithModifiers
-import com.warriortech.resb.model.ModifierGroup
 import com.warriortech.resb.model.Order
 import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.data.repository.MenuItemRepository
@@ -348,7 +344,7 @@ class MenuViewModel @Inject constructor(
     fun showModifierDialog(menuItem: MenuItem) {
         _selectedMenuItemForModifier.value = menuItem
         _showModifierDialog.value = true
-        loadModifiersForMenuItem(menuItem.menu_item_id)
+        loadModifiersForMenuItem(menuItem.item_cat_id)
     }
 
     fun hideModifierDialog() {
@@ -392,7 +388,7 @@ class MenuViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Load modifiers from repository
-                modifierRepository.getModifiersByMenuItem(menuItemId).collect { result ->
+                modifierRepository.getModifierGroupsForMenuItem(menuItemId).collect { result ->
                     result.fold(
                         onSuccess = { modifiers ->
                             _modifierGroups.value = modifiers

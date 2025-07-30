@@ -1,7 +1,6 @@
 
 package com.warriortech.resb.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,14 +23,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.warriortech.resb.model.*
-import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.TemplateViewModel
 import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,8 +56,8 @@ fun BillTemplateScreen(
     // Get default bill template
     LaunchedEffect(templateUiState.templates) {
         selectedTemplate = templateUiState.templates.find { 
-            it.receiptType == ReceiptType.BILL && it.isDefault 
-        } ?: templateUiState.templates.firstOrNull { it.receiptType == ReceiptType.BILL }
+            it.type == ReceiptType.BILL && it.isDefault
+        } ?: templateUiState.templates.firstOrNull { it.type == ReceiptType.BILL }
     }
 
     Scaffold(
@@ -114,7 +110,7 @@ fun BillTemplateScreen(
                         
                         // Template Selection
                         TemplateSelector(
-                            templates = templateUiState.templates.filter { it.receiptType == ReceiptType.BILL },
+                            templates = templateUiState.templates.filter { it.type == ReceiptType.BILL },
                             selectedTemplate = template,
                             onTemplateSelected = { selectedTemplate = it }
                         )
@@ -234,10 +230,19 @@ fun TemplateSelector(
                         modifier = Modifier.weight(1f)
                     )
                     if (template.isDefault) {
-                        Chip(
-                            onClick = { },
-                            label = { Text("Default", fontSize = 12.sp) }
-                        )
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = "DEFAULT",
+                                modifier = Modifier.padding(4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
             }
@@ -285,7 +290,7 @@ fun BillTemplatePreview(
                 modifier = Modifier.fillMaxWidth()
             )
             
-            if (template.headerSettings.showAddress && template.headerSettings.businessAddress.isNotEmpty()) {
+            if ( template.headerSettings.businessAddress.isNotEmpty()) {
                 Text(
                     text = template.headerSettings.businessAddress,
                     fontSize = (template.headerSettings.fontSize - 2).sp,
@@ -298,7 +303,7 @@ fun BillTemplatePreview(
                 )
             }
             
-            if (template.headerSettings.showPhone && template.headerSettings.businessPhone.isNotEmpty()) {
+            if ( template.headerSettings.businessPhone.isNotEmpty()) {
                 Text(
                     text = "Phone: ${template.headerSettings.businessPhone}",
                     fontSize = (template.headerSettings.fontSize - 2).sp,
