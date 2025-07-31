@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
@@ -42,20 +41,20 @@ fun BillTemplateScreen(
     val billsUiState by billsViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     var selectedTemplate by remember { mutableStateOf<ReceiptTemplate?>(null) }
     var showPreview by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
-    
+
     // Load bill and templates
     LaunchedEffect(billId) {
         billsViewModel.loadBillDetails(billId)
         templateViewModel.loadTemplates()
     }
-    
+
     // Get default bill template
     LaunchedEffect(templateUiState.templates) {
-        selectedTemplate = templateUiState.templates.find { 
+        selectedTemplate = templateUiState.templates.find {
             it.type == ReceiptType.BILL && it.isDefault
         } ?: templateUiState.templates.firstOrNull { it.type == ReceiptType.BILL }
     }
@@ -105,18 +104,18 @@ fun BillTemplateScreen(
                                 // TODO: Implement print functionality
                             }
                         )
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         // Template Selection
                         TemplateSelector(
                             templates = templateUiState.templates.filter { it.type == ReceiptType.BILL },
                             selectedTemplate = template,
                             onTemplateSelected = { selectedTemplate = it }
                         )
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         // Bill Preview
                         BillTemplatePreview(
                             bill = bill,
@@ -127,7 +126,7 @@ fun BillTemplateScreen(
             }
         }
     }
-    
+
     // Preview Dialog
     if (showPreview && selectedTemplate != null && billsUiState.selectedBill != null) {
         BillPreviewDialog(
@@ -136,7 +135,7 @@ fun BillTemplateScreen(
             onDismiss = { showPreview = false }
         )
     }
-    
+
     // Edit Dialog
     if (showEdit && selectedTemplate != null) {
         BillTemplateEditDialog(
@@ -172,7 +171,7 @@ fun BillTemplateActions(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Preview")
         }
-        
+
         Button(
             onClick = onEdit,
             modifier = Modifier.weight(1f),
@@ -182,7 +181,7 @@ fun BillTemplateActions(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Edit")
         }
-        
+
         Button(
             onClick = onPrint,
             modifier = Modifier.weight(1f),
@@ -213,9 +212,9 @@ fun TemplateSelector(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             templates.forEach { template ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -257,7 +256,7 @@ fun BillTemplatePreview(
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance() }
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()) }
-    
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
@@ -289,8 +288,8 @@ fun BillTemplatePreview(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-            
-            if ( template.headerSettings.businessAddress.isNotEmpty()) {
+
+            if (template.headerSettings.businessAddress.isNotEmpty()) {
                 Text(
                     text = template.headerSettings.businessAddress,
                     fontSize = (template.headerSettings.fontSize - 2).sp,
@@ -302,8 +301,8 @@ fun BillTemplatePreview(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            
-            if ( template.headerSettings.businessPhone.isNotEmpty()) {
+
+            if (template.headerSettings.businessPhone.isNotEmpty()) {
                 Text(
                     text = "Phone: ${template.headerSettings.businessPhone}",
                     fontSize = (template.headerSettings.fontSize - 2).sp,
@@ -315,9 +314,9 @@ fun BillTemplatePreview(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Bill Information
             Text(
                 text = "BILL",
@@ -326,9 +325,9 @@ fun BillTemplatePreview(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -342,7 +341,7 @@ fun BillTemplatePreview(
                     fontSize = template.bodySettings.fontSize.sp
                 )
             }
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -358,18 +357,18 @@ fun BillTemplatePreview(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Items Section
             Text(
                 text = "Items:",
                 fontSize = template.bodySettings.fontSize.sp,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Note: In a real implementation, you'd need to get the actual bill items
             // For now, showing placeholder items
             repeat(3) { index ->
@@ -394,9 +393,9 @@ fun BillTemplatePreview(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Total Section
             if (template.bodySettings.showTotal) {
                 Row(
@@ -415,9 +414,9 @@ fun BillTemplatePreview(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Footer Section
             if (template.footerSettings.showThankYou) {
                 Text(
@@ -428,7 +427,7 @@ fun BillTemplatePreview(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            
+
             if (template.footerSettings.showDateTime) {
                 Text(
                     text = "Printed: ${dateFormatter.format(Date())}",
@@ -437,7 +436,7 @@ fun BillTemplatePreview(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            
+
             // Notes
             if (!bill.notes.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -481,7 +480,7 @@ fun BillTemplateEditDialog(
     onDismiss: () -> Unit
 ) {
     var editedTemplate by remember { mutableStateOf(template) }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Template") },
@@ -493,12 +492,12 @@ fun BillTemplateEditDialog(
                     label = { Text("Template Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 OutlinedTextField(
                     value = editedTemplate.headerSettings.businessName,
-                    onValueChange = { 
+                    onValueChange = {
                         editedTemplate = editedTemplate.copy(
                             headerSettings = editedTemplate.headerSettings.copy(businessName = it)
                         )
@@ -506,9 +505,9 @@ fun BillTemplateEditDialog(
                     label = { Text("Business Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically

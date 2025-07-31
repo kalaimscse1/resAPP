@@ -31,6 +31,7 @@ import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.util.NetworkMonitor
+import com.warriortech.resb.util.PrinterHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -163,9 +164,17 @@ object AppModule {
     @Singleton
     fun provideOrderRepository(
         apiService: ApiService,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        printerHelper: PrinterHelper
     ): OrderRepository {
-        return OrderRepository(apiService,sessionManager)
+        return OrderRepository(apiService,sessionManager,printerHelper)
+    }
+
+
+    @Provides
+    @Singleton // Or another appropriate scope if needed
+    fun providePrinterHelper(@ApplicationContext context: Context /*, other dependencies */): PrinterHelper {
+        return PrinterHelper(context /*, other dependencies */) // Assuming PrinterHelper needs Context
     }
 
     @Provides

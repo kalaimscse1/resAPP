@@ -13,6 +13,7 @@ import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.model.TblOrderResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.util.PrinterHelper
 import com.warriortech.resb.util.getCurrentDateModern
 import com.warriortech.resb.util.getCurrentTimeModern
 import kotlinx.coroutines.flow.*
@@ -27,7 +28,8 @@ import javax.inject.Singleton
 @Singleton
 class OrderRepository @Inject constructor(
     private val apiService: ApiService,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val printerHelper: PrinterHelper
 ) {
     /**
      * Create a new order
@@ -326,15 +328,23 @@ class OrderRepository @Inject constructor(
 // }
 // data class PrintResponse(val message: String, val status: String) // Placeholder
 
-    suspend fun printKOT(orderId: KOTRequest): Flow<Result<String>> = flow { // Changed Flow type to Flow<Result<PrintResponse>>
+    suspend fun printKOT(orderId: KOTRequest,ipAddress:String): Flow<Result<String>> = flow { // Changed Flow type to Flow<Result<PrintResponse>>
         try {
             val response = apiService.printKOT(orderId,sessionManager.getCompanyCode()?:"")
-
+            val result = orderId.items
             if (response.isSuccessful) {
                 val printResponse = response.body()
-                val message = printResponse?.get("message")
+
+                var mess = ""
                 if (printResponse != null) {
-                    emit(Result.success(message.toString())) // Emit the successful PrintResponse object
+                    printerHelper.printViaTcp(ipAddress, data = printResponse){ success, message ->
+                        mess = if (success) {
+                            message
+                        } else {
+                            message
+                        }
+                    }
+                    emit(Result.success(mess)) // Emit the successful PrintResponse object
                 } else {
                     // Successful response but empty body - this might be an error case depending on your API
                     emit(Result.failure(Exception("KOT print successful but response body was empty.")))
@@ -350,6 +360,13 @@ class OrderRepository @Inject constructor(
         }
     }
 
+    suspend fun getIpAddress(category: String): String {
+        val response = apiService.getIpAddresss(category,sessionManager.getCompanyCode()?:"")
+        return if(response.isSuccessful && response.body()!= null)
+            response.body().toString()
+        else
+            ""
+    }
     /**
      * Update an order's status
      */

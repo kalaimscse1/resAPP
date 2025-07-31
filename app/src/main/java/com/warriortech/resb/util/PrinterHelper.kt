@@ -1,11 +1,20 @@
 package com.warriortech.resb.util
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.util.Log
 import com.warriortech.resb.model.*
+import java.io.IOException
+import java.io.OutputStream
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.text.SimpleDateFormat
 import java.util.*
+import android.os.Handler
+import android.os.Looper
 
 /**
  * Helper class for handling communication with physical printer hardware.
@@ -269,7 +278,7 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append("\n")
         
         if (template.footerSettings.showThankYou) {
-            val message = template.footerSettings.customMessage ?: "THANK YOU"
+            val message = if (template.footerSettings.customMessage.isNotEmpty())template.footerSettings.customMessage else "THANK YOU"
             stringBuilder.append(centerText(message, template.paperSettings.characterWidth))
             stringBuilder.append("\n")
         }
@@ -348,4 +357,64 @@ class PrinterHelper(private val context: Context) {
         // Placeholder for actual printer disconnection code
         Log.d(TAG, "Disconnecting from printer...")
     }
+
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    fun printViaBluetooth(device: BluetoothDevice, data: ByteArray) {
+        Thread  {
+            try {
+                val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+                val socket = device.createRfcommSocketToServiceRecord(uuid)
+                socket.connect()
+                socket.outputStream.write(data)
+                socket.outputStream.flush()
+                socket.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
+    fun printViaTcp(
+        ip: String,
+        port: Int = 9100,
+        data: ByteArray,
+        onResult: (success: Boolean, message: String) -> Unit
+    ) {
+        Thread {
+            try {
+                val socket = Socket()
+                socket.connect(InetSocketAddress(ip, port), 3000)
+                val out: OutputStream = socket.getOutputStream()
+                out.write(data)
+                out.flush()
+                out.close()
+                socket.close()
+
+                // Success: notify on main thread
+                Handler(Looper.getMainLooper()).post {
+                    onResult(true, "✅ Print sent to printer at $ip:$port")
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                // Failure: notify on main thread
+                Handler(Looper.getMainLooper()).post {
+                    onResult(false, "❌ Print failed: ${e.message}")
+                }
+            }
+        }.start()
+    }
+
+    @SuppressLint("ServiceCast")
+    fun printViaUsb(context: Context, usbDevice: UsbDevice, data: ByteArray) {
+        val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+        val usbInterface = usbDevice.getInterface(0)
+        val endpoint = usbInterface.getEndpoint(0) // Usually OUT endpoint
+        val connection = usbManager.openDevice(usbDevice)
+
+        connection?.claimInterface(usbInterface, true)
+        connection?.bulkTransfer(endpoint, data, data.size, 1000)
+        connection?.releaseInterface(usbInterface)
+        connection?.close()
+    }
+
 }

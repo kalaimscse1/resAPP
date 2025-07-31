@@ -50,17 +50,26 @@ class MenuViewModel @Inject constructor(
 
     private val _orderState = MutableStateFlow<OrderUiState>(OrderUiState.Idle)
     val orderState: StateFlow<OrderUiState> = _orderState.asStateFlow()
+
     private val _selectedTableId = MutableStateFlow<Long?>(null)
+
     private val _selectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
     var selectedItems: StateFlow<Map<MenuItem, Int>> = _selectedItems.asStateFlow()
+
     val categories = MutableStateFlow<List<String>>(emptyList())
+
     val selectedCategory = MutableStateFlow<String?>(null)
+
     val tableStatus =MutableStateFlow<String?>(null)
+
     val existingOrderId =MutableStateFlow<Int?>(null)
+
     private val _newselectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
     var newselectedItems: StateFlow<Map<MenuItem, Int>> = _newselectedItems.asStateFlow()
+
     private val _isExistingOrderLoaded = MutableStateFlow(false)
     val isExistingOrderLoaded: StateFlow<Boolean> = _isExistingOrderLoaded.asStateFlow()
+
     val orderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
     private val _selectedMenuItemForModifier = MutableStateFlow<MenuItem?>(null)
@@ -72,23 +81,15 @@ class MenuViewModel @Inject constructor(
     private val _modifierGroups = MutableStateFlow<List<Modifiers>>(emptyList())
     val modifierGroups: StateFlow<List<Modifiers>> = _modifierGroups.asStateFlow()
 
-    // MutableStateFlow to hold selected modifiers for each menu item
     private val _selectedModifiers = MutableStateFlow<Map<Long, List<Modifiers>>>(emptyMap())
     val selectedModifiers: StateFlow<Map<Long, List<Modifiers>>> = _selectedModifiers.asStateFlow()
 
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
         viewModelScope.launch {
-            loadMenuItems()// Always load menu items
+            loadMenuItems()
             if (isTableOrder) {
-                // Attempt to load existing items for this table
-                // This is a placeholder for your actual data fetching logic
                 val existingItemsForTable = orderRepository.getOpenOrderItemsForTable(currentTableId) // Or from local cache
-
                 if (existingItemsForTable.isNotEmpty()) {
-                    // If you clear items by default on init, you might need to reconsider
-                    // For now, let's assume selectedItems can be populated here.
-                    // Or, you might have a separate flow for "billable items" vs "newly selected items"
-                    // For simplicity here, we'll assume selectedItems is the live cart
                     orderDetailsResponse.value = existingItemsForTable
                     val menuItems=existingItemsForTable.map{
 
@@ -124,18 +125,17 @@ class MenuViewModel @Inject constructor(
                             )
                     }
                         _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
-                         // Adjust based on your MenuItem and how quantity is stored
                     _isExistingOrderLoaded.value = true
                     existingOrderId.value= existingItemsForTable.firstOrNull()?.order_master_id?.toInt()
                 } else {
-                    _selectedItems.value = mutableMapOf() // Start with an empty cart if no existing order
+                    _selectedItems.value = mutableMapOf()
                 }
             } else {
-                // For takeaway/delivery, always start with a fresh order (unless you have cart persistence)
                 _selectedItems.value = mutableMapOf()
             }
         }
     }
+
     fun loadMenuItems(category: String? = null) {
         viewModelScope.launch {
             _menuState.value = MenuUiState.Loading
@@ -154,6 +154,7 @@ class MenuViewModel @Inject constructor(
             }
         }
     }
+
     fun setTableId(tableId: Long?) {
         _selectedTableId.value = tableId
     }
@@ -203,8 +204,7 @@ class MenuViewModel @Inject constructor(
     fun clearOrder() {
         _newselectedItems.value =mutableMapOf()
         _selectedItems.value = mutableMapOf()
-        _isExistingOrderLoaded.value = false // Reset this if you clear the order
-        // Potentially reset other order-related states
+        _isExistingOrderLoaded.value = false
         _orderState.value = OrderUiState.Idle
     }
 
@@ -250,10 +250,6 @@ class MenuViewModel @Inject constructor(
                                 items = kotItem
                             )
                             printKOT(kotRequest)
-                            // After creating the order, print the KOT
-//                        order.order_master_id?.let {  } ?: run {
-//                            _orderState.value = OrderUiState.Error("Order ID is missing")
-//                        }
                         },
                         onFailure = { error ->
                             _orderState.value =
@@ -292,10 +288,6 @@ class MenuViewModel @Inject constructor(
                                 items = kotItem
                             )
                             printKOT(kotRequest)
-                            // After creating the order, print the KOT
-//                        order.order_master_id?.let {  } ?: run {
-//                            _orderState.value = OrderUiState.Error("Order ID is missing")
-//                        }
                         },
                         onFailure = { error ->
                             _orderState.value =
@@ -307,31 +299,40 @@ class MenuViewModel @Inject constructor(
         }
     }
 
-
     private fun printKOT(orderId: KOTRequest) {
         viewModelScope.launch {
-            orderRepository.printKOT(orderId).collect { result ->
-                result.fold(
-                    onSuccess = { printResponse ->
-                        // Using OrderUiState.Success even though we get a PrintResponse
-                        // We'll create a fake Order object with the orderId for simplicity
-                        val order = Order(
-                            id = 1,
-                            tableId = 0, // We don't know the tableId here
-                            items = emptyList(),
-                            totalAmount = 0.0,
-                            status = "PENDING",
-                            isPrinted = true
-                        )
-                        _orderState.value = OrderUiState.Success(order)
-
-                        // Clear the selection after successful order
-                        _selectedItems.value = emptyMap()
-                    },
-                    onFailure = { error ->
-                        _orderState.value = OrderUiState.Error(error.message ?: "Failed to print KOT")
-                    }
+            val category = orderId.items.groupBy { it.category }
+            for ((category, items) in category) {
+                val kotForCategory = KOTRequest(
+                    tableNumber = orderId.tableNumber,
+                    kotId = orderId.kotId,
+                    orderId = orderId.orderId,
+                    waiterName = orderId.waiterName,
+                    items = items,
+                    orderCreatedAt = orderId.orderCreatedAt,
+                    paperWidth = orderId.paperWidth
                 )
+                val ip = orderRepository.getIpAddress(category)
+                orderRepository.printKOT(kotForCategory,ip).collect { result ->
+                    result.fold(
+                        onSuccess = { printResponse ->
+                            val order = Order(
+                                id = 1,
+                                tableId = 0,
+                                items = emptyList(),
+                                totalAmount = 0.0,
+                                status = "PENDING",
+                                isPrinted = true
+                            )
+                            _orderState.value = OrderUiState.Success(order)
+
+                            _selectedItems.value = emptyMap()
+                        },
+                        onFailure = { error ->
+                            _orderState.value = OrderUiState.Error(error.message ?: "Failed to print KOT for $category")
+                        }
+                    )
+                }
             }
         }
     }
@@ -361,10 +362,6 @@ class MenuViewModel @Inject constructor(
 
     private fun loadModifierGroups(menuItemId: Long) {
         viewModelScope.launch {
-            // For now, using mock data. Replace with actual API call
-//            _modifierGroups.value = modifierRepository.getMockModifierGroups()
-
-//             Uncomment when API is ready
             modifierRepository.getModifierGroupsForMenuItem(menuItemId).collect { result ->
                 result.fold(
                     onSuccess = { groups ->
@@ -381,11 +378,8 @@ class MenuViewModel @Inject constructor(
 
     fun addMenuItemWithModifiers(menuItem: MenuItem, modifiers: List<Modifiers>) {
         val currentItems = _selectedItems.value.toMutableMap()
-
-        // Add the menu item to selected items
         val existingCount = currentItems[menuItem] ?: 0
         currentItems[menuItem] = existingCount + 1
-
         _selectedItems.value = currentItems
         hideModifierDialog()
     }
@@ -393,7 +387,6 @@ class MenuViewModel @Inject constructor(
     fun loadModifiersForMenuItem(menuItemId: Long) {
         viewModelScope.launch {
             try {
-                // Load modifiers from repository
                 modifierRepository.getModifierGroupsForMenuItem(menuItemId).collect { result ->
                     result.fold(
                         onSuccess = { modifiers ->
@@ -420,7 +413,7 @@ class MenuViewModel @Inject constructor(
         if (!selectedList.contains(modifier)) {
             selectedList.add(modifier)
         } else {
-            selectedList.remove(modifier) // Allow deselecting
+            selectedList.remove(modifier)
         }
 
         currentSelection[menuItemId] = selectedList
