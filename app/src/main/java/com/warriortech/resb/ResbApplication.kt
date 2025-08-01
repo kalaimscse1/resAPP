@@ -89,3 +89,22 @@ class ResbApplication : Application(), Configuration.Provider {
 //        }
 //    }
 //}
+package com.warriortech.resb
+
+import android.app.Application
+import com.warriortech.resb.util.SubscriptionScheduler
+import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
+
+@HiltAndroidApp
+class ResbApplication : Application() {
+    
+    @Inject
+    lateinit var subscriptionScheduler: SubscriptionScheduler
+    
+    override fun onCreate() {
+        super.onCreate()
+        // Schedule daily subscription checks
+        subscriptionScheduler.scheduleSubscriptionChecks()
+    }
+}

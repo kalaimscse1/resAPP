@@ -322,6 +322,18 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedOrderId by remember { mutableStateOf<Long?>(null) }
+    
+    // Check subscription status
+    LaunchedEffect(Unit) {
+        val subscriptionManager = SubscriptionManager(sessionManager)
+        if (subscriptionManager.isSubscriptionExpired()) {
+            // Clear all user data and navigate to login
+            sessionManager.clearSession()
+            navController.navigate("login") {
+                popUpTo(0) // Clear entire back stack
+            }
+        }
+    }
 
 
     NavHost(navController = navController, startDestination = "login") {

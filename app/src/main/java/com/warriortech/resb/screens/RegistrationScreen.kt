@@ -291,7 +291,14 @@ fun RegistrationScreen(
                     ) {
                         OutlinedTextField(
                             value = uiState.subscriptionDays.toString(),
-                            onValueChange = viewModel::updateSubscriptionDays,
+                            onValueChange = { days ->
+                                viewModel.updateSubscriptionDays(days)
+                                // Calculate and save subscription end date
+                                val subscriptionDays = days.toLongOrNull() ?: 0
+                                val endDate = LocalDate.now().plusDays(subscriptionDays)
+                                val subscriptionManager = SubscriptionManager(sessionManager)
+                                subscriptionManager.saveSubscriptionEndDate(endDate)
+                            },
                             label = { Text("Subscription Days *") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

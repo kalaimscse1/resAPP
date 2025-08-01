@@ -119,6 +119,47 @@ class SessionManager @Inject constructor(
     }
     
     /**
+     * Save subscription end date
+     */
+    fun saveSubscriptionEndDate(endDate: String) {
+        checkInitialization()
+        prefs.edit { putString("subscription_end_date", endDate) }
+    }
+    
+    /**
+     * Get subscription end date
+     */
+    fun getSubscriptionEndDate(): String? {
+        checkInitialization()
+        return prefs.getString("subscription_end_date", null)
+    }
+    
+    /**
+     * Save last notification date
+     */
+    fun saveLastNotificationDate(date: String) {
+        checkInitialization()
+        prefs.edit { putString("last_notification_date", date) }
+    }
+    
+    /**
+     * Get last notification date
+     */
+    fun getLastNotificationDate(): String? {
+        checkInitialization()
+        return prefs.getString("last_notification_date", null)
+    }
+    
+    /**
+     * Clear all session data (for logout)
+     */
+    fun clearSession() {
+        checkInitialization()
+        prefs.edit().clear().apply()
+        Log.d(TAG, "Session cleared")
+    }
+    
+    /**
      * Update last sync timestamp
      */
     fun updateLastSyncTimestamp() {
