@@ -1,11 +1,13 @@
 package com.warriortech.resb.ui.viewmodel
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RegistrationRepository
 import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RestaurantProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -105,7 +107,8 @@ class RegistrationViewModel @Inject constructor(
     fun loadCompanyCode(){
         viewModelScope.launch {
             val companyCode = registrationRepository.getCompanyCode()
-            _uiState.value = _uiState.value.copy(companyMasterCode = companyCode["company_master_code"].toString())
+            _uiState.value = _uiState.value.copy(companyMasterCode = companyCode["company_master_code"].toString(), databaseName = companyCode["company_master_code"].toString())
+
         }
     }
     fun registerCompany() {
@@ -141,26 +144,27 @@ class RegistrationViewModel @Inject constructor(
                     is_block = state.isBlock
                 )
 
+                val profile = RestaurantProfile(
+                    company_code = state.companyMasterCode,
+                    company_name = state.companyName,
+                    owner_name = state.ownerName,
+                    address1 = state.address1,
+                    address2 = state.address2,
+                    place = state.place,
+                    pincode = state.pincode,
+                    contact_no = state.contactNo,
+                    mail_id = state.mailId,
+                    country = state.country,
+                    state = state.state,
+                    currency = "Rs",
+                    tax_no = "",
+                    decimal_point = 2L
+                )
+
                 val response = registrationRepository.registerCompany(request)
+                delay(3000)
+                registrationRepository.addRestaurantProfile(profile)
                 _registrationResult.value = if (response.success) {
-                    val data = response.data
-                    val profile = RestaurantProfile(
-                        company_code = data?.company_master_code ?: "",
-                        company_name = data?.company_name ?: "",
-                        owner_name = data?.owner_name ?: "",
-                        address1 = data?.address1 ?: "",
-                        address2 = data?.address2 ?: "",
-                        place = data?.place ?: "",
-                        pincode = data?.pincode ?: "",
-                        contact_no = data?.contact_no ?: "",
-                        mail_id = data?.mail_id ?: "",
-                        country = data?.country ?: "",
-                        state = data?.state ?: "",
-                        currency = "Rs",
-                        tax_no = "",
-                        decimal_point = 2L
-                    )
-                    registrationRepository.addRestaurantProfile(profile)
                     "Registration successful!"
                 } else {
                     response.message
@@ -173,7 +177,8 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
-    private fun validateForm(state: RegistrationUiState): Boolean {
+    private fun validateForm(state: RegistrationUiState): Boolean
+    {
         return state.companyMasterCode.isNotBlank() &&
                 state.companyName.isNotBlank() &&
                 state.ownerName.isNotBlank() &&

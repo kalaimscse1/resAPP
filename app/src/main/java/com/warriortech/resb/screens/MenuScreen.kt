@@ -216,14 +216,15 @@ fun MenuScreen(
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
+                        MobileOptimizedButton(
+                            onClick = { showConfirmDialog = true },
+                            enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                            text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
+                            modifier = Modifier.weight(1f)
+                        )
                     }
 
-                    MobileOptimizedButton(
-                        onClick = { showConfirmDialog = true },
-                        enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
-                        text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
-                        modifier = Modifier.weight(1f)
-                    )
+
                 }
             }
         },

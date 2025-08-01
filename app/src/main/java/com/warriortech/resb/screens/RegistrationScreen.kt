@@ -19,10 +19,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.R
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.RegistrationViewModel
 import com.warriortech.resb.util.MobileUtils
 import com.warriortech.resb.util.StringDropdown
+import com.warriortech.resb.util.SubscriptionManager
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -30,7 +32,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun RegistrationScreen(
     navController: NavHostController,
-    viewModel: RegistrationViewModel = hiltViewModel()
+    viewModel: RegistrationViewModel = hiltViewModel(),
+    sessionManager: SessionManager
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val registrationResult by viewModel.registrationResult.collectAsStateWithLifecycle()
@@ -298,6 +301,8 @@ fun RegistrationScreen(
                                 val endDate = LocalDate.now().plusDays(subscriptionDays)
                                 val subscriptionManager = SubscriptionManager(sessionManager)
                                 subscriptionManager.saveSubscriptionEndDate(endDate)
+                                viewModel.updateExpiryDate(LocalDate.now().plusDays(subscriptionDays)
+                                    .toString())
                             },
                             label = { Text("Subscription Days *") },
                             modifier = Modifier.weight(1f),

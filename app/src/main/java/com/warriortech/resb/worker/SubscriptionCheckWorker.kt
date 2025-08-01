@@ -6,10 +6,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.notification.NotificationHelper
 import com.warriortech.resb.util.SubscriptionManager
-import dagger.hilt.android.EntryPoint
-import dagger.hilt.android.InstallIn
-import dagger.hilt.android.components.SingletonComponent
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

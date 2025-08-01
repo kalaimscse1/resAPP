@@ -46,6 +46,7 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -116,6 +117,7 @@ import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.util.SubscriptionManager
 
 
 /**
@@ -554,7 +556,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                             ReportScreen(navController = navController)
                         }
         composable("registration") {
-                            RegistrationScreen(navController = navController)
+                            RegistrationScreen(navController = navController,
+                                sessionManager = sessionManager)
         }
 
         composable("ai_assistant") {

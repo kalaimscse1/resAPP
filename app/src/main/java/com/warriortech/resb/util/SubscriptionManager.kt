@@ -1,7 +1,6 @@
 
 package com.warriortech.resb.util
 
-import android.content.Context
 import android.util.Log
 import com.warriortech.resb.network.SessionManager
 import java.time.LocalDate

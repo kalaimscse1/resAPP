@@ -155,7 +155,7 @@ class SessionManager @Inject constructor(
      */
     fun clearSession() {
         checkInitialization()
-        prefs.edit().clear().apply()
+        prefs.edit { clear() }
         Log.d(TAG, "Session cleared")
     }
     
@@ -173,14 +173,6 @@ class SessionManager @Inject constructor(
     fun getLastSyncTimestamp(): Long {
         checkInitialization()
         return prefs.getLong(KEY_LAST_SYNC, 0)
-    }
-    
-    /**
-     * Clear session data on logout
-     */
-    fun clearSession() {
-        checkInitialization()
-        prefs.edit { clear() }
     }
     
     /**

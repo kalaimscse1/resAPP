@@ -16,10 +16,15 @@ import timber.log.BuildConfig
 import timber.log.Timber
 import javax.inject.Inject
 import com.warriortech.resb.util.LocaleHelper
+import com.warriortech.resb.util.SubscriptionScheduler
 
 @HiltAndroidApp
 class ResbApplication : Application(), Configuration.Provider {
     lateinit var sessionManager: SessionManager
+
+    @Inject
+    lateinit var subscriptionScheduler: SubscriptionScheduler
+
     companion object {
         lateinit var sharedPreferences: SharedPreferences
             private set // Make setter private to ensure it's only set here
@@ -29,6 +34,7 @@ class ResbApplication : Application(), Configuration.Provider {
 
         // Initialize Timber for logging
         sessionManager = SessionManager(this)
+        subscriptionScheduler.scheduleSubscriptionChecks()
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
@@ -89,22 +95,3 @@ class ResbApplication : Application(), Configuration.Provider {
 //        }
 //    }
 //}
-package com.warriortech.resb
-
-import android.app.Application
-import com.warriortech.resb.util.SubscriptionScheduler
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
-
-@HiltAndroidApp
-class ResbApplication : Application() {
-    
-    @Inject
-    lateinit var subscriptionScheduler: SubscriptionScheduler
-    
-    override fun onCreate() {
-        super.onCreate()
-        // Schedule daily subscription checks
-        subscriptionScheduler.scheduleSubscriptionChecks()
-    }
-}

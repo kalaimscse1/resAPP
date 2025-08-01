@@ -29,9 +29,11 @@ import com.warriortech.resb.data.repository.VoucherRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.notification.NotificationHelper
 import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.util.NetworkMonitor
 import com.warriortech.resb.util.PrinterHelper
+import com.warriortech.resb.util.SubscriptionScheduler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -97,6 +99,18 @@ object AppModule {
 //    fun provideOrderItemDao(database: RestaurantDatabase): OrderItemDao {
 //        return database.orderItemDao()
 //    }
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionScheduler(@ApplicationContext context: Context): SubscriptionScheduler {
+        return SubscriptionScheduler(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotifocationHelper(@ApplicationContext context: Context): NotificationHelper {
+        return NotificationHelper(context)
+    }
 
     @Provides
     @Singleton

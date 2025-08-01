@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.ui.components.*
 import com.warriortech.resb.ui.theme.Dimensions
@@ -82,14 +83,14 @@ fun LoginScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope() // For Snackbar
-    val uiState = viewModel.uiState
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
 
     /**
      * Effect to handle login success.
      */
-    LaunchedEffect(uiState.loginSuccess) {
-        if (uiState.loginSuccess) {
+    LaunchedEffect(uiState.value.loginSuccess) {
+        if (uiState.value.loginSuccess) {
             keyboardController?.hide() // Hide keyboard on success
             onLoginSuccess()
             viewModel.onLoginHandled() // Reset the flag
@@ -99,8 +100,8 @@ fun LoginScreen(
     /**
      * Effect to show error messages in a Snackbar.
      */
-    LaunchedEffect(uiState.loginError) {
-        uiState.loginError?.let { error ->
+    LaunchedEffect(uiState.value.loginError) {
+        uiState.value.loginError?.let { error ->
             coroutineScope.launch {
                 scaffoldState.snackbarHostState.showSnackbar(error)
             }
@@ -181,7 +182,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
                     MobileOptimizedTextField(
-                        value = uiState.companyCode,
+                        value = uiState.value.companyCode,
                         onValueChange = viewModel::onCompanyCodeChange,
                         label = "CompanyCode",
                         leadingIcon = {
@@ -195,7 +196,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     MobileOptimizedTextField(
-                        value = uiState.username,
+                        value = uiState.value.username,
                         onValueChange = viewModel::onUsernameChange,
                         label = "Username",
                         leadingIcon = {
@@ -210,7 +211,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     MobileOptimizedTextField(
-                        value = uiState.password,
+                        value = uiState.value.password,
                         onValueChange = viewModel::onPasswordChange,
                         label = "Password",
                         leadingIcon = {
@@ -223,8 +224,8 @@ fun LoginScreen(
                         trailingIcon = {
                             IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                                 Icon(
-                                    imageVector = if (uiState.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = if (uiState.isPasswordVisible) "Hide Password" else "Show Password"
+                                    imageVector = if (uiState.value.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (uiState.value.isPasswordVisible) "Hide Password" else "Show Password"
                                 )
                             }
                         }
@@ -236,9 +237,9 @@ fun LoginScreen(
                             keyboardController?.hide() // Hide keyboard on button press
                             viewModel.attemptLogin()
                         },
-                        enabled = !uiState.isLoading,
-                        text = if (uiState.isLoading) "Logging in..." else "Login",
-                        icon = if (uiState.isLoading) null else Icons.Default.Login
+                        enabled = !uiState.value.isLoading,
+                        text = if (uiState.value.isLoading) "Logging in..." else "Login",
+                        icon = if (uiState.value.isLoading) null else Icons.Default.Login
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -246,7 +247,7 @@ fun LoginScreen(
                     OutlinedButton(
                         onClick = onRegisterClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !uiState.isLoading
+                        enabled = !uiState.value.isLoading
                     ) {
                         Text(
                             text = stringResource(R.string.register),
@@ -300,7 +301,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     MobileOptimizedTextField(
-                        value = uiState.companyCode,
+                        value = uiState.value.companyCode,
                         onValueChange = viewModel::onCompanyCodeChange,
                         label = "CompanyCode",
                         leadingIcon = {
@@ -313,7 +314,7 @@ fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.height(Dimensions.spacingM))
                     MobileOptimizedTextField(
-                        value = uiState.username,
+                        value = uiState.value.username,
                         onValueChange = viewModel::onUsernameChange,
                         label = "Username",
                         leadingIcon = {
@@ -328,7 +329,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(Dimensions.spacingM))
 
                     MobileOptimizedTextField(
-                        value = uiState.password,
+                        value = uiState.value.password,
                         onValueChange = viewModel::onPasswordChange,
                         label = "Password",
                         leadingIcon = {
@@ -341,8 +342,8 @@ fun LoginScreen(
                         trailingIcon = {
                             androidx.compose.material.IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
                                 Icon(
-                                    imageVector = if (uiState.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (uiState.isPasswordVisible) "Hide password" else "Show password",
+                                    imageVector = if (uiState.value.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                    contentDescription = if (uiState.value.isPasswordVisible) "Hide password" else "Show password",
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -356,9 +357,9 @@ fun LoginScreen(
                             keyboardController?.hide()
                             viewModel.attemptLogin()
                         },
-                        enabled = !uiState.isLoading,
-                        text = if (uiState.isLoading) "Logging in..." else "Login",
-                        icon = if (uiState.isLoading) null else Icons.Default.Login
+                        enabled = !uiState.value.isLoading,
+                        text = if (uiState.value.isLoading) "Logging in..." else "Login",
+                        icon = if (uiState.value.isLoading) null else Icons.Default.Login
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -367,7 +368,7 @@ fun LoginScreen(
                     OutlinedButton(
                         onClick = onRegisterClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !uiState.isLoading
+                        enabled = !uiState.value.isLoading
                     ) {
                         Text(
                             text = stringResource(R.string.register),

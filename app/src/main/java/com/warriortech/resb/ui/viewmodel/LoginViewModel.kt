@@ -1,15 +1,21 @@
 package com.warriortech.resb.ui.viewmodel
 
 import android.util.Log
+import androidx.compose.animation.core.copy
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.LoginRequest
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,43 +39,53 @@ class LoginViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : ViewModel() { // Assuming you might inject dependencies later
 
-    var uiState by mutableStateOf(LoginUiState())
-        private set
+//    var uiState by mutableStateOf(LoginUiState())
+//        private set
+
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
     /**
      * Handles changes to the company code input field.
      */
+    init {
+        // Pre-fill company code when ViewModel is created
+        val savedCompanyCode = sessionManager.getCompanyCode() ?: ""
+        _uiState.update { it.copy(companyCode = savedCompanyCode) }
+    }
+
     fun onCompanyCodeChange(companyCode: String) {
-        uiState = uiState.copy(companyCode = companyCode, loginError = null)
+        _uiState.update {it.copy(companyCode = companyCode, loginError = null)}
     }
 
     /**
      * Handles changes to the username input field.
      */
     fun onUsernameChange(username: String) {
-        uiState = uiState.copy(username = username, loginError = null)
+        _uiState.update{it.copy(username = username, loginError = null)}
     }
 
     /**
      * Handles changes to the password input field.
      */
     fun onPasswordChange(password: String) {
-        uiState = uiState.copy(password = password, loginError = null)
+        _uiState.update{it.copy(password = password, loginError = null)}
     }
 
     /**
      * Toggles the visibility of the password input field.
      */
     fun togglePasswordVisibility() {
-        uiState = uiState.copy(isPasswordVisible = !uiState.isPasswordVisible)
+        _uiState.update{it.copy(isPasswordVisible = !uiState.value.isPasswordVisible)}
     }
 
     /**
      * Validates the input fields to ensure they are not empty.
      */
     private fun validateInput(): Boolean {
-        return uiState.username.isNotBlank() &&
-                uiState.password.isNotBlank() &&
-                uiState.companyCode.isNotBlank()
+        return uiState.value.username.isNotBlank() &&
+                uiState.value.password.isNotBlank() &&
+                uiState.value.companyCode.isNotBlank()
     }
     /**
      * Login function that attempts to log in the user with the provided credentials.
@@ -77,42 +93,42 @@ class LoginViewModel @Inject constructor(
 
     fun attemptLogin() {
         if (!validateInput()) {
-            uiState = uiState.copy(loginError = "Please fill all fields")
+            _uiState.update{it.copy(loginError = "Please fill all fields")}
             return
         }
 
-        uiState = uiState.copy(isLoading = true, loginError = null)
+        _uiState.update{it.copy(isLoading = true, loginError = null)}
         viewModelScope.launch {
             try {
-                val check = RetrofitClient.apiService.checkIsBlock(uiState.companyCode)
+                val check = RetrofitClient.apiService.checkIsBlock(uiState.value.companyCode)
                 Log.d("checkIsBlock", check.toString())
                 if (check.data!!){
                     val response = RetrofitClient.apiService.login(
                         request=LoginRequest(
-                            companyCode = uiState.companyCode,
-                            user_name = uiState.username,
-                            password = uiState.password
+                            companyCode = uiState.value.companyCode,
+                            user_name = uiState.value.username,
+                            password = uiState.value.password
                         ),
-                        tenantId = uiState.companyCode
+                        tenantId = uiState.value.companyCode
                     )
 
                     if (response.success && response.data != null) {
                         val authResponse = response.data
                         sessionManager.saveAuthToken(authResponse.token)
                         sessionManager.saveUser(authResponse.user)
-                        sessionManager.saveCompanyCode(uiState.companyCode)
-                        uiState = uiState.copy(isLoading = false, loginSuccess = true)
+                        sessionManager.saveCompanyCode(uiState.value.companyCode)
+                        _uiState.update{it.copy(isLoading = false, loginSuccess = true)}
                     } else {
-                        uiState = uiState.copy(isLoading = false, loginError = "Login failed: ${response.message}")
+                        _uiState.update{it.copy(isLoading = false, loginError = "Login failed: ${response.message}")}
                     }
 
                 }
                 else{
-                    uiState = uiState.copy(isLoading = false, loginError = check.message)
+                    _uiState.update{it.copy(isLoading = false, loginError = check.message)}
                 }
 
             } catch (e: Exception) {
-                uiState = uiState.copy(isLoading = false, loginError = "Error: ${e.message ?: "Unknown error"}")
+                _uiState.update{it.copy(isLoading = false, loginError = "Error: ${e.message ?: "Unknown error"}")}
             }
         }
     }
@@ -121,6 +137,6 @@ class LoginViewModel @Inject constructor(
      * Resets the login success state after handling the login result.
      */
     fun onLoginHandled() {
-        uiState = uiState.copy(loginSuccess = false, loginError = null)
+        _uiState.update{it.copy(loginSuccess = false, loginError = null)}
     }
 }

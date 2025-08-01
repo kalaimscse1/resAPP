@@ -60,9 +60,9 @@ class MenuViewModel @Inject constructor(
 
     val selectedCategory = MutableStateFlow<String?>(null)
 
-    val tableStatus =MutableStateFlow<String?>(null)
+    val tableStatus = MutableStateFlow<String?>(null)
 
-    val existingOrderId =MutableStateFlow<Int?>(null)
+    val existingOrderId = MutableStateFlow<Int?>(null)
 
     private val _newselectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
     var newselectedItems: StateFlow<Map<MenuItem, Int>> = _newselectedItems.asStateFlow()
@@ -73,7 +73,8 @@ class MenuViewModel @Inject constructor(
     val orderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
     private val _selectedMenuItemForModifier = MutableStateFlow<MenuItem?>(null)
-    val selectedMenuItemForModifier: StateFlow<MenuItem?> = _selectedMenuItemForModifier.asStateFlow()
+    val selectedMenuItemForModifier: StateFlow<MenuItem?> =
+        _selectedMenuItemForModifier.asStateFlow()
 
     private val _showModifierDialog = MutableStateFlow<Boolean>(false)
     val showModifierDialog: StateFlow<Boolean> = _showModifierDialog.asStateFlow()
@@ -88,45 +89,47 @@ class MenuViewModel @Inject constructor(
         viewModelScope.launch {
             loadMenuItems()
             if (isTableOrder) {
-                val existingItemsForTable = orderRepository.getOpenOrderItemsForTable(currentTableId) // Or from local cache
+                val existingItemsForTable =
+                    orderRepository.getOpenOrderItemsForTable(currentTableId) // Or from local cache
                 if (existingItemsForTable.isNotEmpty()) {
                     orderDetailsResponse.value = existingItemsForTable
-                    val menuItems=existingItemsForTable.map{
+                    val menuItems = existingItemsForTable.map {
 
-                            MenuItem(
-                                menu_item_id = it.menuItem.menu_item_id,
-                                menu_item_name = it.menuItem.menu_item_name,
-                                menu_item_name_tamil = it.menuItem.menu_item_name_tamil,
-                                item_cat_id = it.menuItem.item_cat_id,
-                                item_cat_name = it.menuItem.item_cat_name,
-                                rate = it.rate,
-                                ac_rate = it.rate,
-                                parcel_rate = it.rate,
-                                parcel_charge = it.rate,
-                                tax_id = it.menuItem.tax_id,
-                                tax_name = it.menuItem.tax_name,
-                                tax_percentage = it.menuItem.tax_percentage,
-                                kitchen_cat_id = it.menuItem.kitchen_cat_id,
-                                kitchen_cat_name = it.menuItem.kitchen_cat_name,
-                                stock_maintain = it.menuItem.stock_maintain,
-                                rate_lock = it.menuItem.rate_lock,
-                                unit_id = it.menuItem.unit_id,
-                                unit_name = it.menuItem.unit_name,
-                                min_stock = it.menuItem.min_stock,
-                                hsn_code = it.menuItem.hsn_code,
-                                order_by = it.menuItem.order_by,
-                                is_inventory = it.menuItem.is_inventory,
-                                is_raw = it.menuItem.is_raw,
-                                is_available = it.menuItem.is_available,
-                                image = it.menuItem.image,
-                                qty = it.qty,
-                                cess_specific = it.cess_specific,
-                                cess_per = it.cess_per.toString()
-                            )
+                        MenuItem(
+                            menu_item_id = it.menuItem.menu_item_id,
+                            menu_item_name = it.menuItem.menu_item_name,
+                            menu_item_name_tamil = it.menuItem.menu_item_name_tamil,
+                            item_cat_id = it.menuItem.item_cat_id,
+                            item_cat_name = it.menuItem.item_cat_name,
+                            rate = it.rate,
+                            ac_rate = it.rate,
+                            parcel_rate = it.rate,
+                            parcel_charge = it.rate,
+                            tax_id = it.menuItem.tax_id,
+                            tax_name = it.menuItem.tax_name,
+                            tax_percentage = it.menuItem.tax_percentage,
+                            kitchen_cat_id = it.menuItem.kitchen_cat_id,
+                            kitchen_cat_name = it.menuItem.kitchen_cat_name,
+                            stock_maintain = it.menuItem.stock_maintain,
+                            rate_lock = it.menuItem.rate_lock,
+                            unit_id = it.menuItem.unit_id,
+                            unit_name = it.menuItem.unit_name,
+                            min_stock = it.menuItem.min_stock,
+                            hsn_code = it.menuItem.hsn_code,
+                            order_by = it.menuItem.order_by,
+                            is_inventory = it.menuItem.is_inventory,
+                            is_raw = it.menuItem.is_raw,
+                            is_available = it.menuItem.is_available,
+                            image = it.menuItem.image,
+                            qty = it.qty,
+                            cess_specific = it.cess_specific,
+                            cess_per = it.cess_per.toString()
+                        )
                     }
-                        _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
+                    _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
                     _isExistingOrderLoaded.value = true
-                    existingOrderId.value= existingItemsForTable.firstOrNull()?.order_master_id?.toInt()
+                    existingOrderId.value =
+                        existingItemsForTable.firstOrNull()?.order_master_id?.toInt()
                 } else {
                     _selectedItems.value = mutableMapOf()
                 }
@@ -139,16 +142,17 @@ class MenuViewModel @Inject constructor(
     fun loadMenuItems(category: String? = null) {
         viewModelScope.launch {
             _menuState.value = MenuUiState.Loading
-            tableStatus.value= _selectedTableId.value?.let { tableRepository.getstatus(it) }
+            tableStatus.value = _selectedTableId.value?.let { tableRepository.getstatus(it) }
             menuRepository.getMenuItems(category).collect { result ->
                 result.fold(
                     onSuccess = { menuItems ->
                         _menuState.value = MenuUiState.Success(menuItems)
-                        categories.value= menuItems.map { it.item_cat_name }.distinct().sorted()
-                        selectedCategory.value=categories.value.firstOrNull()
+                        categories.value = menuItems.map { it.item_cat_name }.distinct().sorted()
+                        selectedCategory.value = categories.value.firstOrNull()
                     },
                     onFailure = { error ->
-                        _menuState.value = MenuUiState.Error(error.message ?: "Failed to load menu items")
+                        _menuState.value =
+                            MenuUiState.Error(error.message ?: "Failed to load menu items")
                     }
                 )
             }
@@ -167,8 +171,7 @@ class MenuViewModel @Inject constructor(
             val currentQuantity = currentItems[menuItem] ?: 0
             currentItems[menuItem] = currentQuantity + 1
             _newselectedItems.value = currentItems
-        }
-        else{
+        } else {
             val currentItems = _selectedItems.value.toMutableMap()
             val currentQuantity = currentItems[menuItem] ?: 0
             currentItems[menuItem] = currentQuantity + 1
@@ -189,7 +192,7 @@ class MenuViewModel @Inject constructor(
                 currentItems.remove(menuItem)
             }
             _newselectedItems.value = currentItems
-        }else{
+        } else {
             val currentItems = _selectedItems.value.toMutableMap()
             val currentQuantity = currentItems[menuItem] ?: 0
             if (currentQuantity > 1) {
@@ -197,12 +200,12 @@ class MenuViewModel @Inject constructor(
             } else {
                 currentItems.remove(menuItem)
             }
-        _selectedItems.value = currentItems
-         }
+            _selectedItems.value = currentItems
+        }
     }
 
     fun clearOrder() {
-        _newselectedItems.value =mutableMapOf()
+        _newselectedItems.value = mutableMapOf()
         _selectedItems.value = mutableMapOf()
         _isExistingOrderLoaded.value = false
         _orderState.value = OrderUiState.Idle
@@ -217,8 +220,6 @@ class MenuViewModel @Inject constructor(
 
             _orderState.value = OrderUiState.Loading
 
-
-
             if (_isExistingOrderLoaded.value) {
                 val orderItems = _newselectedItems.value.map { (menuItem, quantity) ->
                     OrderItem(
@@ -228,12 +229,14 @@ class MenuViewModel @Inject constructor(
                 }
                 orderRepository.placeOrUpdateOrder(
                     tableId, orderItems,
-                    tableStatus1.toString(),existingOrderId.value
+                    tableStatus1.toString(), existingOrderId.value
                 ).collect { result ->
                     result.fold(
                         onSuccess = { order ->
                             val kotItem = orderItems.map { orderItem ->
-                                val modifierNames = _selectedModifiers.value[orderItem.menuItem.menu_item_id]?.map { it.add_on_name } ?: emptyList()
+                                val modifierNames =
+                                    _selectedModifiers.value[orderItem.menuItem.menu_item_id]?.map { it.add_on_name }
+                                        ?: emptyList()
                                 KOTItem(
                                     name = orderItem.menuItem.menu_item_name,
                                     quantity = orderItem.quantity,
@@ -257,7 +260,7 @@ class MenuViewModel @Inject constructor(
                         }
                     )
                 }
-            } else{
+            } else {
                 val orderItems = _selectedItems.value.map { (menuItem, quantity) ->
                     OrderItem(
                         quantity = quantity,
@@ -271,7 +274,9 @@ class MenuViewModel @Inject constructor(
                     result.fold(
                         onSuccess = { order ->
                             val kotItem = orderItems.map { orderItem ->
-                                val modifierNames = _selectedModifiers.value[orderItem.menuItem.menu_item_id]?.map { it.add_on_name } ?: emptyList()
+                                val modifierNames =
+                                    _selectedModifiers.value[orderItem.menuItem.menu_item_id]?.map { it.add_on_name }
+                                        ?: emptyList()
                                 KOTItem(
                                     name = orderItem.menuItem.menu_item_name,
                                     quantity = orderItem.quantity,
@@ -295,7 +300,7 @@ class MenuViewModel @Inject constructor(
                         }
                     )
                 }
-        }
+            }
         }
     }
 
@@ -313,7 +318,7 @@ class MenuViewModel @Inject constructor(
                     paperWidth = orderId.paperWidth
                 )
                 val ip = orderRepository.getIpAddress(category)
-                orderRepository.printKOT(kotForCategory,ip).collect { result ->
+                orderRepository.printKOT(kotForCategory, ip).collect { result ->
                     result.fold(
                         onSuccess = { printResponse ->
                             val order = Order(
@@ -329,7 +334,9 @@ class MenuViewModel @Inject constructor(
                             _selectedItems.value = emptyMap()
                         },
                         onFailure = { error ->
-                            _orderState.value = OrderUiState.Error(error.message ?: "Failed to print KOT for $category")
+                            _orderState.value = OrderUiState.Error(
+                                error.message ?: "Failed to print KOT for $category"
+                            )
                         }
                     )
                 }
@@ -337,14 +344,14 @@ class MenuViewModel @Inject constructor(
         }
     }
 
-    fun getOrderTotal(tableStatus:String): Double {
+    fun getOrderTotal(tableStatus: String): Double {
         return _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
-            if (tableStatus=="AC")
+            if (tableStatus == "AC")
                 menuItem.ac_rate * quantity
-            else if (tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY")
+            else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY")
                 menuItem.parcel_rate * quantity
             else
-            menuItem.rate * quantity
+                menuItem.rate * quantity
         }
     }
 
