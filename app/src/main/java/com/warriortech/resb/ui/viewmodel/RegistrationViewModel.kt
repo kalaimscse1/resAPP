@@ -7,6 +7,7 @@ import com.warriortech.resb.data.repository.RegistrationRepository
 import com.warriortech.resb.model.Registration
 import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RestaurantProfile
+import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
-    private val registrationRepository: RegistrationRepository
+    private val registrationRepository: RegistrationRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegistrationUiState())
@@ -98,6 +100,10 @@ class RegistrationViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(expiryDate = value)
     }
 
+    fun updatePassword(value: String) {
+        _uiState.value = _uiState.value.copy(password = value)
+    }
+
     fun updateIsBlock(value: Boolean) {
         _uiState.value = _uiState.value.copy(isBlock = value)
     }
@@ -122,40 +128,41 @@ class RegistrationViewModel @Inject constructor(
         }
 
         _uiState.value = _uiState.value.copy(isLoading = true)
-
-        viewModelScope.launch {
-            try {
-                val request = RegistrationRequest(
-                    company_master_code = state.companyMasterCode,
-                    company_name = state.companyName,
-                    owner_name = state.ownerName,
-                    address1 = state.address1,
-                    address2 = state.address2,
-                    place = state.place,
-                    pincode = state.pincode,
-                    contact_no = state.contactNo,
-                    mail_id = state.mailId,
-                    country = state.country,
-                    state = state.state,
-                    year = state.year,
-                    database_name = state.databaseName,
-                    order_plan = state.orderPlan,
-                    install_date = state.installDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
-                    subscription_days = state.subscriptionDays,
-                    expiry_date = state.expiryDate,
-                    is_block = state.isBlock
-                )
-                val response = registrationRepository.registerCompany(request)
-                response.collect { result->
-                    result.fold(
-                        onSuccess = { res ->
-                            _registrationResult.value ="Registration successful!"
-                        },
-                        onFailure = { error ->
-                            _registrationResult.value = error.message
-                        }
+        if (state.password=="Kingtec2025") {
+            viewModelScope.launch {
+                try {
+                    val request = RegistrationRequest(
+                        company_master_code = state.companyMasterCode,
+                        company_name = state.companyName,
+                        owner_name = state.ownerName,
+                        address1 = state.address1,
+                        address2 = state.address2,
+                        place = state.place,
+                        pincode = state.pincode,
+                        contact_no = state.contactNo,
+                        mail_id = state.mailId,
+                        country = state.country,
+                        state = state.state,
+                        year = state.year,
+                        database_name = state.databaseName,
+                        order_plan = state.orderPlan,
+                        install_date = state.installDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                        subscription_days = state.subscriptionDays,
+                        expiry_date = state.expiryDate,
+                        is_block = state.isBlock
                     )
-                }
+                    val response = registrationRepository.registerCompany(request)
+                    response.collect { result ->
+                        result.fold(
+                            onSuccess = { res ->
+                                sessionManager.saveCompanyCode(res.company_code)
+                                _registrationResult.value = "Registration successful!"
+                            },
+                            onFailure = { error ->
+                                _registrationResult.value = error.message
+                            }
+                        )
+                    }
 
 //                 if (response.success) {
 //                     createCompany(response.data!!)
@@ -163,10 +170,11 @@ class RegistrationViewModel @Inject constructor(
 //                } else {
 //                     _registrationResult.value =  response.message
 //                }
-            } catch (e: Exception) {
-                _registrationResult.value = "Registration failed: ${e.message}"
-            } finally {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                } catch (e: Exception) {
+                    _registrationResult.value = "Registration failed: ${e.message}"
+                } finally {
+                    _uiState.value = _uiState.value.copy(isLoading = false)
+                }
             }
         }
     }
@@ -222,7 +230,8 @@ class RegistrationViewModel @Inject constructor(
                 state.year.isNotBlank() &&
                 state.databaseName.isNotBlank() &&
                 state.orderPlan.isNotBlank() &&
-                state.expiryDate.isNotBlank()
+                state.expiryDate.isNotBlank() &&
+                state.password.isNotBlank()
     }
 }
 
@@ -245,5 +254,6 @@ data class RegistrationUiState(
     val subscriptionDays: Long = 0L,
     val expiryDate: String = "",
     val isBlock: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val password : String=""
 )

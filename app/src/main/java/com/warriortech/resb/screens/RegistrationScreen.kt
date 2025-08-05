@@ -7,6 +7,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,6 +50,8 @@ fun RegistrationScreen(
         initialSelectedDateMillis = System.currentTimeMillis()
     )
     val orderPlan = listOf("Trail", "CLosed")
+    var passwordVisible by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.loadCompanyCode()
     }
@@ -330,7 +336,30 @@ fun RegistrationScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Block Account")
                     }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.password,
+                            onValueChange = viewModel::updatePassword,
+                            label = { Text("") },
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(imageVector = image, contentDescription = description)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                    }
                 }
+
             }
 
             Button(

@@ -3,7 +3,7 @@ package com.warriortech.resb.model
 import java.time.LocalDate
 
 data class Registration(
-    val id: Long=0L,
+    val id: Long,
     val company_master_code: String,
     val company_name: String,
     val owner_name: String,
@@ -21,10 +21,9 @@ data class Registration(
     val install_date: LocalDate,
     val subscription_days: Long,
     val expiry_date: String,
-    val is_block: Boolean = false,
-    val is_active: Boolean=true
+    val is_block: Boolean,
+    val is_active: Boolean
 )
-
 data class RegistrationRequest(
     val company_master_code: String,
     val company_name: String,

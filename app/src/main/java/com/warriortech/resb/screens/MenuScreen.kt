@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.TextPrimary
 import kotlinx.coroutines.launch
 import com.warriortech.resb.ui.components.MobileOptimizedCard
@@ -58,7 +59,8 @@ fun MenuScreen(
     onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId:Long) -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
     drawerState: DrawerState,
-    navController: NavHostController
+    navController: NavHostController,
+    sessionManager: SessionManager
 ) {
     val menuState by viewModel.menuState.collectAsStateWithLifecycle()
     val orderState by viewModel.orderState.collectAsStateWithLifecycle()
@@ -103,7 +105,10 @@ fun MenuScreen(
         when (val currentOrderState = orderState) { // Use a stable val
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
-                    snackbarHostState.showSnackbar("Order placed successfully and KOT sent to kitchen")
+                    if (sessionManager.getGeneralSetting()?.is_kot!!)
+                        snackbarHostState.showSnackbar("Order placed successfully and KOT sent to kitchen")
+                        else
+                    snackbarHostState.showSnackbar("Order placed successfully")
                     onOrderPlaced() // This should navigate away or reset the screen
                 }
             }

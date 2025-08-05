@@ -55,7 +55,7 @@ class NotificationHelper @Inject constructor(
         val message = "Your subscription will expire in $daysRemaining day${if (daysRemaining != 1L) "s" else ""}. Please renew to continue using the app."
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.b_svg)
+            .setSmallIcon(R.drawable.resb_logo_2)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))

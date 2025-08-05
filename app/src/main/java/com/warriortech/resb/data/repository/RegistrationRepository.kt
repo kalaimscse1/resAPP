@@ -1,6 +1,7 @@
 package com.warriortech.resb.data.repository
 
 import android.annotation.SuppressLint
+import android.util.Log
 import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RegistrationResponse
 import com.warriortech.resb.model.RestaurantProfile
@@ -18,9 +19,10 @@ class RegistrationRepository @Inject constructor(
     fun registerCompany(registrationRequest: RegistrationRequest): Flow<Result<RestaurantProfile>> = flow {
         try {
             val response = apiService.registerCompany(registrationRequest)
+            Log.d("RegistrationRepository", "Response: $response")
 
-            if (response.isSuccessful && response.body()?.data != null) {
-                val res = response.body()!!.data!!
+            if (response.isSuccessful) {
+                val res = response.body()!!
 
                 val profile = RestaurantProfile(
                     company_code = res.company_master_code,
@@ -48,6 +50,7 @@ class RegistrationRepository @Inject constructor(
                 }
 
             } else {
+                Log.d("RegistrationRepository", "Error response: ${response.errorBody()?.string()}")
                 emit(Result.failure(Exception("Company registration failed: ${response.message()}")))
             }
         } catch (e: Exception) {

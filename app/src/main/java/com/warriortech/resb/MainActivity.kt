@@ -386,7 +386,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                     selectedItems=items
                     selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}") },
-                navController = navController
+                navController = navController,
+                sessionManager = sessionManager
             )
         }
 
@@ -403,7 +404,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                     selectedItems=items
                     selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}") },
-                navController = navController
+                navController = navController,
+                sessionManager = sessionManager
             )
         }
         composable("billing_screen/{orderMasterId}") { backStackEntry ->
@@ -667,6 +669,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         }
     }
 }
+
 @Composable
 fun DrawerContent(
     isCollapsed: Boolean,

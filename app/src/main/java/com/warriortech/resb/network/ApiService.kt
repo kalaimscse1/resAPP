@@ -720,7 +720,6 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
-
     @GET("menu/addOn/getAddOnByCategoryId/{item_cat_id}")
     suspend fun getModifierGroupsForMenuItem(
         @Path("item_cat_id") menuItemId: Long,
@@ -734,7 +733,7 @@ interface ApiService {
      * Kitchen KOT Management
      */
 
-    @GET("kitchen/kots")
+    @GET("kitchen/kot")
     suspend fun getKitchenKOTs(@Header("X-Tenant-ID") tenantId: String): Response<KitchenKOTResponse>
 
     @PUT("kitchen/kot/{kotId}/status")
@@ -744,13 +743,12 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<KOTUpdateResponse>
 
-
     /**
      * Register Management
      */
 
     @POST("companyMaster/createCompanyMaster")
-    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest): Response<RegistrationResponse>
+    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest): Response<Registration>
 
     @GET("companyMaster/getCompanyCode")
     suspend fun getCompanyCode(): Map<String, String>
