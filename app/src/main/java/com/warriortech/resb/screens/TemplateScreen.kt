@@ -1,6 +1,5 @@
 package com.warriortech.resb.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -121,7 +120,6 @@ fun TemplateScreen(
                         TemplateCard(
                             template = template,
                             onEdit = {
-                                Log.d("TemplateScreen", "Editing template: ${template.name}")
 //                                viewModel.startEditingTemplate(template)
                                 navController.navigate("template_editor/${template.id}")
                             },

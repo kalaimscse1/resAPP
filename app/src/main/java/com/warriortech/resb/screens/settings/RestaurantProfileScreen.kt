@@ -1,5 +1,10 @@
 package com.warriortech.resb.screens.settings
 
+import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -9,21 +14,34 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.widget.Toast
 import com.warriortech.resb.R
 import com.warriortech.resb.model.RestaurantProfile
+import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.RestaurantProfileViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestaurantProfileScreen(
     viewModel: RestaurantProfileViewModel = hiltViewModel(),
+    apiService: ApiService,
+    sessionManager: SessionManager,
     onBackPressed: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -74,7 +92,9 @@ fun RestaurantProfileScreen(
                                         viewModel.updateProfile(newSetting)
                                         snackbarHostState.showSnackbar("General Settings updated successfully")
                                     }
-                                }
+                                },
+                                apiService,
+                                sessionManager = sessionManager
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -111,7 +131,9 @@ fun RestaurantProfileScreen(
 @Composable
 fun CompanySettingDialog(
     setting: RestaurantProfile?,
-    onSave: (RestaurantProfile) -> Unit
+    onSave: (RestaurantProfile) -> Unit,
+    apiService: ApiService,
+    sessionManager: SessionManager
 ) {
     var companyName by remember { mutableStateOf(setting?.company_name ?: "") }
     var ownerName by remember { mutableStateOf(setting?.owner_name ?: "") }
@@ -126,7 +148,17 @@ fun CompanySettingDialog(
     var currency by remember { mutableStateOf(setting?.currency ?: "") }
     var taxNo by remember { mutableStateOf(setting?.tax_no ?: "") }
     var decimalPoint by remember { mutableStateOf(setting?.decimal_point?.toString() ?: "2") }
+    val context = LocalContext.current
+    val logoUri = remember { mutableStateOf<Uri?>(null) }
+    val logoUploadProgress = remember { mutableStateOf(false) }
+    val uploadSuccess = remember { mutableStateOf(false) }
 
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        logoUri.value = uri
+        uploadSuccess.value = false
+    }
     Column {
         OutlinedTextField(
             value = companyName,
@@ -219,8 +251,69 @@ fun CompanySettingDialog(
             label = { Text("Decimal Point") },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(10.dp))
 
+        if (logoUploadProgress.value) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { launcher.launch("*/*") }) {
+                Text("Choose Logo")
+            }
+            Spacer(Modifier.width(8.dp))
+            logoUri.value?.let {
+                Text(it.lastPathSegment ?: "Image selected", fontSize = 12.sp)
+            }
+        }
+
+        logoUri.value?.let { uri ->
+            Spacer(modifier = Modifier.height(8.dp))
+            val mimeType = context.contentResolver.getType(uri)
+            val supportedTypes = listOf("image/png", "image/jpeg", "image/svg+xml")
+            if (mimeType !in supportedTypes) {
+                Text("Unsupported file type", color = MaterialTheme.colorScheme.error)
+            } else {
+                Button(
+                    onClick = {
+                        logoUploadProgress.value = true
+                        uploadLogo(
+                            uri = uri,
+                            context = context,
+                            apiService = apiService,
+                            sessionManager = sessionManager,
+                            onSuccess = {
+                                logoUploadProgress.value = false
+                                uploadSuccess.value = true
+                                Toast.makeText(
+                                    context,
+                                    "Logo uploaded successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            },
+                            onFailure = {
+                                logoUploadProgress.value = false
+                                Toast.makeText(context, "Upload failed", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                ) {
+                    Text("Upload Logo")
+                }
+            }
+        }
+
+        if (uploadSuccess.value) {
+            AlertDialog(
+                onDismissRequest = { uploadSuccess.value = false },
+                confirmButton = {
+                    TextButton(onClick = { uploadSuccess.value = false }) {
+                        Text("OK")
+                    }
+                },
+                title = { Text("Upload Successful") },
+                text = { Text("Your logo has been uploaded successfully.") }
+            )
+        }
         Button(
             onClick = {
                 val newSetting = RestaurantProfile(
@@ -246,6 +339,37 @@ fun CompanySettingDialog(
                 text = if (setting == null) "Add" else "Update",
                 fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
+
+fun uploadLogo(
+    uri: Uri,
+    context: Context,
+    apiService: ApiService,
+    sessionManager: SessionManager,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
+) {
+    val contentResolver = context.contentResolver
+    val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+    val inputStream = contentResolver.openInputStream(uri) ?: return onFailure()
+
+    val requestBody = inputStream.readBytes().toRequestBody(mimeType.toMediaTypeOrNull())
+    val extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "jpg"
+    val filePart = MultipartBody.Part.createFormData("file", "logo.$extension", requestBody)
+
+    val token = sessionManager.getCompanyCode() ?: ""
+    val cleanedCompanyCode = token
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val response = apiService.uploadLogo(cleanedCompanyCode, filePart,cleanedCompanyCode)
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) onSuccess() else onFailure()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) { onFailure() }
         }
     }
 }

@@ -306,40 +306,54 @@ class MenuViewModel @Inject constructor(
 
     private fun printKOT(orderId: KOTRequest) {
         viewModelScope.launch {
-            val category = orderId.items.groupBy { it.category }
-            for ((category, items) in category) {
-                val kotForCategory = KOTRequest(
-                    tableNumber = orderId.tableNumber,
-                    kotId = orderId.kotId,
-                    orderId = orderId.orderId,
-                    waiterName = orderId.waiterName,
-                    items = items,
-                    orderCreatedAt = orderId.orderCreatedAt,
-                    paperWidth = orderId.paperWidth
-                )
-                val ip = orderRepository.getIpAddress(category)
-                orderRepository.printKOT(kotForCategory, ip).collect { result ->
-                    result.fold(
-                        onSuccess = { printResponse ->
-                            val order = Order(
-                                id = 1,
-                                tableId = 0,
-                                items = emptyList(),
-                                totalAmount = 0.0,
-                                status = "PENDING",
-                                isPrinted = true
-                            )
-                            _orderState.value = OrderUiState.Success(order)
-
-                            _selectedItems.value = emptyMap()
-                        },
-                        onFailure = { error ->
-                            _orderState.value = OrderUiState.Error(
-                                error.message ?: "Failed to print KOT for $category"
-                            )
-                        }
+            if (sessionManager.getGeneralSetting()?.is_kot!!) {
+                val category = orderId.items.groupBy { it.category }
+                for ((category, items) in category) {
+                    val kotForCategory = KOTRequest(
+                        tableNumber = orderId.tableNumber,
+                        kotId = orderId.kotId,
+                        orderId = orderId.orderId,
+                        waiterName = orderId.waiterName,
+                        items = items,
+                        orderCreatedAt = orderId.orderCreatedAt,
+                        paperWidth = orderId.paperWidth
                     )
+                    val ip = orderRepository.getIpAddress(category)
+                    orderRepository.printKOT(kotForCategory, ip).collect { result ->
+                        result.fold(
+                            onSuccess = { printResponse ->
+                                val order = Order(
+                                    id = 1,
+                                    tableId = 0,
+                                    items = emptyList(),
+                                    totalAmount = 0.0,
+                                    status = "PENDING",
+                                    isPrinted = true
+                                )
+                                _orderState.value = OrderUiState.Success(order)
+
+                                _selectedItems.value = emptyMap()
+                            },
+                            onFailure = { error ->
+                                _orderState.value = OrderUiState.Error(
+                                    error.message ?: "Failed to print KOT for $category"
+                                )
+                            }
+                        )
+                    }
                 }
+            }else{
+                val order = Order(
+                    id = 1,
+                    tableId = 0,
+                    items = emptyList(),
+                    totalAmount = 0.0,
+                    status = "PENDING",
+                    isPrinted = true
+                )
+                _orderState.value = OrderUiState.Success(order)
+
+                _selectedItems.value = emptyMap()
             }
         }
     }

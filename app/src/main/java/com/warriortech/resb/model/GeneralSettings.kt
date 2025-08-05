@@ -1,4 +1,7 @@
 package com.warriortech.resb.model
+
+import androidx.datastore.preferences.protobuf.Internal
+
 //
 //data class GeneralSettings(
 //    val id: Int = 1,
@@ -27,4 +30,9 @@ data class GeneralSettings(
     var disc_by:Int,
     var disc_amt:Double,
     var is_tendered:Boolean,
+    var is_gst_summary: Boolean,
+    var is_receipt: Boolean,
+    var is_kot: Boolean,
+    var is_logo: Boolean,
+    var logo_path: String,
 )

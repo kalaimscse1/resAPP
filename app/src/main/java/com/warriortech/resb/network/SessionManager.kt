@@ -2,12 +2,13 @@ package com.warriortech.resb.network
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.warriortech.resb.model.TblStaff
 import androidx.core.content.edit
+import com.warriortech.resb.model.GeneralSettings
+import com.warriortech.resb.model.RestaurantProfile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -25,6 +26,7 @@ class SessionManager @Inject constructor(
         private const val KEY_USER = "user"
         private const val KEY_COMPANY_CODE = "company_code"
         private const val KEY_LAST_SYNC = "last_sync_timestamp"
+        private const val KEY_GENERAL_SETTING = "general_setting"
     }
     
     private lateinit var prefs: SharedPreferences
@@ -49,10 +51,7 @@ class SessionManager @Inject constructor(
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-            
-            Log.d(TAG, "SessionManager initialized successfully")
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing encrypted preferences: ${e.message}")
             // Fall back to regular shared preferences if encryption fails
             prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         }
@@ -94,14 +93,32 @@ class SessionManager @Inject constructor(
             try {
                 gson.fromJson(userJson, TblStaff::class.java)
             } catch (e: Exception) {
-                Log.e(TAG, "Error parsing user data: ${e.message}")
                 null
             }
         } else {
             null
         }
     }
-    
+
+    fun saveGeneralSetting(setting: GeneralSettings){
+        checkInitialization()
+        val settingJson = gson.toJson(setting)
+        prefs.edit { putString(KEY_GENERAL_SETTING,settingJson) }
+    }
+
+    fun getGeneralSetting(): GeneralSettings?{
+        checkInitialization()
+        val settingJson = prefs.getString(KEY_GENERAL_SETTING,null)
+        return if (settingJson != null) {
+            try {
+                gson.fromJson(settingJson, GeneralSettings::class.java)
+            }catch (e: Exception){
+                null
+            }
+        }
+        else
+            null
+    }
     /**
      * Save company code
      */
@@ -156,7 +173,6 @@ class SessionManager @Inject constructor(
     fun clearSession() {
         checkInitialization()
         prefs.edit { clear() }
-        Log.d(TAG, "Session cleared")
     }
     
     /**

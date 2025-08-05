@@ -83,13 +83,6 @@ fun GeneralSettingsScreen(
                         contentPadding = PaddingValues(16.dp)
                     ) {
                         items(state.generalSettings) { setting ->
-//                          GeneralSettingItem(
-//                                setting = setting,
-//                                onEdit = {
-//                                    editingTable = setting
-//                                    showAddDialog = true
-//                                }
-//                            )
 
                             GeneralSettingDialog(
                                 setting = setting,
@@ -131,103 +124,7 @@ fun GeneralSettingsScreen(
                 }
             }
           }
-//         if (showAddDialog || editingTable != null) {
-//            GeneralSettingDialog(
-//                setting = editingTable,
-//                onDismiss = {
-//                    showAddDialog = false
-//                    editingTable = null
-//                },
-//                onSave = { newSetting ->
-//                    scope.launch {
-//                        try {
-//                            if (editingTable != null) {
-//                                viewModel.updateSettings(newSetting)
-//                                snackbarHostState.showSnackbar("General Settings updated successfully")
-//                            }
-//                        } catch (e: Exception) {
-//                            snackbarHostState.showSnackbar("Error: ${e.message}")
-//                        }
-//                    }
-//                    showAddDialog = false
-//                    editingTable = null
-//                }
-//            )
-//         }
-
        }
-    }
-}
-
-@Composable
-fun GeneralSettingItem(
-    setting: GeneralSettings,
-    onEdit: () -> Unit
-) {
-    MobileOptimizedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Company Name Font :${setting.company_name_font}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Address Font : ${setting.address_font} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Is Tax : ${setting.is_tax} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Is Tax Included : ${setting.is_tax_included} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Is RoundOff : ${setting.is_round_off} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Is Allowed Discount : ${setting.is_allowed_disc} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Discount By : ${setting.disc_by} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Discount Amount : ${setting.disc_amt} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Is Tendered : ${setting.is_tendered} ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                }
-            }
-        }
     }
 }
 
@@ -247,6 +144,11 @@ fun GeneralSettingDialog(
     var discBy by remember { mutableStateOf(setting?.disc_by?.toString() ?: "") }
     var discAmt by remember { mutableStateOf(setting?.disc_amt?.toString() ?: "") }
     var isTendered by remember { mutableStateOf(setting?.is_tendered ?: false) }
+    var isGstSummary by remember { mutableStateOf(setting?.is_gst_summary ?: false) }
+    var isReceipt by remember { mutableStateOf(setting?.is_receipt ?: false) }
+    var isKot by remember { mutableStateOf(setting?.is_kot ?: false) }
+    var isLogo by remember { mutableStateOf(setting?.is_logo ?: false) }
+    var logoPath by remember { mutableStateOf(setting?.logo_path ?: "") }
 
     Column {
         OutlinedTextField(
@@ -331,6 +233,57 @@ fun GeneralSettingDialog(
             Spacer(modifier = Modifier.width(8.dp))
             Text("IS Tendered")
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isGstSummary,
+                onCheckedChange = { isGstSummary = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS GST SUMMARY")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isReceipt,
+                onCheckedChange = { isReceipt = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS RECEIPT")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isKot,
+                onCheckedChange = { isKot = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS KOT")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isLogo,
+                onCheckedChange = { isLogo = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("IS LOGO")
+        }
+        OutlinedTextField(
+            value = logoPath,
+            onValueChange = { logoPath = it },
+            label = { Text("LOGO PATH") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
@@ -345,7 +298,12 @@ fun GeneralSettingDialog(
                     is_allowed_disc = isAllowedDisc,
                     disc_by = discBy.toIntOrNull() ?: 0,
                     disc_amt = discAmt.toDoubleOrNull() ?: 0.0,
-                    is_tendered = isTendered
+                    is_tendered = isTendered,
+                    is_gst_summary = isGstSummary,
+                    is_receipt = isReceipt,
+                    is_kot = isKot,
+                    is_logo = isLogo,
+                    logo_path = logoPath
                 )
                 onSave(newSetting)
             }

@@ -1,6 +1,9 @@
 package com.warriortech.resb.network
 
 import com.warriortech.resb.model.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -30,6 +33,14 @@ interface ApiService {
         @Body passwordRequest: ChangePasswordRequest,
         @Header("X-Tenant-ID") tenantId: String
     ): ApiResponse<Boolean>
+
+    @Multipart
+    @POST("logo/upload/{companyCode}")
+    suspend fun uploadLogo(
+        @Path("companyCode") companyCode: String,
+        @Part file: MultipartBody.Part,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Unit>
 
     /**
      * Dashboard Management
@@ -467,7 +478,7 @@ interface ApiService {
     suspend fun addRestaurantProfile(
         @Body profile: RestaurantProfile,
         @Header("X-Tenant-ID") tenantId: String
-    ): RestaurantProfile
+    ): Response<RestaurantProfile>
 
     /**
      * GeneralSettings Management
@@ -739,7 +750,7 @@ interface ApiService {
      */
 
     @POST("companyMaster/createCompanyMaster")
-    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest): RegistrationResponse
+    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest): Response<RegistrationResponse>
 
     @GET("companyMaster/getCompanyCode")
     suspend fun getCompanyCode(): Map<String, String>

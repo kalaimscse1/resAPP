@@ -76,22 +76,3 @@ class ResbApplication : Application(), Configuration.Provider {
         LocaleHelper.onAttach(this)
     }
 }
-
-//class CustomWorkerFactory @Inject constructor() : WorkerFactory() {
-//    val sessionManager = SessionManager(this)
-//    override fun createWorker(
-//        appContext: Context,
-//        workerClassName: String,
-//        workerParameters: WorkerParameters
-//    ): ListenableWorker? {
-//        return when (workerClassName) {
-//            SyncWorker::class.java.name -> SyncWorker(
-//                appContext,
-//                workerParameters,
-//                apiService,
-//                sessionManager
-//            )
-//            else -> null
-//        }
-//    }
-//}

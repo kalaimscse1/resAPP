@@ -1,7 +1,6 @@
 
 package com.warriortech.resb.util
 
-import android.util.Log
 import com.warriortech.resb.network.SessionManager
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -29,7 +28,6 @@ class SubscriptionManager @Inject constructor(
             try {
                 LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
             } catch (e: Exception) {
-                Log.e(TAG, "Error parsing subscription end date: ${e.message}")
                 null
             }
         }
@@ -71,7 +69,6 @@ class SubscriptionManager @Inject constructor(
             try {
                 LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
             } catch (e: Exception) {
-                Log.e(TAG, "Error parsing last notification date: ${e.message}")
                 null
             }
         }

@@ -4,13 +4,15 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RegistrationRepository
+import com.warriortech.resb.model.Registration
 import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RestaurantProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -143,32 +145,24 @@ class RegistrationViewModel @Inject constructor(
                     expiry_date = state.expiryDate,
                     is_block = state.isBlock
                 )
-
-                val profile = RestaurantProfile(
-                    company_code = state.companyMasterCode,
-                    company_name = state.companyName,
-                    owner_name = state.ownerName,
-                    address1 = state.address1,
-                    address2 = state.address2,
-                    place = state.place,
-                    pincode = state.pincode,
-                    contact_no = state.contactNo,
-                    mail_id = state.mailId,
-                    country = state.country,
-                    state = state.state,
-                    currency = "Rs",
-                    tax_no = "",
-                    decimal_point = 2L
-                )
-
                 val response = registrationRepository.registerCompany(request)
-                delay(3000)
-                registrationRepository.addRestaurantProfile(profile)
-                _registrationResult.value = if (response.success) {
-                    "Registration successful!"
-                } else {
-                    response.message
+                response.collect { result->
+                    result.fold(
+                        onSuccess = { res ->
+                            _registrationResult.value ="Registration successful!"
+                        },
+                        onFailure = { error ->
+                            _registrationResult.value = error.message
+                        }
+                    )
                 }
+
+//                 if (response.success) {
+//                     createCompany(response.data!!)
+//                     _registrationResult.value ="Registration successful!"
+//                } else {
+//                     _registrationResult.value =  response.message
+//                }
             } catch (e: Exception) {
                 _registrationResult.value = "Registration failed: ${e.message}"
             } finally {
@@ -176,6 +170,41 @@ class RegistrationViewModel @Inject constructor(
             }
         }
     }
+//
+//    private fun createCompany(response: Registration){
+//        viewModelScope.launch {
+//            try {
+//                val res = response
+//
+//                val profile = RestaurantProfile(
+//                    company_code = res.company_master_code,
+//                    company_name = res.company_name,
+//                    owner_name = res.owner_name,
+//                    address1 = res.address1,
+//                    address2 = res.address2,
+//                    place = res.place,
+//                    pincode = res.pincode,
+//                    contact_no = res.contact_no,
+//                    mail_id = res.mail_id,
+//                    country = res.country,
+//                    state = res.state,
+//                    currency = "Rs",
+//                    tax_no = "",
+//                    decimal_point = 2L
+//                )
+//                val result = registrationRepository.addRestaurantProfile(profile)
+//                if (result != null) {
+//                    _registrationResult.value = "Registration successful!"
+//                } else {
+//                    _registrationResult.value = "Registration UnSuccessful!"
+//                }
+//            }catch (e: Exception) {
+//                _registrationResult.value = "Registration failed: ${e.message}"
+//            } finally {
+//                _uiState.value = _uiState.value.copy(isLoading = false)
+//            }
+//        }
+//    }
 
     private fun validateForm(state: RegistrationUiState): Boolean
     {

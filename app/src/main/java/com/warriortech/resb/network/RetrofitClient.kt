@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
  * Singleton object for creating and managing the Retrofit client
  */
 object RetrofitClient {
-    private const val BASE_URL = "http://110.172.164.71:5050/api/" // Replace with your actual API URL
+    const val BASE_URL = "http://110.172.164.71:5050/api/" // Replace with your actual API URL
     // Create OkHttpClient with logging and timeout settings
 
     val apiService: ApiService = Retrofit.Builder()

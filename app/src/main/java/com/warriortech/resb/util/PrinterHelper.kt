@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.util.Log
 import com.warriortech.resb.model.*
 import java.io.IOException
 import java.io.OutputStream
@@ -39,7 +38,6 @@ class PrinterHelper(private val context: Context) {
      */
     fun connectPrinter(): Boolean {
         // Placeholder for actual printer connection code
-        Log.d(TAG, "Connecting to printer...")
         return true
     }
 
@@ -51,12 +49,10 @@ class PrinterHelper(private val context: Context) {
      * @return true if print successful, false otherwise
      */
     fun printKot(kotData: KotData, template: ReceiptTemplate): Boolean {
-        Log.d(TAG, "Printing KOT #${kotData.kotNumber} for Table ${kotData.tableNumber}")
 
         try {
             // 1. Connect to printer (if not already connected)
             if (!connectPrinter()) {
-                Log.e(TAG, "Failed to connect to printer")
                 return false
             }
 
@@ -65,14 +61,12 @@ class PrinterHelper(private val context: Context) {
 
             // 3. Send data to printer
             // This is where you would use your printer's SDK to send the actual data
-            Log.d(TAG, "Sending KOT data to printer: $printData")
 
             // 4. Disconnect printer
             disconnectPrinter()
 
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "Error printing KOT: ${e.message}")
             return false
         }
     }
@@ -84,12 +78,10 @@ class PrinterHelper(private val context: Context) {
      * @return true if print successful, false otherwise
      */
     fun printKot(kotData: KOTRequest): Boolean {
-        Log.d(TAG, "Printing KOT #${kotData.kotId} for Table ${kotData.tableNumber}")
 
         try {
             // 1. Connect to printer (if not already connected)
             if (!connectPrinter()) {
-                Log.e(TAG, "Failed to connect to printer")
                 return false
             }
 
@@ -98,14 +90,12 @@ class PrinterHelper(private val context: Context) {
 
             // 3. Send data to printer
             // This is where you would use your printer's SDK to send the actual data
-            Log.d(TAG, "Sending data to printer: $printData")
 
             // 4. Disconnect printer
             disconnectPrinter()
 
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "Error printing KOT: ${e.message}")
             return false
         }
     }
@@ -118,12 +108,10 @@ class PrinterHelper(private val context: Context) {
      * @return true if print successful, false otherwise
      */
     fun printBill(billData: Bill, template: ReceiptTemplate): Boolean {
-        Log.d(TAG, "Printing Bill #${billData.billNo}")
 
         try {
             // 1. Connect to printer (if not already connected)
             if (!connectPrinter()) {
-                Log.e(TAG, "Failed to connect to printer")
                 return false
             }
 
@@ -131,14 +119,12 @@ class PrinterHelper(private val context: Context) {
             val printData = formatBillForPrinting(billData, template)
 
             // 3. Send data to printer
-            Log.d(TAG, "Sending bill data to printer: $printData")
 
             // 4. Disconnect printer
             disconnectPrinter()
 
             return true
         } catch (e: Exception) {
-            Log.e(TAG, "Error printing bill: ${e.message}")
             return false
         }
     }
@@ -355,7 +341,6 @@ class PrinterHelper(private val context: Context) {
      */
     private fun disconnectPrinter() {
         // Placeholder for actual printer disconnection code
-        Log.d(TAG, "Disconnecting from printer...")
     }
 
     @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
