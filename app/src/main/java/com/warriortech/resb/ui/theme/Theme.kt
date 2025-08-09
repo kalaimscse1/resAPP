@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.warriortech.resb.R
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 val MontserratFontFamily = FontFamily(
     Font(R.font.montserrat_regular, FontWeight.Normal),
@@ -182,18 +183,17 @@ val ResbTypography = Typography(
 @Composable
 fun ResbTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // 👈 disable dynamic colors
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      darkTheme -> DarkColorScheme
-      else -> LightColorScheme
+    val systemUiController = rememberSystemUiController()
+    val colorScheme = if (darkTheme) {
+        systemUiController.setStatusBarColor(DarkColorScheme.surface, darkIcons = false)
+        DarkColorScheme
+    } else {
+        systemUiController.setStatusBarColor(LightColorScheme.surface, darkIcons = true)
+        LightColorScheme
     }
-//    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
@@ -201,3 +201,48 @@ fun ResbTheme(
         content = content
     )
 }
+
+//@Composable
+//fun ResbTheme(
+//    darkTheme: Boolean = isSystemInDarkTheme(),
+//    dynamicColor: Boolean = true,
+//    content: @Composable () -> Unit
+//) {
+//    val systemUiController = rememberSystemUiController()
+//    val colorScheme = when {
+//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+//            val context = LocalContext.current
+//            if (darkTheme) {
+//                systemUiController.setStatusBarColor(
+//                    color = DarkColorScheme.surface,
+//                    darkIcons = false
+//                )
+//                dynamicDarkColorScheme(context)
+//            } else {
+//                systemUiController.setStatusBarColor(
+//                    color = LightColorScheme.surface,
+//                    darkIcons = true
+//                )
+//                dynamicLightColorScheme(context)
+//            }
+//        }
+//        darkTheme -> {
+//            systemUiController.setStatusBarColor(color = DarkColorScheme.surface, darkIcons = false)
+//            DarkColorScheme
+//        }
+//        else -> {
+//            systemUiController.setStatusBarColor(
+//                color = LightColorScheme.surface,
+//                darkIcons = true
+//            )
+//            LightColorScheme
+//        }
+//    }
+//    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
+//    MaterialTheme(
+//        colorScheme = colorScheme,
+//        typography = Typography,
+//        content = content
+//    )
+//}

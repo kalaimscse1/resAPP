@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,6 +61,9 @@ fun RegistrationScreen(
         registrationResult?.let { message ->
             snackbarHostState.showSnackbar(message)
             viewModel.clearRegistrationResult()
+            navController.navigate("login") {
+                popUpTo("registration") { inclusive = true }
+            }
         }
     }
 
@@ -237,6 +241,14 @@ fun RegistrationScreen(
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = uiState.mailId,
+                        onValueChange = { viewModel.updateMailId(it) },
+                        label = { Text("Email ID *") },
+                        isError = uiState.emailError != null,
+                        supportingText = { uiState.emailError?.let { Text(it, color = Color.Red) } },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

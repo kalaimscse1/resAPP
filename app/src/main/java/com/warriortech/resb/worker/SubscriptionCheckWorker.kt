@@ -25,7 +25,7 @@ class SubscriptionCheckWorker(
         fun notificationHelper(): NotificationHelper
     }
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO)  {
         try {
             val entryPoint = EntryPointAccessors.fromApplication(
                 applicationContext,

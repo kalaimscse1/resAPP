@@ -518,7 +518,7 @@ fun createSampleBillData(): Bill {
         roundOff = 0.0,
         paperWidth = 48,
         time = "",
-        orderNo = 1L,
+        orderNo = "",
         counter = "",
         custName = "",
         custNo = "",

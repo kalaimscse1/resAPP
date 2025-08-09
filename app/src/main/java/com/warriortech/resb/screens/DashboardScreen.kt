@@ -31,36 +31,6 @@ import com.warriortech.resb.ui.components.PaymentModePieChart
 import com.warriortech.resb.ui.components.WeeklySalesBarChart
 import com.warriortech.resb.ui.theme.GradientStart
 
-/**
- * DashboardScreen displays the main dashboard with real-time metrics,
- * quick actions, running orders, and recent activity.
- * It provides an overview of the restaurant's operations,
- * including today's metrics, quick actions for common tasks,
- * a list of running orders, and recent activity logs.
- * This screen is designed to be responsive and optimized for mobile devices,
- * allowing restaurant staff to quickly access important information
- * and perform actions efficiently.
- * It includes sections for:
- * - Today's Metrics: Displays key metrics like running orders, pending bills, total sales, and pending due.
- * - Quick Actions: Provides buttons for common tasks like creating a new order, viewing orders, billing, and settings.
- * - Running Orders: Lists currently active orders with details like order ID, table info, status, item count, and amount.
- * - Recent Activity: Shows a log of recent activities in the restaurant, such as order updates or billing actions.
- * This screen uses a [Scaffold] to provide a top app bar and handles loading states,
- * error states, and success states using a [LazyColumn] for displaying content.
- * It also includes a top app bar with a title, navigation icon, and refresh action.
- * @param drawerState The state of the navigation drawer, used to open/close the drawer.
- * @param onNavigateToOrders Callback to navigate to the orders screen.
- * @param onNavigateToMenu Callback to navigate to the menu screen.
- * @param onNavigateToSettings Callback to navigate to the settings screen.
- * @param onNavigateToBilling Callback to navigate to the billing screen.
- * @param viewModel The [DashboardViewModel] instance to manage the dashboard data.
- * This screen is part of the restaurant management application,
- * providing a centralized view for staff to monitor and manage daily operations.
- * @author WarriorTech
- * @version 1.0
- * @date 2025-07-17
- */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
 @Composable
@@ -70,6 +40,8 @@ fun DashboardScreen(
     onNavigateToMenu: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToBilling: () -> Unit,
+    onDineInSelected: () -> Unit,
+    onTakeawaySelected: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
     sessionManager: SessionManager
 ) {
@@ -173,6 +145,8 @@ fun DashboardScreen(
                             onNavigateToOrders = onNavigateToOrders,
                             onNavigateToSettings = onNavigateToSettings,
                             onNavigateToBilling = onNavigateToBilling,
+                            onDineInSelected = onDineInSelected,
+                            onTakeawaySelected = onTakeawaySelected,
                             sessionManager
                         )
                     }
@@ -352,9 +326,13 @@ fun QuickActionsSection(
     onNavigateToOrders: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToBilling: () -> Unit,
+    onDineInSelected: () -> Unit,
+    onTakeawaySelected: () -> Unit,
     sessionManager: SessionManager
 ) {
     val role = sessionManager.getUser()?.role?:""
+    var showOrderTypeDialog by remember { mutableStateOf(false) }
+
     Column {
         Text(
             "Quick Actions",
@@ -368,7 +346,7 @@ fun QuickActionsSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MobileOptimizedButton(
-                onClick = onNavigateToMenu,
+                onClick = { showOrderTypeDialog = true },
                 text = "New Order",
                 modifier = Modifier.weight(1f)
             )
@@ -399,6 +377,29 @@ fun QuickActionsSection(
                 )
             }
         }
+    }
+    if (showOrderTypeDialog) {
+        AlertDialog(
+            onDismissRequest = { showOrderTypeDialog = false },
+            title = { Text("Select Order Type") },
+            text = { Text("Please choose order type:") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showOrderTypeDialog = false
+                    onDineInSelected()
+                }) {
+                    Text("Dine-In")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showOrderTypeDialog = false
+                    onTakeawaySelected()
+                }) {
+                    Text("Takeaway")
+                }
+            }
+        )
     }
 }
 

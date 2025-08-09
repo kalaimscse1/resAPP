@@ -18,7 +18,7 @@ data class Registration(
     val year: String,
     val database_name: String,
     val order_plan: String,
-    val install_date: LocalDate,
+    val install_date: String,
     val subscription_days: Long,
     val expiry_date: String,
     val is_block: Boolean,

@@ -37,23 +37,8 @@ class RestaurantProfileRepository @Inject constructor(
         }
     }
 
-    suspend fun uploadImageToServer(uri: Uri, context: Context, companyCode: String) : Flow<Result<String>>  =
-        flow{
-            val contentResolver = context.contentResolver
-            val inputStream = contentResolver.openInputStream(uri) ?: return@flow
-            val file = File(context.cacheDir, "upload_image")
-            file.outputStream().use { inputStream.copyTo(it) }
+    suspend fun addRestaurantProfile(profile: RestaurantProfile) :RestaurantProfile?{
+        return apiService.addRestaurantProfile(profile,profile.company_code).body()
+    }
 
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val multipartBody = MultipartBody.Part.createFormData("file", file.name, requestFile)
-            val companyCodeBody = companyCode.toRequestBody("text/plain".toMediaTypeOrNull())
-
-            val response = apiService.uploadLogo(companyCode,multipartBody,companyCode)
-
-            if (response.isSuccessful) {
-                Result.success("Image uploaded successfully")
-            } else {
-               Result.failure(Exception("Image upload failed"))
-            }
-        }
 }

@@ -115,7 +115,7 @@ fun BillingScreen(
     navController: NavHostController,
     viewModel: BillingViewModel = hiltViewModel(),
     orderDetailsResponse: List<TblOrderDetailsResponse>? = null,
-    orderMasterId: Long? = null
+    orderMasterId: String? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -177,7 +177,10 @@ fun BillingScreen(
         },
         bottomBar = {
             BillingBottomBar(uiState = uiState,orderMasterId = orderMasterId) {
-                navController.navigate("payment_screen/${uiState.totalAmount}")
+                navController.navigate("payment_screen/${uiState.totalAmount}/${uiState.orderMasterId}") {
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
         }
     ) { paddingValues ->
@@ -457,7 +460,7 @@ fun EditableBillingRow(
 @Composable
 fun BillingBottomBar(
     uiState: BillingPaymentUiState,
-    orderMasterId: Long? = null,
+    orderMasterId: String? = null,
     onProceedToPayment: () -> Unit
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }

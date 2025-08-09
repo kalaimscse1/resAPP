@@ -7,7 +7,7 @@ data class TblVoucherRequest(
     var voucher_prefix:String,
     var voucher_suffix:String,
     var starting_no:String,
-    var is_active:Long
+    var is_active: Boolean
 )
 
 data class TblVoucherResponse(
@@ -17,7 +17,7 @@ data class TblVoucherResponse(
     var voucher_prefix:String,
     var voucher_suffix:String,
     var starting_no:String,
-    var is_active:Long
+    var is_active: Boolean
 )
 
 data class TblVoucher(
@@ -27,5 +27,5 @@ data class TblVoucher(
     var voucher_prefix:String,
     var voucher_suffix:String,
     var starting_no:String,
-    var is_active:Long
+    var is_active: Boolean
 )

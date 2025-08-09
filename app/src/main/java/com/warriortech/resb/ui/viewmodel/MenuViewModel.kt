@@ -62,7 +62,7 @@ class MenuViewModel @Inject constructor(
 
     val tableStatus = MutableStateFlow<String?>(null)
 
-    val existingOrderId = MutableStateFlow<Int?>(null)
+    val existingOrderId = MutableStateFlow<String?>(null)
 
     private val _newselectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
     var newselectedItems: StateFlow<Map<MenuItem, Int>> = _newselectedItems.asStateFlow()
@@ -129,7 +129,7 @@ class MenuViewModel @Inject constructor(
                     _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
                     _isExistingOrderLoaded.value = true
                     existingOrderId.value =
-                        existingItemsForTable.firstOrNull()?.order_master_id?.toInt()
+                        existingItemsForTable.firstOrNull()?.order_master_id
                 } else {
                     _selectedItems.value = mutableMapOf()
                 }
@@ -247,7 +247,7 @@ class MenuViewModel @Inject constructor(
                             val kotRequest = KOTRequest(
                                 tableNumber = if (tableStatus1 != "TAKEAWAY" && tableStatus1 != "DELIVERY") order.table_name else tableStatus1.toString(),
                                 kotId = order.kot_number,
-                                orderId = order.order_master_id?.toLong(),
+                                orderId = order.order_master_id,
                                 waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
                                 items = kotItem
@@ -287,7 +287,7 @@ class MenuViewModel @Inject constructor(
                             val kotRequest = KOTRequest(
                                 tableNumber = if (tableStatus1 != "TAKEAWAY" && tableStatus.value != "DELIVERY") order.table_name.toString() else tableStatus1.toString(),
                                 kotId = order.kot_number,
-                                orderId = order.order_master_id?.toLong(),
+                                orderId = order.order_master_id,
                                 waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
                                 items = kotItem
@@ -306,7 +306,8 @@ class MenuViewModel @Inject constructor(
 
     private fun printKOT(orderId: KOTRequest) {
         viewModelScope.launch {
-            if (sessionManager.getGeneralSetting()?.is_kot!!) {
+            val isKOTEnabled = sessionManager.getGeneralSetting()?.is_kot ?: false
+            if (isKOTEnabled) {
                 val category = orderId.items.groupBy { it.category }
                 for ((category, items) in category) {
                     val kotForCategory = KOTRequest(

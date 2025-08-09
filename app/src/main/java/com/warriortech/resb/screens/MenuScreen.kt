@@ -26,6 +26,7 @@ import androidx.compose.material.Tab
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
@@ -47,7 +48,7 @@ import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
 
-@SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
+@SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
@@ -56,7 +57,7 @@ fun MenuScreen(
     tableId: Long,       // Actual table ID for table orders, or a placeholder for others
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
-    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId:Long) -> Unit,
+    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId: String) -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
     drawerState: DrawerState,
     navController: NavHostController,
@@ -105,11 +106,13 @@ fun MenuScreen(
         when (val currentOrderState = orderState) { // Use a stable val
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
-                    if (sessionManager.getGeneralSetting()?.is_kot!!)
+                    if (sessionManager.getGeneralSetting()?.is_kot!!){
                         snackbarHostState.showSnackbar("Order placed successfully and KOT sent to kitchen")
-                        else
-                    snackbarHostState.showSnackbar("Order placed successfully")
-                    onOrderPlaced() // This should navigate away or reset the screen
+                        onOrderPlaced()
+                    } else {
+                        snackbarHostState.showSnackbar("Order placed successfully")
+                        onOrderPlaced() // This should navigate away or reset the screen
+                    }
                 }
             }
             is MenuViewModel.OrderUiState.Error -> {
@@ -209,11 +212,11 @@ fun MenuScreen(
                     if (viewModel.isExistingOrderLoaded.value) {
                         MobileOptimizedButton(
                             onClick = {
-                                navController.navigate("billing_screen/${viewModel.existingOrderId.value?.toLong() ?: 0}") {
+                                navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
                                     launchSingleTop = true
                                 }
                                 onBillPlaced(viewModel.orderDetailsResponse.value,
-                                    viewModel.existingOrderId.value?.toLong()!!
+                                    viewModel.existingOrderId.value?:""
                                 )
                                 },
                             enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
@@ -326,11 +329,15 @@ fun MenuScreen(
                                     existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem] ?: 0 else 0,
                                     onAddItem = { 
                                         // Show modifier dialog instead of directly adding
-                                        viewModel.showModifierDialog(menuItem)
+//                                        viewModel.showModifierDialog(menuItem)
+                                        viewModel.addItemToOrder(menuItem)
                                     },
                                     onRemoveItem = { viewModel.removeItemFromOrder(menuItem) },
                                     tableStatus = effectiveStatus.toString(),
-                                    isExistingOrder = viewModel.isExistingOrderLoaded.value
+                                    isExistingOrder = viewModel.isExistingOrderLoaded.value,
+                                    onModifierClick = {
+                                        viewModel.showModifierDialog(menuItem)
+                                    }
                                 )
                             }
                             item { Spacer(modifier = Modifier.height(80.dp)) } // For bottom bar
@@ -402,6 +409,7 @@ fun MenuItemCard(
     existingQuantity: Int = 0,
     onAddItem: () -> Unit,
     onRemoveItem: () -> Unit,
+    onModifierClick: () -> Unit,
     tableStatus: String,
     isExistingOrder: Boolean = false
 ) {
@@ -498,6 +506,15 @@ fun MenuItemCard(
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Add",
+                                tint = Color.Green
+                            )
+                        }
+                        IconButton(
+                            onClick = onModifierClick
+                        ) {
+                            Icon(
+                                Icons.Default.AddCircle,
+                                contentDescription = "Modigiers",
                                 tint = Color.Green
                             )
                         }

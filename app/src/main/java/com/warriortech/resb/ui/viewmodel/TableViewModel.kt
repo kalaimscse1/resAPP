@@ -44,7 +44,7 @@ class TableViewModel @Inject constructor(
     fun loadTables(){
         // Load tables when section changes or just all tables if no section selected
         viewModelScope.launch {
-            _area.value=tableRepository.getAllAreas()
+            _area.value=tableRepository.getAllAreas().filter { it.area_name !="--" }
             _selectedSection
                 .flatMapLatest { section ->
                     if (section != null) {

@@ -1,5 +1,10 @@
 package com.warriortech.resb.screens
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,16 +15,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.CircularProgressIndicator
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.Surface
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -53,25 +56,59 @@ import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.SuccessGreen
 import com.warriortech.resb.ui.theme.TextPrimary
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.theme.TextSecondary
+import com.warriortech.resb.ui.theme.ghostWhite
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+//
+@OptIn( ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionScreen(
     onTableSelected: (Table) -> Unit,
     viewModel: TableViewModel = hiltViewModel(),
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    sessionManager: SessionManager
 ) {
     val connectionState by viewModel.connectionState.collectAsState()
     val tablesState by viewModel.tablesState.collectAsState()
     val areas by viewModel.areas.collectAsState()
     val scope = rememberCoroutineScope()
-    var selectedArea by remember { mutableStateOf<String?>(null) }
 
-
+    val displayableAreas = areas.filter { it.area_name != "--" }
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { displayableAreas.size}
+    )
+    val currentArea = displayableAreas.getOrNull(pagerState.currentPage)
+    val role = sessionManager.getUser()?.role ?: ""
+    val areaId = currentArea?.area_name ?: ""
+    var selectedArea by remember { mutableStateOf<String?>(areaId) }
     LaunchedEffect(Unit) {
         viewModel.loadTables()
+    }
+
+    // Update selected area and section whenever the page changes
+    LaunchedEffect(pagerState.currentPage) {
+        currentArea?.let {
+            viewModel.setSection(it.area_id)
+        }
     }
 
     Scaffold(
@@ -93,87 +130,178 @@ fun SelectionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
         ) {
             NetworkStatusBar(connectionState = connectionState)
-            if (areas.isNotEmpty()) {
-                val displayablAreas = areas.filter { it.area_name != "--" }
-                val calculatedIndex = displayablAreas.indexOfFirst { it.area_name == selectedArea }
-                ScrollableTabRow(
-                    selectedTabIndex = calculatedIndex.coerceAtLeast(0),
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    contentColor = TextPrimary,
-                    edgePadding = 0.dp
-                ) {
-                    displayablAreas.forEachIndexed { index, areaItem ->
-                        Tab(
-                            selected = areaItem.area_name == selectedArea,
-                            onClick = {
-                                selectedArea = areaItem.area_name
-                                viewModel.setSection(areaItem.area_id)
-                            },
-                            text = { Text(areaItem.area_name) }
-                        )
-                    }
-                }
-            }
-
-
-            // Table Grid
-            when (val currentTablesState = tablesState) {
-                is TableViewModel.TablesState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+            if (role == "ADMIN" || role == "RESBADMIN" || role == "CHEF") {
+                if (displayableAreas.isNotEmpty()) {
+                    ScrollableTabRow(
+                        selectedTabIndex = pagerState.currentPage,
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        contentColor = TextPrimary,
+                        edgePadding = 0.dp
                     ) {
-                        CircularProgressIndicator()
+                        displayableAreas.forEachIndexed { index, areaItem ->
+                            Tab(
+                                selected = index == pagerState.currentPage,
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                },
+                                text = { Text(areaItem.area_name) }
+                            )
+                        }
+                    }
+
+                    HorizontalPager(
+                        pageSize = PageSize.Fill,
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        val area = displayableAreas[page]
+                        val filteredTables = when (val state = tablesState) {
+                            is TableViewModel.TablesState.Success ->
+                                state.tables.filter { it.area_name == area.area_name }
+
+                            else -> emptyList()
+                        }
+
+                        when (val currentTablesState = tablesState) {
+                            is TableViewModel.TablesState.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+
+                            is TableViewModel.TablesState.Success -> {
+                                if (filteredTables.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No tables in ${area.area_name}.",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                } else {
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Fixed(3),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(16.dp),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        items(filteredTables) { table ->
+                                            TableItem(
+                                                table = table,
+                                                onClick = { onTableSelected(table) })
+                                        }
+                                    }
+                                }
+                            }
+
+                            is TableViewModel.TablesState.Error -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = currentTablesState.message,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }else{
+                if (areas.isNotEmpty()) {
+                    val displayablAreas = areas.filter { it.area_name == areaId }
+                    val calculatedIndex = displayablAreas.indexOfFirst { it.area_name == selectedArea }
+                    ScrollableTabRow(
+                        selectedTabIndex = calculatedIndex.coerceAtLeast(0),
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        contentColor = TextPrimary,
+                        edgePadding = 0.dp
+                    ) {
+                        displayablAreas.forEachIndexed { index, areaItem ->
+                            Tab(
+                                selected = areaItem.area_name == selectedArea,
+                                onClick = {
+                                    selectedArea = areaItem.area_name
+                                    viewModel.setSection(areaItem.area_id)
+                                },
+                                text = { Text(areaItem.area_name) }
+                            )
+                        }
                     }
                 }
 
-                is TableViewModel.TablesState.Success -> {
-                    val tables = currentTablesState.tables
-                    val filteredTables = if (selectedArea != null) {
-                        tables.filter { it.area_name == selectedArea }
-                    } else {
-                        tables
+
+                // Table Grid
+                when (val currentTablesState = tablesState) {
+                    is TableViewModel.TablesState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
-                    if (filteredTables.isEmpty()) {
+
+                    is TableViewModel.TablesState.Success -> {
+                        val filteredTables = when (val state = tablesState) {
+                            is TableViewModel.TablesState.Success ->
+                                state.tables.filter { it.area_name == areaId }
+
+                            else -> emptyList()
+                        }
+                        if (filteredTables.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No tables available for the selected criteria.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        } else {
+
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(3), // 👈 exactly 3 columns per row
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                items(filteredTables) { table ->
+                                    TableItem(table = table, onClick = { onTableSelected(table) })
+                                }
+                            }
+                        }
+                    }
+
+                    is TableViewModel.TablesState.Error -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No tables available for the selected criteria.",
+                                text = currentTablesState.message,
+                                color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Center
                             )
                         }
-                    } else {
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            filteredTables.forEach { table ->
-                                TableItem(table = table, onClick = { onTableSelected(table) })
-                            }
-                        }
-                    }
-                }
-
-                is TableViewModel.TablesState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = currentTablesState.message,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
             }
@@ -184,31 +312,61 @@ fun SelectionScreen(
 @Composable
 fun TableItem(table: Table, onClick: () -> Unit) {
     val color = when (table.table_availability) {
-        "AVAILABLE" -> MaterialTheme.colorScheme.primaryContainer
-        "OCCUPIED" -> MaterialTheme.colorScheme.errorContainer
+        "AVAILABLE" -> TextSecondary
+        "OCCUPIED" -> SuccessGreen
         "RESERVED" -> MaterialTheme.colorScheme.tertiaryContainer
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
-
+    val borderColor: Color = color
+    val cornerRadius: Dp = 12.dp
+    val borderWidth: Dp = 4.dp
     Surface(
         modifier = Modifier
-            .width(150.dp)
-            .height(150.dp)
+            .width(90.dp)
+            .height(90.dp)
             .clickable(onClick = onClick),
-        shape = MaterialTheme.shapes.small,
-        elevation = 4.dp,
-        border = _root_ide_package_.androidx.compose.foundation.BorderStroke(4.dp, color)
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = 8.dp,
+        color = ghostWhite
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(table.table_name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("${table.seating_capacity} Seats", style = MaterialTheme.typography.bodySmall)
+                .clip(RoundedCornerShape(cornerRadius))
+                .drawWithContent {
+                    drawContent()
+
+                    val stroke = borderWidth.toPx()
+                    val width = size.width
+                    val lineWidth = width
+
+                    // Draw animated top border with rounded corners
+                    drawRoundRect(
+                        color = borderColor,
+                        topLeft = Offset(0f, 0f),
+                        size = Size(lineWidth, stroke),
+                        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+                    )
+                }
+        )
+       {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = table.table_name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "${table.seating_capacity} Seats",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }

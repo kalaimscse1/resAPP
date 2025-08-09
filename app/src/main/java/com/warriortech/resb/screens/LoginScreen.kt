@@ -27,7 +27,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -85,6 +89,7 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope() // For Snackbar
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
+    var passwordVisible by remember { mutableStateOf(false) }
 
     /**
      * Effect to handle login success.
@@ -222,10 +227,10 @@ fun LoginScreen(
                             )
                         },
                         trailingIcon = {
-                            IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    imageVector = if (uiState.value.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = if (uiState.value.isPasswordVisible) "Hide Password" else "Show Password"
+                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password"
                                 )
                             }
                         }
@@ -340,11 +345,10 @@ fun LoginScreen(
                             )
                         },
                         trailingIcon = {
-                            androidx.compose.material.IconButton(onClick = { viewModel.togglePasswordVisibility() }) {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    imageVector = if (uiState.value.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (uiState.value.isPasswordVisible) "Hide password" else "Show password",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password"
                                 )
                             }
                         }

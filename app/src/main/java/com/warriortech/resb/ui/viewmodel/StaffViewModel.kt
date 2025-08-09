@@ -64,6 +64,8 @@ class StaffViewModel @Inject constructor(
                     is_block = false,
                     counter_id = 1,
                     counter_name = "",
+                    area_id = 1,
+                    area_name = "",
                     is_active = 1
                 )
                 staffRepository.insertStaff(staff)

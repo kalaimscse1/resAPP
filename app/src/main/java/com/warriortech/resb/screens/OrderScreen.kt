@@ -29,7 +29,7 @@ import com.warriortech.resb.ui.theme.GradientStart
 fun OrderScreen(
     drawerState: DrawerState,
     viewModel: OrderScreenViewModel = hiltViewModel(),
-    onNavigateToBilling: (List<TblOrderDetailsResponse>, Long) -> Unit,
+    onNavigateToBilling: (List<TblOrderDetailsResponse>, String) -> Unit,
 ) {
     val dineInOrders by viewModel.dineInOrders.collectAsStateWithLifecycle()
     val takeawayOrders by viewModel.takeawayOrders.collectAsStateWithLifecycle()
@@ -312,7 +312,7 @@ private fun OrderItem(
 }
 
 data class OrderDisplayItem(
-    val orderId: Long,
+    val orderId: String,
     val areaName: String?,
     val tableName: String?,
     val totalAmount: Double,

@@ -1,8 +1,6 @@
 package com.warriortech.resb.data.repository
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.Order
 import com.warriortech.resb.model.OrderDetails
@@ -41,7 +39,7 @@ class OrderRepository @Inject constructor(
         tableId: Long,
         itemsToPlace: List<OrderItem>,
         tableStatus: String,
-        existingOpenOrderMasterId: Int? = null // Allow passing it if already known
+        existingOpenOrderMasterId: String? = null // Allow passing it if already known
     ): Flow<Result<TblOrderResponse>> = flow {
         if (itemsToPlace.isEmpty()) {
             emit(Result.failure(IllegalArgumentException("Cannot place an order with no items.")))
@@ -68,7 +66,7 @@ class OrderRepository @Inject constructor(
 
             // 2. If no existing open OrderMaster, create a new one
             if (currentOrderMasterId == null) {
-                val newOrderMasterApiId = apiService.getOrderNo(sessionManager.getCompanyCode()?:"") // Get new Order Master ID from API
+                val newOrderMasterApiId = apiService.getOrderNo(sessionManager.getCompanyCode()?:"",sessionManager.getUser()?.counter_id ?:0L,"ORDER") // Get new Order Master ID from API
                 val orderRequest = OrderMaster(
                     order_date = getCurrentDateModern(),
                     order_create_time = getCurrentTimeModern(),
@@ -84,10 +82,10 @@ class OrderRepository @Inject constructor(
                     order_status = "RUNNING",
                     is_merge = false,
                     is_active = 1,
-                    order_master_id = newOrderMasterApiId["order_master_id"], // Use ID from getOrderNo
+                    order_master_id = newOrderMasterApiId["order_master_id"]?:"", // Use ID from getOrderNo
                     is_delivered = false
                 )
-                val response = apiService.createOrder(orderRequest,sessionManager.getCompanyCode()?:"")
+                val response = apiService.createOrder(orderRequest,sessionManager.getCompanyCode()?:"",sessionManager.getUser()?.counter_id ?: 0L,"ORDER")
                 if (response.isSuccessful && response.body() != null) {
                     orderMasterResponse = response.body()
                     currentOrderMasterId = orderMasterResponse!!.order_master_id
@@ -107,7 +105,7 @@ class OrderRepository @Inject constructor(
                 // This part depends on what TblOrderResponse should contain when updating.
                 // For simplicity, let's assume we proceed and the success emission will primarily focus on the KOT.
                 // Fetch the order master details if we only have the ID
-                val masterResponse = apiService.getOrderMasterById(currentOrderMasterId.toLong(),sessionManager.getCompanyCode()?:"") // YOU MIGHT NEED THIS ENDPOINT
+                val masterResponse = apiService.getOrderMasterById(currentOrderMasterId,sessionManager.getCompanyCode()?:"") // YOU MIGHT NEED THIS ENDPOINT
                 if (masterResponse.isSuccessful && masterResponse.body() != null) {
                     orderMasterResponse = masterResponse.body()
                 } else {
@@ -121,7 +119,7 @@ class OrderRepository @Inject constructor(
             val newKotNumberMap = apiService.getKotNo(sessionManager.getCompanyCode()?:"") // Get a KOT number for this batch of items
             val newKotNumber = newKotNumberMap["kot_number"]
 
-            if (currentOrderMasterId == null || newKotNumber == null) {
+            if (currentOrderMasterId.isEmpty() || newKotNumber == null) {
                 emit(Result.failure(Exception("Failed to obtain OrderMaster ID or KOT number.")))
                 return@flow
             }
@@ -222,7 +220,7 @@ class OrderRepository @Inject constructor(
 
                 // Step 2: Fetch all OrderDetails for that OrderMaster ID.
                 // Assuming getOpenOrderDetailsForTable actually means "getAllOrderDetailsForOrderMaster"
-                val orderDetailsResponse = apiService.getOpenOrderDetailsForTable(orderMasterId?.toLong(),sessionManager.getCompanyCode()?:"") // YOU MAY NEED TO RENAME/CREATE THIS
+                val orderDetailsResponse = apiService.getOpenOrderDetailsForTable(orderMasterId,sessionManager.getCompanyCode()?:"") // YOU MAY NEED TO RENAME/CREATE THIS
                 if (orderDetailsResponse.isSuccessful && orderDetailsResponse.body() != null) {
                     return orderDetailsResponse.body()!!
                 }
@@ -257,7 +255,7 @@ class OrderRepository @Inject constructor(
         return emptyList()
     }
 
-    suspend fun getRunningOrderAmount(orderId: Long): Map<String, Double> {
+    suspend fun getRunningOrderAmount(orderId: String): Map<String, Double> {
         val response = apiService.getRunningOrderAmount(orderId,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyMap()
@@ -268,26 +266,26 @@ class OrderRepository @Inject constructor(
      * Get orders for a specific table
      * Filters orders client-side
      */
-    suspend fun getOrdersByTable(tableId: Long): List<TblOrderDetailsResponse> {
-
-            val response = apiService.getOpenOrderItemsForTable(tableId,sessionManager.getCompanyCode()?:"")
-            var order=0
-
-            if (response.isSuccessful) {
-                val allOrders = response.body()
-                val orderno = allOrders?.get("order_master_id")
-                if (allOrders != null && orderno != null) {
-                    order=orderno
-// Filter orders for this table
-//                    val tableOrders = allOrders.filter { it.tableId == tableId }
-                }
-            }
-            val orderDetails = apiService.getOpenOrderDetailsForTable(order.toLong(),sessionManager.getCompanyCode()?:"")
-            if(orderDetails.isSuccessful){
-                return orderDetails.body()!!
-            }
-        return emptyList()
-    }
+//    suspend fun getOrdersByTable(tableId: Long): List<TblOrderDetailsResponse> {
+//
+//            val response = apiService.getOpenOrderItemsForTable(tableId,sessionManager.getCompanyCode()?:"")
+//            var order=0
+//
+//            if (response.isSuccessful) {
+//                val allOrders = response.body()
+//                val orderno = allOrders?.get("order_master_id")
+//                if (allOrders != null && orderno != null) {
+//                    order=orderno
+//// Filter orders for this table
+////                    val tableOrders = allOrders.filter { it.tableId == tableId }
+//                }
+//            }
+//            val orderDetails = apiService.getOpenOrderDetailsForTable(order,sessionManager.getCompanyCode()?:"")
+//            if(orderDetails.isSuccessful){
+//                return orderDetails.body()!!
+//            }
+//        return emptyList()
+//    }
 
     /**
      * Get active orders for a specific table
@@ -370,10 +368,10 @@ class OrderRepository @Inject constructor(
     /**
      * Update an order's status
      */
-    suspend fun updateOrderStatus(orderId: Int, newStatus: OrderStatus): Flow<Result<Order>> = flow {
+    suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Flow<Result<Order>> = flow {
         try {
             val statusUpdate = mapOf("status" to newStatus.name)
-            val response = apiService.updateOrderStatus(orderId, statusUpdate,sessionManager.getCompanyCode()?:"")
+            val response = apiService.updateOrderStatus(orderId, statusUpdate["status"]?:"",sessionManager.getCompanyCode()?:"")
 
             if (response.isSuccessful) {
                 val updatedOrder = response.body()
@@ -390,7 +388,7 @@ class OrderRepository @Inject constructor(
         }
     }
 
-    suspend fun getOrdersByOrderId(lng: Long): Response<List<TblOrderDetailsResponse>> {
+    suspend fun getOrdersByOrderId(lng: String): Response<List<TblOrderDetailsResponse>> {
         return apiService.getOpenOrderDetailsForTable(lng,sessionManager.getCompanyCode()?:"")
     }
 }

@@ -40,9 +40,9 @@ class OrderScreenViewModel @Inject constructor(
             try {
                 val orders = orderRepository.getAllOrders()
                 val orderDisplayItems = orders.map { order ->
-                    val totalAmount = orderRepository.getRunningOrderAmount(order.order_master_id?.toLong() ?: 0)
+                    val totalAmount = orderRepository.getRunningOrderAmount(order.order_master_id)
                     OrderDisplayItem(
-                        orderId = order.order_master_id?.toLong() ?: 0,
+                        orderId = order.order_master_id,
                         areaName = order.area_name,
                         tableName =  order.table_name,
                         totalAmount = totalAmount["grand_total"] ?: 0.0,
@@ -80,7 +80,7 @@ class OrderScreenViewModel @Inject constructor(
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun getOrdersByOrderId(lng: Long): List<TblOrderDetailsResponse> {
+    fun getOrdersByOrderId(lng: String): List<TblOrderDetailsResponse> {
         viewModelScope.launch {
             val order = orderRepository.getOrdersByOrderId(lng)
             if (order.body()!=null)

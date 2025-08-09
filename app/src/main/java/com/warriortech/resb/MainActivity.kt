@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -330,7 +331,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
-    var selectedOrderId by remember { mutableStateOf<Long?>(null) }
+    var selectedOrderId by remember { mutableStateOf<String?>(null) }
     
     // Check subscription status
     LaunchedEffect(Unit) {
@@ -367,7 +368,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                     selectedTable = table
                     navController.navigate("menu")
                 },
-                drawerState = drawerState
+                drawerState = drawerState,
+                sessionManager = sessionManager
             )
         }
 
@@ -412,13 +414,14 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             BillingScreen(
                 navController = navController,
                 orderDetailsResponse = selectedItems,
-                orderMasterId = backStackEntry.arguments?.getString("orderMasterId")?.toLong() ?: 0L
+                orderMasterId = backStackEntry.arguments?.getString("orderMasterId")
             )
         }
 
-        composable("payment_screen/{amountToPayFromRoute}") {
+        composable("payment_screen/{amountToPayFromRoute}/{orderId}") { it ->
             PaymentScreen(navController = navController,
-                amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")?.toDoubleOrNull() ?: 0.0
+                amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")?.toDoubleOrNull() ?: 0.0,
+                orderMasterId = it.arguments?.getString("orderId") ?: ""
             )
         }
 
@@ -553,6 +556,12 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                 onNavigateToMenu = {navController.navigate("menu")},
                 onNavigateToSettings = {navController.navigate("settings")},
                 onNavigateToBilling = {navController.navigate("counter")},
+                onDineInSelected = { navController.navigate("selects") },
+                onTakeawaySelected = {
+                    isTakeaway = "TAKEAWAY"
+                    selectedTable = null
+                    navController.navigate("takeaway_menu")
+                },
                 sessionManager = sessionManager
             )
         }
@@ -682,7 +691,7 @@ fun DrawerContent(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val role = sessionManager.getUser()?.role?:""
     val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
-
+    val (ordersExpanded, setOrdersExpanded) = remember { mutableStateOf(false) }
     ModalDrawerSheet(
         modifier = Modifier.width(drawerWidth),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
@@ -754,34 +763,50 @@ fun DrawerContent(
             }
             if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CASHIER") {
                 NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Dine In") else Text("") },
-                    icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
-                    selected = currentDestination?.route == "selects",
-                    onClick = {
-                        onDestinationClicked("selects")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Takeaway") else Text("") },
-                    icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
-                    selected = currentDestination?.route == "takeaway_menu",
-                    onClick = {
-                        onDestinationClicked("takeaway_menu")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-
-                NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Orders") else Text("") },
-                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                    selected = currentDestination?.route == "orders",
-                    onClick = {
-                        onDestinationClicked("orders")
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Receipt,
+                            contentDescription = null
+                        )
                     },
+                    selected = currentDestination?.route == "orders" ||
+                            currentDestination?.route == "selects" ||
+                            currentDestination?.route == "takeaway_menu",
+                    onClick = { setOrdersExpanded(!ordersExpanded) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
+
+                // Sub-menu items
+                AnimatedVisibility(visible = ordersExpanded) {
+                    Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Dine In") else Text("") },
+                            icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
+                            selected = currentDestination?.route == "selects",
+                            onClick = { onDestinationClicked("selects") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Takeaway") else Text("") },
+                            icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
+                            selected = currentDestination?.route == "takeaway_menu",
+                            onClick = { onDestinationClicked("takeaway_menu") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Orders") else Text("") },
+                            icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                            selected = currentDestination?.route == "orders",
+                            onClick = {
+                                onDestinationClicked("orders")
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+                    }
+                }
+
+
             }
             if (role == "RESBADMIN" || role == "ADMIN") {
                 NavigationDrawerItem(

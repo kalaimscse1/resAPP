@@ -59,7 +59,7 @@ data class PrintResponse(
 )
 
 data class OrderMaster(
-    var order_master_id: Int?,
+    var order_master_id: String,
     var order_date: String,
     var order_create_time: String,
     var order_completed_time: String,
@@ -79,7 +79,7 @@ data class OrderMaster(
 
 data class OrderDetails(
     var order_details_id: Long,
-    var order_master_id: Int?,
+    var order_master_id: String,
     var kot_number: Int?,
     var menu_item_id: Long,
     var rate: Double,
@@ -107,7 +107,7 @@ data class OrderDetails(
     var is_active:Long
 )
 data class TblOrderResponse(
-    var order_master_id: Int?,
+    var order_master_id: String,
     var order_date: String,
     var order_create_time:String,
     var order_completed_time:String,
@@ -131,7 +131,7 @@ data class TblOrderResponse(
 )
 data class TblOrderDetailsResponse(
     var order_details_id:Long,
-    var order_master_id:Long,
+    var order_master_id: String,
     var kot_number:Int,
     var menuItem: MenuItem,
     var rate: Double,

@@ -22,8 +22,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true      // Removes unused resources
+            isMinifyEnabled = false
+            isShrinkResources = false      // Removes unused resources
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -100,7 +100,7 @@ dependencies {
 //    implementation(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
     implementation(libs.androidx.security.crypto.ktx)
-
+    implementation("androidx.compose.foundation:foundation:1.6.0")
     ksp(libs.room.compiler.v252)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.android.core)
@@ -114,6 +114,7 @@ dependencies {
     implementation("com.itextpdf:itext7-core:7.2.5")
     implementation("org.apache.poi:poi:5.2.4")
     implementation("org.apache.poi:poi-ooxml:5.2.4")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0") // Or the latest version
 
     // AI Integration dependencies
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

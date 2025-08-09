@@ -17,6 +17,9 @@ import timber.log.Timber
 import javax.inject.Inject
 import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.util.SubscriptionScheduler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class ResbApplication : Application(), Configuration.Provider {
@@ -37,6 +40,10 @@ class ResbApplication : Application(), Configuration.Provider {
         subscriptionScheduler.scheduleSubscriptionChecks()
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            LocaleHelper.applyLocale(this@ResbApplication)
         }
     }
     override fun getWorkManagerConfiguration(): Configuration {

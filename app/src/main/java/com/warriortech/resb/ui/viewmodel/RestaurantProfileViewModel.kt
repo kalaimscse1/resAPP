@@ -1,10 +1,12 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RestaurantProfileRepository
 import com.warriortech.resb.model.GeneralSettings
 import com.warriortech.resb.model.RestaurantProfile
+import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RestaurantProfileViewModel @Inject constructor(
-    private val restaurantProfileRepository: RestaurantProfileRepository
+    private val restaurantProfileRepository: RestaurantProfileRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -31,8 +34,16 @@ class RestaurantProfileViewModel @Inject constructor(
 
             try {
                 _uiState.value = UiState.Loading
-                val profile = restaurantProfileRepository.getRestaurantProfile()
-                _uiState.value = UiState.Success(profile!!)
+                val profile = sessionManager.getRestaurantProfile()
+                val check = restaurantProfileRepository.getRestaurantProfile()
+                if (check != null) {
+                    _uiState.value = UiState.Success(check)
+                } else if (profile != null) {
+                    val pro = restaurantProfileRepository.addRestaurantProfile(profile)
+                    _uiState.value = UiState.Success(pro!!)
+                }else{
+                    _uiState.value = UiState.Error("Profile not found")
+                }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

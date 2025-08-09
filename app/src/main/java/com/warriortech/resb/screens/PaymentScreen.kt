@@ -39,14 +39,16 @@ import com.warriortech.resb.ui.theme.GradientStart
 fun PaymentScreen(
     navController: NavHostController,
     viewModel: BillingViewModel = hiltViewModel(), // Shared ViewModel
-    amountToPayFromRoute: Double? = null // If passing amount via route
+    amountToPayFromRoute: Double? = null,
+    orderMasterId: String? = null // If passing amount via route
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // If amount was passed via route, you might set it in the ViewModel once
-     LaunchedEffect(key1 = amountToPayFromRoute) {
+     LaunchedEffect(key1 = amountToPayFromRoute, key2 =  orderMasterId) {
          amountToPayFromRoute?.let { viewModel.updateAmountToPay(it.toDouble()) }
+            orderMasterId?.let { viewModel.updateOrderMasterId(it) }
      }
 
     LaunchedEffect(uiState.errorMessage) {
@@ -66,6 +68,7 @@ fun PaymentScreen(
             // For now, just show a snackbar and allow manual dismissal or pop back
             snackbarHostState.showSnackbar("Payment Successful! TXN ID: ${successState.transactionId}")
              viewModel.resetPaymentState() // Reset for next payment
+            navController.navigate("selects")
         } else if (uiState.paymentProcessingState is PaymentProcessingState.Error) {
             val errorState = uiState.paymentProcessingState as PaymentProcessingState.Error
             snackbarHostState.showSnackbar("Payment Failed: ${errorState.message}")

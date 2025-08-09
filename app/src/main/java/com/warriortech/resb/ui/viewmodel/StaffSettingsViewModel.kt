@@ -57,7 +57,9 @@ class StaffSettingsViewModel @Inject constructor(
                     is_block = false, // Assuming is_block is not required for add
                     counter_id = 1, // Assuming counter_id is not required for add
                     counter_name = "", // Assuming counter_name is not required for add
-                    is_active = 1 // Assuming is_active is not required for add
+                    is_active = 1,
+                    area_id = 0L,
+                    area_name = ""
                 )
                 staffRepository.insertStaff(staff)
                 loadStaff()
@@ -84,7 +86,9 @@ class StaffSettingsViewModel @Inject constructor(
                     is_block = false, // Assuming is_block is not required for update
                     counter_id = 1, // Assuming counter_id is not required for update
                     counter_name = "", // Assuming counter_name is not required for update
-                    is_active = 1 // Assuming is_active is not required for update
+                    is_active = 1, // Assuming is_active is not required for update
+                    area_id = 1L,
+                    area_name = "" // Assuming area_name is not required for update
                 )
                 staffRepository.updateStaff(staff)
                 loadStaff()

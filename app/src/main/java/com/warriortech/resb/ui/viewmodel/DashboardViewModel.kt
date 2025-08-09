@@ -63,7 +63,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun getOrdersByOrderId(lng: Long): List<TblOrderDetailsResponse> {
+    fun getOrdersByOrderId(lng: String): List<TblOrderDetailsResponse> {
         viewModelScope.launch {
             val order = orderRepository.getOrdersByOrderId(lng)
             if (order.body()!=null)

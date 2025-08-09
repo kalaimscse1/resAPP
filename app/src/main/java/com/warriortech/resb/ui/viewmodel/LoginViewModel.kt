@@ -100,9 +100,8 @@ class LoginViewModel @Inject constructor(
         _uiState.update{it.copy(isLoading = true, loginError = null)}
         viewModelScope.launch {
             try {
-                val check = RetrofitClient.apiService.checkIsBlock(uiState.value.companyCode)
-                val generalSetting = RetrofitClient.apiService.getGeneralSettings(uiState.value.companyCode)
-                Log.d("checkIsBlock", check.toString())
+                val check = RetrofitClient.apiService.checkIsBlock(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
+                val generalSetting = RetrofitClient.apiService.getGeneralSettings(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
                 if (check.data!!){
                     val response = RetrofitClient.apiService.login(
                         request=LoginRequest(

@@ -22,11 +22,21 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import com.warriortech.resb.R
 import com.warriortech.resb.model.RestaurantProfile
 import com.warriortech.resb.network.ApiService
+import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.Shapes
 import com.warriortech.resb.ui.viewmodel.RestaurantProfileViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -153,6 +163,86 @@ fun CompanySettingDialog(
     val logoUploadProgress = remember { mutableStateOf(false) }
     val uploadSuccess = remember { mutableStateOf(false) }
 
+    val companyNameError = remember { mutableStateOf("") }
+    val ownerNameError = remember { mutableStateOf("") }
+    val address1Error = remember { mutableStateOf("") }
+    val placeError = remember { mutableStateOf("") }
+    val pincodeError = remember { mutableStateOf("") }
+    val contactNoError = remember { mutableStateOf("") }
+    val mailIdError = remember { mutableStateOf("") }
+    val countryError = remember { mutableStateOf("") }
+    val stateError = remember { mutableStateOf("") }
+    val currencyError = remember { mutableStateOf("") }
+    val taxNoError = remember { mutableStateOf("") }
+    val decimalPointError = remember { mutableStateOf("") }
+
+
+    fun validateInputs(): Boolean {
+        var isValid = true
+
+        if (companyName.isBlank()) {
+            companyNameError.value = "Company Name is required"
+            isValid = false
+        } else companyNameError.value = ""
+
+        if (ownerName.isBlank()) {
+            ownerNameError.value = "Owner Name is required"
+            isValid = false
+        } else ownerNameError.value = ""
+
+        if (address1.isBlank()) {
+            address1Error.value = "Address Line 1 is required"
+            isValid = false
+        } else address1Error.value = ""
+
+        if (place.isBlank()) {
+            placeError.value = "Place is required"
+            isValid = false
+        } else placeError.value = ""
+
+        if (pincode.isBlank()) {
+            pincodeError.value = "Pincode is required"
+            isValid = false
+        } else pincodeError.value = ""
+
+        if (contactNo.isBlank() || contactNo.length < 10) {
+            contactNoError.value = "Valid contact number is required"
+            isValid = false
+        } else contactNoError.value = ""
+
+        if (mailId.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(mailId).matches()) {
+            mailIdError.value = "Valid email is required"
+            isValid = false
+        } else mailIdError.value = ""
+
+        if (country.isBlank()) {
+            countryError.value = "Country is required"
+            isValid = false
+        } else countryError.value = ""
+
+        if (state.isBlank()) {
+            stateError.value = "State is required"
+            isValid = false
+        } else stateError.value = ""
+
+        if (currency.isBlank()) {
+            currencyError.value = "Currency is required"
+            isValid = false
+        } else currencyError.value = ""
+
+        if (taxNo.isBlank()) {
+            taxNoError.value = "Tax number is required"
+            isValid = false
+        } else taxNoError.value = ""
+
+        if (decimalPoint.isBlank() || decimalPoint.toIntOrNull() == null) {
+            decimalPointError.value = "Decimal point must be a number"
+            isValid = false
+        } else decimalPointError.value = ""
+
+        return isValid
+    }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -166,6 +256,13 @@ fun CompanySettingDialog(
             label = { Text("Company Name ") },
             modifier = Modifier.fillMaxWidth()
         )
+        if (companyNameError.value.isNotEmpty()) {
+            Text(
+                text = companyNameError.value,
+                color = Color.Red,
+                fontSize = 12.sp
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = ownerName,
@@ -173,6 +270,13 @@ fun CompanySettingDialog(
             label = { Text("Owner Name") },
             modifier = Modifier.fillMaxWidth()
         )
+        if (ownerNameError.value.isNotEmpty()) {
+            Text(
+                text = ownerNameError.value,
+                color = Color.Red,
+                fontSize = 12.sp
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -284,11 +388,7 @@ fun CompanySettingDialog(
                             onSuccess = {
                                 logoUploadProgress.value = false
                                 uploadSuccess.value = true
-                                Toast.makeText(
-                                    context,
-                                    "Logo uploaded successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+
                             },
                             onFailure = {
                                 logoUploadProgress.value = false
@@ -301,8 +401,23 @@ fun CompanySettingDialog(
                 }
             }
         }
-
+        Spacer(modifier = Modifier.height(8.dp))
         if (uploadSuccess.value) {
+            val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
+            Row(
+                modifier =  Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Company Logo",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RectangleShape)
+                        .background(MaterialTheme.colorScheme.surface),
+                    contentScale = ContentScale.Crop
+                )
+            }
             AlertDialog(
                 onDismissRequest = { uploadSuccess.value = false },
                 confirmButton = {

@@ -288,7 +288,9 @@ fun EditStaffDialog(
                     is_block = false,
                     counter_id = 1L,
                     counter_name = "",
-                    is_active = 1L
+                    is_active = 1L,
+                    area_id = 1L,
+                    area_name = "--"
                 )) },
                 enabled = name.isNotBlank() && role.isNotBlank()
             ) {

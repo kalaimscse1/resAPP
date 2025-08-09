@@ -24,3 +24,8 @@ val TextHint = Color(0xFFBDBDBD)
 val SuccessGreen = Color(0xFF4CAF50)
 val WarningAmber = Color(0xFFFF9800)
 val ErrorRed = Color(0xFFF44336)
+val outlineVariant = Color(0xFF424242)
+
+val ghostWhite = Color(0xFFF8F8FF)
+val ghostWhiteLight = Color(0xFFE6E6FA)
+val ghostWhiteDark = Color(0xFFB0C4DE)

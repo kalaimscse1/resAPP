@@ -119,6 +119,26 @@ class SessionManager @Inject constructor(
         else
             null
     }
+
+    fun saveRestaurantProfile(profile: RestaurantProfile) {
+        checkInitialization()
+        val profileJson = gson.toJson(profile)
+        prefs.edit { putString("restaurant_profile", profileJson) }
+    }
+
+    fun getRestaurantProfile(): RestaurantProfile? {
+        checkInitialization()
+        val profileJson = prefs.getString("restaurant_profile", null)
+        return if (profileJson != null) {
+            try {
+                gson.fromJson(profileJson, RestaurantProfile::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
     /**
      * Save company code
      */

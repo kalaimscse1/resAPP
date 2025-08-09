@@ -2,8 +2,6 @@ package com.warriortech.resb.network
 
 import com.warriortech.resb.model.*
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -246,15 +244,17 @@ interface ApiService {
      * Order Management
      */
 
-    @POST("order/addOrder")
+    @POST("order/addOrderByCounterId")
     suspend fun createOrder(
         @Body orderRequest: OrderMaster,
-        @Header("X-Tenant-ID") tenantId: String
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("counterId") counterId: Long,
+        @Query("type")type: String
     ): Response<TblOrderResponse>
 
     @GET("order/getOrder/{order_master_id}")
     suspend fun getOrderMasterById(
-        @Path("order_master_id") orderId: Long,
+        @Path("order_master_id") orderId: String,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblOrderResponse>
 
@@ -270,8 +270,11 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblOrderResponse>
 
-    @GET("order/getOrderNO")
-    suspend fun getOrderNo(@Header("X-Tenant-ID") tenantId: String): Map<String, Int>
+    @GET("order/getOrderNoByCounterId")
+    suspend fun getOrderNo(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("counterId") counterId: Long,
+        @Query("type")type: String): Map<String, String>
 
     @GET("order/orderDetails/getKotNO")
     suspend fun getKotNo(@Header("X-Tenant-ID") tenantId: String): Map<String, Int>
@@ -281,7 +284,7 @@ interface ApiService {
 
     @GET("order/getRunningOrderAmount/{order_master_id}")
     suspend fun getRunningOrderAmount(
-        @Path("order_master_id") orderId: Long,
+        @Path("order_master_id") orderId: String,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Map<String, Double>>
 
@@ -293,7 +296,7 @@ interface ApiService {
 
     @GET("order/orderDetails/getOrdersDetailsByOrderIdApp/{order_master_id}")
     suspend fun getOpenOrderDetailsForTable(
-        @Path("order_master_id") tableId: Long?,
+        @Path("order_master_id") orderId: String,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<List<TblOrderDetailsResponse>>
 
@@ -306,10 +309,16 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ByteArray>
 
-    @PUT("orders/{orderId}")
+    @POST("print/bill")
+    suspend fun printReceipt(
+        @Body bill : Bill,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ByteArray>
+
+    @GET("order/updateOrderStatusByOrderId/{order_master_id}")
     suspend fun updateOrderStatus(
-        @Path("orderId") orderId: Int,
-        @Body statusUpdate: Map<String, String>,
+        @Path("order_master_id") orderId: String,
+        @Query("orderStatus") statusUpdate: String,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Order>
 
@@ -474,7 +483,7 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): RestaurantProfile
 
-    @GET("company/addCompany")
+    @POST("company/addCompany")
     suspend fun addRestaurantProfile(
         @Body profile: RestaurantProfile,
         @Header("X-Tenant-ID") tenantId: String
@@ -528,7 +537,8 @@ interface ApiService {
     @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
     suspend fun getVoucherByCounterId(
         @Path("counter_id") counterId: Long,
-        @Header("X-Tenant-ID") tenantId: String
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("type") type: String
     ): Response<TblVoucherResponse>
 
     /**
@@ -569,9 +579,9 @@ interface ApiService {
 
     @GET("payment/getBillNoByCounterId")
     suspend fun getBillNoByCounterId(
-        @Query("counter_id") counterId: Long,
+        @Query("counterId") counterId: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Map<String, String>>
+    ): Map<String, String>
 
     @POST("payment/addPayment")
     suspend fun addPayment(
@@ -748,9 +758,9 @@ interface ApiService {
      */
 
     @POST("companyMaster/createCompanyMaster")
-    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest): Response<Registration>
+    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest,@Header("X-Tenant-ID") tenantId: String): Response<Registration>
 
     @GET("companyMaster/getCompanyCode")
-    suspend fun getCompanyCode(): Map<String, String>
+    suspend fun getCompanyCode(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, String>>
 
 }

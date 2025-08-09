@@ -11,7 +11,7 @@ data class KotData(
 data class KOTRequest(
     val tableNumber: String,
     val kotId: Int?,
-    val orderId: Long?,
+    val orderId: String?,
     val waiterName: String?,
     val orderCreatedAt: String,
     val items: List<KOTItem>,

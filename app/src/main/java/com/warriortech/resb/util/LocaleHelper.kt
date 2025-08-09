@@ -94,6 +94,12 @@ object LocaleHelper {
             LANGUAGE_TAMIL to "தமிழ்"
         )
     }
+
+    suspend fun applyLocale(context: Context): Context {
+        val lang = getLanguage(context)
+        return setLocale(context, lang)
+    }
+
     fun isEnglish(context: Context): Boolean {
         return getLanguage(context) == LANGUAGE_ENGLISH
     }

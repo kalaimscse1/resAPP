@@ -1,6 +1,8 @@
 package com.warriortech.resb.ui.viewmodel
 
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RegistrationRepository
@@ -112,11 +114,21 @@ class RegistrationViewModel @Inject constructor(
         _registrationResult.value = null
     }
 
+    @SuppressLint("SuspiciousIndentation")
     fun loadCompanyCode(){
         viewModelScope.launch {
-            val companyCode = registrationRepository.getCompanyCode()
-            _uiState.value = _uiState.value.copy(companyMasterCode = companyCode["company_master_code"].toString(), databaseName = companyCode["company_master_code"].toString())
-
+            try{
+                val companyCode = registrationRepository.getCompanyCode()
+                    companyCode.let {
+                       val code = it["company_master_code"] ?: ""
+                       _uiState.value = _uiState.value.copy(
+                           companyMasterCode = code,
+                           databaseName = code
+                       )
+                    }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
     fun registerCompany() {
@@ -155,7 +167,25 @@ class RegistrationViewModel @Inject constructor(
                     response.collect { result ->
                         result.fold(
                             onSuccess = { res ->
-                                sessionManager.saveCompanyCode(res.company_code)
+
+                                val profile = RestaurantProfile(
+                                    company_code = res.company_master_code,
+                                    company_name = res.company_name,
+                                    owner_name = res.owner_name,
+                                    address1 = res.address1,
+                                    address2 = res.address2,
+                                    place = res.place,
+                                    pincode = res.pincode,
+                                    contact_no = res.contact_no,
+                                    mail_id = res.mail_id,
+                                    country = res.country,
+                                    state = res.state,
+                                    currency = "Rs",
+                                    tax_no = "",
+                                    decimal_point = 2L
+                                )
+                                sessionManager.saveRestaurantProfile(profile)
+                                sessionManager.saveCompanyCode(res.company_master_code)
                                 _registrationResult.value = "Registration successful!"
                             },
                             onFailure = { error ->
@@ -163,13 +193,6 @@ class RegistrationViewModel @Inject constructor(
                             }
                         )
                     }
-
-//                 if (response.success) {
-//                     createCompany(response.data!!)
-//                     _registrationResult.value ="Registration successful!"
-//                } else {
-//                     _registrationResult.value =  response.message
-//                }
                 } catch (e: Exception) {
                     _registrationResult.value = "Registration failed: ${e.message}"
                 } finally {
@@ -178,41 +201,44 @@ class RegistrationViewModel @Inject constructor(
             }
         }
     }
-//
-//    private fun createCompany(response: Registration){
-//        viewModelScope.launch {
-//            try {
-//                val res = response
-//
-//                val profile = RestaurantProfile(
-//                    company_code = res.company_master_code,
-//                    company_name = res.company_name,
-//                    owner_name = res.owner_name,
-//                    address1 = res.address1,
-//                    address2 = res.address2,
-//                    place = res.place,
-//                    pincode = res.pincode,
-//                    contact_no = res.contact_no,
-//                    mail_id = res.mail_id,
-//                    country = res.country,
-//                    state = res.state,
-//                    currency = "Rs",
-//                    tax_no = "",
-//                    decimal_point = 2L
-//                )
-//                val result = registrationRepository.addRestaurantProfile(profile)
-//                if (result != null) {
-//                    _registrationResult.value = "Registration successful!"
-//                } else {
-//                    _registrationResult.value = "Registration UnSuccessful!"
-//                }
-//            }catch (e: Exception) {
-//                _registrationResult.value = "Registration failed: ${e.message}"
-//            } finally {
-//                _uiState.value = _uiState.value.copy(isLoading = false)
-//            }
-//        }
-//    }
+    /**
+     * Creates a restaurant profile after successful registration.
+     * @param response The registration response containing company details.
+     */
+    private fun createCompany(response: Registration){
+        viewModelScope.launch {
+            try {
+                val res = response
+
+                val profile = RestaurantProfile(
+                    company_code = res.company_master_code,
+                    company_name = res.company_name,
+                    owner_name = res.owner_name,
+                    address1 = res.address1,
+                    address2 = res.address2,
+                    place = res.place,
+                    pincode = res.pincode,
+                    contact_no = res.contact_no,
+                    mail_id = res.mail_id,
+                    country = res.country,
+                    state = res.state,
+                    currency = "Rs",
+                    tax_no = "",
+                    decimal_point = 2L
+                )
+                val result = registrationRepository.addRestaurantProfile(profile)
+                if (result != null) {
+                   sessionManager.saveRestaurantProfile(profile)
+                } else {
+                    _registrationResult.value = "Registration UnSuccessful!"
+                }
+            }catch (e: Exception) {
+                _registrationResult.value = "Registration failed: ${e.message}"
+            } finally {
+                _uiState.value = _uiState.value.copy(isLoading = false)
+            }
+        }
+    }
 
     private fun validateForm(state: RegistrationUiState): Boolean
     {
@@ -255,5 +281,6 @@ data class RegistrationUiState(
     val expiryDate: String = "",
     val isBlock: Boolean = false,
     val isLoading: Boolean = false,
-    val password : String=""
+    val password : String="",
+    val emailError: String? = null,
 )

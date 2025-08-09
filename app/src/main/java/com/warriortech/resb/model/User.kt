@@ -22,6 +22,25 @@ data class TblStaff(
     var is_block:Boolean,
     var counter_id:Long,
     var counter_name:String,
+    var area_id:Long,
+    var area_name:String,
+    var is_active:Long
+)
+data class staff(
+    var staff_id: Long,
+    var staff_name:String,
+    var contact_no:String,
+    var address:String,
+    var user_name:String,
+    var password:String,
+    var role_id:Long,
+    var role:String,
+    var last_login:String,
+    var is_block:Boolean,
+    var counter_id:Long,
+    var counter_name:String,
+    var area_id:Long,
+    var area_name:String,
     var is_active:Long
 )
 data class LoginRequest(
