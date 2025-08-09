@@ -110,7 +110,9 @@ fun PaymentScreen(
         bottomBar = {
             PaymentBottomBar(
                 uiState = uiState,
-                onConfirmPayment = { viewModel.processPayment() }
+                onConfirmPayment = {
+                    viewModel.updateAmountToPay(amountToPayFromRoute?:0.0)
+                    viewModel.processPayment() }
             )
         }
     ) { paddingValues ->

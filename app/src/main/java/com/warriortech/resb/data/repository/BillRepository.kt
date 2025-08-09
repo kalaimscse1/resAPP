@@ -43,7 +43,8 @@ class BillRepository@Inject constructor(
     // Add more methods as needed for your application
 
     fun bill(orderMasterId: String,paymentMethod: PaymentMethod,receivedAmt: Double,customer: TblCustomer?): Flow<Result<TblBillingResponse>> =flow{
-        try {
+
+            Log.d("BILLTAG", "placeBill: $receivedAmt")
             val billNo = apiService.getBillNoByCounterId(sessionManager.getUser()?.counter_id!!, sessionManager.getCompanyCode()?:"")
             val voucher = apiService.getVoucherByCounterId(sessionManager.getUser()?.counter_id!!, sessionManager.getCompanyCode()?:"", "BILL").body()
             val orderMaster = apiService.getOpenOrderDetailsForTable(orderMasterId, sessionManager.getCompanyCode()?:"").body()!!
@@ -69,28 +70,27 @@ class BillRepository@Inject constructor(
                 upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total } else 0.0,
                 due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
                 others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total } else 0.0,
-                received_amt = if (paymentMethod.name != "DUE") receivedAmt else 0.0,
+                received_amt =  receivedAmt,
                 pending_amt = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
-                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
+//                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
+                change = 0.0,
                 note = "",
                 is_active = 1L
             )
             val response = apiService.addPayment(request,sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
-                val billResponse = response.body()
-                Log.d("BILLTAG", "placeBill: $billResponse")
-                if (billResponse!=null) {
-                    emit(Result.success(billResponse))
-                } else {
-                    emit(Result.failure(Exception("Failed to create bill: Response body is null.")))
-                    return@flow
-                }
+                emit(Result.success(response.body()!!))
+//                val billResponse =
+//                Log.d("BILLTAG", "placeBill: $billResponse")
+//                if (billResponse!=null) {
+//                    emit(Result.success(billResponse))
+//                } else {
+//                    emit(Result.failure(Exception("Failed to create bill: Response body is null.")))
+//                    return@flow
+//                }
             } else {
                 emit(Result.failure(Exception("Error: ${response.message()}")))
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
-        }
     }
     suspend fun placeBill(orderMasterId: String,paymentMethod: PaymentMethod,receivedAmt: Double,
                           customer: TblCustomer?): Flow<Result<TblBillingResponse>> = flow {

@@ -329,13 +329,14 @@ class BillingViewModel @Inject constructor(
 
         _uiState.update { it.copy(paymentProcessingState = PaymentProcessingState.Processing, errorMessage = null) }
         viewModelScope.launch {
-            try {
+
                 // --- Simulate Payment Processing ---
                 // In a real app, this would involve:
                 // 1. Calling a payment gateway SDK or your backend API.
                 // 2. Handling success/failure responses.
                 // 3. If successful, creating an Order record and saving it.
 
+                Log.d("Payment", "Processing payment with method: ${currentState.amountReceived}")
                 billRepository.bill(
                     orderMasterId = currentState.orderMasterId ?:"",
                     paymentMethod = paymentMethod,
@@ -408,18 +409,11 @@ class BillingViewModel @Inject constructor(
                     )
                 }
                 // orderRepository.saveOrder(paidOrder) // Save the order
-            } catch (e: Exception) {
-                Log.e("Payment ee", "Payment failed: ${e.message}")
-                // Log the exception e
-                _uiState.update {
-                    it.copy(paymentProcessingState = PaymentProcessingState.Error("Payment failed: ${e.message}"))
-                }
-            }
         }
     }
     private fun printBill(bill : Bill, currentState: BillingPaymentUiState, amount: Double, paymentMethod: PaymentMethod) {
         viewModelScope.launch {
-            try {
+
                 val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
 
                 if (isReceipt) {
@@ -491,9 +485,7 @@ class BillingViewModel @Inject constructor(
                     }
                     resetPaymentState()
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = "Failed to print bill: ${e.message}") }
-            }
+
         }
     }
 
