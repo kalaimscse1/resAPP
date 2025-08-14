@@ -2,7 +2,9 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.BillRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
+import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.MenuItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CounterViewModel @Inject constructor(
     private val menuRepository: MenuItemRepository,
-    private val counterRepository: com.warriortech.resb.data.repository.CounterRepository
+    private val orderRepository: OrderRepository,
+    private val billRepository: BillRepository
 ) : ViewModel() {
 
     private val _menuState = MutableStateFlow<MenuUiState>(MenuUiState.Loading)

@@ -31,6 +31,7 @@ data class MenuItemEntity(
     val is_inventory:Long,
     val is_raw:String,
     val is_available: String,
+    val is_favourite: Boolean,
     val cess_per:String,
     val cess_specific: Double,
     val image: String? = null,
@@ -67,7 +68,8 @@ data class MenuItemEntity(
                 is_inventory = menuItem.is_inventory,
                 is_raw = menuItem.is_raw,
                 cess_per = menuItem.cess_per,
-                cess_specific = menuItem.cess_specific
+                cess_specific = menuItem.cess_specific,
+                is_favourite = menuItem.is_favourite,
             )
         }
     }
@@ -100,7 +102,8 @@ data class MenuItemEntity(
             is_inventory = this.is_inventory,
             is_raw = this.is_raw,
             cess_per = this.cess_per,
-            cess_specific = this.cess_specific
+            cess_specific = this.cess_specific,
+            is_favourite = this.is_favourite,
         )
     }
 }

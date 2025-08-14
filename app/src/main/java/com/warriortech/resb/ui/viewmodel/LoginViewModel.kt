@@ -52,6 +52,9 @@ class LoginViewModel @Inject constructor(
         // Pre-fill company code when ViewModel is created
         val savedCompanyCode = sessionManager.getCompanyCode() ?: ""
         _uiState.update { it.copy(companyCode = savedCompanyCode) }
+
+        val savedUserName = sessionManager.getUser()?.user_name?:""
+        _uiState.update { it.copy(username = savedUserName) }
     }
 
     fun onCompanyCodeChange(companyCode: String) {

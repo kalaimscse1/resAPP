@@ -27,6 +27,7 @@ data class MenuItem(
     val is_inventory:Long,
     val is_raw:String,
     val is_available: String,
+    val is_favourite: Boolean,
     val image: String = "",
     var qty: Int = 0
 ){
@@ -62,6 +63,7 @@ data class MenuItem(
         if (is_inventory != other.is_inventory) return false
         if (is_raw != other.is_raw) return false
         if (is_available != other.is_available) return false
+        if (is_favourite != other.is_favourite) return false
         if (image != other.image) return false
         // qty is not part of default equals/hashCode for data class primary constructor
 
@@ -97,6 +99,7 @@ data class MenuItem(
         result = 31 * result + is_inventory.hashCode()
         result = 31 * result + (is_raw?.hashCode() ?: 0)
         result = 31 * result + (is_available?.hashCode() ?: 0)
+        result = 31 * result + is_favourite.hashCode()
         result = 31 * result + (image?.hashCode() ?: 0)
         // qty is not part of default equals/hashCode for data class primary constructor
         return result

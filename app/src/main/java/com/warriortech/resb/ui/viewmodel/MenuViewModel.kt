@@ -123,7 +123,8 @@ class MenuViewModel @Inject constructor(
                             image = it.menuItem.image,
                             qty = it.qty,
                             cess_specific = it.cess_specific,
-                            cess_per = it.cess_per.toString()
+                            cess_per = it.cess_per.toString(),
+                            is_favourite = it.menuItem.is_favourite
                         )
                     }
                     _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
@@ -147,7 +148,12 @@ class MenuViewModel @Inject constructor(
                 result.fold(
                     onSuccess = { menuItems ->
                         _menuState.value = MenuUiState.Success(menuItems)
-                        categories.value = menuItems.map { it.item_cat_name }.distinct().sorted()
+                        val data = buildList {
+                            add("FAVOURITES")
+                            addAll(menuItems.map { it.item_cat_name }.distinct())
+                        }
+                        categories.value = data
+//                        categories.value = menuItems.map { it.item_cat_name }.distinct().sorted()
                         selectedCategory.value = categories.value.firstOrNull()
                     },
                     onFailure = { error ->
@@ -241,7 +247,7 @@ class MenuViewModel @Inject constructor(
                                     name = orderItem.menuItem.menu_item_name,
                                     quantity = orderItem.quantity,
                                     category = orderItem.menuItem.kitchen_cat_name,
-                                    addOns = modifierNames
+                                    addOn = modifierNames
                                 )
                             }
                             val kotRequest = KOTRequest(
@@ -281,7 +287,7 @@ class MenuViewModel @Inject constructor(
                                     name = orderItem.menuItem.menu_item_name,
                                     quantity = orderItem.quantity,
                                     category = orderItem.menuItem.kitchen_cat_name,
-                                    addOns = modifierNames
+                                    addOn = modifierNames
                                 )
                             }
                             val kotRequest = KOTRequest(

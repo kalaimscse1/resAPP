@@ -64,7 +64,7 @@ class BillRepository@Inject constructor(
                 delivery_amt = 0.0,
                 grand_total = orderMaster.sumOf { it.grand_total },
                 round_off = 0.0,
-                rounded_amt = 0.0,
+                rounded_amt = receivedAmt,
                 cash = if (paymentMethod.name == "CASH") orderMaster.sumOf { it.grand_total } else 0.0,
                 card = if (paymentMethod.name == "CARD") orderMaster.sumOf { it.grand_total } else 0.0,
                 upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total } else 0.0,
@@ -79,7 +79,10 @@ class BillRepository@Inject constructor(
             )
             val response = apiService.addPayment(request,sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {
-                emit(Result.success(response.body()!!))
+                val res = response.body()!!
+                apiService.updateTableAvailability(res.order_master.table_id, "AVAILABLE", sessionManager.getCompanyCode()?:"")
+                apiService.updateOrderStatus(orderMasterId, "COMPLETED", sessionManager.getCompanyCode()?:"")
+                emit(Result.success(res))
 //                val billResponse =
 //                Log.d("BILLTAG", "placeBill: $billResponse")
 //                if (billResponse!=null) {
@@ -92,54 +95,6 @@ class BillRepository@Inject constructor(
                 emit(Result.failure(Exception("Error: ${response.message()}")))
             }
     }
-    suspend fun placeBill(orderMasterId: String,paymentMethod: PaymentMethod,receivedAmt: Double,
-                          customer: TblCustomer?): Flow<Result<TblBillingResponse>> = flow {
-            val billNo= apiService.getBillNoByCounterId(sessionManager.getUser()?.counter_id!!,sessionManager.getCompanyCode()?:"")
-            val voucher= apiService.getVoucherByCounterId(sessionManager.getUser()?.counter_id!!,sessionManager.getCompanyCode()?:"","BILL").body()
-            val orderMaster= apiService.getOpenOrderDetailsForTable(orderMasterId,sessionManager.getCompanyCode()?:"").body()!!
-            val request = TblBillingRequest(
-                bill_no = billNo["bill_no"] ?: "",
-                bill_date = getCurrentDateModern(),
-                bill_create_time = getCurrentTimeModern(),
-                order_master_id = orderMasterId,
-                voucher_id = voucher?.voucher_id ?: 0L,
-                staff_id = sessionManager.getUser()?.staff_id ?: 0L,
-                customer_id = customer?.customer_id ?: 1L,
-                order_amt = orderMaster.sumOf { it.total },
-                disc_amt = 0.0,
-                tax_amt = orderMaster.sumOf { it.tax_amount },
-                cess = orderMaster.sumOf { it.cess },
-                cess_specific = orderMaster.sumOf { it.cess_specific },
-                delivery_amt = 0.0,
-                grand_total = orderMaster.sumOf { it.grand_total },
-                round_off = 0.0,
-                rounded_amt = 0.0,
-                cash = if (paymentMethod.name == "CASH") orderMaster.sumOf { it.grand_total} else 0.0,
-                card = if (paymentMethod.name == "CARD") orderMaster.sumOf { it.grand_total} else 0.0,
-                upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total} else 0.0,
-                due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total} else 0.0,
-                others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total} else 0.0,
-                received_amt = if (paymentMethod.name != "DUE") receivedAmt else 0.0,
-                pending_amt = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total} else 0.0,
-                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total} else 0.0,
-                note = "",
-                is_active = 1L
-            )
-            val response = apiService.addPayment(request,sessionManager.getCompanyCode()?:"")
-            if (response.isSuccessful) {
-                val billResponse = response.body()
-                Log.d("BILLTAG", "placeBill: $billResponse")
-                if (billResponse!=null) {
-                    emit(Result.success(billResponse))
-                } else {
-                    emit(Result.failure(Exception("Failed to create bill: Response body is null.")))
-                    return@flow
-                }
-            } else {
-                emit(Result.failure(Exception("Error: ${response.message()}")))
-            }
-
-    }
 
     suspend fun getCounter(): TblCounter{
         return apiService.getCounterById(sessionManager.getUser()?.counter_id ?: 0L,sessionManager.getCompanyCode()?:"")
@@ -150,34 +105,39 @@ class BillRepository@Inject constructor(
         apiService.updateOrderStatus(orderMasterId, "COMPLETED", sessionManager.getCompanyCode()?:"")
 
     }
-    suspend fun printBill(bill: Bill,ipAddress: String): Flow<Result<String>> = flow {
+    suspend fun printBill(bill: Bill, ipAddress: String): Flow<Result<String>> = flow {
         try {
-            val response = apiService.printReceipt(bill, sessionManager.getCompanyCode()?:"")
+            val response = apiService.printReceipt(bill, sessionManager.getCompanyCode() ?: "")
 
             if (response.isSuccessful) {
-                val printResponse = response.body()
+                val body = response.body()
+                if (body != null) {
+                    val bytes = body.bytes() // Raw ESC/POS data
 
-                var mess = ""
-                if (printResponse != null) {
-                    printerHelper.printViaTcp(ipAddress, data = printResponse){ success, message ->
-                        mess = if (success) {
-                            message
-                        } else {
-                            message
-                        }
+                    // 🔹 Debug logging: log size and first few bytes in hex
+                    Log.d("PrintBill", "Received ${bytes.size} bytes from server")
+                    Log.d(
+                        "PrintBill",
+                        "First 20 bytes: ${
+                            bytes.take(20).joinToString(" ") { String.format("%02X", it) }
+                        }"
+                    )
+
+                    var mess = ""
+                    printerHelper.printViaTcp(ipAddress, data = bytes) { success, message ->
+                        mess = message
                     }
-                    emit(Result.success(mess)) // Emit the successful PrintResponse object
+                    emit(Result.success(mess))
                 } else {
-                    // Successful response but empty body - this might be an error case depending on your API
-                    emit(Result.failure(Exception("KOT print successful but response body was empty.")))
+                    emit(Result.failure(Exception("Print successful but response body was empty.")))
                 }
             } else {
-                // API call failed (e.g., 4xx, 5xx error)
                 val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                emit(Result.failure(Exception("Failed to print KOT. Code: ${response.code()}, Error: $errorBody")))
+                emit(Result.failure(Exception("Failed to print bill. Code: ${response.code()}, Error: $errorBody")))
             }
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
     }
+
 }

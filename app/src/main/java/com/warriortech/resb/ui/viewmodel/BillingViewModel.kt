@@ -138,7 +138,8 @@ class BillingViewModel @Inject constructor(
                         image = it.menuItem.image,
                         qty = it.qty,
                         cess_specific = it.cess_specific,
-                        cess_per = it.cess_per.toString()
+                        cess_per = it.cess_per.toString(),
+                        is_favourite = false
                     )
                 }
                 // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
@@ -340,7 +341,7 @@ class BillingViewModel @Inject constructor(
                 billRepository.bill(
                     orderMasterId = currentState.orderMasterId ?:"",
                     paymentMethod = paymentMethod,
-                    receivedAmt = currentState.amountReceived,
+                    receivedAmt = currentState.amountToPay,
                     customer = null // Assuming no customer details for now
                 ).collect { result->
                     result.fold(
@@ -349,11 +350,11 @@ class BillingViewModel @Inject constructor(
                             val bill = MutableStateFlow<List<BillItem>>(emptyList())
                             val orderDetails = orderRepository.getOrdersByOrderId(response.order_master.order_master_id).body()!!
                             val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
-                            orderDetails.forEach { detail ->
+                            val billItems = orderDetails.map {detail ->
                                 val menuItem = detail.menuItem
                                 val qty = detail.qty
-                                bill.value += BillItem(
-                                    sn = sn,
+                               BillItem(
+                                    sn = sn++,
                                     itemName = menuItem.menu_item_name,
                                     qty = qty,
                                     price = menuItem.rate,
@@ -368,7 +369,6 @@ class BillingViewModel @Inject constructor(
                                     cess = if (detail.cess > 0) detail.cess else 0.0,
                                     cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0
                                 )
-                                sn += 1
                             }
                             val billDetails = Bill(
                                 company_code = sessionManager.getCompanyCode() ?: "",
@@ -382,19 +382,48 @@ class BillingViewModel @Inject constructor(
                                 custNo = "1234567890",
                                 custAddress = "Customer Address",
                                 custGstin = "GSTIN123456",
-                                items = bill.value,
+                                items = billItems,
                                 subtotal = response.order_amt,
                                 deliveryCharge = 0.0, // Assuming no delivery charge
                                 discount = response.disc_amt,
                                 roundOff = response.round_off,
                                 total = response.grand_total,
                             )
-                            billRepository.updateTablAndOrderStatus(
-                                orderMasterId = response.order_master.order_master_id,
-                                tableId = response.order_master.table_id
-                            )
+//                            billRepository.updateTablAndOrderStatus(
+//                                orderMasterId = response.order_master.order_master_id,
+//                                tableId = response.order_master.table_id
+//                            )
                             val data = currentState
-                            printBill(billDetails,data,amount, paymentMethod)
+                            val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
+
+                            if (isReceipt) {
+                                printBill(billDetails, data, amount, paymentMethod)
+                            }
+                            else{
+                                delay(2000) // Simulate network delay
+
+                                // Example: If payment is successful
+                                val transactionId = UUID.randomUUID().toString()
+                                val paidOrder = PaidOrder(
+                                    // orderId = generateNewOrderId(), // From repository
+                                    items = currentState.billedItems,
+                                    tableStatus = currentState.tableStatus,
+                                    subtotal = currentState.subtotal,
+                                    taxAmount = currentState.taxAmount,
+                                    discount = currentState.discountFlat,
+                                    totalAmount = currentState.totalAmount,
+                                    paidAmount = amount,
+                                    paymentMethod = paymentMethod.name,
+                                    transactionId = transactionId,
+                                    timestamp = System.currentTimeMillis()
+                                )
+                                Log.d("Payment", "Payment successful$paidOrder")
+
+                                _uiState.update {
+                                    it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
+                                }
+
+                            }
                             // Handle successful payment response
                             // For example, you might want to update the UI or save the order
                             Log.d("Payment", "Payment successful")
@@ -440,14 +469,8 @@ class BillingViewModel @Inject constructor(
                                     timestamp = System.currentTimeMillis()
                                 )
                                 _uiState.update {
-                                    it.copy(
-                                        paymentProcessingState = PaymentProcessingState.Success(
-                                            paidOrder,
-                                            transactionId
-                                        )
-                                    )
+                                    it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
                                 }
-                                resetPaymentState()
                             },
                             onFailure = { error ->
                                 _uiState.update { it.copy(errorMessage = "Failed to print bill: ${error.message}") }
@@ -458,7 +481,8 @@ class BillingViewModel @Inject constructor(
                 }
                 else
                 {
-                    delay(2000) // Simulate network delay
+                    Log.d("Payment", "Payment successful")
+//                    delay(2000) // Simulate network delay
 
                     // Example: If payment is successful
                     val transactionId = UUID.randomUUID().toString()
@@ -475,15 +499,10 @@ class BillingViewModel @Inject constructor(
                         transactionId = transactionId,
                         timestamp = System.currentTimeMillis()
                     )
+                    Log.d("Payment", "Payment successful$paidOrder")
                     _uiState.update {
-                        it.copy(
-                            paymentProcessingState = PaymentProcessingState.Success(
-                                paidOrder,
-                                transactionId
-                            )
-                        )
+                        it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
                     }
-                    resetPaymentState()
                 }
 
         }

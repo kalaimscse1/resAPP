@@ -66,7 +66,7 @@ fun PaymentScreen(
             //     popUpTo("billing_screen_route_or_graph_start") { inclusive = true } // Clear back stack
             // }
             // For now, just show a snackbar and allow manual dismissal or pop back
-            snackbarHostState.showSnackbar("Payment Successful! TXN ID: ${successState.transactionId}")
+//            snackbarHostState.showSnackbar("Payment Successful! TXN ID: ${successState.transactionId}")
              viewModel.resetPaymentState() // Reset for next payment
             navController.navigate("selects")
         } else if (uiState.paymentProcessingState is PaymentProcessingState.Error) {

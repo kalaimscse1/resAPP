@@ -290,7 +290,8 @@ fun MenuItemDialog(
                         is_raw = TODO(),
                         is_available = TODO(),
                         image = TODO(),
-                        qty = TODO()
+                        qty = TODO(),
+                        is_favourite = false
                     )
                     onSave(newMenuItem)
                 },

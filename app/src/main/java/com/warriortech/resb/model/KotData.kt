@@ -22,5 +22,9 @@ data class KOTItem(
     val name: String,
     val quantity: Int,
     val category: String,
-    val addOns: List<String>// e.g., "Extra Cheese", "No Onions"
+    val addOn: List<String>// e.g., "Extra Cheese", "No Onions"
+)
+
+data class PrintResponse(
+    val printerIpAddress: String
 )

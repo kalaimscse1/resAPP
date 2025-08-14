@@ -2,6 +2,7 @@ package com.warriortech.resb.network
 
 import com.warriortech.resb.model.*
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -307,26 +308,26 @@ interface ApiService {
     suspend fun printKOT(
         @Body orderRequest: KOTRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<ByteArray>
+    ): Response<ResponseBody>
 
     @POST("print/bill")
     suspend fun printReceipt(
-        @Body bill : Bill,
+        @Body bill: Bill,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<ByteArray>
+    ): Response<ResponseBody>
 
     @GET("order/updateOrderStatusByOrderId/{order_master_id}")
     suspend fun updateOrderStatus(
         @Path("order_master_id") orderId: String,
         @Query("orderStatus") statusUpdate: String,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Order>
+    ): Response<Int>
 
     @GET("settings/printer/getPrinterByIpAddress/{kitchen_cat_name}")
     suspend fun getIpAddresss(
         @Path("kitchen_cat_name") kitchenCatName: String,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<String>
+    ): Response<PrintResponse>
 
     /**
      * Settings Management

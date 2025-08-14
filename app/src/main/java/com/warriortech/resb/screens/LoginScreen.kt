@@ -46,65 +46,44 @@ import com.warriortech.resb.ui.components.*
 import com.warriortech.resb.ui.theme.Dimensions
 import com.warriortech.resb.ui.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
-
-/**
- * LoginScreen is the main entry point for user authentication.
- * It provides a user interface for entering login credentials,
- * including company code, username, and password.
- * It handles login attempts, displays error messages,
- * and navigates to the next screen upon successful login.
- * This screen is optimized for mobile devices
- * and uses a responsive design approach.
- * @param onLoginSuccess Callback function to be invoked when login is successful.
- * @param viewModel The [LoginViewModel] instance to manage the login state and actions.
- * * This ViewModel is injected using Hilt for dependency injection.
- * * The screen includes a logo, welcome message, and a form for user input.
- * It also features a snackbar for displaying error messages.
- * * The login form includes fields for company code, username, and password,
- * with appropriate icons and validation.
- * * The password field includes a toggle for visibility.
- * * The login button is disabled while a login attempt is in progress,
- * and shows a loading state when clicked.
- * * The screen uses a vertical gradient background for visual appeal.
- * * The login process is handled asynchronously,
- * and the keyboard is hidden upon successful login or button press.
- * * @see LoginViewModel
- * * This screen is designed to be responsive and user-friendly,
- * making it suitable for mobile devices.
- * @since 1.0
- * @author WarriorTech
- * @version 1.0
- * @note This screen is part of the ResB application,
- * which is a restaurant management system.
- * * It is built using Jetpack Compose for modern UI development.
- */
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel() // Inject ViewModel
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val scaffoldState = rememberScaffoldState()
-    val coroutineScope = rememberCoroutineScope() // For Snackbar
+    val coroutineScope = rememberCoroutineScope()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
     var passwordVisible by remember { mutableStateOf(false) }
 
-    /**
-     * Effect to handle login success.
-     */
+    // Detect keyboard height in dp
+    val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
+    val animatedPadding by animateDpAsState(
+        targetValue = if (imeHeight > 0) imeHeight.dp else 0.dp,
+        animationSpec = spring()
+    )
+
     LaunchedEffect(uiState.value.loginSuccess) {
         if (uiState.value.loginSuccess) {
-            keyboardController?.hide() // Hide keyboard on success
+            keyboardController?.hide()
             onLoginSuccess()
-            viewModel.onLoginHandled() // Reset the flag
+            viewModel.onLoginHandled()
         }
     }
 
-    /**
-     * Effect to show error messages in a Snackbar.
-     */
     LaunchedEffect(uiState.value.loginError) {
         uiState.value.loginError?.let { error ->
             coroutineScope.launch {
@@ -112,7 +91,6 @@ fun LoginScreen(
             }
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -128,9 +106,12 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Dimensions.spacingL),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(Dimensions.spacingL)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = animatedPadding) // animate upward shift
+                .padding(horizontal = Dimensions.spacingL),
+        horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Logo section
             Card(
@@ -269,6 +250,9 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = animatedPadding) // animate upward shift
                     .padding(horizontal = Dimensions.spacingL),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center

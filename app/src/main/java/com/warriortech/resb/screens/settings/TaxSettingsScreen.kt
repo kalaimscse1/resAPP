@@ -82,7 +82,7 @@ fun TaxSettingsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("No tables available", style = MaterialTheme.typography.bodyMedium)
+                            Text("No Taxes available", style = MaterialTheme.typography.bodyMedium)
                         }
                     } else{
                         LazyColumn(

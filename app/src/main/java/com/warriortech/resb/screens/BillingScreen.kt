@@ -482,10 +482,7 @@ fun BillingBottomBar(
                     fontWeight = FontWeight.Bold
                 )
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+
                 MobileOptimizedButton(
                     onClick = {
                         if (orderMasterId != null) {
@@ -496,7 +493,6 @@ fun BillingBottomBar(
                     text = "Proceed to Payment",
                     modifier = Modifier.weight(1f)
                 )
-            }
         }
     }
 }

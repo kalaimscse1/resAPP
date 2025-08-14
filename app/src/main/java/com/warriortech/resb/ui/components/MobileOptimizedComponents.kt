@@ -20,6 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.warriortech.resb.ui.theme.DarkGreen
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.getScreenSizeInfo
 
@@ -158,8 +161,8 @@ fun MobileOptimizedButton(
     val gradientColors = if (isPrimary) {
         if (enabled) {
             listOf(
-                MaterialTheme.colorScheme.primary,
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                PrimaryGreen,
+                PrimaryGreen.copy(alpha = 0.8f)
             )
         } else {
             listOf(

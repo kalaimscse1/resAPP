@@ -38,7 +38,7 @@ class MenuItemRepository @Inject constructor(
 
             if (response.isSuccessful) {
                 val menuItems = response.body()
-                if (menuItems != null) {
+                if (menuItems != null && category !="FAVOURITES") {
                     // If category is provided, filter by category
                     val filteredItems = if (category != null) {
                         menuItems.filter { it.item_cat_name == category }
@@ -46,9 +46,16 @@ class MenuItemRepository @Inject constructor(
                         menuItems
                     }
                     emit(Result.success(filteredItems))
-                } else {
-                    emit(Result.failure(Exception("No menu items data received")))
+                } else if (menuItems != null){
+                    val filteredItems =
+                        menuItems.filter { it.is_favourite == true }
+                    emit(Result.success(filteredItems))
                 }
+                else
+                    {
+                        emit(Result.failure(Exception("No menu items data received")))
+                    }
+
             } else {
                 emit(Result.failure(Exception("Error fetching menu items: ${response.code()}")))
             }
@@ -141,7 +148,8 @@ private fun MenuItem.toEntity() = MenuItemEntity(
     is_inventory = is_inventory,
     is_raw = is_raw,
     cess_specific = cess_specific,
-    cess_per= cess_per
+    cess_per= cess_per,
+    is_favourite = is_favourite
 )
 
 private fun MenuItemEntity.toModel() = MenuItem(
@@ -171,5 +179,6 @@ private fun MenuItemEntity.toModel() = MenuItem(
     is_inventory = this.is_inventory,
     is_raw = this.is_raw,
     cess_per = this.cess_per,
-    cess_specific = this.cess_specific
+    cess_specific = this.cess_specific,
+    is_favourite = this.is_favourite
 )

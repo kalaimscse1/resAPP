@@ -154,7 +154,7 @@ val ResbTypography = Typography(
     bodySmall = TextStyle(
         fontFamily = MontserratFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
+        fontSize = 10.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     ),

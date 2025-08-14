@@ -24,7 +24,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Resb"
         tools:targetApi="33"
-
+        android:exported="true"
+        android:windowSoftInputMode="adjustResize"
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"

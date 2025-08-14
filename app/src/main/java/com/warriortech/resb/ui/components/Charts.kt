@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.warriortech.resb.model.PaymentModeData
 import com.warriortech.resb.model.WeeklySalesData
+import com.warriortech.resb.ui.theme.SurfaceLight
 
 @Composable
 fun PaymentModePieChart(
@@ -31,7 +32,8 @@ fun PaymentModePieChart(
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -83,23 +85,36 @@ fun PaymentModeLegendItem(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+
     ) {
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = paymentMode,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+        Column(modifier = Modifier.padding(end = 12.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(color)
             )
+        }
+        Column(modifier = Modifier.padding(end = 12.dp)) {
+           Text(
+               text = paymentMode,
+               style = MaterialTheme.typography.bodyMedium,
+               fontWeight = FontWeight.Medium
+           )
+       }
+        Column(modifier = Modifier.padding(start = 12.dp),
+            horizontalAlignment= Alignment.End) {
             Text(
-                text = "₹${String.format("%.0f", amount)} ($percentage%)",
+                text = "₹${String.format("%.0f", amount)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Column(modifier = Modifier.padding(start = 12.dp),
+            horizontalAlignment= Alignment.End) {
+            Text(
+                text = "($percentage%)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -138,7 +153,8 @@ fun WeeklySalesBarChart(
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

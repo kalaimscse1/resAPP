@@ -89,7 +89,7 @@ fun TaxSplitSettingsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("No tables available", style = MaterialTheme.typography.bodyMedium)
+                            Text("No Tax Splits available", style = MaterialTheme.typography.bodyMedium)
                         }
                     } else{
                         LazyColumn(

@@ -1,7 +1,5 @@
 package com.warriortech.resb.model
 
-import androidx.datastore.preferences.protobuf.Internal
-
 //
 //data class GeneralSettings(
 //    val id: Int = 1,
@@ -35,4 +33,8 @@ data class GeneralSettings(
     var is_kot: Boolean,
     var is_logo: Boolean,
     var logo_path: String,
+    var is_cess:Boolean,
+    var is_delivery_charge:Boolean,
+    var is_table_allowed:Boolean,
+    var is_waiter_allowed:Boolean
 )

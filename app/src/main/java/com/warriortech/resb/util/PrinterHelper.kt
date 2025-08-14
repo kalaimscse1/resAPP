@@ -307,8 +307,8 @@ class PrinterHelper(private val context: Context) {
             stringBuilder.append("$itemName ${item.quantity}\n")
             
             // Add modifiers if any
-            if (item.addOns.isNotEmpty()) {
-                item.addOns.forEach { modifier ->
+            if (item.addOn?.isNotEmpty() == true) {
+                item.addOn.forEach { modifier ->
                     stringBuilder.append("  + $modifier\n")
                 }
             }

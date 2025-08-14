@@ -53,10 +53,7 @@ data class CreateOrderRequest(
 /**
  * PrintResponse model for KOT print response
  */
-data class PrintResponse(
-    val message: String,
-    val orderId: Long
-)
+
 
 data class OrderMaster(
     var order_master_id: String,

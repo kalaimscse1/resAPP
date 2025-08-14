@@ -22,7 +22,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.ui.theme.Black
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.LightGreen
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.ui.theme.ghostWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +55,8 @@ fun OrderScreen(
                     Text(
                         "Orders Dashboard",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = SurfaceLight
                     )
                 },
                 navigationIcon = {
@@ -63,13 +70,12 @@ fun OrderScreen(
                         Icon(
                             Icons.Default.Menu,
                             contentDescription = "Menu",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = SurfaceLight
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = PrimaryGreen
                 )
             )
         }
@@ -111,8 +117,8 @@ fun OrderScreen(
                         title = "Dine In",
                         icon = Icons.Default.Restaurant,
                         orders = dineInOrders,
-                        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        backgroundColor = PrimaryGreen,
+                        contentColor = SurfaceLight,
                         onOrderClick = { order ->
                             // Handle order click
                             val orderId = order.orderId
@@ -127,7 +133,7 @@ fun OrderScreen(
                         title = "Takeaway",
                         icon = Icons.Default.DirectionsCar,
                         orders = takeawayOrders,
-                        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                        backgroundColor = SecondaryGreen,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         onOrderClick = { order ->
                             // Handle order click
@@ -144,7 +150,7 @@ fun OrderScreen(
                         title = "Delivery",
                         icon = Icons.Default.DeliveryDining,
                         orders = deliveryOrders,
-                        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        backgroundColor = LightGreen,
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                         onOrderClick = { order ->
                             // Handle order click
@@ -202,7 +208,7 @@ private fun OrderSection(
                 Card(
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = contentColor.copy(alpha = 0.2f)
+                        containerColor = SurfaceLight
                     )
                 ) {
                     Text(
@@ -210,7 +216,7 @@ private fun OrderSection(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = contentColor
+                        color = Black
                     )
                 }
             }
@@ -220,7 +226,7 @@ private fun OrderSection(
                 orders.forEach { order ->
                     OrderItem(
                         order = order,
-                        contentColor = contentColor,
+                        contentColor = SurfaceLight,
                         onClick = { onOrderClick(order) }
                     )
                     if (order != orders.last()) {
@@ -252,7 +258,7 @@ private fun OrderItem(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = contentColor.copy(alpha = 0.1f)
+            containerColor = ghostWhite
         ),
         onClick= onClick
     ) {
@@ -269,23 +275,25 @@ private fun OrderItem(
                         text = "Order #${order.orderId}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = contentColor
+                        color = PrimaryGreen
+
+
                     )
                     Text(
-                        text = "${order.areaName}",
+                        text = "${order.areaName} | ${order.tableName} | ${order.totalAmount} ",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = contentColor.copy(alpha = 0.8f)
+                        color = Black.copy(alpha = 0.8f)
                     )
-                    Text(
-                        text = "${order.tableName}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = contentColor.copy(alpha = 0.8f)
-                    )
-                    Text(
-                        text = "${order.totalAmount}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = contentColor.copy(alpha = 0.8f)
-                    )
+//                    Text(
+//                        text = "${order.tableName}",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = contentColor.copy(alpha = 0.8f)
+//                    )
+//                    Text(
+//                        text = "${order.totalAmount}",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = contentColor.copy(alpha = 0.8f)
+//                    )
                 }
                 Card(
                     shape = RoundedCornerShape(8.dp),
@@ -294,7 +302,7 @@ private fun OrderItem(
                             "PENDING" -> Color(0xFFFF9800)
                             "PREPARING" -> Color(0xFF2196F3)
                             "READY" -> Color(0xFF4CAF50)
-                            else -> Color(0xFF757575)
+                            else -> PrimaryGreen
                         }
                     )
                 ) {

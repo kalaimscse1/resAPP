@@ -147,16 +147,16 @@ class OrderRepository @Inject constructor(
                     total = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice * item.quantity else cess.basePrice * item.quantity, // Total base price for this item line
                     tax_id = item.menuItem.tax_id,
                     tax_name = item.menuItem.tax_name,
-                    tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount else cess.gstAmount,
+                    tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount * item.quantity  else cess.gstAmount* item.quantity,
                     sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
-                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.sgst else 0.0} else{if (tableStatus!="DELIVERY") cess.sgst else 0.0},
+                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.sgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.sgst * item.quantity else 0.0},
                     cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
-                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.cgst else 0.0} else{if (tableStatus!="DELIVERY") cess.cgst else 0.0}, // Adjust if your backend calculates differently
+                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.cgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.cgst * item.quantity else 0.0}, // Adjust if your backend calculates differently
                     igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
                     igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount else 0.0 ,
                     cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
-                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.cessAmount else 0.0,
-                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) item.menuItem.cess_specific else 0.0 ,
+                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.cessAmount * item.quantity else 0.0,
+                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) item.menuItem.cess_specific * item.quantity else 0.0 ,
                     grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.totalPrice * item.quantity else taxAmount.totalPrice* item.quantity,
                     prepare_status = true, // Item needs preparation
                     item_add_mode = existingOpenOrderMasterId != null, // True if adding to an existing order
@@ -335,7 +335,7 @@ class OrderRepository @Inject constructor(
 
                 var mess = ""
                 if (printResponse != null) {
-                    printerHelper.printViaTcp(ipAddress, data = printResponse){ success, message ->
+                    printerHelper.printViaTcp(ipAddress, data = printResponse.bytes()){ success, message ->
                         mess = if (success) {
                             message
                         } else {
@@ -361,14 +361,14 @@ class OrderRepository @Inject constructor(
     suspend fun getIpAddress(category: String): String {
         val response = apiService.getIpAddresss(category,sessionManager.getCompanyCode()?:"")
         return if(response.isSuccessful && response.body()!= null)
-            response.body().toString()
+            response.body()?.printerIpAddress?:""
         else
             ""
     }
     /**
      * Update an order's status
      */
-    suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Flow<Result<Order>> = flow {
+    suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Flow<Result<Int>> = flow {
         try {
             val statusUpdate = mapOf("status" to newStatus.name)
             val response = apiService.updateOrderStatus(orderId, statusUpdate["status"]?:"",sessionManager.getCompanyCode()?:"")

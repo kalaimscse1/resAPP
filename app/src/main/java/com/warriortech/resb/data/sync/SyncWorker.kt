@@ -213,7 +213,8 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             is_inventory = this.is_inventory,
             is_raw = this.is_raw,
             cess_per = this.cess_per,
-            cess_specific = this.cess_specific
+            cess_specific = this.cess_specific,
+            is_favourite = this.is_favourite
         )
     }
 

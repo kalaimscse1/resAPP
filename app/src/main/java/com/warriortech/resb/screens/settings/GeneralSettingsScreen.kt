@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +19,6 @@ import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.GeneralSettingsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.GeneralSettings
-import com.warriortech.resb.ui.components.MobileOptimizedCard
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -173,7 +171,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isTax = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Is Tax")
+            Text("Tax Applicable")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -184,7 +182,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isTaxIncluded = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("IS Tax Included")
+            Text("Tax Included")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -206,7 +204,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isAllowedDisc = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("IS Allowed Discount")
+            Text("Discount Allowed")
         }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -242,7 +240,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isGstSummary = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("IS GST SUMMARY")
+            Text("Tax Summary in Bill")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -253,7 +251,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isReceipt = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("IS RECEIPT")
+            Text("Print Bill")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -264,7 +262,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isKot = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("IS KOT")
+            Text("KOT")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -275,7 +273,7 @@ fun GeneralSettingDialog(
                 onCheckedChange = { isLogo = it }
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("IS LOGO")
+            Text("Logo In Bill")
         }
         OutlinedTextField(
             value = logoPath,
@@ -303,7 +301,11 @@ fun GeneralSettingDialog(
                     is_receipt = isReceipt,
                     is_kot = isKot,
                     is_logo = isLogo,
-                    logo_path = logoPath
+                    logo_path = logoPath,
+                    is_cess = false,
+                    is_delivery_charge = false,
+                    is_table_allowed = true,
+                    is_waiter_allowed = true
                 )
                 onSave(newSetting)
             }

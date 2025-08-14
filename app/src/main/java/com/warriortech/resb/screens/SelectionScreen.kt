@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,6 +74,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.TextSecondary
 import com.warriortech.resb.ui.theme.ghostWhite
 
@@ -114,14 +118,19 @@ fun SelectionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Selection", style = MaterialTheme.typography.titleLarge) },
+                title = { Text("Selection",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        androidx.compose.material.Icon(
+                            Icons.Default.Menu, contentDescription = "Menu",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         }
@@ -136,8 +145,8 @@ fun SelectionScreen(
                 if (displayableAreas.isNotEmpty()) {
                     ScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage,
-                        backgroundColor = MaterialTheme.colorScheme.surface,
-                        contentColor = TextPrimary,
+                        backgroundColor = SecondaryGreen,
+                        contentColor = SurfaceLight,
                         edgePadding = 0.dp
                     ) {
                         displayableAreas.forEachIndexed { index, areaItem ->
@@ -149,6 +158,7 @@ fun SelectionScreen(
                                     }
                                 },
                                 text = { Text(areaItem.area_name) }
+
                             )
                         }
                     }
@@ -319,12 +329,13 @@ fun TableItem(table: Table, onClick: () -> Unit) {
     }
     val borderColor: Color = color
     val cornerRadius: Dp = 12.dp
-    val borderWidth: Dp = 4.dp
+    val borderWidth: Dp = 6.dp
     Surface(
         modifier = Modifier
             .width(90.dp)
             .height(90.dp)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .border(1.dp, color = borderColor, shape = RoundedCornerShape(cornerRadius)),
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 8.dp,
         color = ghostWhite

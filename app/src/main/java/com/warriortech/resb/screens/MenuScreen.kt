@@ -12,8 +12,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.ui.viewmodel.MenuViewModel
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
@@ -34,6 +36,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,8 +53,16 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.R
+import com.warriortech.resb.ui.theme.ghostWhite
+import com.warriortech.resb.util.getDeviceInfo
 
-@SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation")
+@SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation",
+    "ResourceAsColor"
+)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
@@ -120,7 +134,8 @@ fun MenuScreen(
                     snackbarHostState.showSnackbar(currentOrderState.message)
                 }
             }
-            else -> { snackbarHostState.showSnackbar("Loading") }
+            else -> {
+                snackbarHostState.showSnackbar("Loading") }
         }
     }
 
@@ -145,12 +160,14 @@ fun MenuScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Menu Selection")
+                        Text("Menu Selection",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = SurfaceLight)
                         if (viewModel.isExistingOrderLoaded.value) {
                             Text(
                                 text = "Editing Order #${viewModel.existingOrderId.value ?: ""}",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = SurfaceLight
                             )
                         }
                     }
@@ -159,7 +176,9 @@ fun MenuScreen(
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }
                     }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = "Menu",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 actions = {
@@ -168,12 +187,13 @@ fun MenuScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.RemoveShoppingCart,
-                            contentDescription = "Clear Cart"
+                            contentDescription = "Clear Cart",
+                            tint= SurfaceLight
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },
@@ -209,21 +229,47 @@ fun MenuScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    if (viewModel.isExistingOrderLoaded.value) {
+                    val hasNewItems = if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()
+                    if (hasNewItems)
+                    {
                         MobileOptimizedButton(
-                            onClick = {
-                                navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
-                                    launchSingleTop = true
-                                }
-                                onBillPlaced(viewModel.orderDetailsResponse.value,
-                                    viewModel.existingOrderId.value?:""
-                                )
-                                },
-                            enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
-                            text = "Bill",
+                            onClick = { showConfirmDialog = true },
+                            enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                            text = "Place Order",
                             modifier = Modifier.weight(1f)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    if (viewModel.isExistingOrderLoaded.value) {
+                        if (sessionManager.getUser()?.role=="ADMIN"||sessionManager.getUser()?.role=="CASHIER"){
+                            MobileOptimizedButton(
+                                onClick = {
+                                    navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
+                                        launchSingleTop = true
+                                    }
+                                    onBillPlaced(viewModel.orderDetailsResponse.value,
+                                        viewModel.existingOrderId.value?:""
+                                    )
+                                },
+                                enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
+                                text = "Bill",
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+//                        MobileOptimizedButton(
+//                            onClick = {
+//                                navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
+//                                    launchSingleTop = true
+//                                }
+//                                onBillPlaced(viewModel.orderDetailsResponse.value,
+//                                    viewModel.existingOrderId.value?:""
+//                                )
+//                                },
+//                            enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
+//                            text = "Bill",
+//                            modifier = Modifier.weight(1f)
+//                        )
+//                        Spacer(modifier = Modifier.width(8.dp))
                         MobileOptimizedButton(
                             onClick = { showConfirmDialog = true },
                             enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
@@ -246,17 +292,17 @@ fun MenuScreen(
             }
         },
         // ... (snackbarHost and floatingActionButton remain similar, ensure floatingActionButton also uses effectiveStatus if needed for display)
-        floatingActionButton = {
-            val hasNewItems = if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()
-            if (hasNewItems) {
-                FloatingActionButton(
-                    onClick = { showConfirmDialog = true }
-                ) {
-                    val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
-                    Text("$newItemCount")
-                }
-            }
-        }
+//        floatingActionButton = {
+//            val hasNewItems = if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()
+//            if (hasNewItems) {
+//                FloatingActionButton(
+//                    onClick = { showConfirmDialog = true }
+//                ) {
+//                    val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
+//                    Text("$newItemCount")
+//                }
+//            }
+//        }
     ) { paddingValues ->
 
         when (val currentMenuState = menuState) { // Use stable val
@@ -273,9 +319,12 @@ fun MenuScreen(
 
             is MenuViewModel.MenuUiState.Success -> {
                 val menuItems = currentMenuState.menuItems
-                val filteredMenuItems = if (selectedCategory != null) { // Make sure selectedCategory is handled safely
+                val filteredMenuItems = if (selectedCategory != null && selectedCategory=="FAVOURITES") {
+                    menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
+                } else if (selectedCategory != null) {
                     menuItems.filter { it.item_cat_name == selectedCategory }
-                } else {
+                }
+                else{
                     menuItems
                 }
 
@@ -299,8 +348,8 @@ fun MenuScreen(
                         if (categories.isNotEmpty()) {
                             ScrollableTabRow(
                                 selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0), // Ensure index is not -1
-                                backgroundColor = Color.White,
-                                contentColor = TextPrimary
+                                backgroundColor = SecondaryGreen,
+                                contentColor = SurfaceLight
                             ) {
                                 categories.forEachIndexed { index, category ->
                                     Tab(
@@ -316,7 +365,7 @@ fun MenuScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(top = 2.dp)
-                                .background(color = Color.White),
+                                .background(color = Color(R.color.text_secondary)),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp) // Add horizontal for consistency
                         ) {
@@ -413,11 +462,45 @@ fun MenuItemCard(
     tableStatus: String,
     isExistingOrder: Boolean = false
 ) {
+    val IconBoldA: ImageVector = ImageVector.Builder(
+        name = "BoldA",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(
+            fill = SolidColor(Color.Black),
+            pathFillType = PathFillType.NonZero
+        ) {
+            // Outer A shape
+            moveTo(12f, 4f)      // Top point
+            lineTo(3f, 20f)      // Bottom left
+            lineTo(7f, 20f)      // Left foot
+            lineTo(8.6f, 16.8f)  // Up left leg to crossbar
+            lineTo(15.4f, 16.8f) // Across crossbar
+            lineTo(17f, 20f)     // Down right leg to right foot
+            lineTo(21f, 20f)     // Bottom right
+            close()
 
-    MobileOptimizedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            // Crossbar
+            moveTo(9.6f, 14f)
+            lineTo(14.4f, 14f)
+            lineTo(12f, 8.8f)
+            close()
+        }
+    }.build()
+
+    val deviceInfo = getDeviceInfo()
+    val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
+    Card(
+        modifier = Modifier.fillMaxWidth()
+            .border(2.dp, SecondaryGreen, RoundedCornerShape(cornerRadius)),
+        shape = RoundedCornerShape(cornerRadius),
+        colors = CardDefaults.cardColors(
+            containerColor = ghostWhite
+        ),
+
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -428,48 +511,92 @@ fun MenuItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(2f)
                 ) {
-                    Text(
-                        text = menuItem.menu_item_name,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    if (menuItem.menu_item_name_tamil.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                    Row {
                         Text(
-                            text = menuItem.menu_item_name_tamil,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2,
+                            text = menuItem.menu_item_name,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+
+                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = menuItem.menu_item_name_tamil,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                    Row {
+//                        Text(
+//                            text = if (tableStatus == "AC") "₹${
+//                                String.format(
+//                                    "%.2f",
+//                                    menuItem.ac_rate
+//                                )
+//                            }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
+//                                String.format(
+//                                    "%.2f",
+//                                    menuItem.parcel_rate
+//                                )
+//                            }" else "₹${String.format("%.2f", menuItem.rate)}",
+//                            style = MaterialTheme.typography.titleSmall,
+//                            fontWeight = FontWeight.Bold
+//                        )
+//
+//                        if (isExistingOrder && existingQuantity > 0) {
+//                            Spacer(modifier = Modifier.height(4.dp))
+//                            Text(
+//                                text = "Previously ordered: $existingQuantity",
+//                                style = MaterialTheme.typography.bodySmall,
+//                                color = MaterialTheme.colorScheme.primary,
+//                                fontWeight = FontWeight.Medium
+//                            )
+//                        }
+//                    }
 
-                    Text(
-                        text = if (tableStatus=="AC")"₹${String.format("%.2f", menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", menuItem.parcel_rate)}" else "₹${String.format("%.2f", menuItem.rate)}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    if (isExistingOrder && existingQuantity > 0) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Previously ordered: $existingQuantity",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
                 }
-
+            }
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
                 if (menuItem.is_available=="YES") {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Text(
+                            text = if (tableStatus == "AC") "₹${
+                                String.format(
+                                    "%.2f",
+                                    menuItem.ac_rate
+                                )
+                            }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
+                                String.format(
+                                    "%.2f",
+                                    menuItem.parcel_rate
+                                )
+                            }" else "₹${String.format("%.2f", menuItem.rate)}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        if (isExistingOrder && existingQuantity > 0) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Previously ordered: $existingQuantity",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(horizontal = 22.dp))
                         IconButton(
                             onClick = onRemoveItem
                         ) {
@@ -513,9 +640,9 @@ fun MenuItemCard(
                             onClick = onModifierClick
                         ) {
                             Icon(
-                                Icons.Default.AddCircle,
-                                contentDescription = "Modigiers",
-                                tint = Color.Green
+                                IconBoldA,
+                                contentDescription = "Modifiers",
+                                tint = Color.Blue
                             )
                         }
                     }

@@ -29,7 +29,12 @@ import com.warriortech.resb.R
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.PaymentModePieChart
 import com.warriortech.resb.ui.components.WeeklySalesBarChart
+import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryBlueLight
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.ResbTypography
+import com.warriortech.resb.ui.theme.SurfaceLight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
@@ -56,17 +61,23 @@ fun DashboardScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            stringResource(R.string.dashboard),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            "Real-time overview",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                    Row {
+                        Column {
+                            Text(
+                                stringResource(R.string.dashboard),
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SurfaceLight
+                            )
+                        }
+                        Column {
+                            Text(
+                                "Real-time overview",
+                                style = ResbTypography.bodySmall,
+                                color = SurfaceLight,
+                                modifier = Modifier.padding(start = 2.dp, top = 15.dp)
+                            )
+                        }
                     }
                 },
                 navigationIcon = {
@@ -80,7 +91,7 @@ fun DashboardScreen(
                         Icon(
                             Icons.Default.Menu,
                             contentDescription = "Menu",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = SurfaceLight
                         )
                     }
                 },
@@ -88,12 +99,13 @@ fun DashboardScreen(
                     IconButton(onClick = { viewModel.refreshDashboard() }) {
                         Icon(
                             Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = "Refresh",
+                            tint = SurfaceLight
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         }
@@ -125,16 +137,6 @@ fun DashboardScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(16.dp)
                 ) {
-                    /**
-                     * Today's Metrics Section
-                     */
-                    item {
-                        MetricsSection(
-                            metrics = state.metrics,
-                            onNavigateToOrders = onNavigateToOrders,
-                            onNavigateToBilling = onNavigateToBilling
-                        )
-                    }
 
                     /**
                      * Quick Actions Section
@@ -148,6 +150,17 @@ fun DashboardScreen(
                             onDineInSelected = onDineInSelected,
                             onTakeawaySelected = onTakeawaySelected,
                             sessionManager
+                        )
+                    }
+
+                    /**
+                     * Today's Metrics Section
+                     */
+                    item {
+                        MetricsSection(
+                            metrics = state.metrics,
+                            onNavigateToOrders = onNavigateToOrders,
+                            onNavigateToBilling = onNavigateToBilling
                         )
                     }
 
@@ -226,45 +239,51 @@ fun MetricsSection(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            item {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ){
                 MetricCard(
                     title = "Running Orders",
                     value = metrics.runningOrders.toString(),
                     icon = Icons.Default.Restaurant,
                     color = MaterialTheme.colorScheme.primary,
-                    onClick = onNavigateToOrders
+                    onClick = onNavigateToOrders,
+                    textValue = "Running Orders"
                 )
-            }
-            item {
+
                 MetricCard(
                     title = "Pending Bills",
                     value = metrics.pendingBills.toString(),
                     icon = Icons.Default.Receipt,
                     color = MaterialTheme.colorScheme.secondary,
-                    onClick = onNavigateToBilling
+                    onClick = onNavigateToBilling,
+                    textValue = "Pending Bills"
                 )
-            }
-            item {
+
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+
                 MetricCard(
                     title = "Total Sales",
                     value = "₹${String.format("%.2f", metrics.totalSales)}",
                     icon = Icons.Default.TrendingUp,
-                    color = Color(0xFF4CAF50)
+                    color = Color(0xFF4CAF50),
+                    textValue = "Total Sales"
                 )
-            }
-            item {
+
                 MetricCard(
                     title = "Pending Due",
                     value = "₹${String.format("%.2f", metrics.pendingDue)}",
                     icon = Icons.Default.Warning,
-                    color = Color(0xFFF44336)
+                    color = Color(0xFFF44336),
+                    textValue = "Pending Due"
                 )
-            }
+
         }
     }
 }
@@ -273,6 +292,7 @@ fun MetricsSection(
 fun MetricCard(
     title: String,
     value: String,
+    textValue:String,
     icon: ImageVector,
     color: Color,
     onClick: (() -> Unit)? = null
@@ -280,41 +300,36 @@ fun MetricCard(
     MobileOptimizedCard(
         modifier = Modifier
             .width(160.dp)
-            .height(120.dp)
+            .height(130.dp)
             .let { if (onClick != null) it else it },
         onClick = onClick ?: {}
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = color,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Column {
-                Text(
-                    value,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = color
-                )
                 Text(
                     title,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                    Text(
+                        value,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = color
+                    )
             }
         }
     }
@@ -348,35 +363,40 @@ fun QuickActionsSection(
             MobileOptimizedButton(
                 onClick = { showOrderTypeDialog = true },
                 text = "New Order",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(0.5f)
             )
             MobileOptimizedButton(
                 onClick = onNavigateToOrders,
                 text = "View Orders",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(0.5f)
+            )
+            MobileOptimizedButton(
+                onClick = onNavigateToBilling,
+                text = "Billing",
+                modifier = Modifier.weight(0.5f)
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (role == "RESBADMIN" || role == "ADMIN")
-        {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                MobileOptimizedButton(
-                    onClick = onNavigateToBilling,
-                    text = "Billing",
-                    modifier = Modifier.weight(1f)
-                )
-                MobileOptimizedButton(
-                    onClick = onNavigateToSettings,
-                    text = "Settings",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
+//        Spacer(modifier = Modifier.height(8.dp))
+//
+//        if (role == "RESBADMIN" || role == "ADMIN")
+//        {
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.spacedBy(12.dp)
+//            ) {
+//                MobileOptimizedButton(
+//                    onClick = onNavigateToBilling,
+//                    text = "Billing",
+//                    modifier = Modifier.weight(1f)
+//                )
+//                MobileOptimizedButton(
+//                    onClick = onNavigateToSettings,
+//                    text = "Settings",
+//                    modifier = Modifier.weight(1f)
+//                )
+//            }
+//        }
     }
     if (showOrderTypeDialog) {
         AlertDialog(
