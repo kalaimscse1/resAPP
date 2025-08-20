@@ -14,11 +14,12 @@ import androidx.compose.ui.window.Dialog
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.MenuItemWithModifiers
+import com.warriortech.resb.model.TblMenuItemResponse
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModifierSelectionDialog(
-    menuItem: MenuItem,
+    menuItem: TblMenuItemResponse,
     availableModifiers: List<Modifiers>,
     selectedModifiers: List<Modifiers>,
     onModifiersSelected: (List<Modifiers>) -> Unit,

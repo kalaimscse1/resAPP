@@ -1,6 +1,7 @@
 package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.MenuItem
@@ -13,6 +14,7 @@ import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.KOTItem
 import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.Modifiers
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import com.warriortech.resb.util.getCurrentTimeAsFloat
 
 @HiltViewModel
 class MenuViewModel @Inject constructor(
@@ -34,7 +37,7 @@ class MenuViewModel @Inject constructor(
 
     sealed class MenuUiState {
         object Loading : MenuUiState()
-        data class Success(val menuItems: List<MenuItem>) : MenuUiState()
+        data class Success(val menuItems: List<TblMenuItemResponse>) : MenuUiState()
         data class Error(val message: String) : MenuUiState()
     }
 
@@ -53,8 +56,8 @@ class MenuViewModel @Inject constructor(
 
     private val _selectedTableId = MutableStateFlow<Long?>(null)
 
-    private val _selectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
-    var selectedItems: StateFlow<Map<MenuItem, Int>> = _selectedItems.asStateFlow()
+    private val _selectedItems = MutableStateFlow<Map<TblMenuItemResponse, Int>>(emptyMap())
+    var selectedItems: StateFlow<Map<TblMenuItemResponse, Int>> = _selectedItems.asStateFlow()
 
     val categories = MutableStateFlow<List<String>>(emptyList())
 
@@ -64,16 +67,16 @@ class MenuViewModel @Inject constructor(
 
     val existingOrderId = MutableStateFlow<String?>(null)
 
-    private val _newselectedItems = MutableStateFlow<Map<MenuItem, Int>>(emptyMap())
-    var newselectedItems: StateFlow<Map<MenuItem, Int>> = _newselectedItems.asStateFlow()
+    private val _newselectedItems = MutableStateFlow<Map<TblMenuItemResponse, Int>>(emptyMap())
+    var newselectedItems: StateFlow<Map<TblMenuItemResponse, Int>> = _newselectedItems.asStateFlow()
 
     private val _isExistingOrderLoaded = MutableStateFlow(false)
     val isExistingOrderLoaded: StateFlow<Boolean> = _isExistingOrderLoaded.asStateFlow()
 
     val orderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
-    private val _selectedMenuItemForModifier = MutableStateFlow<MenuItem?>(null)
-    val selectedMenuItemForModifier: StateFlow<MenuItem?> =
+    private val _selectedMenuItemForModifier = MutableStateFlow<TblMenuItemResponse?>(null)
+    val selectedMenuItemForModifier: StateFlow<TblMenuItemResponse?> =
         _selectedMenuItemForModifier.asStateFlow()
 
     private val _showModifierDialog = MutableStateFlow<Boolean>(false)
@@ -95,7 +98,7 @@ class MenuViewModel @Inject constructor(
                     orderDetailsResponse.value = existingItemsForTable
                     val menuItems = existingItemsForTable.map {
 
-                        MenuItem(
+                        TblMenuItemResponse(
                             menu_item_id = it.menuItem.menu_item_id,
                             menu_item_name = it.menuItem.menu_item_name,
                             menu_item_name_tamil = it.menuItem.menu_item_name_tamil,
@@ -124,7 +127,11 @@ class MenuViewModel @Inject constructor(
                             qty = it.qty,
                             cess_specific = it.cess_specific,
                             cess_per = it.cess_per.toString(),
-                            is_favourite = it.menuItem.is_favourite
+                            is_favourite = it.menuItem.is_favourite,
+                            menu_item_code = it.menuItem.menu_item_code,
+                            menu_id = it.menuItem.menu_id,
+                            menu_name = it.menuItem.menu_name,
+                            is_active = it.menuItem.is_active
                         )
                     }
                     _selectedItems.value = menuItems.associateWith { it.qty as Int }.toMutableMap()
@@ -143,18 +150,40 @@ class MenuViewModel @Inject constructor(
     fun loadMenuItems(category: String? = null) {
         viewModelScope.launch {
             _menuState.value = MenuUiState.Loading
+            val menus = menuRepository.getMenus().associateBy { it.menu_id }
             tableStatus.value = _selectedTableId.value?.let { tableRepository.getstatus(it) }
             menuRepository.getMenuItems(category).collect { result ->
                 result.fold(
                     onSuccess = { menuItems ->
-                        _menuState.value = MenuUiState.Success(menuItems)
+                        val showMenu = sessionManager.getGeneralSetting()?.menu_show_in_time ?: false
+
+                        val itemsToShow = if (showMenu) {
+                            val currentTime = getCurrentTimeAsFloat()
+
+                            val filteredMenuItems = menuItems.filter { menuItem ->
+                                val menu = menus[menuItem.menu_id]
+                                val startTime = menu?.start_time ?: 0.00f
+                                val endTime = menu?.end_time ?: 24.00f
+                                if (startTime <= endTime) {
+                                    currentTime in startTime..endTime
+                                } else {
+                                    (currentTime >= startTime) || (currentTime <= endTime)
+                                }
+                            }
+                            filteredMenuItems
+                        } else {
+                            menuItems
+                        }
+
+                        _menuState.value = MenuUiState.Success(itemsToShow)
+
                         val data = buildList {
                             add("FAVOURITES")
-                            addAll(menuItems.map { it.item_cat_name }.distinct())
+                            addAll(itemsToShow.map { it.item_cat_name }.distinct())
                         }
                         categories.value = data
-//                        categories.value = menuItems.map { it.item_cat_name }.distinct().sorted()
                         selectedCategory.value = categories.value.firstOrNull()
+
                     },
                     onFailure = { error ->
                         _menuState.value =
@@ -170,7 +199,7 @@ class MenuViewModel @Inject constructor(
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun addItemToOrder(menuItem: MenuItem) {
+    fun addItemToOrder(menuItem: TblMenuItemResponse) {
 
         if (_isExistingOrderLoaded.value) {
             val currentItems = _newselectedItems.value.toMutableMap()
@@ -187,7 +216,7 @@ class MenuViewModel @Inject constructor(
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun removeItemFromOrder(menuItem: MenuItem) {
+    fun removeItemFromOrder(menuItem: TblMenuItemResponse) {
 
         if (_isExistingOrderLoaded.value) {
             val currentItems = _newselectedItems.value.toMutableMap()
@@ -376,7 +405,7 @@ class MenuViewModel @Inject constructor(
         }
     }
 
-    fun showModifierDialog(menuItem: MenuItem) {
+    fun showModifierDialog(menuItem: TblMenuItemResponse) {
         _selectedMenuItemForModifier.value = menuItem
         _showModifierDialog.value = true
         loadModifiersForMenuItem(menuItem.item_cat_id)
@@ -404,7 +433,7 @@ class MenuViewModel @Inject constructor(
         }
     }
 
-    fun addMenuItemWithModifiers(menuItem: MenuItem, modifiers: List<Modifiers>) {
+    fun addMenuItemWithModifiers(menuItem: TblMenuItemResponse, modifiers: List<Modifiers>) {
         val currentItems = _selectedItems.value.toMutableMap()
         val existingCount = currentItems[menuItem] ?: 0
         currentItems[menuItem] = existingCount + 1

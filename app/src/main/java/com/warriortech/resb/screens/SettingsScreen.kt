@@ -119,6 +119,7 @@ fun SettingsMainScreen(
                 SettingsModule.Tax,
                 SettingsModule.TaxSplit,
                 SettingsModule.RestaurantProfile,
+                SettingsModule.GeneralSettings,
                 SettingsModule.CreateVoucher,
                 SettingsModule.Counter,
                 SettingsModule.Customer,

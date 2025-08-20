@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.MenuRepository
 import com.warriortech.resb.model.Menu
-import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,13 +40,15 @@ class MenuSettingsViewModel @Inject constructor(
         }
     }
 
-    fun addMenu(name: String, description: String, isActive: Boolean) {
+    fun addMenu(name: String, description: String, isActive: Boolean,startTime:Float,endTime:Float) {
         viewModelScope.launch {
             try {
                 val menu = Menu(
                     menu_id = 0,
                     menu_name = name,
                     order_by = description,
+                    start_time = startTime,
+                    end_time = endTime,
                     is_active = isActive,
                 )
                 menuRepository.insertMenu(menu)
@@ -58,13 +59,15 @@ class MenuSettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateMenu(id: Long, name: String, description: String, isActive: Boolean) {
+    fun updateMenu(id: Long, name: String, description: String, isActive: Boolean,startTime:Float,endTime:Float) {
         viewModelScope.launch {
             try {
                 val menu = Menu(
                     menu_id = id,
                     menu_name = name,
                     order_by = description,
+                    start_time = startTime,
+                    end_time = endTime,
                     is_active = isActive,
                 )
                 menuRepository.updateMenu(menu)

@@ -13,6 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.content.edit
+import com.warriortech.resb.model.TblMenuItemResponse
 
 @Singleton
 class AIRepository @Inject constructor(
@@ -45,7 +46,7 @@ class AIRepository @Inject constructor(
         return encryptedPrefs.getString("openai_api_key", null)
     }
 
-    suspend fun generateMenuDescription(menuItem: MenuItem): Result<String> =
+    suspend fun generateMenuDescription(menuItem: TblMenuItemResponse): Result<String> =
         withContext(Dispatchers.IO) {
             try {
                 val apiKey =

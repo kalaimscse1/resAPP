@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class OrderItem(
     val id: Long? = null,
-    val menuItem: MenuItem,
+    val menuItem: TblMenuItemResponse,
     val quantity: Int,
     val notes: String? = null
 )
@@ -130,7 +130,7 @@ data class TblOrderDetailsResponse(
     var order_details_id:Long,
     var order_master_id: String,
     var kot_number:Int,
-    var menuItem: MenuItem,
+    var menuItem: TblMenuItemResponse,
     var rate: Double,
     var qty:Int,
     var total:Double,

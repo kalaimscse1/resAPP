@@ -73,7 +73,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import com.warriortech.resb.model.TableStatusResponse
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.theme.DarkGreen
+import com.warriortech.resb.ui.theme.DarkRed
+import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -209,7 +213,21 @@ fun SelectionScreen(
                                         items(filteredTables) { table ->
                                             TableItem(
                                                 table = table,
-                                                onClick = { onTableSelected(table) })
+                                                onClick = {
+                                                    val tbl = Table(
+                                                        table_id = table.table_id,
+                                                        area_id = table.area_id,
+                                                        area_name = table.area_name,
+                                                        table_name = table.table_name,
+                                                        seating_capacity = table.seating_capacity.toInt(),
+                                                        is_ac = table.is_ac,
+                                                        table_status = table.table_status,
+                                                        table_availability = table.table_availability,
+                                                        is_active = table.is_active
+                                                    )
+                                                    onTableSelected(tbl)
+                                                },
+                                                sessionManager)
                                         }
                                     }
                                 }
@@ -294,7 +312,21 @@ fun SelectionScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 items(filteredTables) { table ->
-                                    TableItem(table = table, onClick = { onTableSelected(table) })
+                                    TableItem(table = table, onClick = {
+                                        val tbl = Table(
+                                            table_id = table.table_id,
+                                            area_id = table.area_id,
+                                            area_name = table.area_name,
+                                            table_name = table.table_name,
+                                            seating_capacity = table.seating_capacity.toInt(),
+                                            is_ac = table.is_ac,
+                                            table_status = table.table_status,
+                                            table_availability = table.table_availability,
+                                            is_active = table.is_active
+                                        )
+                                        onTableSelected(tbl)
+                                    },
+                                        sessionManager)
                                 }
                             }
                         }
@@ -320,7 +352,7 @@ fun SelectionScreen(
 }
 
 @Composable
-fun TableItem(table: Table, onClick: () -> Unit) {
+fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: SessionManager) {
     val color = when (table.table_availability) {
         "AVAILABLE" -> TextSecondary
         "OCCUPIED" -> SuccessGreen
@@ -330,6 +362,7 @@ fun TableItem(table: Table, onClick: () -> Unit) {
     val borderColor: Color = color
     val cornerRadius: Dp = 12.dp
     val borderWidth: Dp = 6.dp
+
     Surface(
         modifier = Modifier
             .width(90.dp)
@@ -377,6 +410,23 @@ fun TableItem(table: Table, onClick: () -> Unit) {
                     text = "${table.seating_capacity} Seats",
                     style = MaterialTheme.typography.bodySmall
                 )
+                Spacer(modifier = Modifier.height(4.dp))
+                if (table.grandTotal>0) {
+                    Text(
+                        text = sessionManager.getRestaurantProfile()?.currency + " " + table.grandTotal,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color=ErrorRed
+                    )
+                } else {
+                    Text(
+                        text = "New",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color=DarkGreen
+                    )
+                }
             }
         }
     }

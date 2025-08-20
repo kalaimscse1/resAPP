@@ -22,3 +22,17 @@ data class TblTable(
     val table_availability:String,
     val is_active: Boolean
 )
+
+
+data class TableStatusResponse(
+    var table_id: Long,
+    var area_id:Long,
+    var area_name:String,
+    var table_name:String,
+    var seating_capacity:Long,
+    var is_ac:String,
+    var table_status:String,
+    var table_availability:String,
+    var is_active:Boolean,
+    var grandTotal:Double
+)

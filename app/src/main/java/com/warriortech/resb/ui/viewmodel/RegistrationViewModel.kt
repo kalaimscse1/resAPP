@@ -186,6 +186,7 @@ class RegistrationViewModel @Inject constructor(
                                 )
                                 sessionManager.saveRestaurantProfile(profile)
                                 sessionManager.saveCompanyCode(res.company_master_code)
+                                createCompany(res)
                                 _registrationResult.value = "Registration successful!"
                             },
                             onFailure = { error ->
@@ -222,7 +223,7 @@ class RegistrationViewModel @Inject constructor(
                     mail_id = res.mail_id,
                     country = res.country,
                     state = res.state,
-                    currency = "Rs",
+                    currency = "Rs.",
                     tax_no = "",
                     decimal_point = 2L
                 )

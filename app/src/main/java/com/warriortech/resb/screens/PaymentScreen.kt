@@ -33,6 +33,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.util.AnimatedSnackbarDemo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +79,7 @@ fun PaymentScreen(
 
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { AnimatedSnackbarDemo(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { 
@@ -229,91 +230,6 @@ fun PaymentScreen(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun PaymentContent(
-    modifier: Modifier = Modifier,
-    uiState: BillingPaymentUiState,
-    onSelectPaymentMethod: (PaymentMethod) -> Unit,
-    onAmountChange: (Double) -> Unit
-) {
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
-    var amountText by remember(uiState.amountToPay) { mutableStateOf(uiState.amountToPay.format(2)) }
-
-
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Text(
-                "Amount Due: ${currencyFormatter.format(uiState.totalAmount)}",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = {
-                    amountText = it
-                    it.toDoubleOrNull()?.let { numVal -> onAmountChange(numVal) }
-                },
-                label = { Text("Amount to Pay") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                leadingIcon = { Text(currencyFormatter.currency?.symbol ?: "₹") }
-            )
-        }
-
-        item {
-            Text("Select Payment Method", style = MaterialTheme.typography.titleMedium)
-        }
-
-        if (uiState.availablePaymentMethods.isEmpty()) {
-            item { Text("No payment methods available.") }
-        } else {
-            items(uiState.availablePaymentMethods) { method ->
-                PaymentMethodItem(
-                    method = method,
-                    isSelected = uiState.selectedPaymentMethod?.id == method.id,
-                    onClick = { onSelectPaymentMethod(method) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun PaymentMethodItem(
-    method: PaymentMethod,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(method.name, style = MaterialTheme.typography.bodyLarge)
-            if (isSelected) {
-                Icon(Icons.Filled.CheckCircle, contentDescription = "Selected", tint = MaterialTheme.colorScheme.primary)
             }
         }
     }

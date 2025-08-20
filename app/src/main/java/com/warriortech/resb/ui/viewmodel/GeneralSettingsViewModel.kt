@@ -1,9 +1,11 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.GeneralSettingsRepository
 import com.warriortech.resb.model.GeneralSettings
+import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GeneralSettingsViewModel @Inject constructor(
-    private val generalSettingsRepository: GeneralSettingsRepository
+    private val generalSettingsRepository: GeneralSettingsRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -43,8 +46,11 @@ class GeneralSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val updatedSettings = generalSettingsRepository.updateGeneralSettings(settings)
+
                 if (updatedSettings != null) {
                    loadSettings()
+                    Log.d("GeneralSettingsViewModel", "Settings updated successfully$settings")
+                    sessionManager.saveGeneralSetting(settings)
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to update settings")

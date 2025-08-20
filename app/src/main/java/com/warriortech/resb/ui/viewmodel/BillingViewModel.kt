@@ -11,6 +11,7 @@ import com.warriortech.resb.model.BillItem
 import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Order
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
@@ -48,7 +49,7 @@ sealed interface PaymentProcessingState {
 // Represents the overall UI state for Billing and Payment
 data class BillingPaymentUiState(
     // Billing Details (from your existing ViewModel)
-    val billedItems: Map<MenuItem, Int> = emptyMap(),
+    val billedItems: Map<TblMenuItemResponse, Int> = emptyMap(),
     val tableStatus: String = "TABLE", // Default GST
     val discountFlat: Double = 0.0,
     val cessSpecific: Double=0.0,
@@ -110,7 +111,7 @@ class BillingViewModel @Inject constructor(
                 _filteredOrderDetails.value = orderDetailsResponse
                 val menuItems=orderDetailsResponse.map{
 
-                    MenuItem(
+                    TblMenuItemResponse(
                         menu_item_id = it.menuItem.menu_item_id,
                         menu_item_name = it.menuItem.menu_item_name,
                         menu_item_name_tamil = it.menuItem.menu_item_name_tamil,
@@ -139,7 +140,11 @@ class BillingViewModel @Inject constructor(
                         qty = it.qty,
                         cess_specific = it.cess_specific,
                         cess_per = it.cess_per.toString(),
-                        is_favourite = false
+                        is_favourite = it.menuItem.is_favourite,
+                        menu_item_code = it.menuItem.menu_item_code,
+                        menu_id = it.menuItem.menu_id,
+                        menu_name = it.menuItem.menu_name,
+                        is_active = it.menuItem.is_active
                     )
                 }
                 // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
@@ -200,7 +205,7 @@ class BillingViewModel @Inject constructor(
         _filteredOrderDetails.value = filtered
 
         // Recalculate billing details for filtered items
-        val itemsMap = mutableMapOf<MenuItem, Int>()
+        val itemsMap = mutableMapOf<TblMenuItemResponse, Int>()
         filtered.forEach { detail ->
             val existingQty = itemsMap[detail.menuItem] ?: 0
             itemsMap[detail.menuItem] = existingQty + detail.qty
@@ -337,7 +342,6 @@ class BillingViewModel @Inject constructor(
                 // 2. Handling success/failure responses.
                 // 3. If successful, creating an Order record and saving it.
 
-                Log.d("Payment", "Processing payment with method: ${currentState.amountReceived}")
                 billRepository.bill(
                     orderMasterId = currentState.orderMasterId ?:"",
                     paymentMethod = paymentMethod,
@@ -347,7 +351,6 @@ class BillingViewModel @Inject constructor(
                     result.fold(
                         onSuccess = { response ->
                             var sn = 1
-                            val bill = MutableStateFlow<List<BillItem>>(emptyList())
                             val orderDetails = orderRepository.getOrdersByOrderId(response.order_master.order_master_id).body()!!
                             val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
                             val billItems = orderDetails.map {detail ->
@@ -368,7 +371,7 @@ class BillingViewModel @Inject constructor(
                                     igst = if (detail.igst> 0) detail.igst else 0.0,
                                     cess = if (detail.cess > 0) detail.cess else 0.0,
                                     cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0
-                                )
+                               )
                             }
                             val billDetails = Bill(
                                 company_code = sessionManager.getCompanyCode() ?: "",
@@ -536,7 +539,7 @@ class BillingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(discount = discount)
     }
 
-    fun updateItemQuantity(menuItem: MenuItem, newQuantity: Int) {
+    fun updateItemQuantity(menuItem: TblMenuItemResponse, newQuantity: Int) {
         val currentItems = _uiState.value.billedItems.toMutableMap()
         if (newQuantity > 0) {
             currentItems[menuItem] = newQuantity
@@ -546,7 +549,7 @@ class BillingViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(billedItems = currentItems)
     }
 
-    fun removeItem(menuItem: MenuItem) {
+    fun removeItem(menuItem: TblMenuItemResponse) {
         val currentItems = _uiState.value.billedItems.toMutableMap()
         currentItems.remove(menuItem)
         _uiState.value = _uiState.value.copy(billedItems = currentItems)
@@ -556,7 +559,7 @@ class BillingViewModel @Inject constructor(
 // Assume Order model exists (simplified)
 data class PaidOrder(
     // val orderId: String,
-    val items: Map<MenuItem, Int>,
+    val items: Map<TblMenuItemResponse, Int>,
     val tableStatus: String,
     val subtotal: Double,
     val taxAmount: Double,

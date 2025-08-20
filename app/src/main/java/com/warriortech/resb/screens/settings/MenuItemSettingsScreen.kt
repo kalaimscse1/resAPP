@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblMenuItemRequest
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.MenuItemSettingsViewModel
@@ -30,7 +32,7 @@ fun MenuItemSettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingMenuItem by remember { mutableStateOf<MenuItem?>(null) }
+    var editingMenuItem by remember { mutableStateOf<TblMenuItemResponse?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -152,7 +154,7 @@ fun MenuItemSettingsScreen(
 
 @Composable
 fun MenuItemCard(
-    menuItem: MenuItem,
+    menuItem: TblMenuItemResponse,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -200,9 +202,9 @@ fun MenuItemCard(
 
 @Composable
 fun MenuItemDialog(
-    menuItem: MenuItem?,
+    menuItem: TblMenuItemResponse?,
     onDismiss: () -> Unit,
-    onSave: (MenuItem) -> Unit
+    onSave: (TblMenuItemRequest) -> Unit
 ) {
     var name by remember { mutableStateOf(menuItem?.menu_item_name ?: "") }
     var nameTamil by remember { mutableStateOf(menuItem?.menu_item_name_tamil ?: "") }
@@ -262,27 +264,21 @@ fun MenuItemDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val newMenuItem = MenuItem(
+                    val newMenuItem = TblMenuItemRequest(
                         menu_item_id = menuItem?.menu_item_id ?: 0,
                         menu_item_name = name,
                         menu_item_name_tamil = nameTamil,
                         item_cat_id = menuItem?.item_cat_id ?: 1,
-                        item_cat_name = menuItem?.item_cat_name ?: "",
                         rate = rate.toDoubleOrNull() ?: 0.0,
                         ac_rate = acRate.toDoubleOrNull() ?: 0.0,
                         parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
-                        parcel_charge = menuItem?.parcel_charge?: 0.0,
+                        parcel_charge = menuItem?.parcel_charge ?: 0.0,
                         tax_id = menuItem?.tax_id ?: 1,
-                        tax_name = menuItem?.tax_name ?: "",
-                        tax_percentage = menuItem?.tax_percentage ?: 0.0.toString(),
-                        cess_per = TODO(),
                         cess_specific = TODO(),
                         kitchen_cat_id = TODO(),
-                        kitchen_cat_name = TODO(),
                         stock_maintain = TODO(),
                         rate_lock = TODO(),
                         unit_id = TODO(),
-                        unit_name = TODO(),
                         min_stock = TODO(),
                         hsn_code = TODO(),
                         order_by = TODO(),
@@ -290,8 +286,10 @@ fun MenuItemDialog(
                         is_raw = TODO(),
                         is_available = TODO(),
                         image = TODO(),
-                        qty = TODO(),
-                        is_favourite = false
+                        menu_item_code = TODO(),
+                        menu_id = TODO(),
+                        is_favourite = TODO(),
+                        is_active = TODO(),
                     )
                     onSave(newMenuItem)
                 },
@@ -310,6 +308,6 @@ fun MenuItemDialog(
 
 sealed class MenuItemSettingsUiState {
     object Loading : MenuItemSettingsUiState()
-    data class Success(val menuItems: List<MenuItem>) : MenuItemSettingsUiState()
+    data class Success(val menuItems: List<TblMenuItemResponse>) : MenuItemSettingsUiState()
     data class Error(val message: String) : MenuItemSettingsUiState()
 }

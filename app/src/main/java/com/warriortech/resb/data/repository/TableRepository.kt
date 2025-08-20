@@ -5,10 +5,10 @@ import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TableEntity
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TableStatusResponse
 import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -40,6 +40,19 @@ class TableRepository @Inject constructor(
             throw e
         }
     }
+
+    suspend fun getActiveTables(): Flow<List<TableStatusResponse>> = flow {
+        try {
+            val  response  = apiService.getActiveTables(sessionManager.getCompanyCode()?:"")
+            if (response.isSuccessful){
+                emit(response.body()!!)
+            }else {
+                throw Exception("Failed to fetch table: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
     suspend fun deleteTable(tableId: Int) {
         val response = apiService.deleteTable(tableId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
@@ -57,7 +70,7 @@ class TableRepository @Inject constructor(
         }
     }
 
-    fun getTablesBySection(section: Long): Flow<List<Table>> =flow {
+    fun getTablesBySection(section: Long): Flow<List<TableStatusResponse>> =flow {
         try {
             val response = apiService.getTablesBySection(section,sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful) {

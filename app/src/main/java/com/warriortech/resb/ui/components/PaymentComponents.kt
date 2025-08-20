@@ -44,7 +44,6 @@ fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
 
             PaymentSummaryRow(label = "Subtotal", amount = "₹${uiState.subtotal}")
             PaymentSummaryRow(label = "Tax", amount = "₹${uiState.taxAmount}")
-            PaymentSummaryRow(label = "Service Charge", amount = "₹0.0")
 
             Divider(
                 modifier = Modifier.padding(vertical = 12.dp),

@@ -9,6 +9,7 @@ import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TableEntity
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import kotlinx.coroutines.Dispatchers
@@ -184,7 +185,7 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             is_active = true
         )
     }
-    private fun MenuItem.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): MenuItemEntity {
+    private fun TblMenuItemResponse.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): MenuItemEntity {
         return return MenuItemEntity(
             menu_item_id = this.menu_item_id,
             menu_item_name = this.menu_item_name,
@@ -214,7 +215,11 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             is_raw = this.is_raw,
             cess_per = this.cess_per,
             cess_specific = this.cess_specific,
-            is_favourite = this.is_favourite
+            is_favourite = this.is_favourite,
+            menu_item_code = this.menu_item_code,
+            menu_id = this.menu_id,
+            menu_name = this.menu_name,
+            is_active = this.is_active
         )
     }
 

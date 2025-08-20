@@ -85,36 +85,23 @@ fun PaymentModeLegendItem(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(),
-
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.padding(end = 12.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(color)
-            )
-        }
-        Column(modifier = Modifier.padding(end = 12.dp)) {
-           Text(
-               text = paymentMode,
-               style = MaterialTheme.typography.bodyMedium,
-               fontWeight = FontWeight.Medium
-           )
-       }
-        Column(modifier = Modifier.padding(start = 12.dp),
-            horizontalAlignment= Alignment.End) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "₹${String.format("%.0f", amount)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = paymentMode,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
             )
-        }
-        Column(modifier = Modifier.padding(start = 12.dp),
-            horizontalAlignment= Alignment.End) {
             Text(
-                text = "($percentage%)",
+                text = "₹${String.format("%.0f", amount)} ($percentage%)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

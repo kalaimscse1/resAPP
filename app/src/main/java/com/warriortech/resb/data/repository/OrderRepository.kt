@@ -2,7 +2,6 @@ package com.warriortech.resb.data.repository
 
 import android.annotation.SuppressLint
 import com.warriortech.resb.model.KOTRequest
-import com.warriortech.resb.model.Order
 import com.warriortech.resb.model.OrderDetails
 import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.model.OrderMaster
@@ -203,6 +202,164 @@ class OrderRepository @Inject constructor(
      * Get open order items for a specific table to display in UI.
      * This needs to be robust to fetch all items belonging to any open OrderMaster for the table.
      */
+
+    @SuppressLint("SuspiciousIndentation")
+    suspend fun placeOrUpdateOrders(
+        tableId: Long,
+        itemsToPlace: List<OrderItem>,
+        tableStatus: String,
+        existingOpenOrderMasterId: String? = null // Allow passing it if already known
+    ): Flow<Result<List<TblOrderDetailsResponse>>> = flow {
+        if (itemsToPlace.isEmpty()) {
+            emit(Result.failure(IllegalArgumentException("Cannot place an order with no items.")))
+            return@flow
+        }
+
+        try {
+            var currentOrderMasterId = existingOpenOrderMasterId
+            var orderMasterResponse: TblOrderResponse? = null
+
+            // 1. Check for/Determine existing open OrderMaster ID for the table
+            if (currentOrderMasterId == null && tableStatus != "TAKEAWAY" && tableStatus != "DELIVERY") {
+                // Try to find an open order for this table
+                // Assuming getOpenOrderMasterForTable returns a TblOrderResponse or similar with order_master_id
+                // If it returns null, no open order exists.
+                val openOrderResponse = apiService.getOpenOrderMasterForTable(tableId,sessionManager.getCompanyCode()?:"") // YOU NEED TO IMPLEMENT/DEFINE THIS
+                if (openOrderResponse.isSuccessful && openOrderResponse.body() != null) {
+                    currentOrderMasterId = openOrderResponse.body()!!.order_master_id
+                    orderMasterResponse = openOrderResponse.body() // Store the existing order master response
+                }
+            }
+
+            val tableInfo = apiService.getTablesByStatus(tableId,sessionManager.getCompanyCode()?:"") // Assuming this gets details like seating_capacity, table_name
+
+            // 2. If no existing open OrderMaster, create a new one
+            if (currentOrderMasterId == null) {
+                val newOrderMasterApiId = apiService.getOrderNo(sessionManager.getCompanyCode()?:"",sessionManager.getUser()?.counter_id ?:0L,"ORDER") // Get new Order Master ID from API
+                val orderRequest = OrderMaster(
+                    order_date = getCurrentDateModern(),
+                    order_create_time = getCurrentTimeModern(),
+                    order_completed_time = "", // Will be empty for new/running orders
+                    staff_id = sessionManager.getUser()?.staff_id ?: 1,
+                    is_dine_in = tableStatus != "TAKEAWAY" && tableStatus != "DELIVERY",
+                    is_take_away = tableStatus == "TAKEAWAY",
+                    is_delivery = tableStatus == "DELIVERY",
+                    table_id = tableId,
+                    no_of_person = tableInfo.seating_capacity,
+                    waiter_request_status = true,
+                    kitchen_response_status = true, // Assuming KOT is being sent
+                    order_status = "RUNNING",
+                    is_merge = false,
+                    is_active = 1,
+                    order_master_id = newOrderMasterApiId["order_master_id"]?:"", // Use ID from getOrderNo
+                    is_delivered = false
+                )
+                val response = apiService.createOrder(orderRequest,sessionManager.getCompanyCode()?:"",sessionManager.getUser()?.counter_id ?: 0L,"ORDER")
+                if (response.isSuccessful && response.body() != null) {
+                    orderMasterResponse = response.body()
+                    currentOrderMasterId = orderMasterResponse!!.order_master_id
+                    // Update table availability only if a new order is created for a dine-in table
+                    if (orderRequest.is_dine_in) {
+                        apiService.updateTableAvailability(tableId, "OCCUPIED",sessionManager.getCompanyCode()?:"")
+                    }
+                } else {
+                    emit(Result.failure(Exception("Error creating new OrderMaster: ${response.code()}, ${response.errorBody()?.string()}")))
+                    return@flow
+                }
+            } else{
+                // If currentOrderMasterId was passed or found, but we don't have the TblOrderResponse object yet
+                // You might need an API endpoint to fetch OrderMaster details by its ID if not already available
+                // For now, let's assume if currentOrderMasterId is not null, it's valid.
+                // The TblOrderResponse is mainly used to emit success, so we might need to construct a minimal one or fetch it.
+                // This part depends on what TblOrderResponse should contain when updating.
+                // For simplicity, let's assume we proceed and the success emission will primarily focus on the KOT.
+                // Fetch the order master details if we only have the ID
+                val masterResponse = apiService.getOrderMasterById(currentOrderMasterId,sessionManager.getCompanyCode()?:"") // YOU MIGHT NEED THIS ENDPOINT
+                if (masterResponse.isSuccessful && masterResponse.body() != null) {
+                    orderMasterResponse = masterResponse.body()
+                } else {
+                    emit(Result.failure(Exception("Could not retrieve details for existing OrderMaster ID: $currentOrderMasterId")))
+                    return@flow
+                }
+            }
+
+
+            // 3. Create OrderDetails for the items being placed (new or added)
+            val newKotNumberMap = apiService.getKotNo(sessionManager.getCompanyCode()?:"") // Get a KOT number for this batch of items
+            val newKotNumber = newKotNumberMap["kot_number"]
+
+            if (currentOrderMasterId.isEmpty() || newKotNumber == null) {
+                emit(Result.failure(Exception("Failed to obtain OrderMaster ID or KOT number.")))
+                return@flow
+            }
+
+
+            val orderDetailsList = itemsToPlace.map { item ->
+                val pricePerUnit = when (tableStatus) {
+                    "AC" -> item.menuItem.ac_rate
+                    "PARCEL", "DELIVERY" -> item.menuItem.parcel_rate
+                    else -> item.menuItem.rate
+                }
+                val tax = apiService.getTaxSplit(item.menuItem.tax_id,sessionManager.getCompanyCode()?:"")
+                val cgst = tax[0].tax_split_percentage
+                val sgst= tax[1].tax_split_percentage
+                val totalAmountForTaxCalc = pricePerUnit
+                val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), true,sgst.toDouble(),cgst.toDouble())
+                val cess =  calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true,item.menuItem.cess_specific,sgst.toDouble(),cgst.toDouble())
+                OrderDetails(
+                    order_master_id = currentOrderMasterId, // Link to existing or new OrderMaster
+                    order_details_id = 0, // Backend should generate this or handle it
+                    kot_number = newKotNumber, // KOT number for this specific batch
+                    menu_item_id = item.menuItem.menu_item_id,
+                    rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice else cess.basePrice, // Rate per unit (base price)
+                    qty = item.quantity,
+                    total = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice * item.quantity else cess.basePrice * item.quantity, // Total base price for this item line
+                    tax_id = item.menuItem.tax_id,
+                    tax_name = item.menuItem.tax_name,
+                    tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount * item.quantity  else cess.gstAmount* item.quantity,
+                    sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
+                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.sgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.sgst * item.quantity else 0.0},
+                    cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
+                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.cgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.cgst * item.quantity else 0.0}, // Adjust if your backend calculates differently
+                    igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
+                    igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount else 0.0 ,
+                    cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
+                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.cessAmount * item.quantity else 0.0,
+                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) item.menuItem.cess_specific * item.quantity else 0.0 ,
+                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.totalPrice * item.quantity else taxAmount.totalPrice* item.quantity,
+                    prepare_status = true, // Item needs preparation
+                    item_add_mode = existingOpenOrderMasterId != null, // True if adding to an existing order
+                    is_flag = false,
+                    merge_order_nos = "",
+                    merge_order_tables = "", // Name of the current table
+                    merge_pax = 0, // Pax of the current table
+                    is_active = 1
+                )
+            }
+            val detailsResponse = apiService.createOrderDetails(orderDetailsList,sessionManager.getCompanyCode()?:"")
+
+            if (detailsResponse.isSuccessful) {
+                val response = detailsResponse.body()
+                // If TblOrderResponse needs to be the master order, ensure orderMasterResponse is not null
+                if (response != null) {
+                    // Update the KOT number on the response object to reflect the latest KOT generated
+                    // Note: TblOrderResponse might represent the master, which can have multiple KOTs.
+                    // This assignment implies the response primarily reflects the latest action.
+                    orderMasterResponse?.kot_number = newKotNumber
+                    emit(Result.success(response))
+                } else {
+                    // This case should ideally be handled earlier by ensuring orderMasterResponse is fetched/created
+                    emit(Result.failure(Exception("Order details created, but failed to package final response.")))
+                }
+            } else {
+                emit(Result.failure(Exception("Error creating OrderDetails: ${detailsResponse.code()}, ${detailsResponse.errorBody()?.string()}")))
+            }
+
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
+
     suspend fun getOpenOrderItemsForTable(tableId: Long): List<TblOrderDetailsResponse> {
         // This implementation needs to correctly find the OPEN OrderMaster(s) for the table
         // and then fetch all its details.

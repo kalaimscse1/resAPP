@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -125,6 +126,8 @@ import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.SubscriptionManager
 
 
@@ -521,14 +524,10 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             val counterId = backStackEntry.arguments?.getString("counterId")?.toLongOrNull() ?: 1L
             CounterScreen(
                 onBackPressed = { navController.popBackStack() },
-                onProceedToBilling = { items ->
-                    // Convert counter items to billing format
-                    val billingItems = items.mapKeys { it.key }.mapValues { it.value }
-                    // Navigate to billing with counter items
-                    navController.navigate("billing_screen/${billingItems.values}") {
-                        popUpTo("counter/${counterId}") { inclusive = true }
-                    }
-                },
+                onProceedToBilling = { items,orderId->
+                    selectedItems=items
+                    selectedOrderId = orderId
+                    navController.navigate("billing_screen/${orderId}") },
                 drawerState = drawerState,
                 counterId = counterId
             )
@@ -537,14 +536,10 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         composable("counter") {
             CounterScreen(
                 onBackPressed = { navController.popBackStack() },
-                onProceedToBilling = { items ->
-                    // Convert counter items to billing format
-                    val billingItems = items.mapKeys { it.key }.mapValues { it.value }
-                    // Navigate to billing with counter items
-                    navController.navigate("billing_screen/${billingItems.values}") {
-                        popUpTo("counter") { inclusive = true }
-                    }
-                },
+                onProceedToBilling = {items,orderId->
+            selectedItems=items
+            selectedOrderId = orderId
+            navController.navigate("billing_screen/${orderId}") },
                 drawerState = drawerState
             )
         }
@@ -678,7 +673,6 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         }
     }
 }
-
 @Composable
 fun DrawerContent(
     isCollapsed: Boolean,
@@ -689,9 +683,30 @@ fun DrawerContent(
     sessionManager: SessionManager
 ) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
-    val role = sessionManager.getUser()?.role?:""
+    val role = sessionManager.getUser()?.role ?: ""
     val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
     val (ordersExpanded, setOrdersExpanded) = remember { mutableStateOf(false) }
+    val (billingExpanded, setBillingExpanded) = remember { mutableStateOf(false) }
+
+    // 👇 Define colors for main menu & submenu
+    val drawerItemColors = NavigationDrawerItemDefaults.colors(
+        selectedContainerColor = PrimaryGreen.copy(alpha = 0.15f),
+        selectedIconColor = SurfaceLight,
+        selectedTextColor = SurfaceLight,
+        unselectedContainerColor = Color.Transparent,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    val subMenuColors = NavigationDrawerItemDefaults.colors(
+        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+        selectedIconColor = MaterialTheme.colorScheme.primary,
+        selectedTextColor = MaterialTheme.colorScheme.primary,
+        unselectedContainerColor = Color.Transparent,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
     ModalDrawerSheet(
         modifier = Modifier.width(drawerWidth),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
@@ -748,33 +763,34 @@ fun DrawerContent(
                 },
                 selected = false,
                 onClick = onCollapseToggle,
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                colors = drawerItemColors
             )
 
             Spacer(modifier = Modifier.height(8.dp))
+
+            // 👇 Example with custom colors
             if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CHEF" || role == "CASHIER") {
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Dashboard") else Text("") },
                     icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
                     selected = currentDestination?.route == "dashboard",
                     onClick = { onDestinationClicked("dashboard") },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = drawerItemColors
                 )
             }
+
             if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CASHIER") {
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Orders") else Text("") },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Receipt,
-                            contentDescription = null
-                        )
-                    },
+                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                     selected = currentDestination?.route == "orders" ||
                             currentDestination?.route == "selects" ||
                             currentDestination?.route == "takeaway_menu",
                     onClick = { setOrdersExpanded(!ordersExpanded) },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = drawerItemColors
                 )
 
                 // Sub-menu items
@@ -785,115 +801,101 @@ fun DrawerContent(
                             icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
                             selected = currentDestination?.route == "selects",
                             onClick = { onDestinationClicked("selects") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
                         )
                         NavigationDrawerItem(
                             label = { if (!isCollapsed) Text("Takeaway") else Text("") },
                             icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
                             selected = currentDestination?.route == "takeaway_menu",
                             onClick = { onDestinationClicked("takeaway_menu") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
                         )
                         NavigationDrawerItem(
                             label = { if (!isCollapsed) Text("Orders") else Text("") },
                             icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                             selected = currentDestination?.route == "orders",
-                            onClick = {
-                                onDestinationClicked("orders")
-                            },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            onClick = { onDestinationClicked("orders") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
                         )
                     }
                 }
-
-
             }
-            if (role == "RESBADMIN" || role == "ADMIN") {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                    selected = currentDestination?.route == "paid_bills",
-                    onClick = {
-                        onDestinationClicked("paid_bills")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
 
+            if (role == "RESBADMIN" || role == "ADMIN") {
+//                NavigationDrawerItem(
+//                    label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+//                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+//                    selected = currentDestination?.route == "paid_bills",
+//                    onClick = { onDestinationClicked("paid_bills") },
+//                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+//                    colors = drawerItemColors
+//                )
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Settings") else Text("") },
                     icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                     selected = currentDestination?.route == "settings",
-                    onClick = {
-                        onDestinationClicked("settings")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Template") else Text("") },
-                    selected = currentDestination?.route =="bill_template/{billId}",
-                    onClick = {
-                        onDestinationClicked("bill_template/{billId}")
-                    },
+                    onClick = { onDestinationClicked("settings") },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) }
+                    colors = drawerItemColors
                 )
+//                NavigationDrawerItem(
+//                    label = { if (!isCollapsed) Text("Template") else Text("") },
+//                    selected = currentDestination?.route == "bill_template/{billId}",
+//                    onClick = { onDestinationClicked("bill_template/{billId}") },
+//                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+//                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+//                    colors = drawerItemColors
+//                )
             }
-            if (role == "RESBADMIN" || role == "ADMIN" || role == "CASHIER")
-            {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
-                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                    selected = currentDestination?.route == "counter",
-                    onClick = {
-                        onDestinationClicked("counter")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
 
+            if (role == "RESBADMIN" || role == "ADMIN" || role == "CASHIER") {
                 NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Reports") else Text("") },
+                    label = { if (!isCollapsed) Text("Bills") else Text("") },
                     icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                    selected = currentDestination?.route == "report_screen",
-                    onClick = {
-                        onDestinationClicked("report_screen")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    selected = currentDestination?.route == "counter" ||
+                            currentDestination?.route == "report_screen",
+                    onClick = { setBillingExpanded(!billingExpanded) },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = drawerItemColors
                 )
+                AnimatedVisibility(visible = billingExpanded) {
+                    Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
+                            icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                            selected = currentDestination?.route == "counter",
+                            onClick = { onDestinationClicked("counter") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Reports") else Text("") },
+                            icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                            selected = currentDestination?.route == "report_screen",
+                            onClick = { onDestinationClicked("report_screen") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
+                    }
 
+                }
             }
-//            NavigationDrawerItem(
-//                label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
-//                icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
-//                selected = currentDestination?.route == "ai_assistant",
-//                onClick = {
-//                    onDestinationClicked("ai_assistant")
-//                },
-//                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-//            )
-
-//            NavigationDrawerItem(
-//                label = { if (!isCollapsed) Text("Kitchen") else Text("") },
-//                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
-//                selected = currentDestination?.route == "kitchen",
-//                onClick = {
-//                    onDestinationClicked("kitchen")
-//                },
-//                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-//            )
-
             Spacer(modifier = Modifier.weight(1f))
-
             ModernDivider()
-        if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CHEF" || role== "CASHIER") {
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Logout") else Text("") },
-                icon = { Icon(Icons.Default.Logout, contentDescription = null) },
-                selected = false,
-                onClick = { onDestinationClicked("logout") },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
-        }
 
+            if (role == "RESBADMIN" || role == "ADMIN" || role == "WAITER" || role == "CHEF" || role== "CASHIER") {
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Logout") else Text("") },
+                    icon = { Icon(Icons.Default.Logout, contentDescription = null) },
+                    selected = false,
+                    onClick = { onDestinationClicked("logout") },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = drawerItemColors
+                )
+            }
         }
     }
 }

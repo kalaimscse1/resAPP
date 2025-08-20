@@ -94,11 +94,14 @@ interface ApiService {
     @GET("table/table/getTablesByIsActive")
     suspend fun getAllTables(@Header("X-Tenant-ID") tenantId: String): Response<List<Table>>
 
+    @GET("table/table/getTablesByActive")
+    suspend fun getActiveTables(@Header("X-Tenant-ID") tenantId: String): Response<List<TableStatusResponse>>
+
     @GET("table/table/getTableByAreaId/{area_id}")
     suspend fun getTablesBySection(
         @Path("area_id") section: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<List<Table>>
+    ): Response<List<TableStatusResponse>>
 
     @GET("table/table/getTable/{table_id}")
     suspend fun getTablesByStatus(
@@ -209,16 +212,16 @@ interface ApiService {
 
     @POST("menu/menuItem/addMenuItem")
     suspend fun createMenuItem(
-        @Body menuItem: MenuItem,
+        @Body menuItem: TblMenuItemRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<MenuItem>
+    ): Response<TblMenuItemResponse>
 
     @PUT("menu/menuItem/updateMenuItems/{menu_item_id}")
     suspend fun updateMenuItem(
         @Path("id") id: Long,
-        @Body menuItem: MenuItem,
+        @Body menuItem: TblMenuItemRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<MenuItem>
+    ): Response<Int>
 
     @DELETE("menu/deleteMenuItemById/{menu_item_id}")
     suspend fun deleteMenuItem(
@@ -227,16 +230,16 @@ interface ApiService {
     ): Response<Any>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
-    suspend fun getMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
+    suspend fun getMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<TblMenuItemResponse>>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
-    suspend fun getAllMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<MenuItem>>
+    suspend fun getAllMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<TblMenuItemResponse>>
 
     @GET("menu/menuItem/search")
     suspend fun searchMenuItems(
         @Query("query") query: String,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<List<MenuItem>>
+    ): Response<List<TblMenuItemResponse>>
 
     @GET("menu/menuItem/getMaxOrderBy")
     suspend fun getMenuItemOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
@@ -501,7 +504,7 @@ interface ApiService {
     suspend fun updateGeneralSettings(
         @Path("id") id: Long, @Body settings: GeneralSettings,
         @Header("X-Tenant-ID") tenantId: String
-    ): GeneralSettings
+    ): Int
 
     /**
      * VoucherSettings Management

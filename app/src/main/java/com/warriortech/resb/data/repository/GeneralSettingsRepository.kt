@@ -20,7 +20,7 @@ class GeneralSettingsRepository @Inject constructor(
             }
         }
 
-    suspend fun updateGeneralSettings(settings: GeneralSettings): GeneralSettings? {
+    suspend fun updateGeneralSettings(settings: GeneralSettings): Int? {
         return try {
             apiService.updateGeneralSettings(settings.id.toLong(),settings,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {

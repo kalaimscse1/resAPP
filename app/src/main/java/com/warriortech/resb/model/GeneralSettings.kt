@@ -36,5 +36,7 @@ data class GeneralSettings(
     var is_cess:Boolean,
     var is_delivery_charge:Boolean,
     var is_table_allowed:Boolean,
-    var is_waiter_allowed:Boolean
+    var is_waiter_allowed:Boolean,
+    var menu_show_in_time:Boolean,
+    var tamil_receipt_print:Boolean
 )

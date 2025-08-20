@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
@@ -29,9 +30,11 @@ import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
@@ -57,8 +60,14 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.R
+import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.ui.theme.DarkGreen
+import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.ghostWhite
+import com.warriortech.resb.util.AnimatedSnackbarDemo
+import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
+import com.warriortech.resb.util.scrollToBottomSmooth
 
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation",
     "ResourceAsColor"
@@ -121,6 +130,7 @@ fun MenuScreen(
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
                     if (sessionManager.getGeneralSetting()?.is_kot!!){
+
                         snackbarHostState.showSnackbar("Order placed successfully and KOT sent to kitchen")
                         onOrderPlaced()
                     } else {
@@ -229,12 +239,12 @@ fun MenuScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    val hasNewItems = if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()
+                    val hasNewItems = selectedItems.isNotEmpty()
                     if (hasNewItems)
                     {
                         MobileOptimizedButton(
                             onClick = { showConfirmDialog = true },
-                            enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                            enabled = (selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
                             text = "Place Order",
                             modifier = Modifier.weight(1f)
                         )
@@ -283,13 +293,7 @@ fun MenuScreen(
             }
         },
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(data.visuals.message)
-                }
-            }
+            AnimatedSnackbarDemo(snackbarHostState)
         },
         // ... (snackbarHost and floatingActionButton remain similar, ensure floatingActionButton also uses effectiveStatus if needed for display)
 //        floatingActionButton = {
@@ -338,50 +342,61 @@ fun MenuScreen(
                         Text("No menu items available")
                     }
                 } else {
+                    val menuShow = sessionManager.getGeneralSetting()?.menu_show_in_time == true
+                    val listState = rememberLazyListState()
+                    val scope = rememberCoroutineScope()
+                    val bottomBarHeight = 80.dp
+
+                    // 👇 Reusable helper: auto-correct when last item overlaps BottomBar
+                    listState.ensureLastItemVisible(bottomBarHeight)
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
                             .background(color = Color.White)
                     ) {
-                        // ... (Categories TabRow)
+                        // Categories TabRow
                         if (categories.isNotEmpty()) {
                             ScrollableTabRow(
-                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0), // Ensure index is not -1
-                                backgroundColor = SecondaryGreen,
-                                contentColor = SurfaceLight
+                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
+                                backgroundColor = Color.White,
+                                contentColor = TextPrimary
                             ) {
                                 categories.forEachIndexed { index, category ->
                                     Tab(
                                         selected = selectedCategory == category,
-                                        onClick = { viewModel.selectedCategory.value = category }, // Assuming a selectCategory method in VM
-                                        text = { Text(category) }
+                                        onClick = { viewModel.selectedCategory.value = category },
+                                        text = { androidx.compose.material.Text(category) }
                                     )
                                 }
                             }
                         }
 
                         LazyColumn(
+                            state = listState,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(top = 2.dp)
-                                .background(color = Color(R.color.text_secondary)),
+                                .background(color = Color.White),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp) // Add horizontal for consistency
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            item { Spacer(modifier = Modifier.padding(top = 5.dp)) }
+                            item { Spacer(modifier = Modifier.height(5.dp)) }
 
                             items(filteredMenuItems, key = { it.menu_item_id }) { menuItem -> // Add a key for better performance
                                 MenuItemCard(
                                     menuItem = menuItem,
                                     quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem] ?: 0 else selectedItems[menuItem] ?: 0,
                                     existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem] ?: 0 else 0,
-                                    onAddItem = { 
-                                        // Show modifier dialog instead of directly adding
-//                                        viewModel.showModifierDialog(menuItem)
+                                    onAddItem = {
                                         viewModel.addItemToOrder(menuItem)
+                                        scope.scrollToBottomSmooth(listState)
                                     },
-                                    onRemoveItem = { viewModel.removeItemFromOrder(menuItem) },
+                                    onRemoveItem = {
+                                        viewModel.removeItemFromOrder(menuItem)
+                                        scope.scrollToBottomSmooth(listState)
+                                                   },
                                     tableStatus = effectiveStatus.toString(),
                                     isExistingOrder = viewModel.isExistingOrderLoaded.value,
                                     onModifierClick = {
@@ -389,7 +404,9 @@ fun MenuScreen(
                                     }
                                 )
                             }
-                            item { Spacer(modifier = Modifier.height(80.dp)) } // For bottom bar
+
+                            // 👇 Spacer ensures last item never hides under BottomBar
+                            item { Spacer(modifier = Modifier.height(bottomBarHeight)) }
                         }
                     }
                 }
@@ -453,7 +470,7 @@ fun MenuScreen(
 @SuppressLint("DefaultLocale")
 @Composable
 fun MenuItemCard(
-    menuItem: MenuItem,
+    menuItem: TblMenuItemResponse,
     quantity: Int,
     existingQuantity: Int = 0,
     onAddItem: () -> Unit,
@@ -464,10 +481,10 @@ fun MenuItemCard(
 ) {
     val IconBoldA: ImageVector = ImageVector.Builder(
         name = "BoldA",
-        defaultWidth = 24.dp,
-        defaultHeight = 24.dp,
-        viewportWidth = 24f,
-        viewportHeight = 24f
+        defaultWidth = 20.dp,
+        defaultHeight = 20.dp,
+        viewportWidth = 20f,
+        viewportHeight = 20f
     ).apply {
         path(
             fill = SolidColor(Color.Black),
@@ -603,7 +620,7 @@ fun MenuItemCard(
                             Icon(
                                 Icons.Default.Remove,
                                 contentDescription = "Remove",
-                                tint = Color.Red
+                                tint = ErrorRed
                             )
                         }
 
@@ -633,14 +650,14 @@ fun MenuItemCard(
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Add",
-                                tint = Color.Green
+                                tint = DarkGreen
                             )
                         }
                         IconButton(
                             onClick = onModifierClick
                         ) {
                             Icon(
-                                IconBoldA,
+                                Icons.Default.Tune,
                                 contentDescription = "Modifiers",
                                 tint = Color.Blue
                             )
@@ -710,7 +727,7 @@ fun MenuItemCard(
 
 @Composable
 fun OrderConfirmationDialog(
-    selectedItems: Map<MenuItem, Int>,
+    selectedItems: Map<TblMenuItemResponse, Int>,
     totalAmount: Double,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,

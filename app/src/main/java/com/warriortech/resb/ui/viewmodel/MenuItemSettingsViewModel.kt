@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblMenuItemRequest
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +37,7 @@ class MenuItemSettingsViewModel @Inject constructor(
         }
     }
 
-    fun addMenuItem(menuItem: MenuItem) {
+    fun addMenuItem(menuItem: TblMenuItemRequest) {
         viewModelScope.launch {
             try {
                 menuItemRepository.insertMenuItem(menuItem)
@@ -46,7 +48,7 @@ class MenuItemSettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateMenuItem(menuItem: MenuItem) {
+    fun updateMenuItem(menuItem: TblMenuItemRequest) {
         viewModelScope.launch {
             try {
                 menuItemRepository.updateMenuItem(menuItem)

@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,67 +13,57 @@ import kotlinx.coroutines.launch
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.IconButton
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.theme.DarkGreen
+import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.TextPrimary
-
-
-/**
- * CounterScreen is a composable function that displays the counter billing interface.
- * It allows users to view menu items, select quantities, and proceed to billing.
- * It includes a top app bar with navigation and action buttons,
- * a bottom app bar showing total items and amount,
- * and a floating action button for quick access to billing.
- * It uses a ViewModel to manage the state of menu items and selected items.
- * It also handles loading states and errors gracefully,
- * showing appropriate messages to the user.
- * @param onBackPressed Callback to handle back navigation.
- * @param onProceedToBilling Callback to handle proceeding to billing with selected items.
- * @param viewModel The CounterViewModel instance to manage the counter data.
- * @param drawerState The state of the navigation drawer.
- * @param counterId Optional ID of the counter to load specific data.
- * This function is annotated with @Composable to indicate it is a composable function
- * and uses various Compose UI components to build the user interface.
- * It also uses the Hilt dependency injection library to provide the ViewModel instance.
- * It is optimized for mobile devices with appropriate padding and layout adjustments.
- * It uses the Material3 design system for consistent styling and theming.
- * It includes a snackbar for displaying messages to the user.
- * It supports dynamic updates to the UI based on user interactions,
- * such as adding or removing items from the order.
- * It also includes a loading state that shows a progress indicator while data is being fetched.
- * It uses a LazyColumn to display the list of menu items,
- * allowing for efficient scrolling and rendering of items.
- * It includes a tab row for filtering menu items by category,
- * allowing users to easily navigate through different types of items.
- * It provides a clear and user-friendly interface for managing orders at a counter,
- * making it suitable for restaurant or cafe applications.
- */
+import com.warriortech.resb.ui.theme.ghostWhite
+import com.warriortech.resb.util.AnimatedSnackbarDemo
+import com.warriortech.resb.util.ensureLastItemVisible
+import com.warriortech.resb.util.getDeviceInfo
+import com.warriortech.resb.util.scrollToBottomSmooth
 
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CounterScreen(
     onBackPressed: () -> Unit,
-    onProceedToBilling: (Map<MenuItem, Int>) -> Unit,
+    onProceedToBilling: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId: String) -> Unit,
     viewModel: CounterViewModel = hiltViewModel(),
     drawerState: DrawerState,
     counterId: Long? = null
@@ -83,6 +74,12 @@ fun CounterScreen(
     val scope = rememberCoroutineScope()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
+    val showModifierDialog by viewModel.showModifierDialog.collectAsStateWithLifecycle()
+    val selectedMenuItemForModifier by viewModel.selectedMenuItemForModifier.collectAsStateWithLifecycle()
+    val modifierGroups by viewModel.modifierGroups.collectAsStateWithLifecycle()
+    val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
+    val orderId by viewModel.orderId.collectAsStateWithLifecycle()
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
@@ -95,6 +92,18 @@ fun CounterScreen(
         }
     }
 
+    if (showConfirmDialog) {
+        BillConfirmationDialog(// Use effectiveStatus
+            onConfirm = {
+                // The tableId passed here is the one this screen was launched with.
+                // For takeaway/delivery, it might be a specific ID like 0, 1, or 2 as per your existing logic.
+                // For table orders, it's the actual tableId.
+                onProceedToBilling(orderDetailsResponse,orderId?:"") // Use effectiveStatus
+                showConfirmDialog = false
+            },
+            onDismiss = { showConfirmDialog = false }
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -104,14 +113,16 @@ fun CounterScreen(
                         if (currentCounter != null)
                             "Counter Billing - ${currentCounter!!.code}"
                         else
-                            "Counter Billing"
+                            "Counter Billing",
+                        color = SurfaceLight
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }
                     }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = "Menu",
+                            tint = SurfaceLight)
                     }
                 },
                 actions = {
@@ -128,12 +139,13 @@ fun CounterScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.RemoveShoppingCart,
-                            contentDescription = "Clear Cart"
+                            contentDescription = "Clear Cart",
+                            tint = SurfaceLight
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },
@@ -162,7 +174,10 @@ fun CounterScreen(
                     }
 
                     MobileOptimizedButton(
-                        onClick = { onProceedToBilling(selectedItems) },
+                        onClick = {
+                            viewModel.placeOrder(2,"")
+                            showConfirmDialog=true
+                            },
                         enabled = selectedItems.isNotEmpty(),
                         text = "Proceed to Bill",
                         modifier = Modifier.weight(1f)
@@ -171,23 +186,7 @@ fun CounterScreen(
             }
         },
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(data.visuals.message)
-                }
-            }
-        },
-        floatingActionButton = {
-            if (selectedItems.isNotEmpty()) {
-                FloatingActionButton(
-                    onClick = { onProceedToBilling(selectedItems) }
-                ) {
-                    val itemCount = selectedItems.values.sum()
-                    Text("$itemCount")
-                }
-            }
+            AnimatedSnackbarDemo(snackbarHostState)
         }
     ) { paddingValues ->
 
@@ -203,15 +202,87 @@ fun CounterScreen(
                 }
             }
 
+//            is CounterViewModel.MenuUiState.Success -> {
+//                val menuItems = currentMenuState.menuItems
+//                val filteredMenuItems = if (selectedCategory != null) {
+//                    menuItems.filter { it.item_cat_name == selectedCategory }
+//                } else {
+//                    menuItems
+//                }
+//
+//                if (menuItems.isEmpty()) {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(paddingValues),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Text("No menu items available")
+//                    }
+//                } else {
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(paddingValues)
+//                            .background(color = Color.White)
+//                    ) {
+//                        // Categories TabRow
+//                        if (categories.isNotEmpty()) {
+//                            ScrollableTabRow(
+//                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
+//                                backgroundColor = Color.White,
+//                                contentColor = TextPrimary
+//                            ) {
+//                                categories.forEachIndexed { index, category ->
+//                                    Tab(
+//                                        selected = selectedCategory == category,
+//                                        onClick = { viewModel.selectedCategory.value = category },
+//                                        text = { androidx.compose.material.Text(category) }
+//                                    )
+//                                }
+//                            }
+//                        }
+//
+//                        LazyColumn(
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .padding(top = 2.dp)
+//                                .background(color = Color.White),
+//                            verticalArrangement = Arrangement.spacedBy(8.dp),
+//                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+//                        ) {
+//                            item { Spacer(modifier = Modifier.padding(top = 5.dp)) }
+//
+//                            items(filteredMenuItems, key = { it.menu_item_id }) { menuItem ->
+//                                CounterMenuItemCard(
+//                                    menuItem = menuItem,
+//                                    quantity = selectedItems[menuItem] ?: 0,
+//                                    onAddItem = { viewModel.addItemToOrder(menuItem) },
+//                                    onRemoveItem = { viewModel.removeItemFromOrder(menuItem) },
+//                                    onModifierClick = {
+//                                        viewModel.showModifierDialog(menuItem)
+//                                    }
+//                                )
+//                            }
+//                            item { Spacer(modifier = Modifier.height(80.dp)) }
+//                        }
+//                    }
+//                }
+//            }
+
             is CounterViewModel.MenuUiState.Success -> {
+
                 val menuItems = currentMenuState.menuItems
-                val filteredMenuItems = if (selectedCategory != null) {
+                val filteredMenuItems = if (selectedCategory != null && selectedCategory=="FAVOURITES") {
+                    menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
+                } else if (selectedCategory != null) {
                     menuItems.filter { it.item_cat_name == selectedCategory }
-                } else {
+                }
+                else {
                     menuItems
                 }
 
-                if (menuItems.isEmpty()) {
+                    if (menuItems.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -221,6 +292,13 @@ fun CounterScreen(
                         Text("No menu items available")
                     }
                 } else {
+                    val listState = rememberLazyListState()
+                    val scope = rememberCoroutineScope()
+                    val bottomBarHeight = 80.dp
+
+                    // 👇 Reusable helper: auto-correct when last item overlaps BottomBar
+                    listState.ensureLastItemVisible(bottomBarHeight)
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -231,8 +309,8 @@ fun CounterScreen(
                         if (categories.isNotEmpty()) {
                             ScrollableTabRow(
                                 selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
-                                backgroundColor = Color.White,
-                                contentColor = TextPrimary
+                                backgroundColor = SecondaryGreen,
+                                contentColor = SurfaceLight
                             ) {
                                 categories.forEachIndexed { index, category ->
                                     Tab(
@@ -245,6 +323,7 @@ fun CounterScreen(
                         }
 
                         LazyColumn(
+                            state = listState,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(top = 2.dp)
@@ -252,17 +331,26 @@ fun CounterScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            item { Spacer(modifier = Modifier.padding(top = 5.dp)) }
+                            item { Spacer(modifier = Modifier.height(5.dp)) }
 
                             items(filteredMenuItems, key = { it.menu_item_id }) { menuItem ->
                                 CounterMenuItemCard(
                                     menuItem = menuItem,
                                     quantity = selectedItems[menuItem] ?: 0,
-                                    onAddItem = { viewModel.addItemToOrder(menuItem) },
-                                    onRemoveItem = { viewModel.removeItemFromOrder(menuItem) }
+                                    onAddItem = {
+                                        viewModel.addItemToOrder(menuItem)
+                                        scope.scrollToBottomSmooth(listState) // 👈 reusable
+                                    },
+                                    onRemoveItem = {
+                                        viewModel.removeItemFromOrder(menuItem)
+                                        scope.scrollToBottomSmooth(listState) // 👈 reusable
+                                    },
+                                    onModifierClick = { viewModel.showModifierDialog(menuItem) }
                                 )
                             }
-                            item { Spacer(modifier = Modifier.height(80.dp)) }
+
+                            // 👇 Spacer ensures last item never hides under BottomBar
+                            item { Spacer(modifier = Modifier.height(bottomBarHeight)) }
                         }
                     }
                 }
@@ -288,21 +376,68 @@ fun CounterScreen(
             }
         }
     }
+    if (showModifierDialog && selectedMenuItemForModifier != null) {
+        ModifierSelectionDialog(
+            menuItem = selectedMenuItemForModifier!!,
+            availableModifiers = modifierGroups,
+            selectedModifiers = emptyList(),
+            onModifiersSelected = { selectedModifiers ->
+                viewModel.addMenuItemWithModifiers(selectedMenuItemForModifier!!, selectedModifiers)
+            },
+            onDismiss = { viewModel.hideModifierDialog() }
+        )
+    }
 }
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun CounterMenuItemCard(
-    menuItem: MenuItem,
+    menuItem: TblMenuItemResponse,
     quantity: Int,
     onAddItem: () -> Unit,
-    onRemoveItem: () -> Unit
+    onRemoveItem: () -> Unit,
+    onModifierClick: () -> Unit,
 ) {
-    MobileOptimizedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
+    val IconBoldA: ImageVector = ImageVector.Builder(
+        name = "BoldA",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(
+            fill = SolidColor(Color.Black),
+            pathFillType = PathFillType.NonZero
+        ) {
+            // Outer A shape
+            moveTo(12f, 4f)      // Top point
+            lineTo(3f, 20f)      // Bottom left
+            lineTo(7f, 20f)      // Left foot
+            lineTo(8.6f, 16.8f)  // Up left leg to crossbar
+            lineTo(15.4f, 16.8f) // Across crossbar
+            lineTo(17f, 20f)     // Down right leg to right foot
+            lineTo(21f, 20f)     // Bottom right
+            close()
+
+            // Crossbar
+            moveTo(9.6f, 14f)
+            lineTo(14.4f, 14f)
+            lineTo(12f, 8.8f)
+            close()
+        }
+    }.build()
+
+    val deviceInfo = getDeviceInfo()
+    val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
+    Card(
+        modifier = Modifier.fillMaxWidth()
+            .border(2.dp, SecondaryGreen, RoundedCornerShape(cornerRadius)),
+        shape = RoundedCornerShape(cornerRadius),
+        colors = CardDefaults.cardColors(
+            containerColor = ghostWhite
+        ),
+
+        ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -312,45 +447,47 @@ fun CounterMenuItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(2f)
                 ) {
-                    Text(
-                        text = menuItem.menu_item_name,
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    if (menuItem.menu_item_name_tamil.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                    Row {
                         Text(
-                            text = menuItem.menu_item_name_tamil,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2,
+                            text = menuItem.menu_item_name,
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+
+                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = menuItem.menu_item_name_tamil,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "₹${String.format("%.2f", menuItem.rate)}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
-
-                if (menuItem.is_available == "YES") {
+            }
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                if (menuItem.is_available=="YES") {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Text("₹${String.format("%.2f", menuItem.rate)}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 22.dp))
                         IconButton(
                             onClick = onRemoveItem
                         ) {
                             Icon(
                                 Icons.Default.Remove,
                                 contentDescription = "Remove",
-                                tint = Color.Red
+                                tint = ErrorRed
                             )
                         }
 
@@ -380,7 +517,16 @@ fun CounterMenuItemCard(
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Add",
-                                tint = Color.Green
+                                tint = DarkGreen
+                            )
+                        }
+                        IconButton(
+                            onClick = onModifierClick
+                        ) {
+                            Icon(
+                                Icons.Default.Tune,
+                                contentDescription = "Modifiers",
+                                tint = Color.Blue
                             )
                         }
                     }
@@ -392,6 +538,7 @@ fun CounterMenuItemCard(
                     )
                 }
             }
+
 
             AnimatedVisibility(visible = quantity > 0) {
                 Column(
@@ -420,4 +567,38 @@ fun CounterMenuItemCard(
             }
         }
     }
+}
+
+
+@Composable
+fun BillConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            MobileOptimizedButton(
+                onClick = onConfirm,
+                text = "Confirm",
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        dismissButton = {
+            MobileOptimizedButton(
+                onClick = onDismiss,
+                text = "Cancel",
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        title = {
+            Text("Confirm To Bill", style = MaterialTheme.typography.titleLarge)
+        },
+        text = {
+            Text(
+                "Are you sure you want to proceed with billing? This action cannot be undone.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    )
 }

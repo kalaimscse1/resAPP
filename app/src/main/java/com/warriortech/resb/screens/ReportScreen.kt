@@ -153,8 +153,8 @@ fun ReportScreen(
 
 
 
-//
-//                        successState.todaySalesMetrics?.let { todaySalesMetrics ->
+
+//                        state.todaySalesMetrics?.let { todaySalesMetrics ->
 //                            item {
 //                                TodaySalesCard(
 //                                    metrics = todaySalesMetrics,

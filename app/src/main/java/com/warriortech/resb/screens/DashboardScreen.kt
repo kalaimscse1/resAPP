@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,9 +28,6 @@ import com.warriortech.resb.R
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.PaymentModePieChart
 import com.warriortech.resb.ui.components.WeeklySalesBarChart
-import com.warriortech.resb.ui.theme.DarkGreen
-import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.ui.theme.PrimaryBlueLight
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -246,19 +242,15 @@ fun MetricsSection(
                 MetricCard(
                     title = "Running Orders",
                     value = metrics.runningOrders.toString(),
-                    icon = Icons.Default.Restaurant,
                     color = MaterialTheme.colorScheme.primary,
-                    onClick = onNavigateToOrders,
-                    textValue = "Running Orders"
+                    onClick = onNavigateToOrders
                 )
 
                 MetricCard(
                     title = "Pending Bills",
                     value = metrics.pendingBills.toString(),
-                    icon = Icons.Default.Receipt,
                     color = MaterialTheme.colorScheme.secondary,
-                    onClick = onNavigateToBilling,
-                    textValue = "Pending Bills"
+                    onClick = onNavigateToBilling
                 )
 
         }
@@ -271,17 +263,13 @@ fun MetricsSection(
                 MetricCard(
                     title = "Total Sales",
                     value = "₹${String.format("%.2f", metrics.totalSales)}",
-                    icon = Icons.Default.TrendingUp,
-                    color = Color(0xFF4CAF50),
-                    textValue = "Total Sales"
+                    color = Color(0xFF4CAF50)
                 )
 
                 MetricCard(
                     title = "Pending Due",
                     value = "₹${String.format("%.2f", metrics.pendingDue)}",
-                    icon = Icons.Default.Warning,
-                    color = Color(0xFFF44336),
-                    textValue = "Pending Due"
+                    color = Color(0xFFF44336)
                 )
 
         }
@@ -292,8 +280,6 @@ fun MetricsSection(
 fun MetricCard(
     title: String,
     value: String,
-    textValue:String,
-    icon: ImageVector,
     color: Color,
     onClick: (() -> Unit)? = null
 ) {
@@ -316,7 +302,8 @@ fun MetricCard(
             ) {
                 Text(
                     title,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
@@ -326,7 +313,7 @@ fun MetricCard(
             ) {
                     Text(
                         value,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = color
                     )
@@ -406,18 +393,19 @@ fun QuickActionsSection(
             confirmButton = {
                 TextButton(onClick = {
                     showOrderTypeDialog = false
-                    onDineInSelected()
+                    onTakeawaySelected()
                 }) {
-                    Text("Dine-In")
+                    Text("Takeaway")
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
                     showOrderTypeDialog = false
-                    onTakeawaySelected()
+                    onDineInSelected()
                 }) {
-                    Text("Takeaway")
+                    Text("Dine-In")
                 }
+
             }
         )
     }

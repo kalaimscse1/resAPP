@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TableStatusResponse
 import com.warriortech.resb.util.ConnectionState
 import com.warriortech.resb.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +52,7 @@ class TableViewModel @Inject constructor(
                         tableRepository.getTablesBySection(section)
 
                     } else {
-                        tableRepository.getAllTables()
+                        tableRepository.getActiveTables()
                     }
                 }
                 .catch { e ->
@@ -104,7 +105,7 @@ class TableViewModel @Inject constructor(
      */
     sealed class TablesState {
         object Loading : TablesState()
-        data class Success(val tables: List<Table>) : TablesState()
+        data class Success(val tables: List<TableStatusResponse>) : TablesState()
         data class Error(val message: String) : TablesState()
     }
 }

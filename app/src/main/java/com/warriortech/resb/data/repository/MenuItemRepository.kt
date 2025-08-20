@@ -3,9 +3,13 @@ package com.warriortech.resb.data.repository
 import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
+import com.warriortech.resb.model.Menu
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblMenuItemRequest
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.screens.SettingsModule
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -22,7 +26,7 @@ class MenuItemRepository @Inject constructor(
     private val sessionManager: SessionManager
 ) : OfflineFirstRepository(networkMonitor) {
 
-    fun getAllMenuItems(): Flow<List<MenuItem>> {
+    fun getAllMenuItems(): Flow<List<TblMenuItemResponse>> {
         return menuItemDao.getAllMenuItems()
             .map { entities -> entities.map { it.toModel() } }
             .onStart {
@@ -31,7 +35,7 @@ class MenuItemRepository @Inject constructor(
                 }
             }
     }
-    suspend fun getMenuItems(category: String? = null): Flow<Result<List<MenuItem>>> = flow {
+    suspend fun getMenuItems(category: String? = null): Flow<Result<List<TblMenuItemResponse>>> = flow {
         try {
             getAllMenuItems()
             val response = apiService.getMenuItems(sessionManager.getCompanyCode()?:"")
@@ -64,18 +68,26 @@ class MenuItemRepository @Inject constructor(
         }
     }
 
-    fun getMenuItemsByCategory(categoryId: Long): Flow<List<MenuItem>> {
+    fun getMenuItemsByCategory(categoryId: Long): Flow<List<TblMenuItemResponse>> {
         return menuItemDao.getMenuItemsByCategory(categoryId.toString())
             .map { entities -> entities.map { it.toModel() } }
     }
 
-    suspend fun getMenuItemById(id: Long): MenuItem? {
+    suspend fun getMenus(): List<Menu>{
+        val response = apiService.getAllMenus(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch menus: ${response.message()}")
+        }
+    }
+    suspend fun getMenuItemById(id: Long): TblMenuItemResponse? {
         return menuItemDao.getMenuItemById(id)?.toModel()
     }
 
     private suspend fun syncMenuItemsFromRemote() {
         safeApiCall(
-            onSuccess = { remoteItems: List<MenuItem> ->
+            onSuccess = { remoteItems: List<TblMenuItemResponse> ->
                 withContext(Dispatchers.IO) {
                     val entities = remoteItems.map { it.toEntity() }
                     menuItemDao.insertMenuItems(entities)
@@ -92,7 +104,7 @@ class MenuItemRepository @Inject constructor(
     }
 
 
-    suspend fun insertMenuItem(menuItem: MenuItem): MenuItem {
+    suspend fun insertMenuItem(menuItem: TblMenuItemRequest): TblMenuItemResponse {
         val response = apiService.createMenuItem(menuItem,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create menu item")
@@ -101,7 +113,7 @@ class MenuItemRepository @Inject constructor(
         }
     }
 
-    suspend fun updateMenuItem(menuItem: MenuItem): MenuItem {
+    suspend fun updateMenuItem(menuItem: TblMenuItemRequest): Int {
         val response = apiService.updateMenuItem(menuItem.menu_item_id, menuItem,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update menu item")
@@ -120,7 +132,7 @@ class MenuItemRepository @Inject constructor(
 }
 
 // Extension functions
-private fun MenuItem.toEntity() = MenuItemEntity(
+private fun TblMenuItemResponse.toEntity() = MenuItemEntity(
     menu_item_id = menu_item_id,
     menu_item_name = menu_item_name,
     menu_item_name_tamil = menu_item_name_tamil,
@@ -148,11 +160,15 @@ private fun MenuItem.toEntity() = MenuItemEntity(
     is_inventory = is_inventory,
     is_raw = is_raw,
     cess_specific = cess_specific,
-    cess_per= cess_per,
-    is_favourite = is_favourite
+    cess_per = cess_per,
+    is_favourite = is_favourite,
+    menu_item_code = menu_item_code,
+    menu_id = menu_id,
+    menu_name = menu_name,
+    is_active = is_active,
 )
 
-private fun MenuItemEntity.toModel() = MenuItem(
+private fun MenuItemEntity.toModel() = TblMenuItemResponse(
     menu_item_id = this.menu_item_id,
     menu_item_name = this.menu_item_name,
     menu_item_name_tamil = this.menu_item_name_tamil,
@@ -180,5 +196,9 @@ private fun MenuItemEntity.toModel() = MenuItem(
     is_raw = this.is_raw,
     cess_per = this.cess_per,
     cess_specific = this.cess_specific,
-    is_favourite = this.is_favourite
+    is_favourite = this.is_favourite,
+    menu_item_code = this.menu_item_code,
+    menu_id = this.menu_id,
+    menu_name = this.menu_name,
+    is_active = this.is_active
 )

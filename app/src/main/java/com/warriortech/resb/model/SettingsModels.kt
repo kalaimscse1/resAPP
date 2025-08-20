@@ -4,7 +4,9 @@ data class Menu(
     val menu_id: Long,
     val menu_name: String,
     val order_by: String,
-    val is_active: Boolean
+    val start_time: Float,
+    val end_time: Float,
+    val is_active: Boolean,
 )
 
 //data class Customer(

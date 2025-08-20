@@ -23,3 +23,9 @@ fun getCurrentDateTimeWithAmPm(): String {
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss a", Locale("en", "IN"))
     return currentDateTime.format(formatter)
 }
+
+
+fun getCurrentTimeAsFloat(): Float {
+    val now = java.time.LocalTime.now()
+    return now.hour + now.minute / 60f
+}

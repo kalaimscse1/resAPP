@@ -3,43 +3,48 @@ package com.warriortech.resb.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.warriortech.resb.model.MenuItem
+import com.warriortech.resb.model.TblMenuItemResponse
 
 @Entity(tableName = "menu_items")
 data class MenuItemEntity(
     @PrimaryKey
-    val menu_item_id: Long,
-    val menu_item_name: String,
-    val menu_item_name_tamil:String,
-    val item_cat_id:Long,
-    val item_cat_name:String,
-    val rate:Double,
-    val ac_rate:Double,
-    val parcel_rate:Double,
-    val parcel_charge:Double,
-    val tax_id:Long,
-    val tax_name:String,
-    val tax_percentage:String,
-    val kitchen_cat_id:Long,
-    val kitchen_cat_name:String,
-    val stock_maintain:String,
-    val rate_lock:String,
-    val unit_id:Long,
-    val unit_name:String,
-    val min_stock:Long,
-    val hsn_code:String,
-    val order_by:Long,
-    val is_inventory:Long,
-    val is_raw:String,
-    val is_available: String,
-    val is_favourite: Boolean,
+    var menu_item_id: Long,
+    var menu_item_code:String,
+    var menu_item_name:String,
+    var menu_item_name_tamil:String,
+    var menu_id:Long,
+    var menu_name:String,
+    var item_cat_id:Long,
+    var item_cat_name:String,
+    var image:String?=null,
+    var rate:Double,
+    var ac_rate:Double,
+    var parcel_rate:Double,
+    var parcel_charge:Double,
+    var tax_id:Long,
+    var tax_name:String,
+    var tax_percentage:String,
+    var kitchen_cat_id:Long,
+    var kitchen_cat_name:String,
+    var is_available:String,
+    var is_favourite:Boolean,
+    var stock_maintain:String,
+    var rate_lock:String,
+    var unit_id:Long,
+    var unit_name:String,
+    var min_stock:Long,
+    var hsn_code:String,
+    var order_by:Long,
+    var is_inventory:Long,
+    var is_raw:String,
     val cess_per:String,
     val cess_specific: Double,
-    val image: String? = null,
+    var is_active:Long,
     val syncStatus: SyncStatus = SyncStatus.SYNCED,
     val lastModified: Long = System.currentTimeMillis()
 ) {
     companion object {
-        fun fromModel(menuItem: MenuItem, syncStatus: SyncStatus = SyncStatus.SYNCED): MenuItemEntity {
+        fun fromModel(menuItem: TblMenuItemResponse, syncStatus: SyncStatus = SyncStatus.SYNCED): MenuItemEntity {
             return MenuItemEntity(
                 menu_item_id = menuItem.menu_item_id,
                 menu_item_name = menuItem.menu_item_name,
@@ -70,12 +75,15 @@ data class MenuItemEntity(
                 cess_per = menuItem.cess_per,
                 cess_specific = menuItem.cess_specific,
                 is_favourite = menuItem.is_favourite,
-            )
+                menu_item_code = menuItem.menu_item_code,
+                menu_id = menuItem.menu_id,
+                menu_name = menuItem.menu_name,
+                is_active = menuItem.is_active)
         }
     }
 
-    fun toModel(): MenuItem {
-        return MenuItem(
+    fun toModel(): TblMenuItemResponse {
+        return TblMenuItemResponse(
             menu_item_id = this.menu_item_id,
             menu_item_name = this.menu_item_name,
             menu_item_name_tamil = this.menu_item_name_tamil,
@@ -104,6 +112,10 @@ data class MenuItemEntity(
             cess_per = this.cess_per,
             cess_specific = this.cess_specific,
             is_favourite = this.is_favourite,
+            menu_item_code = this.menu_item_code,
+            menu_id = this.menu_id,
+            menu_name = this.menu_name,
+            is_active = this.is_active,
         )
     }
 }

@@ -147,6 +147,12 @@ fun GeneralSettingDialog(
     var isKot by remember { mutableStateOf(setting?.is_kot ?: false) }
     var isLogo by remember { mutableStateOf(setting?.is_logo ?: false) }
     var logoPath by remember { mutableStateOf(setting?.logo_path ?: "") }
+    var cess by remember { mutableStateOf(setting?.is_cess ?: false) }
+    var deliveryCharge by remember { mutableStateOf(setting?.is_delivery_charge ?: false) }
+    var isTableAllowed by remember { mutableStateOf(setting?.is_table_allowed ?: true) }
+    var isWaiterAllowed by remember { mutableStateOf(setting?.is_waiter_allowed ?: true) }
+    var menuShowInTime by remember { mutableStateOf(setting?.menu_show_in_time ?: true) }
+    var tamilReceiptPrint by remember { mutableStateOf(setting?.tamil_receipt_print ?: false) }
 
     Column {
         OutlinedTextField(
@@ -210,7 +216,7 @@ fun GeneralSettingDialog(
         OutlinedTextField(
             value = discBy,
             onValueChange = { discBy = it },
-            label = { Text("Discount By") },
+            label = { Text("Discount By % OR Amount") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -281,9 +287,75 @@ fun GeneralSettingDialog(
             label = { Text("LOGO PATH") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = cess,
+                onCheckedChange = { cess = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Cess Applicable")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = deliveryCharge,
+                onCheckedChange = { deliveryCharge = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Delivery Charge Applicable")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isWaiterAllowed,
+                onCheckedChange = { isWaiterAllowed = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Waiter Validation")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isTableAllowed,
+                onCheckedChange = { isTableAllowed = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Table Validation")
+        }
 
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = menuShowInTime,
+                onCheckedChange = { menuShowInTime = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Menu Show In Time")
+        }
         Spacer(modifier = Modifier.height(10.dp))
 
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = tamilReceiptPrint,
+                onCheckedChange = { tamilReceiptPrint = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Receipt Print In Tamil")
+        }
         Button(
             onClick = {
                 val newSetting = GeneralSettings(
@@ -302,10 +374,12 @@ fun GeneralSettingDialog(
                     is_kot = isKot,
                     is_logo = isLogo,
                     logo_path = logoPath,
-                    is_cess = false,
-                    is_delivery_charge = false,
-                    is_table_allowed = true,
-                    is_waiter_allowed = true
+                    is_cess = cess,
+                    is_delivery_charge = deliveryCharge,
+                    is_table_allowed = isTableAllowed,
+                    is_waiter_allowed = isWaiterAllowed,
+                    menu_show_in_time = menuShowInTime,
+                    tamil_receipt_print = tamilReceiptPrint
                 )
                 onSave(newSetting)
             }

@@ -105,6 +105,9 @@ class LoginViewModel @Inject constructor(
             try {
                 val check = RetrofitClient.apiService.checkIsBlock(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
                 val generalSetting = RetrofitClient.apiService.getGeneralSettings(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
+                val profile = RetrofitClient.apiService.getRestaurantProfile(
+                    tenantId = uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""), companyCode = uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                )
                 if (check.data!!){
                     val response = RetrofitClient.apiService.login(
                         request=LoginRequest(
@@ -122,6 +125,7 @@ class LoginViewModel @Inject constructor(
                         sessionManager.saveUser(authResponse.user)
                         sessionManager.saveCompanyCode(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
                         sessionManager.saveGeneralSetting(general?.get(0) ?: error("general setting failed"))
+                        sessionManager.saveRestaurantProfile(profile)
 
                         _uiState.update{it.copy(isLoading = false, loginSuccess = true)}
                     } else {

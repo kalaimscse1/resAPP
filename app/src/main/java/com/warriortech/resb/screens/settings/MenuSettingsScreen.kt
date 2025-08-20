@@ -118,9 +118,15 @@ fun MenuSettingsScreen(
                 MenuDialog(
                     menu = null,
                     onDismiss = { showAddDialog = false },
-                    onConfirm = { name, description, isActive ->
+                    onConfirm = { menu ->
                         scope.launch {
-                            viewModel.addMenu(name, description, isActive)
+                            viewModel.addMenu(
+                                menu.menu_name,
+                                menu.order_by,
+                                menu.is_active,
+                                menu.start_time,
+                                menu.end_time
+                            )
                             showAddDialog = false
                         }
                     },
@@ -132,9 +138,16 @@ fun MenuSettingsScreen(
                 MenuDialog(
                     menu = menu,
                     onDismiss = { editingMenu = null },
-                    onConfirm = { name, description, isActive ->
+                    onConfirm = { menu ->
                         scope.launch {
-                            viewModel.updateMenu(menu.menu_id, name, description, isActive)
+                            viewModel.updateMenu(
+                                menu.menu_id,
+                                menu.menu_name,
+                                menu.order_by,
+                                menu.is_active,
+                                menu.start_time,
+                                menu.end_time
+                            )
                             editingMenu = null
                         }
                     },
@@ -194,13 +207,15 @@ fun MenuCard(
 fun MenuDialog(
     menu: Menu?,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, Boolean) -> Unit,
+    onConfirm: (Menu) -> Unit,
     order : String
 ) {
 
     var name by remember { mutableStateOf(menu?.menu_name ?: "") }
     var description by remember { mutableStateOf(menu?.order_by ?: order) }
     var isActive by remember { mutableStateOf(menu?.is_active ?: true) }
+    var startTime by remember { mutableStateOf(menu?.start_time ?: 0f) }
+    var endTime by remember { mutableStateOf(menu?.end_time ?: 0f) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -221,6 +236,25 @@ fun MenuDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Menu Time Settings",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    value = startTime.toString(),
+                    onValueChange = { startTime = it.toFloat() },
+                    label = { Text("Start Time") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = endTime.toString(),
+                    onValueChange = { endTime = it.toFloat()},
+                    label = { Text("End Time") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -235,7 +269,16 @@ fun MenuDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(name, description, isActive) }
+                onClick = {
+                    val menu = Menu(
+                        menu_id = menu?.menu_id ?: 0L,
+                        menu_name = name,
+                        order_by = description,
+                        start_time = startTime,
+                        end_time = endTime,
+                        is_active = isActive
+                    )
+                    onConfirm(menu) }
             ) {
                 Text(if (menu == null) "Add" else "Update")
             }
