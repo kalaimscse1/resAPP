@@ -85,11 +85,11 @@ fun SettingsMainScreen(
     val settingsModules = remember {
         if(role == "RESBADMIN")
         listOf(
-            SettingsModule.Area,
-            SettingsModule.Table,
-            SettingsModule.Menu,
-            SettingsModule.MenuCategory,
-            SettingsModule.MenuItem,
+//            SettingsModule.Area,
+//            SettingsModule.Table,
+//            SettingsModule.Menu,
+//            SettingsModule.MenuCategory,
+//            SettingsModule.MenuItem,
             SettingsModule.Customer,
             SettingsModule.Staff,
             SettingsModule.Role,
@@ -103,15 +103,16 @@ fun SettingsMainScreen(
             SettingsModule.Language,
             SettingsModule.PrinterSetting,
             SettingsModule.Modifiers,
-            SettingsModule.ChangePassword
+            SettingsModule.ChangePassword,
+            SettingsModule.ResetData
         )
         else
             listOf(
-                SettingsModule.Area,
-                SettingsModule.Table,
-                SettingsModule.Menu,
-                SettingsModule.MenuCategory,
-                SettingsModule.MenuItem,
+//                SettingsModule.Area,
+//                SettingsModule.Table,
+//                SettingsModule.Menu,
+//                SettingsModule.MenuCategory,
+//                SettingsModule.MenuItem,
                 SettingsModule.Modifiers,
                 SettingsModule.Staff,
                 SettingsModule.Role,
@@ -124,7 +125,8 @@ fun SettingsMainScreen(
                 SettingsModule.Counter,
                 SettingsModule.Customer,
                 SettingsModule.Language,
-                SettingsModule.ChangePassword
+                SettingsModule.ChangePassword,
+                SettingsModule.ResetData
 
             )
     }
@@ -270,6 +272,10 @@ fun SettingsModuleScreen(
         }
         is SettingsModule.ChangePassword -> {
             navController.navigate("change_password")
+        }
+
+        is SettingsModule.ResetData -> {
+            navController.navigate("reset_data")
         }
     }
 }
@@ -426,6 +432,13 @@ sealed class SettingsModule(
         "Manage menu item modifiers",
         Icons.Default.Add,
         listOf("name", "price", "category")
+    )
+    object ResetData : SettingsModule(
+        "reset_data",
+        "Reset Data",
+        "Reset application data",
+        Icons.Default.Delete,
+        listOf("confirm")
     )
 }
 

@@ -767,4 +767,13 @@ interface ApiService {
     @GET("companyMaster/getCompanyCode")
     suspend fun getCompanyCode(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, String>>
 
+
+    /**
+     * Reset Data Management
+     */
+
+    @POST("settings/reset")
+    suspend fun resetData(@Header("X-Tenant-ID") tenantId: String): Response<ApiResponse<Boolean>>
+
+
 }
