@@ -61,6 +61,8 @@ import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.ui.theme.YellowPrimary
+import com.warriortech.resb.ui.theme.YellowSecondary
 import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.ui.viewmodel.CounterViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
@@ -113,7 +115,7 @@ fun ItemWiseBillScreen(
                     .fillMaxWidth()
                     .background(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(PrimaryGreen, SecondaryGreen)
+                            colors = listOf(YellowPrimary, YellowSecondary)
                         ),
                     )
                     .padding(12.dp)
@@ -249,7 +251,7 @@ fun ItemWiseBillScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(SecondaryGreen)
+                    .background(YellowPrimary)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
