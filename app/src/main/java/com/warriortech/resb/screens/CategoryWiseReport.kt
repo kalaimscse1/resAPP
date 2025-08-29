@@ -1,12 +1,11 @@
 package com.warriortech.resb.screens
 
+
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -21,11 +20,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.warriortech.resb.model.TblBillingResponse
+import com.warriortech.resb.model.CategoryReport
+import com.warriortech.resb.model.ItemReport
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.ReportViewModel
+import com.warriortech.resb.ui.viewmodel.CategoryWiseViewModel
+import com.warriortech.resb.ui.viewmodel.ItemWiseViewModel
 import com.warriortech.resb.util.ReportExport
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -35,8 +36,8 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen(
-    viewModel: ReportViewModel = hiltViewModel(),
+fun CategoryWiseReportScreen(
+    viewModel: CategoryWiseViewModel = hiltViewModel(),
     drawerState: DrawerState,
     sessionManager: SessionManager
 ) {
@@ -78,14 +79,14 @@ fun ReportScreen(
             )
         },
         bottomBar = {
-            if (uiState is ReportUiState.Success) {
-                val bills = (uiState as ReportUiState.Success).bills
+            if (uiState is CategoryWiseReportReportUiState.Success) {
+                val bills = (uiState as CategoryWiseReportReportUiState.Success).bills
                 BottomAppBar(
                     actions = {
-                        IconButton(onClick = { ReportExport.exportToPdf(context, bills) }) {
+                        IconButton(onClick = { ReportExport.categoryExportToPdf(context, bills) }) {
                             Icon(Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
                         }
-                        IconButton(onClick = { ReportExport.exportToExcel(context, bills) }) {
+                        IconButton(onClick = { ReportExport.categoryExportToExcel(context, bills) }) {
                             Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
                         }
                         IconButton(onClick = {
@@ -152,17 +153,17 @@ fun ReportScreen(
 
             // 👉 State handling
             when (uiState) {
-                is ReportUiState.Idle -> Text("Please select dates and load reports")
+                is CategoryWiseReportReportUiState.Idle -> Text("Please select dates and load reports")
 
-                is ReportUiState.Loading -> Box(
+                is CategoryWiseReportReportUiState.Loading -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
 
-                is ReportUiState.Success -> {
-                    val bills = (uiState as ReportUiState.Success).bills
+                is CategoryWiseReportReportUiState.Success -> {
+                    val bills = (uiState as CategoryWiseReportReportUiState.Success).bills
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(bills) { bill ->
                             Card(
@@ -172,9 +173,8 @@ fun ReportScreen(
                                 elevation = CardDefaults.cardElevation(4.dp)
                             ) {
                                 Column(Modifier.padding(12.dp)) {
-                                    Text("Bill No: ${bill.bill_no}", fontWeight = FontWeight.Bold)
-                                    Text("Date: ${bill.bill_date}")
-                                    Text("Customer: ${bill.customer.customer_name}")
+                                    Text("Category Name: ${bill.item_cat_name}", fontWeight = FontWeight.Bold)
+                                    Text("Qty: ${bill.qty}")
                                     Text("Total: ₹${bill.grand_total}")
                                 }
                             }
@@ -182,8 +182,8 @@ fun ReportScreen(
                     }
                 }
 
-                is ReportUiState.Error -> {
-                    val message = (uiState as ReportUiState.Error).message
+                is CategoryWiseReportReportUiState.Error -> {
+                    val message = (uiState as CategoryWiseReportReportUiState.Error).message
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("⚠️ $message", color = MaterialTheme.colorScheme.error)
                     }
@@ -254,9 +254,9 @@ fun ReportScreen(
 }
 
 
-sealed class ReportUiState {
-    object Loading : ReportUiState()
-    data class Success(val bills: List<TblBillingResponse>) : ReportUiState()
-    data class Error(val message: String) : ReportUiState()
-    object Idle : ReportUiState()
+sealed class CategoryWiseReportReportUiState {
+    object Loading : CategoryWiseReportReportUiState()
+    data class Success(val bills: List<CategoryReport>) : CategoryWiseReportReportUiState()
+    data class Error(val message: String) : CategoryWiseReportReportUiState()
+    object Idle : CategoryWiseReportReportUiState()
 }

@@ -42,6 +42,21 @@ android {
         compose = true
     }
 
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0",
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            )
+        }
+    }
     lint {
         // Set to true to check all issues, including those found in libraries
         checkDependencies = true
@@ -96,6 +111,8 @@ dependencies {
     implementation (libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.identity.jvm)
 //    implementation(libs.play.services.cast.framework)
 //    implementation(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.compiler)
@@ -109,9 +126,10 @@ dependencies {
     implementation(libs.androidx.material.v181)
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("com.google.android.material:material:1.12.0")
 
     // PDF and Excel export
-    implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation("com.itextpdf:itextg:5.5.10")
     implementation("org.apache.poi:poi:5.2.4")
     implementation("org.apache.poi:poi-ooxml:5.2.4")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0") // Or the latest version

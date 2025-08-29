@@ -44,7 +44,8 @@ fun DashboardScreen(
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    onQuickBill:()->Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -145,7 +146,8 @@ fun DashboardScreen(
                             onNavigateToBilling = onNavigateToBilling,
                             onDineInSelected = onDineInSelected,
                             onTakeawaySelected = onTakeawaySelected,
-                            sessionManager
+                            sessionManager,
+                            onQuickBill
                         )
                     }
 
@@ -330,7 +332,8 @@ fun QuickActionsSection(
     onNavigateToBilling: () -> Unit,
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    onQuickBill:()->Unit
 ) {
     val role = sessionManager.getUser()?.role?:""
     var showOrderTypeDialog by remember { mutableStateOf(false) }
@@ -357,33 +360,28 @@ fun QuickActionsSection(
                 text = "View Orders",
                 modifier = Modifier.weight(0.5f)
             )
-            MobileOptimizedButton(
-                onClick = onNavigateToBilling,
-                text = "Billing",
-                modifier = Modifier.weight(0.5f)
-            )
         }
 
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        if (role == "RESBADMIN" || role == "ADMIN")
-//        {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp)
-//            ) {
-//                MobileOptimizedButton(
-//                    onClick = onNavigateToBilling,
-//                    text = "Billing",
-//                    modifier = Modifier.weight(1f)
-//                )
-//                MobileOptimizedButton(
-//                    onClick = onNavigateToSettings,
-//                    text = "Settings",
-//                    modifier = Modifier.weight(1f)
-//                )
-//            }
-//        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (role == "RESBADMIN" || role == "ADMIN")
+        {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MobileOptimizedButton(
+                    onClick = onNavigateToBilling,
+                    text = "Billing",
+                    modifier = Modifier.weight(1f)
+                )
+                MobileOptimizedButton(
+                    onClick = onQuickBill,
+                    text = "Quick Bill",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
     }
     if (showOrderTypeDialog) {
         AlertDialog(

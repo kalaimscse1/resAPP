@@ -29,6 +29,7 @@ import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.util.CurrencySettings
 
 /**
  * BillingScreen is a composable function that displays the billing summary for an order.
@@ -464,7 +465,6 @@ fun BillingBottomBar(
     orderMasterId: String? = null,
     onProceedToPayment: () -> Unit
 ) {
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer
     ) {
@@ -478,7 +478,7 @@ fun BillingBottomBar(
             Column {
                 Text("Total Due", style = MaterialTheme.typography.labelMedium)
                 Text(
-                    currencyFormatter.format(uiState.totalAmount),
+                    CurrencySettings.format(uiState.totalAmount),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )

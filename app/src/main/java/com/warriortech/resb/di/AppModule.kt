@@ -134,7 +134,7 @@ object AppModule {
     @Singleton
     fun provideApiService(okHttpClient: OkHttpClient): ApiService {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.7:5050/api/") // Replace with your actual API base URL
+            .baseUrl("http://110.172.164.71:5050/api/") // Replace with your actual API base URL
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

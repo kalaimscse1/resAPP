@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.PaymentMethodCard
 import com.warriortech.resb.ui.components.PaymentSummaryCard
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
@@ -34,6 +35,7 @@ import java.util.Locale
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.util.AnimatedSnackbarDemo
+import com.warriortech.resb.util.CurrencySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,10 +43,12 @@ fun PaymentScreen(
     navController: NavHostController,
     viewModel: BillingViewModel = hiltViewModel(), // Shared ViewModel
     amountToPayFromRoute: Double? = null,
-    orderMasterId: String? = null // If passing amount via route
+    orderMasterId: String? = null,
+    sessionManager: SessionManager// If passing amount via route
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val table = sessionManager.getGeneralSetting()?.is_table_allowed == true
 
     // If amount was passed via route, you might set it in the ViewModel once
      LaunchedEffect(key1 = amountToPayFromRoute, key2 =  orderMasterId) {
@@ -61,22 +65,17 @@ fun PaymentScreen(
 
     LaunchedEffect(uiState.paymentProcessingState) {
         if (uiState.paymentProcessingState is PaymentProcessingState.Success) {
-            // Navigate to an order success/confirmation screen or back
-            val successState = uiState.paymentProcessingState as PaymentProcessingState.Success
-            // navController.navigate("order_success/${successState.transactionId}") {
-            //     popUpTo("billing_screen_route_or_graph_start") { inclusive = true } // Clear back stack
-            // }
-            // For now, just show a snackbar and allow manual dismissal or pop back
-//            snackbarHostState.showSnackbar("Payment Successful! TXN ID: ${successState.transactionId}")
              viewModel.resetPaymentState() // Reset for next payment
+            if (table)
             navController.navigate("selects")
+            else
+                navController.navigate("quick_bills")
         } else if (uiState.paymentProcessingState is PaymentProcessingState.Error) {
             val errorState = uiState.paymentProcessingState as PaymentProcessingState.Error
             snackbarHostState.showSnackbar("Payment Failed: ${errorState.message}")
              viewModel.resetPaymentState() // Allow retry
         }
     }
-
 
     Scaffold(
         snackbarHost = { AnimatedSnackbarDemo(snackbarHostState) },
@@ -252,7 +251,7 @@ fun PaymentBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Paying: ${currencyFormatter.format(uiState.amountToPay)}",
+                "Paying: ${CurrencySettings.format(uiState.amountToPay)}",
                 style = MaterialTheme.typography.titleMedium
             )
             MobileOptimizedButton(

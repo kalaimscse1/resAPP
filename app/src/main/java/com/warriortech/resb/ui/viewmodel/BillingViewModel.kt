@@ -16,6 +16,7 @@ import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.ui.viewmodel.MenuViewModel.OrderUiState
+import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,6 +93,7 @@ class BillingViewModel @Inject constructor(
     init {
         // Load initial data like available payment methods
         loadAvailablePaymentMethods()
+        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
     }
 
 
@@ -298,9 +300,7 @@ class BillingViewModel @Inject constructor(
                     PaymentMethod("card", "CARD"),
                     PaymentMethod("upi", "UPI"),
                     PaymentMethod("due", "DUE"),
-                    PaymentMethod("online", "ONLINE"),
                     PaymentMethod("others", "OTHERS")
-                    // Add more methods
                 )
             )
         }
@@ -443,7 +443,7 @@ class BillingViewModel @Inject constructor(
                 // orderRepository.saveOrder(paidOrder) // Save the order
         }
     }
-    private fun printBill(bill : Bill, currentState: BillingPaymentUiState, amount: Double, paymentMethod: PaymentMethod) {
+     fun printBill(bill : Bill, currentState: BillingPaymentUiState, amount: Double, paymentMethod: PaymentMethod) {
         viewModelScope.launch {
 
                 val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false

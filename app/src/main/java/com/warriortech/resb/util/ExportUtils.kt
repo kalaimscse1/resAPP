@@ -1,270 +1,142 @@
 package com.warriortech.resb.util
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
 import androidx.core.content.FileProvider
-import com.itextpdf.kernel.pdf.PdfDocument
-import com.itextpdf.kernel.pdf.PdfWriter
-import com.itextpdf.layout.Document
-import com.itextpdf.layout.element.Paragraph
-import com.itextpdf.layout.element.Table
-import com.itextpdf.layout.properties.TextAlignment
-import com.warriortech.resb.model.*
+import com.warriortech.resb.model.GSTSummaryReport
+import com.warriortech.resb.model.TodaySalesReport
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
-import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.*
 
 object ExportUtils {
-    
-    private val currencyFormatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
-    @SuppressLint("ConstantLocale")
-    private val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-    @SuppressLint("ConstantLocale")
-    private val timeFormatter = SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.getDefault())
-    
+
     fun exportToPDF(
         context: Context,
         todaySales: TodaySalesReport?,
         gstSummary: GSTSummaryReport?,
-        salesSummary: SalesSummaryReport?,
         selectedDate: String
     ): File? {
         return try {
-            val file = File(context.getExternalFilesDir(null), "sales_report_${selectedDate.replace(" ", "_")}.pdf")
-            val pdfWriter = PdfWriter(file)
-            val pdfDocument = PdfDocument(pdfWriter)
-            val document = Document(pdfDocument)
-            
-            // Title
-            document.add(
-                Paragraph("Sales Report - $selectedDate")
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setFontSize(18f)
-                    .setBold()
-            )
-            
-            document.add(Paragraph(" ")) // Space
-            
-            // Today's Sales Section
-            todaySales?.let { sales ->
-                document.add(
-                    Paragraph("Today's Sales Summary")
-                        .setFontSize(14f)
-                        .setBold()
-                )
-                
-                val salesTable = Table(2)
-                salesTable.addCell("Total Orders")
-                salesTable.addCell(sales.totalOrders.toString())
-                salesTable.addCell("Total Amount")
-                salesTable.addCell(currencyFormatter.format(sales.totalSales))
-//                salesTable.addCell("Cash Sales")
-//                salesTable.addCell(currencyFormatter.format(sales.cashSales))
-//                salesTable.addCell("Card Sales")
-//                salesTable.addCell(currencyFormatter.format(sales.cardSales))
-//                salesTable.addCell("UPI Sales")
-//                salesTable.addCell(currencyFormatter.format(sales.upiSales))
-                
-                document.add(salesTable)
-                document.add(Paragraph(" "))
+            val pdfDocument = PdfDocument()
+            val paint = Paint()
+            val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
+            val page = pdfDocument.startPage(pageInfo)
+            val canvas = page.canvas
+
+            var y = 40
+            paint.textSize = 16f
+            paint.isFakeBoldText = true
+            canvas.drawText("Report - $selectedDate", 40f, y.toFloat(), paint)
+
+            y += 30
+            paint.textSize = 12f
+            paint.isFakeBoldText = false
+
+            todaySales?.let {
+                canvas.drawText("Today's Sales: Total ${it.totalSales} | Orders ${it.totalOrders}", 40f, y.toFloat(), paint)
+                y += 20
+                canvas.drawText("Tax: ${it.totalTax} | Cess: ${it.totalCess}", 40f, y.toFloat(), paint)
+                y += 25
             }
-            
-            // GST Summary Section
-            gstSummary?.let { gst ->
-                document.add(
-                    Paragraph("GST Summary")
-                        .setFontSize(14f)
-                        .setBold()
-                )
-                
-                val gstTable = Table(3)
-                gstTable.addCell("GST Rate")
-                gstTable.addCell("Taxable Amount")
-                gstTable.addCell("Tax Amount")
-                
-//                gst.gstBreakdown.forEach { breakdown ->
-//                    gstTable.addCell("${breakdown.gstRate}%")
-//                    gstTable.addCell(currencyFormatter.format(breakdown.taxableAmount))
-//                    gstTable.addCell(currencyFormatter.format(breakdown.taxAmount))
+
+            gstSummary?.let {
+                canvas.drawText("GST Summary: CGST ${it.totalCGST} | SGST ${it.totalSGST} | IGST ${it.totalIGST}", 40f, y.toFloat(), paint)
+                y += 25
+            }
+
+//            salesSummary?.let {
+//                canvas.drawText("Sales Summary: Total ${it.totalSales} | Orders ${it.totalOrders}", 40f, y.toFloat(), paint)
+//                y += 25
+//                if (it.topSellingItems.isNotEmpty()) {
+//                    canvas.drawText("Top Items:", 40f, y.toFloat(), paint)
+//                    y += 20
+//                    it.topSellingItems.forEach { t ->
+//                        canvas.drawText("${t.itemName} - Qty:${t.quantity} Rev:${t.revenue}", 50f, y.toFloat(), paint)
+//                        y += 18
+//                    }
 //                }
-                
-                gstTable.addCell("Total")
-//                gstTable.addCell(currencyFormatter.format(gst.totalTaxableAmount))
-//                gstTable.addCell(currencyFormatter.format(gst.totalTaxAmount))
-                
-                document.add(gstTable)
-                document.add(Paragraph(" "))
-            }
-            
-            // Sales Summary Section
-            salesSummary?.let { summary ->
-                document.add(
-                    Paragraph("Detailed Sales")
-                        .setFontSize(14f)
-                        .setBold()
-                )
-                
-                val summaryTable = Table(4)
-                summaryTable.addCell("Bill No")
-                summaryTable.addCell("Time")
-                summaryTable.addCell("Amount")
-                summaryTable.addCell("Payment Method")
-                
-//                summary.sales.forEach { sale ->
-//                    summaryTable.addCell(sale.billNo)
-//                    summaryTable.addCell(timeFormatter.format(sale.timestamp))
-//                    summaryTable.addCell(currencyFormatter.format(sale.amount))
-//                    summaryTable.addCell(sale.paymentMethod)
-//                }
-                
-                document.add(summaryTable)
-            }
-            
-            document.add(
-                Paragraph("Generated on: ${timeFormatter.format(Date())}")
-                    .setTextAlignment(TextAlignment.RIGHT)
-                    .setFontSize(10f)
-            )
-            
-            document.close()
+//            }
+
+            pdfDocument.finishPage(page)
+            val file = File(context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOCUMENTS), "Report_$selectedDate.pdf")
+            FileOutputStream(file).use { out -> pdfDocument.writeTo(out) }
+            pdfDocument.close()
             file
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
-    
+
     fun exportToExcel(
         context: Context,
         todaySales: TodaySalesReport?,
         gstSummary: GSTSummaryReport?,
-        salesSummary: SalesSummaryReport?,
+//        salesSummary: SalesSummaryReport?,
         selectedDate: String
     ): File? {
         return try {
             val workbook = XSSFWorkbook()
-            val file = File(context.getExternalFilesDir(null), "sales_report_${selectedDate.replace(" ", "_")}.xlsx")
-            
-            // Summary Sheet
-            val summarySheet = workbook.createSheet("Summary")
-            var rowIndex = 0
-            
-            // Title
-            val titleRow = summarySheet.createRow(rowIndex++)
-            titleRow.createCell(0).setCellValue("Sales Report - $selectedDate")
-            rowIndex++ // Empty row
-            
-            // Today's Sales
-            todaySales?.let { sales ->
-                summarySheet.createRow(rowIndex++).createCell(0).setCellValue("Today's Sales Summary")
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("Total Orders")
-                    createCell(1).setCellValue(sales.totalOrders.toDouble())
+            val sheet = workbook.createSheet("Report")
+
+            var rowIdx = 0
+            fun createRow(vararg cells: String) {
+                val row = sheet.createRow(rowIdx++)
+                cells.forEachIndexed { i, v ->
+                    row.createCell(i).setCellValue(v)
                 }
-//                summarySheet.createRow(rowIndex++).apply {
-//                    createCell(0).setCellValue("Total Amount")
-//                    createCell(1).setCellValue(sales.totalAmount)
-//                }
-//                summarySheet.createRow(rowIndex++).apply {
-//                    createCell(0).setCellValue("Cash Sales")
-//                    createCell(1).setCellValue(sales.cashSales)
-//                }
-//                summarySheet.createRow(rowIndex++).apply {
-//                    createCell(0).setCellValue("Card Sales")
-//                    createCell(1).setCellValue(sales.cardSales)
-//                }
-//                summarySheet.createRow(rowIndex++).apply {
-//                    createCell(0).setCellValue("UPI Sales")
-//                    createCell(1).setCellValue(sales.upiSales)
-//                }
-                rowIndex++ // Empty row
             }
-            
-            // GST Summary
-            gstSummary?.let { gst ->
-                summarySheet.createRow(rowIndex++).createCell(0).setCellValue("GST Summary")
-                summarySheet.createRow(rowIndex++).apply {
-                    createCell(0).setCellValue("GST Rate")
-                    createCell(1).setCellValue("Taxable Amount")
-                    createCell(2).setCellValue("Tax Amount")
-                }
-                
-//                gst.gstBreakdown.forEach { breakdown ->
-//                    summarySheet.createRow(rowIndex++).apply {
-//                        createCell(0).setCellValue("${breakdown.gstRate}%")
-//                        createCell(1).setCellValue(breakdown.taxableAmount)
-//                        createCell(2).setCellValue(breakdown.taxAmount)
+
+            createRow("Report Date", selectedDate)
+            createRow("")
+
+            todaySales?.let {
+                createRow("Today's Sales", "Total", it.totalSales.toString())
+                createRow("Orders", it.totalOrders.toString())
+                createRow("Tax", it.totalTax.toString())
+                createRow("")
+            }
+
+            gstSummary?.let {
+                createRow("GST Summary", "CGST", it.totalCGST.toString(), "SGST", it.totalSGST.toString(), "IGST", it.totalIGST.toString())
+                createRow("")
+            }
+
+//            salesSummary?.let {
+//                createRow("Sales Summary", "Total", it.totalSales.toString(), "Orders", it.totalOrders.toString())
+//                if (it.topSellingItems.isNotEmpty()) {
+//                    createRow("Top Items")
+//                    it.topSellingItems.forEach { t ->
+//                        createRow(t.itemName, t.quantity.toString(), t.revenue.toString())
 //                    }
 //                }
-//
-//                summarySheet.createRow(rowIndex++).apply {
-//                    createCell(0).setCellValue("Total")
-//                    createCell(1).setCellValue(gst.totalTaxableAmount)
-//                    createCell(2).setCellValue(gst.totalTaxAmount)
-//                }
-            }
-            
-            // Detailed Sales Sheet
-            salesSummary?.let { summary ->
-                val salesSheet = workbook.createSheet("Detailed Sales")
-                var salesRowIndex = 0
-                
-                // Headers
-                salesSheet.createRow(salesRowIndex++).apply {
-                    createCell(0).setCellValue("Bill No")
-                    createCell(1).setCellValue("Time")
-                    createCell(2).setCellValue("Amount")
-                    createCell(3).setCellValue("Payment Method")
-                }
-                
-                // Data
-//                summary.sales.forEach { sale ->
-//                    salesSheet.createRow(salesRowIndex++).apply {
-//                        createCell(0).setCellValue(sale.billNo)
-//                        createCell(1).setCellValue(timeFormatter.format(sale.timestamp))
-//                        createCell(2).setCellValue(sale.amount)
-//                        createCell(3).setCellValue(sale.paymentMethod)
-//                    }
-//                }
-            }
-            
-            // Write to file
-            val outputStream = FileOutputStream(file)
-            workbook.write(outputStream)
-            outputStream.close()
+//            }
+
+            val file = File(context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOCUMENTS), "Report_$selectedDate.xlsx")
+            FileOutputStream(file).use { out -> workbook.write(out) }
             workbook.close()
-            
             file
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
-    
+
     fun shareFile(context: Context, file: File) {
         try {
-            val uri: Uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                file
-            )
-            
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = when (file.extension) {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = when (file.extension.lowercase()) {
                     "pdf" -> "application/pdf"
                     "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     else -> "*/*"
                 }
-                putExtra(Intent.EXTRA_STREAM, uri)
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            
-            context.startActivity(Intent.createChooser(intent, "Share Report"))
+            context.startActivity(android.content.Intent.createChooser(intent, "Share Report"))
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -126,14 +126,6 @@ fun CounterScreen(
                     }
                 },
                 actions = {
-//                    IconButton(onClick = {
-//                        onBackPressed() // Reset category filter
-//                    }) {
-//                        Icon(
-//                            imageVector = Icons.Default.Menu,
-//                            contentDescription = "All Categories"
-//                        )
-//                    }
                     IconButton(onClick = {
                         viewModel.clearOrder()
                     }) {

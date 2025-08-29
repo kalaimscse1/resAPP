@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -21,11 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.warriortech.resb.model.TblBillingResponse
+import com.warriortech.resb.model.ItemReport
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.ReportViewModel
+import com.warriortech.resb.ui.viewmodel.ItemWiseViewModel
 import com.warriortech.resb.util.ReportExport
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -35,8 +33,8 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen(
-    viewModel: ReportViewModel = hiltViewModel(),
+fun ItemWiseReportScreen(
+    viewModel: ItemWiseViewModel = hiltViewModel(),
     drawerState: DrawerState,
     sessionManager: SessionManager
 ) {
@@ -78,14 +76,14 @@ fun ReportScreen(
             )
         },
         bottomBar = {
-            if (uiState is ReportUiState.Success) {
-                val bills = (uiState as ReportUiState.Success).bills
+            if (uiState is ItemWiseReportReportUiState.Success) {
+                val bills = (uiState as ItemWiseReportReportUiState.Success).bills
                 BottomAppBar(
                     actions = {
-                        IconButton(onClick = { ReportExport.exportToPdf(context, bills) }) {
+                        IconButton(onClick = { ReportExport.itemExportToPdf(context, bills) }) {
                             Icon(Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
                         }
-                        IconButton(onClick = { ReportExport.exportToExcel(context, bills) }) {
+                        IconButton(onClick = { ReportExport.itemExportToExcel(context, bills) }) {
                             Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
                         }
                         IconButton(onClick = {
@@ -152,17 +150,17 @@ fun ReportScreen(
 
             // 👉 State handling
             when (uiState) {
-                is ReportUiState.Idle -> Text("Please select dates and load reports")
+                is ItemWiseReportReportUiState.Idle -> Text("Please select dates and load reports")
 
-                is ReportUiState.Loading -> Box(
+                is ItemWiseReportReportUiState.Loading -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
 
-                is ReportUiState.Success -> {
-                    val bills = (uiState as ReportUiState.Success).bills
+                is ItemWiseReportReportUiState.Success -> {
+                    val bills = (uiState as ItemWiseReportReportUiState.Success).bills
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(bills) { bill ->
                             Card(
@@ -172,17 +170,17 @@ fun ReportScreen(
                                 elevation = CardDefaults.cardElevation(4.dp)
                             ) {
                                 Column(Modifier.padding(12.dp)) {
-                                    Text("Bill No: ${bill.bill_no}", fontWeight = FontWeight.Bold)
-                                    Text("Date: ${bill.bill_date}")
-                                    Text("Customer: ${bill.customer.customer_name}")
-                                    Text("Total: ₹${bill.grand_total}")
+                                    Text("Item Name: ${bill.menu_item_name}", fontWeight = FontWeight.Bold)
+                                    Text("Qty: ${bill.qty}")
+                                    Text("Rate: ${bill.rate}")
+                                    Text("Total: ₹${bill.total}")
                                 }
                             }
                         }
                     }
                 }
 
-                is ReportUiState.Error -> {
+                is ItemWiseReportReportUiState.Error -> {
                     val message = (uiState as ReportUiState.Error).message
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("⚠️ $message", color = MaterialTheme.colorScheme.error)
@@ -254,9 +252,9 @@ fun ReportScreen(
 }
 
 
-sealed class ReportUiState {
-    object Loading : ReportUiState()
-    data class Success(val bills: List<TblBillingResponse>) : ReportUiState()
-    data class Error(val message: String) : ReportUiState()
-    object Idle : ReportUiState()
+sealed class ItemWiseReportReportUiState {
+    object Loading : ItemWiseReportReportUiState()
+    data class Success(val bills: List<ItemReport>) : ItemWiseReportReportUiState()
+    data class Error(val message: String) : ItemWiseReportReportUiState()
+    object Idle : ItemWiseReportReportUiState()
 }

@@ -86,7 +86,7 @@ import com.warriortech.resb.ui.theme.ghostWhite
 
 
 //
-@OptIn( ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionScreen(
     onTableSelected: (Table) -> Unit,
@@ -102,7 +102,7 @@ fun SelectionScreen(
     val displayableAreas = areas.filter { it.area_name != "--" }
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { displayableAreas.size}
+        pageCount = { displayableAreas.size }
     )
     val currentArea = displayableAreas.getOrNull(pagerState.currentPage)
     val role = sessionManager.getUser()?.role ?: ""
@@ -122,9 +122,13 @@ fun SelectionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Selection",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = SurfaceLight) },
+                title = {
+                    Text(
+                        "Selection",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                         androidx.compose.material.Icon(
@@ -227,7 +231,8 @@ fun SelectionScreen(
                                                     )
                                                     onTableSelected(tbl)
                                                 },
-                                                sessionManager)
+                                                sessionManager
+                                            )
                                         }
                                     }
                                 }
@@ -248,10 +253,11 @@ fun SelectionScreen(
                         }
                     }
                 }
-            }else{
+            } else {
                 if (areas.isNotEmpty()) {
                     val displayablAreas = areas.filter { it.area_name == areaId }
-                    val calculatedIndex = displayablAreas.indexOfFirst { it.area_name == selectedArea }
+                    val calculatedIndex =
+                        displayablAreas.indexOfFirst { it.area_name == selectedArea }
                     ScrollableTabRow(
                         selectedTabIndex = calculatedIndex.coerceAtLeast(0),
                         backgroundColor = MaterialTheme.colorScheme.surface,
@@ -312,21 +318,23 @@ fun SelectionScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 items(filteredTables) { table ->
-                                    TableItem(table = table, onClick = {
-                                        val tbl = Table(
-                                            table_id = table.table_id,
-                                            area_id = table.area_id,
-                                            area_name = table.area_name,
-                                            table_name = table.table_name,
-                                            seating_capacity = table.seating_capacity.toInt(),
-                                            is_ac = table.is_ac,
-                                            table_status = table.table_status,
-                                            table_availability = table.table_availability,
-                                            is_active = table.is_active
-                                        )
-                                        onTableSelected(tbl)
-                                    },
-                                        sessionManager)
+                                    TableItem(
+                                        table = table, onClick = {
+                                            val tbl = Table(
+                                                table_id = table.table_id,
+                                                area_id = table.area_id,
+                                                area_name = table.area_name,
+                                                table_name = table.table_name,
+                                                seating_capacity = table.seating_capacity.toInt(),
+                                                is_ac = table.is_ac,
+                                                table_status = table.table_status,
+                                                table_availability = table.table_availability,
+                                                is_active = table.is_active
+                                            )
+                                            onTableSelected(tbl)
+                                        },
+                                        sessionManager
+                                    )
                                 }
                             }
                         }
@@ -352,7 +360,7 @@ fun SelectionScreen(
 }
 
 @Composable
-fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: SessionManager) {
+fun TableItem(table: TableStatusResponse, onClick: () -> Unit, sessionManager: SessionManager) {
     val color = when (table.table_availability) {
         "AVAILABLE" -> TextSecondary
         "OCCUPIED" -> SuccessGreen
@@ -392,7 +400,7 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: Se
                     )
                 }
         )
-       {
+        {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -411,12 +419,12 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: Se
                     style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                if (table.grandTotal>0) {
+                if (table.grandTotal > 0) {
                     Text(
                         text = sessionManager.getRestaurantProfile()?.currency + " " + table.grandTotal,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color=ErrorRed
+                        color = ErrorRed
                     )
                 } else {
                     Text(
@@ -424,7 +432,7 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: Se
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color=DarkGreen
+                        color = DarkGreen
                     )
                 }
             }

@@ -632,17 +632,44 @@ interface ApiService {
      * Reports Management
      */
 
-    @GET("reports/today-sales")
+    @GET("report/today-sales")
     suspend fun getTodaySales(@Header("X-Tenant-ID") tenantId: String): Response<TodaySalesReport>
 
-    @GET("reports/gst-summary")
+    @GET("report/gst-summary")
     suspend fun getGSTSummary(@Header("X-Tenant-ID") tenantId: String): Response<GSTSummaryReport>
 
-    @GET("reports/sales-summary/{date}")
-    suspend fun getSalesSummaryByDate(
-        @Path("date") date: String,
-        @Header("X-Tenant-ID") tenantId: String
-    ): Response<SalesSummaryReport>
+//    @GET("report/sales-summary/{date}")
+//    suspend fun getSalesSummaryByDate(
+//        @Path("date") date: String,
+//        @Header("X-Tenant-ID") tenantId: String
+//    ): Response<SalesSummaryReport>
+
+    @GET("api/reports/today-sales")
+    suspend fun getReportsForDate(
+        @Query("date") date: String? = null
+    ): ReportResponse
+
+    @GET("payment/getPaidBills")
+    suspend fun getSalesReport(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") date: String,
+        @Query("toDate") toDate: String
+    ): Response<List<TblBillingResponse>>
+
+    @GET("report/getOrderDetailsByMenuItemId")
+    suspend fun getItemReport(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") date: String,
+        @Query("toDate") toDate: String
+    ): Response<List<ItemReport>>
+
+    @GET("report/getOrderDetailsByMenuCatId")
+    suspend fun getCategoryReport(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") date: String,
+        @Query("toDate") toDate: String
+
+    ): Response<List<CategoryReport>>
 
     /**
      * Customers Management

@@ -188,11 +188,11 @@ fun MobileOptimizedButton(
         modifier = modifier
             .fillMaxWidth()
             .height(buttonHeight)
-            .shadow(
-                elevation = if (enabled) 8.dp else 0.dp,
-                shape = RoundedCornerShape(cornerRadius),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            )
+//            .shadow(
+//                elevation = if (enabled) 8.dp else 0.dp,
+//                shape = RoundedCornerShape(cornerRadius),
+//                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+//            )
             .clip(RoundedCornerShape(cornerRadius))
             .background(brush = Brush.verticalGradient(gradientColors))
             .clickable(

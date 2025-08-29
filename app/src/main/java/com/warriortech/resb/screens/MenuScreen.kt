@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -77,7 +78,8 @@ import com.warriortech.resb.util.scrollToBottomSmooth
 fun MenuScreen(
     isTakeaway: String, // "TABLE", "TAKEAWAY", "DELIVERY"
     tableStatId: Boolean, // True if it's a table order and tableId is relevant for fetching existing order
-    tableId: Long,       // Actual table ID for table orders, or a placeholder for others
+    tableId: Long,
+    tableName: String,// Actual table ID for table orders, or a placeholder for others
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
     onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId: String) -> Unit,
@@ -170,7 +172,7 @@ fun MenuScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Menu Selection",
+                        Text(if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM!="DELIVERY")"Menu Selection-${tableName}" else "Menu Selection",
                             style = MaterialTheme.typography.titleLarge,
                             color = SurfaceLight)
                         if (viewModel.isExistingOrderLoaded.value) {
@@ -208,105 +210,97 @@ fun MenuScreen(
             )
         },
         bottomBar = {
-            BottomAppBar {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(PrimaryGreen, SecondaryGreen)
+                        ),
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                    )
+                    .padding(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
                     val existingItemCount = if(viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
                     val totalItemCount = newItemCount + existingItemCount
                     val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
-
-                    Column {
-                        if (viewModel.isExistingOrderLoaded.value) {
+                    // 🔹 Row 1: Order Summary
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            if (viewModel.isExistingOrderLoaded.value) {
+                                Text(
+                                    text = "Existing: $existingItemCount | New: $newItemCount",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.8f)
+                                )
+                            }
                             Text(
-                                text = "Existing: $existingItemCount | New: $newItemCount",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.secondary
+                                text = "Total Items: $totalItemCount",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
                             )
                         }
-                        Text(
-                            text = "Total Items: $totalItemCount",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                         Text(
                             text = "Total: ₹${String.format("%.2f", totalAmount)}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
-                    val hasNewItems = selectedItems.isNotEmpty()
-                    if (hasNewItems)
-                    {
-                        MobileOptimizedButton(
-                            onClick = { showConfirmDialog = true },
-                            enabled = (selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
-                            text = "Place Order",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    if (viewModel.isExistingOrderLoaded.value) {
-                        if (sessionManager.getUser()?.role=="ADMIN"||sessionManager.getUser()?.role=="CASHIER"){
+
+                    // 🔹 Row 2: Action Buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (viewModel.isExistingOrderLoaded.value) {
+                            if (sessionManager.getUser()?.role == "ADMIN" || sessionManager.getUser()?.role == "CASHIER") {
+                                MobileOptimizedButton(
+                                    onClick = {
+                                        navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
+                                            launchSingleTop = true
+                                        }
+                                        onBillPlaced(
+                                            viewModel.orderDetailsResponse.value,
+                                            viewModel.existingOrderId.value ?: ""
+                                        )
+                                    },
+                                    text = "Bill",
+                                    enabled = selectedItems.isNotEmpty(),
+                                    modifier = Modifier.weight(1f).height(48.dp)
+                                )
+                            }
                             MobileOptimizedButton(
-                                onClick = {
-                                    navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
-                                        launchSingleTop = true
-                                    }
-                                    onBillPlaced(viewModel.orderDetailsResponse.value,
-                                        viewModel.existingOrderId.value?:""
-                                    )
-                                },
-                                enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
-                                text = "Bill",
-                                modifier = Modifier.weight(1f)
+                                onClick = { showConfirmDialog = true },
+                                enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                                text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
+                                modifier = Modifier.weight(1f) )
+                        } else {
+                            MobileOptimizedButton(
+                                onClick = { showConfirmDialog = true },
+                                text = "Place Order",
+                                enabled = (selectedItems.isNotEmpty()),
+                                modifier = Modifier.weight(1f).height(48.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
                         }
-//                        MobileOptimizedButton(
-//                            onClick = {
-//                                navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
-//                                    launchSingleTop = true
-//                                }
-//                                onBillPlaced(viewModel.orderDetailsResponse.value,
-//                                    viewModel.existingOrderId.value?:""
-//                                )
-//                                },
-//                            enabled = selectedItems.isNotEmpty() && orderState !is MenuViewModel.OrderUiState.Loading,
-//                            text = "Bill",
-//                            modifier = Modifier.weight(1f)
-//                        )
-//                        Spacer(modifier = Modifier.width(8.dp))
-                        MobileOptimizedButton(
-                            onClick = { showConfirmDialog = true },
-                            enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
-                            text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
-                            modifier = Modifier.weight(1f)
-                        )
                     }
-
-
                 }
             }
-        },
+        }
+        ,
         snackbarHost = {
             AnimatedSnackbarDemo(snackbarHostState)
         },
-        // ... (snackbarHost and floatingActionButton remain similar, ensure floatingActionButton also uses effectiveStatus if needed for display)
-//        floatingActionButton = {
-//            val hasNewItems = if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()
-//            if (hasNewItems) {
-//                FloatingActionButton(
-//                    onClick = { showConfirmDialog = true }
-//                ) {
-//                    val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
-//                    Text("$newItemCount")
-//                }
-//            }
-//        }
     ) { paddingValues ->
 
         when (val currentMenuState = menuState) { // Use stable val
@@ -479,35 +473,6 @@ fun MenuItemCard(
     tableStatus: String,
     isExistingOrder: Boolean = false
 ) {
-    val IconBoldA: ImageVector = ImageVector.Builder(
-        name = "BoldA",
-        defaultWidth = 20.dp,
-        defaultHeight = 20.dp,
-        viewportWidth = 20f,
-        viewportHeight = 20f
-    ).apply {
-        path(
-            fill = SolidColor(Color.Black),
-            pathFillType = PathFillType.NonZero
-        ) {
-            // Outer A shape
-            moveTo(12f, 4f)      // Top point
-            lineTo(3f, 20f)      // Bottom left
-            lineTo(7f, 20f)      // Left foot
-            lineTo(8.6f, 16.8f)  // Up left leg to crossbar
-            lineTo(15.4f, 16.8f) // Across crossbar
-            lineTo(17f, 20f)     // Down right leg to right foot
-            lineTo(21f, 20f)     // Bottom right
-            close()
-
-            // Crossbar
-            moveTo(9.6f, 14f)
-            lineTo(14.4f, 14f)
-            lineTo(12f, 8.8f)
-            close()
-        }
-    }.build()
-
     val deviceInfo = getDeviceInfo()
     val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
     Card(
@@ -538,47 +503,16 @@ fun MenuItemCard(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = menuItem.menu_item_name_tamil,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-//                    Spacer(modifier = Modifier.height(8.dp))
-//
-//                    Row {
-//                        Text(
-//                            text = if (tableStatus == "AC") "₹${
-//                                String.format(
-//                                    "%.2f",
-//                                    menuItem.ac_rate
-//                                )
-//                            }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
-//                                String.format(
-//                                    "%.2f",
-//                                    menuItem.parcel_rate
-//                                )
-//                            }" else "₹${String.format("%.2f", menuItem.rate)}",
-//                            style = MaterialTheme.typography.titleSmall,
-//                            fontWeight = FontWeight.Bold
-//                        )
-//
-//                        if (isExistingOrder && existingQuantity > 0) {
+//                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
 //                            Spacer(modifier = Modifier.height(4.dp))
 //                            Text(
-//                                text = "Previously ordered: $existingQuantity",
+//                                text = menuItem.menu_item_name_tamil,
 //                                style = MaterialTheme.typography.bodySmall,
-//                                color = MaterialTheme.colorScheme.primary,
-//                                fontWeight = FontWeight.Medium
+//                                maxLines = 2,
+//                                overflow = TextOverflow.Ellipsis
 //                            )
 //                        }
-//                    }
-
+                    }
                 }
             }
             Row(modifier = Modifier.fillMaxWidth(),
