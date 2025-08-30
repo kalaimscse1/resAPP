@@ -14,6 +14,7 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -45,6 +46,7 @@ import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.GradientStart
@@ -63,7 +65,7 @@ import com.warriortech.resb.util.scrollToBottomSmooth
 @Composable
 fun CounterScreen(
     onBackPressed: () -> Unit,
-    onProceedToBilling: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId: String) -> Unit,
+    onProceedToBilling: (orderDetailsResponse: List<TblOrderDetailsResponse>, orderId: String) -> Unit,
     viewModel: CounterViewModel = hiltViewModel(),
     drawerState: DrawerState,
     counterId: Long? = null
@@ -98,7 +100,7 @@ fun CounterScreen(
                 // The tableId passed here is the one this screen was launched with.
                 // For takeaway/delivery, it might be a specific ID like 0, 1, or 2 as per your existing logic.
                 // For table orders, it's the actual tableId.
-                onProceedToBilling(orderDetailsResponse,orderId?:"") // Use effectiveStatus
+                onProceedToBilling(orderDetailsResponse, orderId ?: "") // Use effectiveStatus
                 showConfirmDialog = false
             },
             onDismiss = { showConfirmDialog = false }
@@ -121,8 +123,10 @@ fun CounterScreen(
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }
                     }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Menu, contentDescription = "Menu",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 actions = {
@@ -167,9 +171,9 @@ fun CounterScreen(
 
                     MobileOptimizedButton(
                         onClick = {
-                            viewModel.placeOrder(2,"")
-                            showConfirmDialog=true
-                            },
+                            viewModel.placeOrder(2, "")
+                            showConfirmDialog = true
+                        },
                         enabled = selectedItems.isNotEmpty(),
                         text = "Proceed to Bill",
                         modifier = Modifier.weight(1f)
@@ -265,16 +269,16 @@ fun CounterScreen(
             is CounterViewModel.MenuUiState.Success -> {
 
                 val menuItems = currentMenuState.menuItems
-                val filteredMenuItems = if (selectedCategory != null && selectedCategory=="FAVOURITES") {
-                    menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
-                } else if (selectedCategory != null) {
-                    menuItems.filter { it.item_cat_name == selectedCategory }
-                }
-                else {
-                    menuItems
-                }
+                val filteredMenuItems =
+                    if (selectedCategory != null && selectedCategory == "FAVOURITES") {
+                        menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
+                    } else if (selectedCategory != null) {
+                        menuItems.filter { it.item_cat_name == selectedCategory }
+                    } else {
+                        menuItems
+                    }
 
-                    if (menuItems.isEmpty()) {
+                if (menuItems.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -300,7 +304,8 @@ fun CounterScreen(
                         // Categories TabRow
                         if (categories.isNotEmpty()) {
                             ScrollableTabRow(
-                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
+                                selectedTabIndex = categories.indexOf(selectedCategory)
+                                    .coerceAtLeast(0),
                                 backgroundColor = SecondaryGreen,
                                 contentColor = SurfaceLight
                             ) {
@@ -422,7 +427,8 @@ fun CounterMenuItemCard(
     val deviceInfo = getDeviceInfo()
     val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .border(2.dp, SecondaryGreen, RoundedCornerShape(cornerRadius)),
         shape = RoundedCornerShape(cornerRadius),
         colors = CardDefaults.cardColors(
@@ -449,78 +455,112 @@ fun CounterMenuItemCard(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = menuItem.menu_item_name_tamil,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
+//                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
+//                            Spacer(modifier = Modifier.height(4.dp))
+//                            Text(
+//                                text = menuItem.menu_item_name_tamil,
+//                                style = MaterialTheme.typography.bodySmall,
+//                                maxLines = 2,
+//                                overflow = TextOverflow.Ellipsis
+//                            )
+//                        }
                     }
                 }
             }
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                if (menuItem.is_available=="YES") {
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (menuItem.is_available == "YES") {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("₹${String.format("%.2f", menuItem.rate)}",
+                        Text(
+                            "₹${String.format("%.2f", menuItem.rate)}",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.padding(horizontal = 22.dp))
-                        IconButton(
-                            onClick = onRemoveItem
+                        Spacer(modifier = Modifier.padding(horizontal = 28.dp))
+
+                        // ---- MINUS BUTTON ----
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, ErrorRed, RoundedCornerShape(4.dp))
+                                .clickable { onRemoveItem() },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Remove,
-                                contentDescription = "Remove",
-                                tint = ErrorRed
+                            Text(
+                                "-",
+                                color = ErrorRed,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-
-                        if (quantity > 0) {
+                        Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+                        // ---- QUANTITY ----
+//                        if (quantity > 0) {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .background(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                                         RoundedCornerShape(4.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+                                    ), contentAlignment = Alignment.Center
+                            )
+                            {
                                 Text(
                                     text = quantity.toString(),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                        } else {
-                            Spacer(modifier = Modifier.width(36.dp))
+//                        } else {
+//                            Spacer(modifier = Modifier.width(36.dp))
+//                        }
+                        Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+                        // ---- PLUS BUTTON ----
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, DarkGreen, RoundedCornerShape(4.dp))
+                                .clickable { onAddItem() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "+",
+                                color = DarkGreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
+                        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+                        // ---- MODIFIER BUTTON ----
 
-                        IconButton(
-                            onClick = onAddItem
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, BluePrimary, RoundedCornerShape(4.dp))
+                                .clickable { onModifierClick() },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Add",
-                                tint = DarkGreen
+                            Text(
+                                "A",
+                                color = DarkGreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                        IconButton(
-                            onClick = onModifierClick
-                        ) {
-                            Icon(
-                                Icons.Default.Tune,
-                                contentDescription = "Modifiers",
-                                tint = Color.Blue
-                            )
-                        }
+//                        IconButton(
+//                            onClick = onModifierClick
+//                        ) {
+//                            Icon(
+//                                Icons.Default.Tune,
+//                                contentDescription = "Modifiers",
+//                                tint = Color.Blue
+//                            )
+//                        }
                     }
                 } else {
                     Text(

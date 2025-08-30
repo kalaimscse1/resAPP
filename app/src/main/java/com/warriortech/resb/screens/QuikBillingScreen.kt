@@ -1,20 +1,24 @@
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material.Divider
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
@@ -32,6 +36,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +63,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.ui.theme.GoldPrimary
+import com.warriortech.resb.ui.theme.GoldSecondary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -86,8 +93,17 @@ fun ItemWiseBillScreen(
     val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
     val orderId by viewModel.orderId.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
+
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
+    }
+    LaunchedEffect(selectedItems.size) {
+        if (selectedItems.isNotEmpty()) {
+            scope.launch {
+                listState.animateScrollToItem(selectedItems.size - 1)
+            }
+        }
     }
     Scaffold(
         snackbarHost = { AnimatedSnackbarDemo(snackbarHostState) },
@@ -114,9 +130,7 @@ fun ItemWiseBillScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(YellowPrimary, YellowSecondary)
-                        ),
+                        Color(0xFFFF9800)
                     )
                     .padding(12.dp)
             ) {
@@ -129,13 +143,14 @@ fun ItemWiseBillScreen(
                         viewModel.cashPrintBill()
                         scope.launch {
                             delay(3000)
-                            snackbarHostState.showSnackbar("Bill Paid in Cash")
+                            snackbarHostState.showSnackbar("Payment Done Successfully")
                         }
                     }
                     ActionButton("Others", Color.Gray) {
                         viewModel.placeOrder(2, null)
                         scope.launch {
                             // Simulate a delay for order processing
+
                             delay(3000)
                             navController.navigate("billing_screen/${orderId ?: ""}") {
                                 launchSingleTop = true
@@ -189,11 +204,13 @@ fun ItemWiseBillScreen(
                 )
             }
 
-           // Cart Table
+
+            // Cart Table
             LazyColumn(
                 modifier = Modifier
                     .weight(0.5f)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                state = listState
             ) {
                 items(
                     selectedItems.entries.toList(),
@@ -202,48 +219,98 @@ fun ItemWiseBillScreen(
                     val item = entry.key
                     val qty = entry.value
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 3.dp, horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // ITEM NAME
-                        Text(
-                            item.menu_item_name,
-                            maxLines = 1,
-                            fontSize = 12.sp,
-                            modifier = Modifier.weight(3f)
-                        )
-                        // QTY with + / - buttons
-                        Row(modifier = Modifier.weight(2f),
-                            horizontalArrangement = Arrangement.Center,
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 2.dp, vertical = 2.dp), // 👈 compact
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(onClick = { viewModel.removeItemFromOrder(item) }) {
-                                Text("-")
+                            Text(
+                                item.menu_item_name,
+                                maxLines = 1,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(3f)
+                            )
+
+                            Row(
+                                modifier = Modifier.weight(2f),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Minus Button
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp) // 👈 fixed square size
+                                        .border(
+                                            1.dp,
+                                            Color.Red,
+                                            RoundedCornerShape(4.dp)
+                                        ) // 👈 border only
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(onTap = {
+                                                viewModel.removeItemFromOrder(
+                                                    item
+                                                )
+                                            })
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "-",
+                                        color = Color.Red,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                // Qty
+                                Text(
+                                    "$qty",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+
+                                // Plus Button
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .border(1.dp, Color.Green, RoundedCornerShape(4.dp))
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(onTap = {
+                                                viewModel.addItemToOrder(
+                                                    item
+                                                )
+                                            })
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "+",
+                                        color = SecondaryGreen,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
-                            Text("$qty",
-                                fontSize = 12.sp)
-                            IconButton(onClick = { viewModel.addItemToOrder(item) }) {
-                                Text("+")
-                            }
+
+
+
+                            Text(
+                                "${item.rate}",
+                                textAlign = TextAlign.End,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(2f)
+                            )
+                            Text(
+                                "${qty * item.rate}",
+                                textAlign = TextAlign.End,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(2f)
+                            )
                         }
-                        // RATE
-                        Text(
-                            "${item.rate}",
-                            textAlign = TextAlign.End,
-                            fontSize = 12.sp,
-                            modifier = Modifier.weight(2f)
-                        )
-                        // TOTAL
-                        Text(
-                            "${qty * item.rate}",
-                            textAlign = TextAlign.End,
-                            fontSize = 12.sp,
-                            modifier = Modifier.weight(2f)
-                        )
+                        Divider(color = Color.LightGray, thickness = 0.5.dp) // 👈 thin separator
                     }
                 }
             }
@@ -251,7 +318,7 @@ fun ItemWiseBillScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(YellowPrimary)
+                    .background(Color(0xFFFF9800))
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -261,19 +328,29 @@ fun ItemWiseBillScreen(
                         "Total Items: ${selectedItems.values.sum()}",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 18.sp
                     )
                     Text(
-                        "Total: ₹${selectedItems.entries.sumOf { it.key.rate * it.value }}",
+                        "Total: ${CurrencySettings.format(selectedItems.entries.sumOf { it.key.rate * it.value })}",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 18.sp
                     )
                 }
             }
 
             // Product Grid
             when (val state = menuState) {
+                is CounterViewModel.MenuUiState.Loading-> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
                 is CounterViewModel.MenuUiState.Success -> {
                     val menuItems = state.menuItems
                     val filteredMenuItems =
@@ -350,7 +427,7 @@ fun ItemWiseBillScreen(
                                         }
                                         Row {
                                             Text(
-                                                "₹${product.rate}",
+                                                CurrencySettings.format(product.rate),
                                                 maxLines = 1,
                                                 textAlign = TextAlign.Center
                                             )
@@ -362,6 +439,7 @@ fun ItemWiseBillScreen(
                     }
 
                 }
+
                 else -> {}
             }
         }

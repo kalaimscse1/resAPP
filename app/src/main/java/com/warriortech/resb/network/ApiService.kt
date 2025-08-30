@@ -706,16 +706,16 @@ interface ApiService {
 
     @POST("auth/addStaff")
     suspend fun createStaff(
-        @Body staff: TblStaff,
+        @Body staff: TblStaffRequest,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblStaff>
 
     @PUT("auth/updateStaff/{staff_id}")
     suspend fun updateStaff(
         @Path("staff_id") id: Long,
-        @Body staff: TblStaff,
+        @Body staff: TblStaffRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<TblStaff>
+    ): Response<Int>
 
     @DELETE("auth/deleteStaffById/{staff_id}")
     suspend fun deleteStaff(

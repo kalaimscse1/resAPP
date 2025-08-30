@@ -259,6 +259,7 @@ class CounterViewModel @Inject constructor(
                         menuItem = menuItem,
                     )
                 }
+            _menuState.value = MenuUiState.Loading
                 orderRepository.placeOrUpdateOrders(
                     tableId, orderItems,
                     tableStatus1.toString()
@@ -293,6 +294,7 @@ class CounterViewModel @Inject constructor(
                     menuItem = menuItem,
                 )
             }
+            _menuState.value = MenuUiState.Loading
             orderRepository.placeOrUpdateOrders(
                 2, orderItems,
                 ""
@@ -347,22 +349,14 @@ class CounterViewModel @Inject constructor(
                                         roundOff = response.round_off,
                                         total = response.grand_total,
                                     )
-//                            billRepository.updateTablAndOrderStatus(
-//                                orderMasterId = response.order_master.order_master_id,
-//                                tableId = response.order_master.table_id
-//                            )
-
                                     val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
 
                                     if (isReceipt) {
                                         printBill(billDetails,  amount, payment)
+                                        loadMenuItems()
                                     }
                                     else{
-                                        // Simulate network delay
-
-                                        // Example: If payment is successful
-//                                        Log.d("Payment", "Payment successful$paidOrder")
-
+                                        loadMenuItems()
                                     }
                                 },
                                 onFailure = { error->

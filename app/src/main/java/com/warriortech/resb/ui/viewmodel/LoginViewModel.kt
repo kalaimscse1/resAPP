@@ -48,6 +48,7 @@ class LoginViewModel @Inject constructor(
     /**
      * Handles changes to the company code input field.
      */
+
     init {
         // Pre-fill company code when ViewModel is created
         val savedCompanyCode = sessionManager.getCompanyCode() ?: ""
@@ -121,6 +122,7 @@ class LoginViewModel @Inject constructor(
                     if (response.success && response.data != null) {
                         val authResponse = response.data
                         val general = generalSetting.body()
+                        Log.d("LoginViewModel", "General Settings: ${authResponse.user}")
                         sessionManager.saveAuthToken(authResponse.token)
                         sessionManager.saveUser(authResponse.user)
                         sessionManager.saveCompanyCode(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))

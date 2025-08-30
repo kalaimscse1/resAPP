@@ -242,14 +242,7 @@ fun RegistrationScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true
                     )
-                    OutlinedTextField(
-                        value = uiState.mailId,
-                        onValueChange = { viewModel.updateMailId(it) },
-                        label = { Text("Email ID *") },
-                        isError = uiState.emailError != null,
-                        supportingText = { uiState.emailError?.let { Text(it, color = Color.Red) } },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+
                 }
             }
 

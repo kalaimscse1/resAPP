@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -62,6 +63,7 @@ import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.R
 import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.ghostWhite
@@ -70,7 +72,8 @@ import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.scrollToBottomSmooth
 
-@SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation",
+@SuppressLint(
+    "StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation",
     "ResourceAsColor"
 )
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +85,7 @@ fun MenuScreen(
     tableName: String,// Actual table ID for table orders, or a placeholder for others
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
-    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>,orderId: String) -> Unit,
+    onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>, orderId: String) -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
     drawerState: DrawerState,
     navController: NavHostController,
@@ -108,7 +111,7 @@ fun MenuScreen(
     val modifierGroups by viewModel.modifierGroups.collectAsStateWithLifecycle()
 
     var showConfirmDialog by remember { mutableStateOf(false) }
-
+    var showOrderDialog by remember { mutableStateOf(false) }
 
     // Determine the effective status string for pricing and display
     val effectiveStatus = remember(isTakeaway, tableStatusFromVM) {
@@ -131,7 +134,7 @@ fun MenuScreen(
         when (val currentOrderState = orderState) { // Use a stable val
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
-                    if (sessionManager.getGeneralSetting()?.is_kot!!){
+                    if (sessionManager.getGeneralSetting()?.is_kot!!) {
 
                         snackbarHostState.showSnackbar("Order placed successfully and KOT sent to kitchen")
                         onOrderPlaced()
@@ -141,13 +144,16 @@ fun MenuScreen(
                     }
                 }
             }
+
             is MenuViewModel.OrderUiState.Error -> {
                 scope.launch {
                     snackbarHostState.showSnackbar(currentOrderState.message)
                 }
             }
+
             else -> {
-                snackbarHostState.showSnackbar("Loading") }
+                snackbarHostState.showSnackbar("Loading")
+            }
         }
     }
 
@@ -166,15 +172,25 @@ fun MenuScreen(
             tableStatus = effectiveStatus.toString() // Use effectiveStatus
         )
     }
+    if (showOrderDialog) {
+        OrderDetailsDialog(
+            selectedItems = selectedItems,
+            totalAmount = viewModel.getOrderTotal(effectiveStatus.toString()), // Use effectiveStatus
+            onConfirm = { showOrderDialog = false },
+            tableStatus = effectiveStatus.toString() // Use effectiveStatus
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Column {
-                        Text(if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM!="DELIVERY")"Menu Selection-${tableName}" else "Menu Selection",
+                        Text(
+                            if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM != "DELIVERY") "Menu -${tableName}" else "Menu ",
                             style = MaterialTheme.typography.titleLarge,
-                            color = SurfaceLight)
+                            color = SurfaceLight
+                        )
                         if (viewModel.isExistingOrderLoaded.value) {
                             Text(
                                 text = "Editing Order #${viewModel.existingOrderId.value ?: ""}",
@@ -188,7 +204,8 @@ fun MenuScreen(
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }
                     }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu",
+                        Icon(
+                            Icons.Default.Menu, contentDescription = "Menu",
                             tint = SurfaceLight
                         )
                     }
@@ -200,7 +217,7 @@ fun MenuScreen(
                         Icon(
                             imageVector = Icons.Default.RemoveShoppingCart,
                             contentDescription = "Clear Cart",
-                            tint= SurfaceLight
+                            tint = SurfaceLight
                         )
                     }
                 },
@@ -225,8 +242,10 @@ fun MenuScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val newItemCount = if(viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
-                    val existingItemCount = if(viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
+                    val newItemCount =
+                        if (viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
+                    val existingItemCount =
+                        if (viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
                     val totalItemCount = newItemCount + existingItemCount
                     val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
                     // 🔹 Row 1: Order Summary
@@ -240,7 +259,8 @@ fun MenuScreen(
                                 Text(
                                     text = "Existing: $existingItemCount | New: $newItemCount",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.8f)
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    modifier = Modifier.clickable { showOrderDialog = true }
                                 )
                             }
                             Text(
@@ -277,27 +297,31 @@ fun MenuScreen(
                                     },
                                     text = "Bill",
                                     enabled = selectedItems.isNotEmpty(),
-                                    modifier = Modifier.weight(1f).height(48.dp)
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
                                 )
                             }
                             MobileOptimizedButton(
                                 onClick = { showConfirmDialog = true },
-                                enabled = (if(viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                                enabled = (if (viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
                                 text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
-                                modifier = Modifier.weight(1f) )
+                                modifier = Modifier.weight(1f)
+                            )
                         } else {
                             MobileOptimizedButton(
                                 onClick = { showConfirmDialog = true },
                                 text = "Place Order",
                                 enabled = (selectedItems.isNotEmpty()),
-                                modifier = Modifier.weight(1f).height(48.dp)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
                             )
                         }
                     }
                 }
             }
-        }
-        ,
+        },
         snackbarHost = {
             AnimatedSnackbarDemo(snackbarHostState)
         },
@@ -317,14 +341,14 @@ fun MenuScreen(
 
             is MenuViewModel.MenuUiState.Success -> {
                 val menuItems = currentMenuState.menuItems
-                val filteredMenuItems = if (selectedCategory != null && selectedCategory=="FAVOURITES") {
-                    menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
-                } else if (selectedCategory != null) {
-                    menuItems.filter { it.item_cat_name == selectedCategory }
-                }
-                else{
-                    menuItems
-                }
+                val filteredMenuItems =
+                    if (selectedCategory != null && selectedCategory == "FAVOURITES") {
+                        menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
+                    } else if (selectedCategory != null) {
+                        menuItems.filter { it.item_cat_name == selectedCategory }
+                    } else {
+                        menuItems
+                    }
 
                 if (menuItems.isEmpty()) {
                     Box(
@@ -353,7 +377,8 @@ fun MenuScreen(
                         // Categories TabRow
                         if (categories.isNotEmpty()) {
                             ScrollableTabRow(
-                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
+                                selectedTabIndex = categories.indexOf(selectedCategory)
+                                    .coerceAtLeast(0),
                                 backgroundColor = Color.White,
                                 contentColor = TextPrimary
                             ) {
@@ -378,11 +403,15 @@ fun MenuScreen(
                         ) {
                             item { Spacer(modifier = Modifier.height(5.dp)) }
 
-                            items(filteredMenuItems, key = { it.menu_item_id }) { menuItem -> // Add a key for better performance
+                            items(
+                                filteredMenuItems,
+                                key = { it.menu_item_id }) { menuItem -> // Add a key for better performance
                                 MenuItemCard(
                                     menuItem = menuItem,
-                                    quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem] ?: 0 else selectedItems[menuItem] ?: 0,
-                                    existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem] ?: 0 else 0,
+                                    quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem]
+                                        ?: 0 else selectedItems[menuItem] ?: 0,
+                                    existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem]
+                                        ?: 0 else 0,
                                     onAddItem = {
                                         viewModel.addItemToOrder(menuItem)
                                         scope.scrollToBottomSmooth(listState)
@@ -390,7 +419,7 @@ fun MenuScreen(
                                     onRemoveItem = {
                                         viewModel.removeItemFromOrder(menuItem)
                                         scope.scrollToBottomSmooth(listState)
-                                                   },
+                                    },
                                     tableStatus = effectiveStatus.toString(),
                                     isExistingOrder = viewModel.isExistingOrderLoaded.value,
                                     onModifierClick = {
@@ -476,14 +505,15 @@ fun MenuItemCard(
     val deviceInfo = getDeviceInfo()
     val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .border(2.dp, SecondaryGreen, RoundedCornerShape(cornerRadius)),
         shape = RoundedCornerShape(cornerRadius),
         colors = CardDefaults.cardColors(
             containerColor = ghostWhite
         ),
 
-    ) {
+        ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -515,15 +545,17 @@ fun MenuItemCard(
                     }
                 }
             }
-            Row(modifier = Modifier.fillMaxWidth(),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                if (menuItem.is_available=="YES") {
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (menuItem.is_available == "YES") {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (tableStatus == "AC") "₹${
+                            if (tableStatus == "AC") "₹${
                                 String.format(
                                     "%.2f",
                                     menuItem.ac_rate
@@ -537,65 +569,85 @@ fun MenuItemCard(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.padding(horizontal = 28.dp))
 
-                        if (isExistingOrder && existingQuantity > 0) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Previously ordered: $existingQuantity",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Spacer(modifier = Modifier.padding(horizontal = 22.dp))
-                        IconButton(
-                            onClick = onRemoveItem
+                        // ---- MINUS BUTTON ----
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, ErrorRed, RoundedCornerShape(4.dp))
+                                .clickable { onRemoveItem() },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Remove,
-                                contentDescription = "Remove",
-                                tint = ErrorRed
+                            Text(
+                                "-",
+                                color = ErrorRed,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-
-                        if (quantity > 0) {
+                        Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+                        // ---- QUANTITY ----
+//                        if (quantity > 0) {
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .background(
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                                         RoundedCornerShape(4.dp)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
+                                    ), contentAlignment = Alignment.Center
+                            )
+                            {
                                 Text(
                                     text = quantity.toString(),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                        } else {
-                            Spacer(modifier = Modifier.width(36.dp))
-                        }
-
-                        IconButton(
-                            onClick = onAddItem
+//                        } else {
+//                            Spacer(modifier = Modifier.width(36.dp))
+//                        }
+                        Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+                        // ---- PLUS BUTTON ----
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, DarkGreen, RoundedCornerShape(4.dp))
+                                .clickable { onAddItem() },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = "Add",
-                                tint = DarkGreen
+                            Text(
+                                "+",
+                                color = DarkGreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-                        IconButton(
-                            onClick = onModifierClick
+                        Spacer(modifier = Modifier.padding(horizontal = 16.dp))
+                        // ---- MODIFIER BUTTON ----
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, BluePrimary, RoundedCornerShape(4.dp))
+                                .clickable { onModifierClick() },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Tune,
-                                contentDescription = "Modifiers",
-                                tint = Color.Blue
+                            Text(
+                                "A",
+                                color = DarkGreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
+//                        IconButton(
+//                            onClick = onModifierClick
+//                        ) {
+//                            androidx.compose.material3.Icon(
+//                                Icons.Default.Tune,
+//                                contentDescription = "Modifiers",
+//                                tint = Color.Blue
+//                            )
+//                        }
                     }
                 } else {
                     Text(
@@ -620,12 +672,39 @@ fun MenuItemCard(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Existing: $existingQuantity × ${if (tableStatus=="AC")"₹${String.format("%.2f", menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", menuItem.parcel_rate)}" else "₹${String.format("%.2f", menuItem.rate)}"}",
+                                text = "Existing: $existingQuantity × ${
+                                    if (tableStatus == "AC") "₹${
+                                        String.format(
+                                            "%.2f",
+                                            menuItem.ac_rate
+                                        )
+                                    }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
+                                        String.format(
+                                            "%.2f",
+                                            menuItem.parcel_rate
+                                        )
+                                    }" else "₹${String.format("%.2f", menuItem.rate)}"
+                                }",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.secondary
                             )
                             Text(
-                                text = if (tableStatus=="AC")"₹${String.format("%.2f", existingQuantity * menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", existingQuantity * menuItem.parcel_rate)}" else "₹${String.format("%.2f", existingQuantity * menuItem.rate)}",
+                                text = if (tableStatus == "AC") "₹${
+                                    String.format(
+                                        "%.2f",
+                                        existingQuantity * menuItem.ac_rate
+                                    )
+                                }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
+                                    String.format(
+                                        "%.2f",
+                                        existingQuantity * menuItem.parcel_rate
+                                    )
+                                }" else "₹${
+                                    String.format(
+                                        "%.2f",
+                                        existingQuantity * menuItem.rate
+                                    )
+                                }",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.secondary
                             )
@@ -641,13 +720,35 @@ fun MenuItemCard(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "${if (isExistingOrder) "New: " else ""}$quantity × ${if (tableStatus=="AC")"₹${String.format("%.2f", menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", menuItem.parcel_rate)}" else "₹${String.format("%.2f", menuItem.rate)}"}",
+                                text = "${if (isExistingOrder) "New: " else ""}$quantity × ${
+                                    if (tableStatus == "AC") "₹${
+                                        String.format(
+                                            "%.2f",
+                                            menuItem.ac_rate
+                                        )
+                                    }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
+                                        String.format(
+                                            "%.2f",
+                                            menuItem.parcel_rate
+                                        )
+                                    }" else "₹${String.format("%.2f", menuItem.rate)}"
+                                }",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = if (isExistingOrder) FontWeight.Bold else FontWeight.Normal
                             )
 
                             Text(
-                                text = if (tableStatus=="AC")"₹${String.format("%.2f", quantity * menuItem.ac_rate)}" else if(tableStatus=="TAKEAWAY"||tableStatus=="DELIVERY") "₹${String.format("%.2f", quantity * menuItem.parcel_rate)}" else "₹${String.format("%.2f", quantity * menuItem.rate)}",
+                                text = if (tableStatus == "AC") "₹${
+                                    String.format(
+                                        "%.2f",
+                                        quantity * menuItem.ac_rate
+                                    )
+                                }" else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") "₹${
+                                    String.format(
+                                        "%.2f",
+                                        quantity * menuItem.parcel_rate
+                                    )
+                                }" else "₹${String.format("%.2f", quantity * menuItem.rate)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -688,7 +789,10 @@ fun OrderConfirmationDialog(
         },
         text = {
             Column {
-                Text("Review your order before placing it:", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "Review your order before placing it:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Spacer(modifier = Modifier.height(12.dp))
 
                 selectedItems.forEach { (item, qty) ->
@@ -698,7 +802,10 @@ fun OrderConfirmationDialog(
                             .padding(vertical = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("${item.menu_item_name} × $qty", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "${item.menu_item_name} × $qty",
+                            style = MaterialTheme.typography.bodySmall
+                        )
 
                         val rate = when (tableStatus.uppercase()) {
                             "AC" -> item.ac_rate
@@ -716,8 +823,16 @@ fun OrderConfirmationDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Total", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("₹%.2f".format(totalAmount), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Total",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "₹%.2f".format(totalAmount),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -726,6 +841,79 @@ fun OrderConfirmationDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary
                 )
+            }
+        }
+    )
+}
+
+
+@Composable
+fun OrderDetailsDialog(
+    selectedItems: Map<TblMenuItemResponse, Int>,
+    totalAmount: Double,
+    onConfirm: () -> Unit,
+    tableStatus: String
+) {
+    AlertDialog(
+        onDismissRequest = onConfirm,
+        confirmButton = {
+            MobileOptimizedButton(
+                onClick = onConfirm,
+                text = "OK",
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        title = {
+            Text("Order Details", style = MaterialTheme.typography.titleLarge)
+        },
+        text = {
+            Column {
+                Text(
+                    "Review your existing order :",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                selectedItems.forEach { (item, qty) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "${item.menu_item_name} × $qty",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
+                        val rate = when (tableStatus.uppercase()) {
+                            "AC" -> item.ac_rate
+                            "TAKEAWAY", "DELIVERY" -> item.parcel_rate
+                            else -> item.rate
+                        }
+
+                        Text("₹%.2f".format(rate * qty), style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+
+                ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Total",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "₹%.2f".format(totalAmount),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
             }
         }
     )

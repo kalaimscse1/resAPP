@@ -208,10 +208,11 @@ fun MenuItemDialog(
 ) {
     var name by remember { mutableStateOf(menuItem?.menu_item_name ?: "") }
     var nameTamil by remember { mutableStateOf(menuItem?.menu_item_name_tamil ?: "") }
-//    var description by remember { mutableStateOf(menuItem?.description ?: "") }
     var rate by remember { mutableStateOf(menuItem?.rate?.toString() ?: "") }
     var acRate by remember { mutableStateOf(menuItem?.ac_rate?.toString() ?: "") }
     var parcelRate by remember { mutableStateOf(menuItem?.parcel_rate?.toString() ?: "") }
+    var parcelCharge by remember { mutableStateOf(menuItem?.parcel_charge?.toString() ?: "") }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,

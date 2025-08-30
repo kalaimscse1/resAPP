@@ -3,6 +3,8 @@ package com.warriortech.resb.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -21,7 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,18 +43,22 @@ fun SettingsScreen(
                 title = { 
                     Text(
                         if (selectedModule != null) selectedModule!!.title 
-                        else "Settings"
+                        else "Settings",
+                        color = SurfaceLight
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         scope.launch { drawerState.open() }
                     }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(
+                            Icons.Default.Menu, contentDescription = "Menu",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         }

@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +30,7 @@ import com.warriortech.resb.ui.components.WeeklySalesBarChart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
+import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
@@ -389,21 +389,24 @@ fun QuickActionsSection(
             title = { Text("Select Order Type") },
             text = { Text("Please choose order type:") },
             confirmButton = {
-                TextButton(onClick = {
-                    showOrderTypeDialog = false
-                    onTakeawaySelected()
-                }) {
-                    Text("Takeaway")
-                }
+                MobileOptimizedButton(
+                    onClick = {
+                        showOrderTypeDialog = false
+                        onTakeawaySelected()
+                    },
+                    text = "Takeaway",
+                    modifier = Modifier.fillMaxWidth()
+                )
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showOrderTypeDialog = false
-                    onDineInSelected()
-                }) {
-                    Text("Dine-In")
-                }
-
+                MobileOptimizedButton(
+                    onClick = {
+                        showOrderTypeDialog = false
+                        onDineInSelected()
+                    },
+                    text = "Dine-In",
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         )
     }

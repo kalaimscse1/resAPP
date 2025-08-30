@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -106,7 +107,7 @@ fun SelectionScreen(
     )
     val currentArea = displayableAreas.getOrNull(pagerState.currentPage)
     val role = sessionManager.getUser()?.role ?: ""
-    val areaId = currentArea?.area_name ?: ""
+    val areaId = sessionManager.getUser()?.area_name ?: ""
     var selectedArea by remember { mutableStateOf<String?>(areaId) }
     LaunchedEffect(Unit) {
         viewModel.loadTables()
@@ -124,7 +125,7 @@ fun SelectionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Selection",
+                        "Table",
                         style = MaterialTheme.typography.titleLarge,
                         color = SurfaceLight
                     )
@@ -255,26 +256,34 @@ fun SelectionScreen(
                 }
             } else {
                 if (areas.isNotEmpty()) {
-                    val displayablAreas = areas.filter { it.area_name == areaId }
-                    val calculatedIndex =
-                        displayablAreas.indexOfFirst { it.area_name == selectedArea }
-                    ScrollableTabRow(
-                        selectedTabIndex = calculatedIndex.coerceAtLeast(0),
-                        backgroundColor = MaterialTheme.colorScheme.surface,
-                        contentColor = TextPrimary,
-                        edgePadding = 0.dp
-                    ) {
-                        displayablAreas.forEachIndexed { index, areaItem ->
-                            Tab(
-                                selected = areaItem.area_name == selectedArea,
-                                onClick = {
-                                    selectedArea = areaItem.area_name
-                                    viewModel.setSection(areaItem.area_id)
-                                },
-                                text = { Text(areaItem.area_name) }
-                            )
-                        }
-                    }
+//                    val displayablAreas = areas.filter { it.area_name == areaId }
+//                    val calculatedIndex =
+//                        displayablAreas.indexOfFirst { it.area_name == areaId }
+                    Tab(
+                        selected =  true,
+                        onClick = {
+                            selectedArea = sessionManager.getUser()?.area_name
+                            viewModel.setSection(sessionManager.getUser()?.area_id)
+                        },
+                        text = { Text(areaId) }
+                    )
+//                    ScrollableTabRow(
+//                        selectedTabIndex = calculatedIndex.coerceAtLeast(0),
+//                        backgroundColor = MaterialTheme.colorScheme.surface,
+//                        contentColor = TextPrimary,
+//                        edgePadding = 0.dp
+//                    ) {
+//                        displayablAreas.forEachIndexed { index, areaItem ->
+//                            Tab(
+//                                selected = areaItem.area_name == selectedArea,
+//                                onClick = {
+//                                    selectedArea = areaItem.area_name
+//                                    viewModel.setSection(areaItem.area_id)
+//                                },
+//                                text = { Text(areaItem.area_name) }
+//                            )
+//                        }
+//                    }
                 }
 
 
