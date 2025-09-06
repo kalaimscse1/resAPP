@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +21,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.warriortech.resb.R
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.LocaleHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,12 +41,18 @@ fun LanguageSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.language_settings)) },
+                title = { Text(stringResource(R.string.language_settings),
+                    color = SurfaceLight
+                ) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = PrimaryGreen
+                ),
             )
         }
     ) { paddingValues ->

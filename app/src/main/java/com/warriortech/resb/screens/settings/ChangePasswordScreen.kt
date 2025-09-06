@@ -24,6 +24,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.ChangePasswordViewModel
 import kotlinx.coroutines.launch
 
@@ -64,14 +66,17 @@ fun ChangePasswordScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Change Password") },
+                title = { Text("Change Password",
+                    color = SurfaceLight
+                ) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },

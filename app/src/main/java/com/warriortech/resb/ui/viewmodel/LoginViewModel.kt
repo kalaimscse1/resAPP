@@ -48,6 +48,7 @@ class LoginViewModel @Inject constructor(
     /**
      * Handles changes to the company code input field.
      */
+
     init {
         // Pre-fill company code when ViewModel is created
         val savedCompanyCode = sessionManager.getCompanyCode() ?: ""
@@ -58,7 +59,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onCompanyCodeChange(companyCode: String) {
-        _uiState.update {it.copy(companyCode = companyCode, loginError = null)}
+        _uiState.update {it.copy(companyCode = companyCode.uppercase(), loginError = null)}
     }
 
     /**
@@ -121,10 +122,12 @@ class LoginViewModel @Inject constructor(
                     if (response.success && response.data != null) {
                         val authResponse = response.data
                         val general = generalSetting.body()
+                        Log.d("LoginViewModel", "General Settings: ${authResponse.user}")
                         sessionManager.saveAuthToken(authResponse.token)
                         sessionManager.saveUser(authResponse.user)
                         sessionManager.saveCompanyCode(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
                         sessionManager.saveGeneralSetting(general?.get(0) ?: error("general setting failed"))
+                        sessionManager.saveDecimalPlaces(profile.decimal_point)
                         sessionManager.saveRestaurantProfile(profile)
 
                         _uiState.update{it.copy(isLoading = false, loginSuccess = true)}

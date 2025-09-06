@@ -1,80 +1,49 @@
 package com.warriortech.resb.data.local.entity
 
-//import androidx.room.Entity
-//import androidx.room.ForeignKey
-//import androidx.room.Index
-//import androidx.room.PrimaryKey
-//import com.warriortech.resb.model.OrderItem
-//
-//@Entity(
-//    tableName = "order_items",
-//    foreignKeys = [
-//        ForeignKey(
-//            entity = OrderEntity::class,
-//            parentColumns = ["id"],
-//            childColumns = ["orderId"],
-//            onDelete = ForeignKey.CASCADE
-//        ),
-//        ForeignKey(
-//            entity = MenuItemEntity::class,
-//            parentColumns = ["id"],
-//            childColumns = ["menuItemId"],
-//            onDelete = ForeignKey.NO_ACTION
-//        )
-//    ],
-//    indices = [
-//        Index("orderId"),
-//        Index("menuItemId")
-//    ]
-//)
-//data class OrderItemEntity(
-//    @PrimaryKey(autoGenerate = true)
-//    val id: Long = 0,
-//    val orderId: Long,
-//    val menuItemId: Long,
-//    val quantity: Int,
-//    val price: Double,
-//    val syncStatus: SyncStatus = SyncStatus.PENDING_SYNC,
-//    val tempOrderId: String? = null // For referencing local orders
-//) {
-//    companion object {
-//        fun fromModel(orderItem: OrderItem, syncStatus: SyncStatus = SyncStatus.SYNCED): OrderItemEntity {
-//            return OrderItemEntity(
-//                id = orderItem.id,
-//                orderId = orderItem.orderId,
-//                menuItemId = orderItem.menuItemId,
-//                quantity = orderItem.quantity,
-//                price = orderItem.price,
-//                syncStatus = syncStatus
-//            )
-//        }
-//
-//        fun createLocalOrderItem(
-//            orderId: Long,
-//            menuItemId: Long,
-//            quantity: Int,
-//            price: Double,
-//            tempOrderId: String? = null
-//        ): OrderItemEntity {
-//            return OrderItemEntity(
-//                orderId = orderId,
-//                menuItemId = menuItemId,
-//                quantity = quantity,
-//                price = price,
-//                syncStatus = SyncStatus.PENDING_SYNC,
-//                tempOrderId = tempOrderId
-//            )
-//        }
-//    }
-//
-//    fun toModel(): OrderItem {
-//        return OrderItem(
-//            id = this.id,
-//            orderId = this.orderId,
-//            menuItemId = this.menuItemId,
-//            quantity = this.quantity,
-//            price = this.price,
-//            menuItemName = menuItem.name
-//        )
-//    }
-//}
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "tbl_order_details",
+    foreignKeys = [
+        ForeignKey(entity = TblOrderMaster::class, parentColumns = ["order_master_id"], childColumns = ["order_master_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblStaff::class, parentColumns = ["staff_id"], childColumns = ["staff_id"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [
+        Index(value = ["order_master_id"]),
+        Index(value = ["staff_id"]),
+    ]
+)
+data class TblOrderDetails(
+    @PrimaryKey(autoGenerate = true) val order_details_id: Int = 0,
+    val order_master_id: String?,
+    val kot_number: Int?,
+    val menu_item_id: Int?,
+    val rate: Double?,
+    val actual_rate: Double?,
+    val qty: Int?,
+    val total: Double?,
+    val tax_id: Int?,
+    val tax_amount: Double?,
+    val sgst_per: Double?,
+    val sgst: Double?,
+    val cgst_per: Double?,
+    val cgst: Double?,
+    val igst_per: Double?,
+    val igst: Double?,
+    val cess_per: Double?,
+    val cess: Double?,
+    val cess_specific: Double?,
+    val grand_total: Double?,
+    val prepare_status: Boolean?,
+    val item_add_mode: Boolean?,
+    val is_flag: Boolean?,
+    val merge_order_nos: String?,
+    val merge_order_tables: String?,
+    val merge_pax: Int?,
+    val is_active: Boolean?,
+    val is_synced: Boolean = false,
+    val last_synced_at: Long? = null
+)

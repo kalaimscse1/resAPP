@@ -19,6 +19,8 @@ import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.GeneralSettingsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.GeneralSettings
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,15 +42,17 @@ fun GeneralSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.general_settings)) },
+                title = { Text(stringResource(R.string.general_settings),
+                    color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
-                )
+                    containerColor = PrimaryGreen
+                ),
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

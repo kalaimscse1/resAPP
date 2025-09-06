@@ -64,35 +64,42 @@ class BillRepository@Inject constructor(
                 delivery_amt = 0.0,
                 grand_total = orderMaster.sumOf { it.grand_total },
                 round_off = 0.0,
-                rounded_amt = receivedAmt,
+                rounded_amt = orderMaster.sumOf { it.grand_total },
                 cash = if (paymentMethod.name == "CASH") orderMaster.sumOf { it.grand_total } else 0.0,
                 card = if (paymentMethod.name == "CARD") orderMaster.sumOf { it.grand_total } else 0.0,
                 upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total } else 0.0,
                 due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
                 others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total } else 0.0,
-                received_amt =  receivedAmt,
+                received_amt =  if (paymentMethod.name == "DUE") receivedAmt else orderMaster.sumOf { it.grand_total },
                 pending_amt = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
 //                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
                 change = 0.0,
                 note = "",
                 is_active = 1L
             )
-            val response = apiService.addPayment(request,sessionManager.getCompanyCode()?:"")
-            if (response.isSuccessful) {
-                val res = response.body()!!
-                apiService.updateTableAvailability(res.order_master.table_id, "AVAILABLE", sessionManager.getCompanyCode()?:"")
-                apiService.updateOrderStatus(orderMasterId, "COMPLETED", sessionManager.getCompanyCode()?:"")
-                emit(Result.success(res))
-//                val billResponse =
-//                Log.d("BILLTAG", "placeBill: $billResponse")
-//                if (billResponse!=null) {
-//                    emit(Result.success(billResponse))
-//                } else {
-//                    emit(Result.failure(Exception("Failed to create bill: Response body is null.")))
-//                    return@flow
-//                }
-            } else {
-                emit(Result.failure(Exception("Error: ${response.message()}")))
+            val check = apiService.checkBillExists(orderMasterId, sessionManager.getCompanyCode()?:"")
+            val checkExist= check.body()?.data == true
+            if(checkExist) {
+                val response = apiService.addPayment(request, sessionManager.getCompanyCode() ?: "")
+                if (response.isSuccessful) {
+                    val res = response.body()!!
+                    apiService.updateTableAvailability(
+                        res.order_master.table_id,
+                        "AVAILABLE",
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                    apiService.updateOrderStatus(
+                        orderMasterId,
+                        "COMPLETED",
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                    emit(Result.success(res))
+                } else {
+                    emit(Result.failure(Exception("Error: ${response.message()}")))
+                }
+            }
+        else{
+                emit(Result.failure(Exception(check.body()?.message?:"Something went wrong")))
             }
     }
 

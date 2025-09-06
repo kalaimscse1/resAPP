@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -83,10 +84,12 @@ import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.TextSecondary
 import com.warriortech.resb.ui.theme.ghostWhite
+import com.warriortech.resb.util.CurrencySettings
+import kotlinx.coroutines.delay
 
 
 //
-@OptIn( ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionScreen(
     onTableSelected: (Table) -> Unit,
@@ -102,14 +105,18 @@ fun SelectionScreen(
     val displayableAreas = areas.filter { it.area_name != "--" }
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { displayableAreas.size}
+        pageCount = { displayableAreas.size }
     )
     val currentArea = displayableAreas.getOrNull(pagerState.currentPage)
     val role = sessionManager.getUser()?.role ?: ""
-    val areaId = currentArea?.area_name ?: ""
+    val areaId = sessionManager.getUser()?.area_name ?: ""
     var selectedArea by remember { mutableStateOf<String?>(areaId) }
+
     LaunchedEffect(Unit) {
-        viewModel.loadTables()
+        while (true) {
+            viewModel.loadTables()
+            delay( 5*1000) // 1 minutes
+        }
     }
 
     // Update selected area and section whenever the page changes
@@ -122,9 +129,13 @@ fun SelectionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Selection",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = SurfaceLight) },
+                title = {
+                    Text(
+                        "Table",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                         androidx.compose.material.Icon(
@@ -227,7 +238,8 @@ fun SelectionScreen(
                                                     )
                                                     onTableSelected(tbl)
                                                 },
-                                                sessionManager)
+                                                sessionManager
+                                            )
                                         }
                                     }
                                 }
@@ -248,27 +260,36 @@ fun SelectionScreen(
                         }
                     }
                 }
-            }else{
+            } else {
                 if (areas.isNotEmpty()) {
-                    val displayablAreas = areas.filter { it.area_name == areaId }
-                    val calculatedIndex = displayablAreas.indexOfFirst { it.area_name == selectedArea }
-                    ScrollableTabRow(
-                        selectedTabIndex = calculatedIndex.coerceAtLeast(0),
-                        backgroundColor = MaterialTheme.colorScheme.surface,
-                        contentColor = TextPrimary,
-                        edgePadding = 0.dp
-                    ) {
-                        displayablAreas.forEachIndexed { index, areaItem ->
-                            Tab(
-                                selected = areaItem.area_name == selectedArea,
-                                onClick = {
-                                    selectedArea = areaItem.area_name
-                                    viewModel.setSection(areaItem.area_id)
-                                },
-                                text = { Text(areaItem.area_name) }
-                            )
-                        }
-                    }
+//                    val displayablAreas = areas.filter { it.area_name == areaId }
+//                    val calculatedIndex =
+//                        displayablAreas.indexOfFirst { it.area_name == areaId }
+                    Tab(
+                        selected =  true,
+                        onClick = {
+                            selectedArea = sessionManager.getUser()?.area_name
+                            viewModel.setSection(sessionManager.getUser()?.area_id)
+                        },
+                        text = { Text(areaId) }
+                    )
+//                    ScrollableTabRow(
+//                        selectedTabIndex = calculatedIndex.coerceAtLeast(0),
+//                        backgroundColor = MaterialTheme.colorScheme.surface,
+//                        contentColor = TextPrimary,
+//                        edgePadding = 0.dp
+//                    ) {
+//                        displayablAreas.forEachIndexed { index, areaItem ->
+//                            Tab(
+//                                selected = areaItem.area_name == selectedArea,
+//                                onClick = {
+//                                    selectedArea = areaItem.area_name
+//                                    viewModel.setSection(areaItem.area_id)
+//                                },
+//                                text = { Text(areaItem.area_name) }
+//                            )
+//                        }
+//                    }
                 }
 
 
@@ -312,21 +333,23 @@ fun SelectionScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 items(filteredTables) { table ->
-                                    TableItem(table = table, onClick = {
-                                        val tbl = Table(
-                                            table_id = table.table_id,
-                                            area_id = table.area_id,
-                                            area_name = table.area_name,
-                                            table_name = table.table_name,
-                                            seating_capacity = table.seating_capacity.toInt(),
-                                            is_ac = table.is_ac,
-                                            table_status = table.table_status,
-                                            table_availability = table.table_availability,
-                                            is_active = table.is_active
-                                        )
-                                        onTableSelected(tbl)
-                                    },
-                                        sessionManager)
+                                    TableItem(
+                                        table = table, onClick = {
+                                            val tbl = Table(
+                                                table_id = table.table_id,
+                                                area_id = table.area_id,
+                                                area_name = table.area_name,
+                                                table_name = table.table_name,
+                                                seating_capacity = table.seating_capacity.toInt(),
+                                                is_ac = table.is_ac,
+                                                table_status = table.table_status,
+                                                table_availability = table.table_availability,
+                                                is_active = table.is_active
+                                            )
+                                            onTableSelected(tbl)
+                                        },
+                                        sessionManager
+                                    )
                                 }
                             }
                         }
@@ -352,7 +375,7 @@ fun SelectionScreen(
 }
 
 @Composable
-fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: SessionManager) {
+fun TableItem(table: TableStatusResponse, onClick: () -> Unit, sessionManager: SessionManager) {
     val color = when (table.table_availability) {
         "AVAILABLE" -> TextSecondary
         "OCCUPIED" -> SuccessGreen
@@ -392,7 +415,7 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: Se
                     )
                 }
         )
-       {
+        {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -411,12 +434,12 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: Se
                     style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                if (table.grandTotal>0) {
+                if (table.grandTotal > 0) {
                     Text(
-                        text = sessionManager.getRestaurantProfile()?.currency + " " + table.grandTotal,
+                        text = CurrencySettings.format(table.grandTotal),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color=ErrorRed
+                        color = ErrorRed
                     )
                 } else {
                     Text(
@@ -424,7 +447,7 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit,sessionManager: Se
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color=DarkGreen
+                        color = DarkGreen
                     )
                 }
             }

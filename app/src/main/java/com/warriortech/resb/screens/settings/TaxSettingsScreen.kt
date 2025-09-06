@@ -23,6 +23,8 @@ import com.warriortech.resb.R
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.TaxSettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -43,18 +45,21 @@ fun TaxSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.tax_settings)) },
+                title = { Text(stringResource(R.string.tax_settings),
+                    color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Tax")
+                        Icon(Icons.Default.Add, contentDescription = "Add Tax",
+                            tint = SurfaceLight)
                     }
                 }
             )
@@ -86,6 +91,10 @@ fun TaxSettingsScreen(
                         }
                     } else{
                         LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(state.taxes) { tax ->

@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Payment
@@ -97,6 +98,7 @@ import javax.inject.Inject
 import androidx.core.content.edit
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.warriortech.resb.model.KotResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.RetrofitClient.apiService
@@ -111,6 +113,7 @@ import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.RegistrationScreen
 import com.warriortech.resb.screens.AIAssistantScreen
 import com.warriortech.resb.screens.BillTemplateScreen
+import com.warriortech.resb.screens.CategoryWiseReportScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
 import com.warriortech.resb.screens.settings.CounterSettingsScreen
@@ -136,51 +139,17 @@ import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
 import com.warriortech.resb.screens.ItemWiseBillScreen
+import com.warriortech.resb.screens.ItemWiseReportScreen
+import com.warriortech.resb.screens.KotModifyScreen
+import com.warriortech.resb.screens.KotReportScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.SubscriptionManager
+import com.warriortech.resb.screens.settings.ChangeCompanyScreen
 
-
-/**
- * MainActivity is the entry point of the RESB application.
- * It sets up the main UI and handles navigation between different screens.
- * It also initializes the network monitor and sync manager to manage network state and data synchronization.
- * * The activity uses Jetpack Compose for UI rendering and Hilt for dependency injection.
- * * @property networkMonitor Monitors the network state to determine if the device is online or offline.
- * * @property syncManager Manages data synchronization tasks when the device is online.
- * * @constructor Creates an instance of MainActivity.
- * * * This activity handles the main navigation of the app, including login, dashboard, menu, orders, settings, and more.
- * * It also manages the responsive design for different screen sizes and orientations.
- * * * The activity uses a drawer for navigation on larger screens and a modal drawer on smaller screens.
- * * It also handles language changes and configuration changes gracefully.
- * * @see [ResbTheme] for theming
- * * @see [NetworkMonitor] for network state monitoring
- * * @see [SyncManager] for data synchronization
- * * @see [LocaleHelper] for handling locale changes
- * * @see [AppNavigation] for setting up the navigation graph
- * * @see [DrawerContent] for the navigation drawer UI
- * * @see [NetworkStatusBar] for displaying network status
- * * @see [SessionManager] for managing user sessions
- * * @see [Table] for representing tables in the restaurant
- * * @see [TblOrderDetailsResponse] for order details response model
- * * * This activity is annotated with @AndroidEntryPoint to enable Hilt dependency injection.
- * * @AndroidEntryPoint annotation is used to enable Hilt dependency injection in this activity.
- * * @see [Hilt Android documentation](https://developer.android.com/training/dependency-injection/hilt-android)
- * * @see [Hilt Navigation Compose documentation](https://developer.android.com/training/dependency-injection/hilt-android#navigation-compose)
- * * @see [Jetpack Compose documentation](https://developer.android.com/jetpack/compose)
- * * @see [Navigation Compose documentation](https://developer.android.com/jetpack/compose/navigation)
- * * @see [Material Design Components](https://material.io/develop/android/components/)
- * * @see [AndroidX Compose documentation](https://developer.android.com/jetpack/compose/documentation)
- * * @see [AndroidX Navigation documentation](https://developer.android.com/jetpack/androidx/releases/navigation)
- * * @see [AndroidX Hilt documentation](https://developer.android.com/jetpack/androidx/releases/hilt)
- * * @see [AndroidX Lifecycle documentation](https://developer.android.com/jetpack/androidx/releases/lifecycle)
- * * @see [AndroidX Core documentation](https://developer.android.com/jetpack/androidx/releases/core)
- * * @see [AndroidX Compose Material documentation](https://developer.android.com/jetpack/androidx/releases/compose-material)
- * * @see [AndroidX Compose Material3 documentation](https://developer.android.com/jetpack/androidx/releases/compose-material3)
- */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -203,7 +172,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-         val sessionManager = SessionManager(this)
+        val sessionManager = SessionManager(this)
         // Initialize sync when app starts
         lifecycleScope.launch {
             networkMonitor.isOnline.collect { connectionState ->
@@ -233,12 +202,18 @@ class MainActivity : ComponentActivity() {
                 val drawerWidth = when {
                     isTablet -> if (isCollapsed.value) 80.dp else 320.dp
                     isLargeScreen -> if (isCollapsed.value) 72.dp else 280.dp
-                    isLandscape -> if (isCollapsed.value) 72.dp else (screenWidth * 0.6f).dp.coerceAtMost(300.dp)
-                    else -> if (isCollapsed.value) 72.dp else (screenWidth * 0.8f).dp.coerceAtMost(300.dp)
+                    isLandscape -> if (isCollapsed.value) 72.dp else (screenWidth * 0.6f).dp.coerceAtMost(
+                        300.dp
+                    )
+
+                    else -> if (isCollapsed.value) 72.dp else (screenWidth * 0.8f).dp.coerceAtMost(
+                        300.dp
+                    )
                 }
                 val animatedDrawerWidth by animateDpAsState(targetValue = drawerWidth)
 
-                val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+                val currentRoute =
+                    navController.currentBackStackEntryAsState().value?.destination?.route
                 val showDrawer = currentRoute != "login"
                 // Drawer content composable
                 val drawerContent = @Composable {
@@ -250,18 +225,25 @@ class MainActivity : ComponentActivity() {
                             scope.launch { drawerState.close() }
                             if (route == "logout") {
                                 scope.launch {
-                                    val sharedPref = context.getSharedPreferences("user_prefs",
+                                    val sharedPref = context.getSharedPreferences(
+                                        "user_prefs",
                                         MODE_PRIVATE
                                     )
                                     sharedPref.edit { clear() }
-                                    Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Logged out successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 }
                             } else {
                                 navController.navigate(route) {
-                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = true
+                                    }
                                     launchSingleTop = true
                                 }
                             }
@@ -283,8 +265,11 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Column {
                                     NetworkStatusBar(connectionState = connectionState)
-                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        AppNavigation(drawerState, navController,sessionManager)
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AppNavigation(drawerState, navController, sessionManager)
                                     }
                                 }
                             }
@@ -304,8 +289,11 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Column {
                                     NetworkStatusBar(connectionState = connectionState)
-                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        AppNavigation(drawerState, navController,sessionManager)
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AppNavigation(drawerState, navController, sessionManager)
                                     }
                                 }
                             }
@@ -321,8 +309,11 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Column {
                             NetworkStatusBar(connectionState = connectionState)
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                AppNavigation(drawerState, navController,sessionManager)
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AppNavigation(drawerState, navController, sessionManager)
                             }
                         }
                     }
@@ -342,13 +333,18 @@ class MainActivity : ComponentActivity() {
  */
 
 @Composable
-fun AppNavigation(drawerState: DrawerState, navController: NavHostController,sessionManager: SessionManager) {
+fun AppNavigation(
+    drawerState: DrawerState,
+    navController: NavHostController,
+    sessionManager: SessionManager
+) {
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
-    
+    var kotRes by remember { mutableStateOf<KotResponse?>(null) }
+
     // Check subscription status
     LaunchedEffect(Unit) {
         val subscriptionManager = SubscriptionManager(sessionManager)
@@ -373,7 +369,8 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                 },
                 onRegisterClick = {
                     navController.navigate("registration")
-                }
+                },
+                sessionManager = sessionManager
             )
         }
 
@@ -392,6 +389,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         composable("menu") {
             val tableId = selectedTable?.table_id ?: 1L
             val tableStatId = selectedTable != null || isTakeaway == "TABLE"
+            val tableNumber = selectedTable?.table_name ?: ""
 
             MenuScreen(
                 isTakeaway = isTakeaway,
@@ -400,12 +398,14 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                 onBackPressed = { navController.popBackStack() },
                 onOrderPlaced = { navController.popBackStack() },
                 drawerState = drawerState,
-                onBillPlaced = { items,orderId->
-                    selectedItems=items
+                onBillPlaced = { items, orderId ->
+                    selectedItems = items
                     selectedOrderId = orderId
-                    navController.navigate("billing_screen/${orderId}") },
+                    navController.navigate("billing_screen/${orderId}")
+                },
                 navController = navController,
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                tableName = tableNumber
             )
         }
 
@@ -415,15 +415,19 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                 tableStatId = false,
                 tableId = 1L,
                 onBackPressed = { navController.popBackStack() },
-                onOrderPlaced = { navController.popBackStack()
-                                selectedTable=null},
+                onOrderPlaced = {
+                    navController.popBackStack()
+                    selectedTable = null
+                },
                 drawerState = drawerState,
-                onBillPlaced = { items,orderId->
-                    selectedItems=items
+                onBillPlaced = { items, orderId ->
+                    selectedItems = items
                     selectedOrderId = orderId
-                    navController.navigate("billing_screen/${orderId}") },
+                    navController.navigate("billing_screen/${orderId}")
+                },
                 navController = navController,
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                tableName = "Takeaway"
             )
         }
         composable("billing_screen/{orderMasterId}") { backStackEntry ->
@@ -435,14 +439,20 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         }
 
         composable("payment_screen/{amountToPayFromRoute}/{orderId}") { it ->
-            PaymentScreen(navController = navController,
-                amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")?.toDoubleOrNull() ?: 0.0,
-                orderMasterId = it.arguments?.getString("orderId") ?: ""
+            PaymentScreen(
+                navController = navController,
+                amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")
+                    ?.toDoubleOrNull() ?: 0.0,
+                orderMasterId = it.arguments?.getString("orderId") ?: "",
+                sessionManager = sessionManager
             )
         }
 
         composable("report_screen") {
-            ReportScreen(navController = navController)
+            ReportScreen(
+                sessionManager = sessionManager,
+                drawerState = drawerState
+            )
         }
 
         composable("kitchen") {
@@ -469,7 +479,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             SettingsScreen(
                 onBackPressed = { navController.popBackStack() },
                 drawerState = drawerState,
-                navController= navController,
+                navController = navController,
                 sessionManager = sessionManager
             )
         }
@@ -486,7 +496,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             })
         }
 
-        composable("menu_setting"){
+        composable("menu_setting") {
             MenuSettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
@@ -502,7 +512,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             )
         }
 
-        composable ("menu_Category_setting") {
+        composable("menu_Category_setting") {
             MenuCategorySettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
@@ -517,7 +527,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         }
 
         composable("customer_setting") {
-           CustomerSettingsScreen(
+            CustomerSettingsScreen(
                 onBackPressed = { navController.popBackStack() }
             )
         }
@@ -537,10 +547,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             val counterId = backStackEntry.arguments?.getString("counterId")?.toLongOrNull() ?: 1L
             CounterScreen(
                 onBackPressed = { navController.popBackStack() },
-                onProceedToBilling = { items,orderId->
-                    selectedItems=items
+                onProceedToBilling = { items, orderId ->
+                    selectedItems = items
                     selectedOrderId = orderId
-                    navController.navigate("billing_screen/${orderId}") },
+                    navController.navigate("billing_screen/${orderId}")
+                },
                 drawerState = drawerState,
                 counterId = counterId
             )
@@ -549,10 +560,11 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         composable("counter") {
             CounterScreen(
                 onBackPressed = { navController.popBackStack() },
-                onProceedToBilling = {items,orderId->
-            selectedItems=items
-            selectedOrderId = orderId
-            navController.navigate("billing_screen/${orderId}") },
+                onProceedToBilling = { items, orderId ->
+                    selectedItems = items
+                    selectedOrderId = orderId
+                    navController.navigate("billing_screen/${orderId}")
+                },
                 drawerState = drawerState
             )
         }
@@ -560,29 +572,40 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
         composable("dashboard") {
             DashboardScreen(
                 drawerState = drawerState,
-                onNavigateToOrders = {navController.navigate("orders")},
-                onNavigateToMenu = {navController.navigate("menu")},
-                onNavigateToSettings = {navController.navigate("settings")},
-                onNavigateToBilling = {navController.navigate("counter")},
+                onNavigateToOrders = { navController.navigate("orders") },
+                onNavigateToMenu = { navController.navigate("menu") },
+                onNavigateToSettings = { navController.navigate("settings") },
+                onNavigateToBilling = { navController.navigate("counter") },
                 onDineInSelected = { navController.navigate("selects") },
                 onTakeawaySelected = {
                     isTakeaway = "TAKEAWAY"
                     selectedTable = null
                     navController.navigate("takeaway_menu")
                 },
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                onQuickBill = {
+                    navController.navigate("quick_bills")
+                }
             )
         }
 
         composable("report_screen") {
-            ReportScreen(navController = navController)
+            ReportScreen(
+                sessionManager = sessionManager,
+                drawerState = drawerState
+            )
         }
         composable("reports") {
-                            ReportScreen(navController = navController)
-                        }
+            ReportScreen(
+                sessionManager = sessionManager,
+                drawerState = drawerState
+            )
+        }
         composable("registration") {
-                            RegistrationScreen(navController = navController,
-                                sessionManager = sessionManager)
+            RegistrationScreen(
+                navController = navController,
+                sessionManager = sessionManager
+            )
         }
 
         composable("ai_assistant") {
@@ -597,7 +620,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
 
         composable("template_editor/{templateId}") {
             val templateId = it.arguments?.getString("templateId") ?: ""
-            TemplateEditorScreen(navController = navController,templateId=templateId)
+            TemplateEditorScreen(navController = navController, templateId = templateId)
         }
 
         composable("template_preview/{templateId}") { backStackEntry ->
@@ -684,7 +707,7 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
                 onBackPressed = { navController.popBackStack() }
             )
         }
-        composable( route="reset_data") {
+        composable(route = "reset_data") {
             ResetScreen(
                 onBackPressed = { navController.popBackStack() },
                 sessionManager = sessionManager,
@@ -692,10 +715,60 @@ fun AppNavigation(drawerState: DrawerState, navController: NavHostController,ses
             )
         }
         composable("quick_bills") {
-            ItemWiseBillScreen()
+            ItemWiseBillScreen(
+                drawerState = drawerState,
+                navController = navController,
+                onProceedToBilling = { items, orderId ->
+                    selectedItems = items
+                    selectedOrderId = orderId
+                    navController.navigate("billing_screen/${orderId}")
+                }
+            )
+        }
+        composable("modifier_setting"){
+            ModifierSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("item_wise"){
+            ItemWiseReportScreen(
+                sessionManager = sessionManager,
+                drawerState = drawerState
+            )
+        }
+        composable("category_wise"){
+            CategoryWiseReportScreen(
+                sessionManager = sessionManager,
+                drawerState = drawerState
+            )
+        }
+
+        composable("change_company") {
+            ChangeCompanyScreen(
+                onBackPressed = { navController.popBackStack() },
+                sessionManager = sessionManager,
+                navController = navController
+            )
+        }
+
+        composable("kot_report") {
+            KotReportScreen(
+                onEditClick = {
+                    navController.navigate("kot_modify/${it.order_master_id}")
+                    kotRes = it
+                },
+                drawerState = drawerState
+            )
+        }
+        composable("kot_modify/{orderId}") { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            KotModifyScreen(
+                navController = navController,
+                orderMasterId = orderId,
+                kotResponse = kotRes
+            )
         }
     }
 }
+
 enum class ExpandedMenu {
     NONE, ORDERS, BILLING, MASTERS, REPORTS
 }
@@ -712,6 +785,7 @@ fun DrawerContent(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val role = sessionManager.getUser()?.role ?: ""
     val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
+    val companyName = sessionManager.getRestaurantProfile()?.company_name ?: "Resb"
 
     // 👇 Single state instead of 4 booleans
     val (expandedMenu, setExpandedMenu) = remember { mutableStateOf(ExpandedMenu.NONE) }
@@ -765,8 +839,15 @@ fun DrawerContent(
                     if (!isCollapsed) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            Text(sessionManager.getUser()?.staff_name ?: "", fontWeight = FontWeight.Bold)
-                            Text(sessionManager.getUser()?.role ?: "", style = MaterialTheme.typography.bodyMedium)
+
+                            Text(
+                                companyName,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                "${sessionManager.getUser()?.staff_name ?: ""}-${sessionManager.getUser()?.role ?: ""}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
@@ -793,7 +874,11 @@ fun DrawerContent(
                     label = { if (!isCollapsed) Text("Masters") else Text("") },
                     icon = { Icon(Icons.Filled.Inventory, contentDescription = null) },
                     selected = currentDestination?.route in listOf(
-                        "menu_item_setting", "menu_setting", "menu_Category_setting", "table_setting", "area_setting"
+                        "menu_item_setting",
+                        "menu_setting",
+                        "menu_Category_setting",
+                        "table_setting",
+                        "area_setting"
                     ),
                     onClick = {
                         setExpandedMenu(if (expandedMenu == ExpandedMenu.MASTERS) ExpandedMenu.NONE else ExpandedMenu.MASTERS)
@@ -829,7 +914,12 @@ fun DrawerContent(
                         )
                         NavigationDrawerItem(
                             label = { if (!isCollapsed) Text("Tables") else Text("") },
-                            icon = { Icon(Icons.Default.TableRestaurant, contentDescription = null) },
+                            icon = {
+                                Icon(
+                                    Icons.Default.TableRestaurant,
+                                    contentDescription = null
+                                )
+                            },
                             selected = currentDestination?.route == "table_setting",
                             onClick = { onDestinationClicked("table_setting") },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -920,10 +1010,17 @@ fun DrawerContent(
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Reports") else Text("") },
                     icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
-                    selected = currentDestination?.route in listOf("report_screen", "orders", "paid_bills"),
-                    onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS)},
+                    selected = currentDestination?.route in listOf(
+                        "report_screen",
+                        "orders",
+                        "item_wise",
+                        "category_wise",
+                        "due_reports",
+                        "kot_report"
+                    ),
+                    onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = subMenuColors
+                    colors = drawerItemColors
                 )
                 AnimatedVisibility(expandedMenu == ExpandedMenu.REPORTS) {
                     Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
@@ -936,7 +1033,7 @@ fun DrawerContent(
                             colors = subMenuColors
                         )
                         NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Reports") else Text("") },
+                            label = { if (!isCollapsed) Text("Sales") else Text("") },
                             icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
                             selected = currentDestination?.route == "report_screen",
                             onClick = { onDestinationClicked("report_screen") },
@@ -944,10 +1041,41 @@ fun DrawerContent(
                             colors = subMenuColors
                         )
                         NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-                            icon = { Icon(Icons.Default.Payment, contentDescription = null) },
-                            selected = currentDestination?.route == "paid_bills",
-                            onClick = { onDestinationClicked("paid_bills") },
+                            label = { if (!isCollapsed) Text("Item Wise") else Text("") },
+                            icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
+                            selected = currentDestination?.route == "item_wise",
+                            onClick = { onDestinationClicked("item_wise") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Category Wise") else Text("") },
+                            icon = { Icon(Icons.Default.Category, contentDescription = null) },
+                            selected = currentDestination?.route == "category_wise",
+                            onClick = { onDestinationClicked("category_wise") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
+//                        NavigationDrawerItem(
+//                            label = { if (!isCollapsed) Text("Due") else Text("") },
+//                            icon = {
+//                                Icon(
+//                                    Icons.Filled.Payment,
+//                                    contentDescription = null,
+//                                    tint = MaterialTheme.colorScheme.error
+//                                )
+//                            },
+//                            selected = currentDestination?.route == "due_reports",
+//                            onClick = { onDestinationClicked("due_reports") },
+//                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+//                            colors = subMenuColors
+//                        )
+
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("KOT Report") else Text("") },
+                            icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                            selected = currentDestination?.route == "kot_report",
+                            onClick = { onDestinationClicked("kot_report") },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = subMenuColors
                         )

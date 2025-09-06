@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.warriortech.resb.util.CurrencySettings
 
 @Composable
 fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
@@ -42,13 +43,13 @@ fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            PaymentSummaryRow(label = "Subtotal", amount = "₹${uiState.subtotal}")
-            PaymentSummaryRow(label = "Tax", amount = "₹${uiState.taxAmount}")
-
-            Divider(
-                modifier = Modifier.padding(vertical = 12.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-            )
+//            PaymentSummaryRow(label = "Subtotal", amount = "₹${uiState.subtotal}")
+//            PaymentSummaryRow(label = "Tax", amount = "₹${uiState.taxAmount}")
+//
+//            Divider(
+//                modifier = Modifier.padding(vertical = 12.dp),
+//                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+//            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -61,7 +62,7 @@ fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "₹${uiState.amountToPay}",
+                    CurrencySettings.format(uiState.amountToPay),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -127,8 +128,7 @@ fun PaymentMethodCard(
                 "CASH" to Icons.Default.Money,
                 "CARD" to Icons.Default.CreditCard,
                 "UPI" to Icons.Default.QrCode,
-                "ONLINE" to Icons.Default.AccountBalance,
-                "DUE" to Icons.Default.Payment,
+//                "DUE" to Icons.Default.Payment,
                 "OTHERS" to Icons.Default.MoreHoriz
             )
 

@@ -22,6 +22,9 @@ import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.ModifierSettingsViewModel
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.util.CurrencySettings
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,10 +47,11 @@ fun ModifierSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Modifier Settings") },
+                title = { Text("Modifier Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 actions = {
@@ -55,11 +59,13 @@ fun ModifierSettingsScreen(
                         showAddDialog = true
                         viewModel.loadCategories()
                     }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Modifier")
+                        Icon(Icons.Default.Add, contentDescription = "Add Modifier",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },
@@ -81,7 +87,9 @@ fun ModifierSettingsScreen(
                 }
                 is ModifierSettingsUiState.Success -> {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -179,7 +187,7 @@ fun ModifierCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Price: $${modifier.add_on_price}",
+                    text = "Price: ${CurrencySettings.format(modifier.add_on_price)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -229,7 +237,7 @@ fun ModifierDialog(
             ) {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { name = it.uppercase() },
                     label = { Text("Modifier Name") },
                     modifier = Modifier.fillMaxWidth()
                 )

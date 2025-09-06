@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -25,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.R
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.components.MobilePasswordOptimizedTextField
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.RegistrationViewModel
 import com.warriortech.resb.util.MobileUtils
@@ -242,14 +244,7 @@ fun RegistrationScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true
                     )
-                    OutlinedTextField(
-                        value = uiState.mailId,
-                        onValueChange = { viewModel.updateMailId(it) },
-                        label = { Text("Email ID *") },
-                        isError = uiState.emailError != null,
-                        supportingText = { uiState.emailError?.let { Text(it, color = Color.Red) } },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+
                 }
             }
 
@@ -353,10 +348,17 @@ fun RegistrationScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedTextField(
+                        MobilePasswordOptimizedTextField(
                             value = uiState.password,
-                            onValueChange = viewModel::updatePassword,
-                            label = { Text("") },
+                            onValueChange = {viewModel.updatePassword(it)},
+                            label = "Password",
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Lock,
+                                    contentDescription = "Password",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             trailingIcon = {
                                 val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
@@ -365,9 +367,7 @@ fun RegistrationScreen(
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                     Icon(imageVector = image, contentDescription = description)
                                 }
-                            },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true
+                            }
                         )
                     }
                 }

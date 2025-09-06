@@ -135,6 +135,7 @@ data class TblMenuItemRequest(
     var is_available:String,
     var is_favourite:Boolean,
     var stock_maintain:String,
+    var preparation_time:Long,
     var rate_lock:String,
     var unit_id:Long,
     var min_stock:Long,
@@ -166,6 +167,7 @@ data class TblMenuItemResponse(
     var kitchen_cat_id:Long,
     var kitchen_cat_name:String,
     var is_available:String,
+    var preparation_time:Long,
     var is_favourite:Boolean,
     var stock_maintain:String,
     var rate_lock:String,
@@ -179,5 +181,12 @@ data class TblMenuItemResponse(
     val cess_per:String,
     val cess_specific: Double,
     var is_active:Long,
-    var qty: Int = 0
+    var qty: Int = 0,
+    var actual_rate: Double = 0.0
+)
+
+data class TblUnit(
+    var unit_id: Long,
+    var unit_name:String,
+    var is_active:Long
 )

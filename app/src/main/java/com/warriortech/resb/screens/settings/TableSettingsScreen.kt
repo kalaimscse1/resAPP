@@ -23,6 +23,8 @@ import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.TableSettingsViewModel
 import kotlinx.coroutines.launch
 import com.warriortech.resb.util.AreaDropdown
@@ -48,17 +50,19 @@ fun TableSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Table Settings") },
+                title = { Text("Table Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 ), actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Table")
+                        Icon(Icons.Default.Add, contentDescription = "Add Table",
+                            tint = SurfaceLight)
                     }
                 },
 
@@ -92,6 +96,10 @@ fun TableSettingsScreen(
                         }
                     } else{
                         LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(state.tables) { table ->
@@ -218,7 +226,7 @@ fun TableDialog(
             Column {
                 OutlinedTextField(
                     value = tableNumber,
-                    onValueChange = { tableNumber = it },
+                    onValueChange = { tableNumber = it.uppercase() },
                     label = { Text("Table Name") },
                     modifier = Modifier.fillMaxWidth()
                 )

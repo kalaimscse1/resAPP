@@ -16,7 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuCategorySettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -38,18 +41,20 @@ fun MenuCategorySettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MenuCategory Settings") },
+                title = { Text("MenuCategory Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add MenuCategory")
+                        Icon(Icons.Default.Add, contentDescription = "Add MenuCategory",
+                            tint = SurfaceLight)
                     }
                 }
             )
@@ -99,7 +104,11 @@ fun MenuCategorySettingsScreen(
                         }
                         return@Column
                     }else{
-                    LazyColumn {
+                    LazyColumn(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(state.categories) { category ->
                             CategoryCard(
                                 category = category,
@@ -158,10 +167,8 @@ fun CategoryCard(
     onEdit: (MenuCategory) -> Unit,
     onDelete: (MenuCategory) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+    MobileOptimizedCard(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -204,7 +211,7 @@ fun CategoryDialog(
             Column {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { name = it.uppercase() },
                     label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth()
                 )

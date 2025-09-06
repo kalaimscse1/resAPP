@@ -24,6 +24,7 @@ data class TblStaff(
     var counter_name:String,
     var area_id:Long,
     var area_name:String,
+    var commission: Double,
     var is_active:Long
 )
 data class staff(
@@ -47,4 +48,20 @@ data class LoginRequest(
     val companyCode: String,
     val user_name: String,
     val password: String
+)
+
+data class TblStaffRequest(
+    val staff_id:Long,
+    val staff_name:String,
+    val contact_no:String,
+    val address:String,
+    val user_name:String,
+    val password:String,
+    val role_id:Long,
+    val last_login:String,
+    val is_block:Boolean,
+    val commission:Double,
+    val counter_id:Long,
+    val area_id:Long,
+    val is_active:Long
 )

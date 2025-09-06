@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +30,9 @@ import com.warriortech.resb.ui.components.WeeklySalesBarChart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
+import com.warriortech.resb.util.CurrencySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
@@ -44,7 +46,8 @@ fun DashboardScreen(
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    onQuickBill:()->Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -145,7 +148,8 @@ fun DashboardScreen(
                             onNavigateToBilling = onNavigateToBilling,
                             onDineInSelected = onDineInSelected,
                             onTakeawaySelected = onTakeawaySelected,
-                            sessionManager
+                            sessionManager,
+                            onQuickBill
                         )
                     }
 
@@ -237,13 +241,13 @@ fun MetricsSection(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ){
                 MetricCard(
                     title = "Running Orders",
                     value = metrics.runningOrders.toString(),
                     color = MaterialTheme.colorScheme.primary,
-                    onClick = onNavigateToOrders
+                    onClick = onNavigateToOrders,
                 )
 
                 MetricCard(
@@ -252,30 +256,28 @@ fun MetricsSection(
                     color = MaterialTheme.colorScheme.secondary,
                     onClick = onNavigateToBilling
                 )
-
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-
                 MetricCard(
                     title = "Total Sales",
-                    value = "₹${String.format("%.2f", metrics.totalSales)}",
+                    value = CurrencySettings.format( metrics.totalSales),
                     color = Color(0xFF4CAF50)
                 )
 
                 MetricCard(
                     title = "Pending Due",
-                    value = "₹${String.format("%.2f", metrics.pendingDue)}",
+                    value = CurrencySettings.format(metrics.pendingDue),
                     color = Color(0xFFF44336)
                 )
-
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MetricCard(
     title: String,
@@ -302,7 +304,7 @@ fun MetricCard(
             ) {
                 Text(
                     title,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -313,9 +315,9 @@ fun MetricCard(
             ) {
                     Text(
                         value,
-                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = color
+                        color = color,
+                        fontSize = 18.sp
                     )
             }
         }
@@ -330,7 +332,8 @@ fun QuickActionsSection(
     onNavigateToBilling: () -> Unit,
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    onQuickBill:()->Unit
 ) {
     val role = sessionManager.getUser()?.role?:""
     var showOrderTypeDialog by remember { mutableStateOf(false) }
@@ -357,33 +360,28 @@ fun QuickActionsSection(
                 text = "View Orders",
                 modifier = Modifier.weight(0.5f)
             )
-            MobileOptimizedButton(
-                onClick = onNavigateToBilling,
-                text = "Billing",
-                modifier = Modifier.weight(0.5f)
-            )
         }
 
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        if (role == "RESBADMIN" || role == "ADMIN")
-//        {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp)
-//            ) {
-//                MobileOptimizedButton(
-//                    onClick = onNavigateToBilling,
-//                    text = "Billing",
-//                    modifier = Modifier.weight(1f)
-//                )
-//                MobileOptimizedButton(
-//                    onClick = onNavigateToSettings,
-//                    text = "Settings",
-//                    modifier = Modifier.weight(1f)
-//                )
-//            }
-//        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (role == "RESBADMIN" || role == "ADMIN")
+        {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MobileOptimizedButton(
+                    onClick = onNavigateToBilling,
+                    text = "Billing",
+                    modifier = Modifier.weight(1f)
+                )
+                MobileOptimizedButton(
+                    onClick = onQuickBill,
+                    text = "Quick Bill",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
     }
     if (showOrderTypeDialog) {
         AlertDialog(
@@ -391,21 +389,25 @@ fun QuickActionsSection(
             title = { Text("Select Order Type") },
             text = { Text("Please choose order type:") },
             confirmButton = {
-                TextButton(onClick = {
-                    showOrderTypeDialog = false
-                    onTakeawaySelected()
-                }) {
-                    Text("Takeaway")
-                }
+                MobileOptimizedButton(
+                    onClick = {
+                        showOrderTypeDialog = false
+                        onDineInSelected()
+                    },
+                    text = "Dine-In",
+                    modifier = Modifier.fillMaxWidth()
+                )
+
             },
             dismissButton = {
-                TextButton(onClick = {
-                    showOrderTypeDialog = false
-                    onDineInSelected()
-                }) {
-                    Text("Dine-In")
-                }
-
+                MobileOptimizedButton(
+                    onClick = {
+                        showOrderTypeDialog = false
+                        onTakeawaySelected()
+                    },
+                    text = "Takeaway",
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         )
     }

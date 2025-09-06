@@ -1,11 +1,14 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.BillRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.data.repository.ModifierRepository
 import com.warriortech.resb.data.repository.OrderRepository
+import com.warriortech.resb.model.Bill
+import com.warriortech.resb.model.BillItem
 import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.KOTItem
 import com.warriortech.resb.model.KOTRequest
@@ -18,14 +21,19 @@ import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.viewmodel.MenuViewModel.OrderUiState
 import com.warriortech.resb.util.getCurrentTimeAsFloat
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.collections.component1
 import kotlin.collections.component2
+import com.warriortech.resb.ui.viewmodel.BillingViewModel
+import com.warriortech.resb.util.CurrencySettings
 
 @HiltViewModel
 class CounterViewModel @Inject constructor(
@@ -74,6 +82,10 @@ class CounterViewModel @Inject constructor(
         data class Error(val message: String) : MenuUiState()
     }
 
+    init {
+        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+
+    }
 //    fun loadMenuItems() {
 //        viewModelScope.launch {
 //            try {
@@ -131,6 +143,7 @@ class CounterViewModel @Inject constructor(
                             _menuState.value = MenuUiState.Success(filteredMenuItems)
                             val data = buildList {
                                 add("FAVOURITES")
+                                add("ALL")
                                 addAll(filteredMenuItems.map { it.item_cat_name }.distinct())
                             }
                             _categories.value = data
@@ -141,6 +154,7 @@ class CounterViewModel @Inject constructor(
                             _menuState.value = MenuUiState.Success(menuItems)
                             val data = buildList {
                                 add("FAVOURITES")
+                                add("ALL")
                                 addAll(menuItems.map { it.item_cat_name }.distinct())
                             }
                             _categories.value = data
@@ -247,6 +261,7 @@ class CounterViewModel @Inject constructor(
                         menuItem = menuItem,
                     )
                 }
+            _menuState.value = MenuUiState.Loading
                 orderRepository.placeOrUpdateOrders(
                     tableId, orderItems,
                     tableStatus1.toString()
@@ -264,6 +279,141 @@ class CounterViewModel @Inject constructor(
                         }
                     )
                 }
+        }
+    }
+
+    fun cashPrintBill() {
+        val list = mutableListOf<TblOrderDetailsResponse>()
+        viewModelScope.launch {
+            if (_selectedItems.value.isEmpty()) {
+
+                _menuState.value = MenuUiState.Error("No items selected")
+                return@launch
+            }
+            val orderItems = _selectedItems.value.map { (menuItem, quantity) ->
+                OrderItem(
+                    quantity = quantity,
+                    menuItem = menuItem,
+                )
+            }
+            _menuState.value = MenuUiState.Loading
+            orderRepository.placeOrUpdateOrders(
+                2, orderItems,
+                ""
+            ).collect { result ->
+                result.fold(
+                    onSuccess = { order ->
+                        val payment = PaymentMethod("cash", "CASH")
+                        val amount = order.sumOf { it.grand_total }
+                        billRepository.bill(order.firstOrNull()?.order_master_id?:"",
+                            payment,amount,null).collect{ billResult->
+                            billResult.fold(
+                                onSuccess = {response ->
+                                    var sn = 1
+                                    val orderDetails = orderRepository.getOrdersByOrderId(response.order_master.order_master_id).body()!!
+                                    val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
+                                    val billItems = orderDetails.map {detail ->
+                                        val menuItem = detail.menuItem
+                                        val qty = detail.qty
+                                        BillItem(
+                                            sn = sn++,
+                                            itemName = menuItem.menu_item_name,
+                                            qty = qty,
+                                            price = menuItem.rate,
+                                            amount = qty * menuItem.rate,
+                                            sgstPercent = menuItem.tax_percentage.toDouble()/ 2,
+                                            cgstPercent = menuItem.tax_percentage.toDouble()/ 2,
+                                            igstPercent = if (detail.igst > 0) menuItem.tax_percentage.toDouble() else 0.0,
+                                            cessPercent = if (detail.cess > 0) menuItem.cess_per.toDouble() else 0.0,
+                                            sgst = detail.sgst,
+                                            cgst = detail.cgst,
+                                            igst = if (detail.igst> 0) detail.igst else 0.0,
+                                            cess = if (detail.cess > 0) detail.cess else 0.0,
+                                            cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0
+                                        )
+                                    }
+                                    val billDetails = Bill(
+                                        company_code = sessionManager.getCompanyCode() ?: "",
+                                        billNo = response.bill_no,
+                                        date = response.bill_date.toString(),
+                                        time = response.bill_create_time.toString(),
+                                        orderNo = response.order_master.order_master_id,
+                                        counter = counter,
+                                        tableNo = response.order_master.table_name,
+                                        custName = "Customer Name",
+                                        custNo = "1234567890",
+                                        custAddress = "Customer Address",
+                                        custGstin = "GSTIN123456",
+                                        items = billItems,
+                                        subtotal = response.order_amt,
+                                        deliveryCharge = 0.0, // Assuming no delivery charge
+                                        discount = response.disc_amt,
+                                        roundOff = response.round_off,
+                                        total = response.grand_total,
+                                    )
+                                    val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
+
+                                    if (isReceipt) {
+                                        printBill(billDetails,  amount, payment)
+                                        loadMenuItems()
+                                    }
+                                    else{
+                                        loadMenuItems()
+                                    }
+                                },
+                                onFailure = { error->
+                                    Timber.e(error,"Failed to print bill")
+                                }
+                            )
+                        }
+                        orderDetailsResponse.value= order
+                        _selectedItems.value = emptyMap() // Clear selected items after placing order
+                    },
+                    onFailure = { error ->
+                        _menuState.value =
+                            MenuUiState.Error(error.message ?: "Failed to place order")
+                    }
+                )
+            }
+        }
+    }
+
+    fun printBill(bill : Bill, amount: Double, paymentMethod: PaymentMethod) {
+        viewModelScope.launch {
+
+            val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
+
+            if (isReceipt) {
+                val ip = orderRepository.getIpAddress("COUNTER")
+                val printResponse = billRepository.printBill(bill, ip)
+                // Optionally, you can reset the payment state after printing
+                printResponse.collect { result->
+                    result.fold(
+                        onSuccess = { message ->
+                            delay(2000) // Simulate network delay
+                            // Example: If payment is successful
+                            val transactionId = UUID.randomUUID().toString()
+
+                            Timber.e(message)
+                        },
+                        onFailure = { error ->
+                            Timber.e(error,"Failed to print bill")
+                        }
+                    )
+
+                }
+            }
+            else
+            {
+                Log.d("Payment", "Payment successful")
+//                    delay(2000) // Simulate network delay
+
+                // Example: If payment is successful
+                val transactionId = UUID.randomUUID().toString()
+
+
+            }
+
         }
     }
 }

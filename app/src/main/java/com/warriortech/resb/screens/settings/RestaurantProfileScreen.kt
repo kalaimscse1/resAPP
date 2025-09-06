@@ -36,7 +36,9 @@ import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.Shapes
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.RestaurantProfileViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,14 +66,17 @@ fun RestaurantProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.restaurant_profile)) },
+                title = { Text(stringResource(R.string.restaurant_profile),
+                    color = SurfaceLight
+                ) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         }

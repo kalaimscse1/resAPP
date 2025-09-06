@@ -2,6 +2,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.ChangePasswordRequest
 import com.warriortech.resb.model.TblStaff
+import com.warriortech.resb.model.TblStaffRequest
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
@@ -22,7 +23,7 @@ class StaffRepository @Inject constructor(
         }
     }
 
-    suspend fun insertStaff(staff: TblStaff): TblStaff {
+    suspend fun insertStaff(staff: TblStaffRequest): TblStaff {
         val response = apiService.createStaff(staff,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create staff")
@@ -31,7 +32,7 @@ class StaffRepository @Inject constructor(
         }
     }
 
-    suspend fun updateStaff(staff: TblStaff): TblStaff {
+    suspend fun updateStaff(staff: TblStaffRequest): Int {
         val response = apiService.updateStaff(staff.staff_id, staff,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update staff")

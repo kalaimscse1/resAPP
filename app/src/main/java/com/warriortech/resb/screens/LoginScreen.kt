@@ -56,18 +56,23 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import com.warriortech.resb.network.SessionManager
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    sessionManager: SessionManager
 ) {
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val keyboardController = LocalSoftwareKeyboardController.current
     var passwordVisible by remember { mutableStateOf(false) }
+    val code = sessionManager.getCompanyCode()?:""
 
     // Detect keyboard height in dp
     val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
@@ -91,158 +96,158 @@ fun LoginScreen(
             }
         }
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        MaterialTheme.colorScheme.surface
-                    )
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Dimensions.spacingL)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = animatedPadding) // animate upward shift
-                .padding(horizontal = Dimensions.spacingL),
-        horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Logo section
-            Card(
-                modifier = Modifier.size(120.dp),
-                shape = CircleShape,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.resb_logo_1),
-                        contentDescription = stringResource(R.string.app_logo),
-                        modifier = Modifier.size(60.dp),
-                        tint = Color.White
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            // Welcome text
-            Text(
-                text = stringResource(R.string.welcome_message),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Text(
-                text = stringResource(R.string.login_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            /**
-             * Mobile-optimized login form card
-             */
-            MobileOptimizedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(Dimensions.spacingL)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp)
-                ) {
-
-                    Spacer(modifier = Modifier.height(32.dp))
-                    MobileOptimizedTextField(
-                        value = uiState.value.companyCode,
-                        onValueChange = viewModel::onCompanyCodeChange,
-                        label = "CompanyCode",
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "CompanyCode",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    MobileOptimizedTextField(
-                        value = uiState.value.username,
-                        onValueChange = viewModel::onUsernameChange,
-                        label = "Username",
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = "Username",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    MobileOptimizedTextField(
-                        value = uiState.value.password,
-                        onValueChange = viewModel::onPasswordChange,
-                        label = "Password",
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Lock,
-                                contentDescription = "Password",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password"
-                                )
-                            }
-                        }
-                    )
-
-
-                    MobileOptimizedButton(
-                        onClick = {
-                            keyboardController?.hide() // Hide keyboard on button press
-                            viewModel.attemptLogin()
-                        },
-                        enabled = !uiState.value.isLoading,
-                        text = if (uiState.value.isLoading) "Logging in..." else "Login",
-                        icon = if (uiState.value.isLoading) null else Icons.Default.Login
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Register button
-                    OutlinedButton(
-                        onClick = onRegisterClick,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !uiState.value.isLoading
-                    ) {
-                        Text(
-                            text = stringResource(R.string.register),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                }
-            }
-        }
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(
+//                brush = Brush.verticalGradient(
+//                    colors = listOf(
+//                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+//                        MaterialTheme.colorScheme.surface
+//                    )
+//                )
+//            )
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(Dimensions.spacingL)
+//                .fillMaxSize()
+//                .verticalScroll(rememberScrollState())
+//                .padding(bottom = animatedPadding) // animate upward shift
+//                .padding(horizontal = Dimensions.spacingL),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            // Logo section
+//            Card(
+//                modifier = Modifier.size(120.dp),
+//                shape = CircleShape,
+//                colors = CardDefaults.cardColors(
+//                    containerColor = MaterialTheme.colorScheme.primary
+//                ),
+//                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+//            ) {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.resb_logo_1),
+//                        contentDescription = stringResource(R.string.app_logo),
+//                        modifier = Modifier.size(60.dp),
+//                        tint = Color.White
+//                    )
+//                }
+//            }
+//
+//            Spacer(modifier = Modifier.height(30.dp))
+//
+//            // Welcome text
+//            Text(
+//                text = stringResource(R.string.welcome_message),
+//                style = MaterialTheme.typography.headlineLarge,
+//                fontWeight = FontWeight.Bold,
+//                color = MaterialTheme.colorScheme.onSurface
+//            )
+//
+//            Text(
+//                text = stringResource(R.string.login_subtitle),
+//                style = MaterialTheme.typography.bodyLarge,
+//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+//                modifier = Modifier.padding(top = 8.dp)
+//            )
+//
+//            Spacer(modifier = Modifier.height(48.dp))
+//
+//            /**
+//             * Mobile-optimized login form card
+//             */
+//            MobileOptimizedCard(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(Dimensions.spacingL)
+//            ) {
+//                Column(
+//                    modifier = Modifier.padding(24.dp)
+//                ) {
+//
+//                    Spacer(modifier = Modifier.height(32.dp))
+//                    MobileOptimizedTextField(
+//                        value = uiState.value.companyCode,
+//                        onValueChange = viewModel::onCompanyCodeChange,
+//                        label = "CompanyCode",
+//                        leadingIcon = {
+//                            Icon(
+//                                Icons.Default.Person,
+//                                contentDescription = "CompanyCode",
+//                                tint = MaterialTheme.colorScheme.primary
+//                            )
+//                        }
+//                    )
+//                    Spacer(modifier = Modifier.height(16.dp))
+//
+//                    MobileOptimizedTextField(
+//                        value = uiState.value.username,
+//                        onValueChange = viewModel::onUsernameChange,
+//                        label = "Username",
+//                        leadingIcon = {
+//                            Icon(
+//                                Icons.Default.Person,
+//                                contentDescription = "Username",
+//                                tint = MaterialTheme.colorScheme.primary
+//                            )
+//                        }
+//                    )
+//
+//                    Spacer(modifier = Modifier.height(16.dp))
+//
+//                    MobileOptimizedTextField(
+//                        value = uiState.value.password,
+//                        onValueChange = viewModel::onPasswordChange,
+//                        label = "Password",
+//                        leadingIcon = {
+//                            Icon(
+//                                Icons.Default.Lock,
+//                                contentDescription = "Password",
+//                                tint = MaterialTheme.colorScheme.primary
+//                            )
+//                        },
+//                        trailingIcon = {
+//                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+//                                Icon(
+//                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+//                                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password"
+//                                )
+//                            }
+//                        }
+//                    )
+//
+//
+//                    MobileOptimizedButton(
+//                        onClick = {
+//                            keyboardController?.hide() // Hide keyboard on button press
+//                            viewModel.attemptLogin()
+//                        },
+//                        enabled = !uiState.value.isLoading,
+//                        text = if (uiState.value.isLoading) "Logging in..." else "Login",
+//                        icon = if (uiState.value.isLoading) null else Icons.Default.Login
+//                    )
+//                    Spacer(modifier = Modifier.height(16.dp))
+//
+//                    // Register button
+//                    OutlinedButton(
+//                        onClick = onRegisterClick,
+//                        modifier = Modifier.fillMaxWidth(),
+//                        enabled = !uiState.value.isLoading
+//                    ) {
+//                        Text(
+//                            text = stringResource(R.string.register),
+//                            style = MaterialTheme.typography.bodyLarge
+//                        )
+//                    }
+//                }
+//            }
+//        }
         Scaffold(
             scaffoldState = scaffoldState
         ) { paddingValues ->
@@ -293,6 +298,7 @@ fun LoginScreen(
                         value = uiState.value.companyCode,
                         onValueChange = viewModel::onCompanyCodeChange,
                         label = "CompanyCode",
+                        enabled = code.isBlank(),
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Person,
@@ -317,7 +323,7 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(Dimensions.spacingM))
 
-                    MobileOptimizedTextField(
+                    MobilePasswordOptimizedTextField(
                         value = uiState.value.password,
                         onValueChange = viewModel::onPasswordChange,
                         label = "Password",
@@ -328,12 +334,13 @@ fun LoginScreen(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         },
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
+                            val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                            val description = if (passwordVisible) "Hide password" else "Show password"
+
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = if (passwordVisible) "Hide Password" else "Show Password"
-                                )
+                                Icon(imageVector = image, contentDescription = description)
                             }
                         }
                     )
@@ -367,4 +374,3 @@ fun LoginScreen(
             }
         }
     }
-}

@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.ui.text.font.FontWeight
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,19 +45,20 @@ fun CounterSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.counter_settings)) },
+                title = { Text(stringResource(R.string.counter_settings), color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.add_counter))
-                    }
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.add_counter),
+                            tint = SurfaceLight)}
                 }
             )
         }
@@ -164,7 +167,7 @@ fun AddEditCounterDialog(
             Column {
                 OutlinedTextField(
                     value = counterName,
-                    onValueChange = { counterName = it },
+                    onValueChange = { counterName = it.uppercase() },
                     label = { Text("Counter Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -224,11 +227,11 @@ fun CounterItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column{
                 Text(
                     text = "Counter : ${counter.counter_name}",
                     style = MaterialTheme.typography.titleMedium,

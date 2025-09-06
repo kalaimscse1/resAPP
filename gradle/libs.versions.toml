@@ -28,6 +28,8 @@ timber = "4.3.1"
 workRuntimeKtx = "2.8.0"
 securityCryptoKtx = "1.1.0-alpha07"
 playServicesCastFramework = "22.1.0"
+appcompat = "1.7.1"
+identityJvm = "202411.1"
 
 [libraries]
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
@@ -69,6 +71,8 @@ room-compiler-v252 = { module = "androidx.room:room-compiler", version.ref = "an
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 play-services-cast-framework = { group = "com.google.android.gms", name = "play-services-cast-framework", version.ref = "playServicesCastFramework" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

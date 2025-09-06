@@ -14,8 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.warriortech.resb.model.Area
+import com.warriortech.resb.model.KitchenCategory
+import com.warriortech.resb.model.Menu
+import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.model.Role
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblCounter
+import com.warriortech.resb.model.TblUnit
 import kotlin.collections.forEach
 
 
@@ -186,6 +191,289 @@ fun CounterDropdown(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RoleDropdown(
+    roles: List<Role>,
+    selectedRole: Role?,
+    onRoleSelected: (Role) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedRole?.role ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (roles.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                roles.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.role) },
+                        onClick = {
+                            onRoleSelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MenuDropdown(
+    menus: List<Menu>,
+    selectedMenu: Menu?,
+    onMenuSelected: (Menu) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedMenu?.menu_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (menus.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                menus.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.menu_name) },
+                        onClick = {
+                            onMenuSelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MenuCategoryDropdown(
+    menus: List<MenuCategory>,
+    selectedMenuCategory: MenuCategory?,
+    onMenuCategorySelected: (MenuCategory) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedMenuCategory?.item_cat_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (menus.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                menus.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.item_cat_name) },
+                        onClick = {
+                            onMenuCategorySelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KitchenGroupDropdown(
+    menus: List<KitchenCategory>,
+    selectedKitchenCategory: KitchenCategory?,
+    onKitchenCategorySelected: (KitchenCategory) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedKitchenCategory?.kitchen_cat_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (menus.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                menus.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.kitchen_cat_name) },
+                        onClick = {
+                            onKitchenCategorySelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UnitDropdown(
+    menus: List<TblUnit>,
+    selectedUnit: TblUnit?,
+    onUnitSelected: (TblUnit) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedUnit?.unit_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (menus.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                menus.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.unit_name) },
+                        onClick = {
+                            onUnitSelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

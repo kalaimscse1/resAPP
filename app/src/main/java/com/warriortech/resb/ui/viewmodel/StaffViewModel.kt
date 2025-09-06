@@ -2,8 +2,16 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.AreaRepository
+import com.warriortech.resb.data.repository.CounterRepository
+import com.warriortech.resb.data.repository.RoleRepository
 import com.warriortech.resb.data.repository.StaffRepository
+import com.warriortech.resb.data.repository.TableRepository
+import com.warriortech.resb.model.Area
+import com.warriortech.resb.model.Role
+import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblStaff
+import com.warriortech.resb.model.TblStaffRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,11 +28,23 @@ data class StaffUiState(
 
 @HiltViewModel
 class StaffViewModel @Inject constructor(
-    private val staffRepository: StaffRepository
+    private val staffRepository: StaffRepository,
+    private val areaRepository: TableRepository,
+    private val roleRepository: RoleRepository,
+    private val counterRepository: CounterRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StaffUiState())
     val uiState: StateFlow<StaffUiState> = _uiState.asStateFlow()
+
+    private val _area = MutableStateFlow<List<Area>>(emptyList())
+    val areas: StateFlow<List<Area>> = _area
+
+    private val _counter = MutableStateFlow<List<TblCounter>>(emptyList())
+    val counters: StateFlow<List<TblCounter>> = _counter
+
+    private val _role = MutableStateFlow<List<Role>>(emptyList())
+    val roles: StateFlow<List<Role>> = _role
 
     init {
         loadStaff()
@@ -35,6 +55,12 @@ class StaffViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 val staff = staffRepository.getAllStaff()
+                val areas = areaRepository.getAllAreas()
+                val roles = roleRepository.getAllRoles()
+                val counters = counterRepository.getAllCounters()
+                _area.value= areas
+                _role.value= roles
+                _counter.value= counters
                 _uiState.value = _uiState.value.copy(
                     staff = staff,
                     isLoading = false
@@ -48,26 +74,24 @@ class StaffViewModel @Inject constructor(
         }
     }
 
-    fun addStaff(name: String, role: String, email: String, phone: String) {
+    fun addStaff(staff  :TblStaffRequest) {
         viewModelScope.launch {
             try {
-                val staff = TblStaff(
-                    staff_id = 1,
-                    staff_name = name,
-                    contact_no = phone,
-                    address = "",
-                    user_name = email,
-                    password ="",
-                    role_id = 1,
-                    role = role,
-                    last_login = "",
-                    is_block = false,
-                    counter_id = 1,
-                    counter_name = "",
-                    area_id = 1,
-                    area_name = "",
-                    is_active = 1
-                )
+//                val staff = TblStaffRequest(
+//                    staff_id = 1,
+//                    staff_name = name,
+//                    contact_no = phone,
+//                    address = "",
+//                    user_name = email,
+//                    password = "",
+//                    role_id = 1,
+//                    last_login = "",
+//                    is_block = false,
+//                    counter_id = 1,
+//                    area_id = 1,
+//                    is_active = 1,
+//                    commission = TODO()
+//                )
                 staffRepository.insertStaff(staff)
                 loadStaff()
                 _uiState.value = _uiState.value.copy(successMessage = "Staff added successfully")
@@ -77,7 +101,7 @@ class StaffViewModel @Inject constructor(
         }
     }
 
-    fun updateStaff(staff: TblStaff) {
+    fun updateStaff(staff: TblStaffRequest) {
         viewModelScope.launch {
             try {
                 staffRepository.updateStaff(staff)

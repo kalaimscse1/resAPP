@@ -48,5 +48,18 @@ data class KOTUpdateResponse(
 data class KitchenCategory(
     val kitchen_cat_id: Long,
     val kitchen_cat_name: String,
-    val is_active: Boolean
+    val is_active: Long
+)
+
+data class KotResponse(
+    val area_name : String,
+    val table_name : String,
+    val kot_number: Long,
+    val order_master_id: String,
+    val grand_total: Double,
+    val order_status: String,
+    val order_type: String,
+    val staff_name: String,
+    val order_date: String,
+    val order_create_time: String
 )

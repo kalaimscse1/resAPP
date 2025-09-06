@@ -7,7 +7,9 @@ import com.warriortech.resb.data.repository.ModifierRepository
 import com.warriortech.resb.data.repository.MenuCategoryRepository
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.screens.settings.ModifierSettingsUiState
+import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ModifierSettingsViewModel @Inject constructor(
     private val modifierRepository: ModifierRepository,
-    private val menuCategoryRepository: MenuCategoryRepository
+    private val menuCategoryRepository: MenuCategoryRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ModifierSettingsUiState>(ModifierSettingsUiState.Loading)
@@ -26,6 +29,11 @@ class ModifierSettingsViewModel @Inject constructor(
 
     private val _categories = MutableStateFlow<List<MenuCategory>>(emptyList())
     val categories: StateFlow<List<MenuCategory>> = _categories.asStateFlow()
+
+    init {
+        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+
+    }
 
     fun loadModifiers() {
         viewModelScope.launch {

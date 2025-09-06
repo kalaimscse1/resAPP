@@ -140,7 +140,7 @@ class RegistrationViewModel @Inject constructor(
         }
 
         _uiState.value = _uiState.value.copy(isLoading = true)
-        if (state.password=="Kingtec2025") {
+        if (state.password=="kingtec2025#") {
             viewModelScope.launch {
                 try {
                     val request = RegistrationRequest(
@@ -200,6 +200,10 @@ class RegistrationViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
+        }
+        else{
+            _registrationResult.value = "Invalid Admin Password!"
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
     /**
