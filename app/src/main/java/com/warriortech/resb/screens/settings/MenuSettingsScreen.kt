@@ -14,7 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Menu
+import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuSettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -38,20 +41,22 @@ fun MenuSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Menu Settings") },
+                title = { Text("Menu Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true
                         viewModel.getOrderBy() }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Menu")
+                        Icon(Icons.Default.Add, contentDescription = "Add Menu",
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },
@@ -83,7 +88,10 @@ fun MenuSettingsScreen(
                             Text("No menus available. Please add a menu.")
                         }
                     } else {
-                        FlowColumn {
+                        FlowColumn(modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             state.menus.forEach { menu ->
                                 MenuCard(
                                     menu = menu,
@@ -164,10 +172,8 @@ fun MenuCard(
     onEdit: (Menu) -> Unit,
     onDelete: (Menu) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
+    MobileOptimizedCard(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -224,14 +230,14 @@ fun MenuDialog(
             Column {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = { name = it.uppercase() },
                     label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = { description = it.uppercase() },
                     label = { Text("OrderBy") },
                     modifier = Modifier.fillMaxWidth()
                 )

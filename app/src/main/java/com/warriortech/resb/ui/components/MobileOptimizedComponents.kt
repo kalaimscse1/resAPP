@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -129,6 +131,62 @@ fun MobileOptimizedTextField(
     )
 }
 
+
+
+@Composable
+fun MobilePasswordOptimizedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    singleLine: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    visualTransformation: VisualTransformation = PasswordVisualTransformation(),
+) {
+    val deviceInfo = getDeviceInfo()
+    val textFieldHeight = if (deviceInfo.isTablet) 72.dp else 64.dp
+    val cornerRadius = if (deviceInfo.isTablet) 20.dp else 16.dp
+    val fontSize = if (deviceInfo.isTablet) 18.sp else 16.sp
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = fontSize
+                )
+            )
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .height(textFieldHeight),
+        enabled = enabled,
+        isError = isError,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+        visualTransformation = visualTransformation,
+        shape = RoundedCornerShape(cornerRadius),
+        singleLine = singleLine,
+        maxLines = maxLines,
+        textStyle = LocalTextStyle.current.copy(fontSize = fontSize),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+        )
+    )
+}
 @Composable
 fun MobileOptimizedButton(
     onClick: () -> Unit,

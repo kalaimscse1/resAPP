@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,36 +30,10 @@ import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.CurrencySettings
 
-/**
- * BillingScreen is a composable function that displays the billing summary for an order.
- * It allows users to view billed items, apply taxes and discounts, and proceed to payment.
- * It includes a top app bar for navigation and actions, a bottom bar for payment actions,
- * and a dialog for selecting KOT numbers.
- * It uses a ViewModel to manage the billing state and updates the UI accordingly.
- * @param navController The NavHostController for navigation.
- * @param viewModel The BillingViewModel instance to manage billing state.
- * @param orderDetailsResponse Optional list of order details to initialize the billing state.
- * @param orderMasterId Optional order master ID to load specific billing details.
- * This screen is designed to be responsive and optimized for mobile devices.
- * It handles various billing operations such as updating item quantities,
- * removing items, and calculating totals.
- * It also supports filtering items by KOT number through a dialog.
- * @see BillingViewModel
- * @see BillingPaymentUiState
- * @param onKotSelected Callback function to handle KOT selection.
- * @param onDismiss Callback function to dismiss the KOT selection dialog.
- * This function is part of the billing feature in the restaurant management application.
- * @author WarriorTech
- * @version 1.0
- * @since 2025-07-17
- * This function is responsible for displaying the billing summary,
- * updating item quantities, applying taxes and discounts,
- * and proceeding to payment.
- * It uses a ViewModel to manage the billing state and updates the UI accordingly.
- * It also includes a dialog for selecting KOT numbers to filter items.
- */
 
 @Composable
 fun KotSelectionDialog(
@@ -154,12 +129,13 @@ fun BillingScreen(
                 title = { 
                     Text(
                         if (selectedKotNumber != null) "Bill Summary - KOT #$selectedKotNumber" 
-                        else "Bill Summary"
+                        else "Bill Summary", color = SurfaceLight
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 actions = {
@@ -167,13 +143,14 @@ fun BillingScreen(
                         IconButton(onClick = { showKotSelectionDialog = true }) {
                             Icon(
                                 imageVector = Icons.Default.FilterList,
-                                contentDescription = "Select KOT"
+                                contentDescription = "Select KOT",
+                                tint = SurfaceLight
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },
@@ -249,7 +226,7 @@ fun BillingContent(
 
         // Subtotal
         item {
-            BillingSummaryRow(
+            EditableBillingRow(
                 label = "Subtotal",
                 amount = uiState.subtotal,
                 currencyFormatter = currencyFormatter
@@ -342,7 +319,7 @@ fun BilledItemRow(
                     )
                 }
                 Text(
-                    text = currencyFormatter.format(menuItem.rate * quantity),
+                    text = CurrencySettings.format(menuItem.rate * quantity),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -357,19 +334,19 @@ fun BilledItemRow(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    IconButton(
-                        onClick = { 
-                            if (quantity > 1) {
-                                onQuantityChange(quantity - 1)
-                            }
-                        },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = "Decrease quantity"
-                        )
-                    }
+//                    IconButton(
+//                        onClick = {
+//                            if (quantity > 1) {
+//                                onQuantityChange(quantity - 1)
+//                            }
+//                        },
+//                        modifier = Modifier.size(32.dp)
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Remove,
+//                            contentDescription = "Decrease quantity"
+//                        )
+//                    }
 
                     Text(
                         text = quantity.toString(),
@@ -379,28 +356,28 @@ fun BilledItemRow(
                         textAlign = TextAlign.Center
                     )
 
-                    IconButton(
-                        onClick = { onQuantityChange(quantity + 1) },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Increase quantity"
-                        )
-                    }
+//                    IconButton(
+//                        onClick = { onQuantityChange(quantity + 1) },
+//                        modifier = Modifier.size(32.dp)
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Add,
+//                            contentDescription = "Increase quantity"
+//                        )
+//                    }
                 }
 
                 // Remove item button
-                IconButton(
-                    onClick = onRemoveItem,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Remove item",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
+//                IconButton(
+//                    onClick = onRemoveItem,
+//                    modifier = Modifier.size(32.dp)
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.Delete,
+//                        contentDescription = "Remove item",
+//                        tint = MaterialTheme.colorScheme.error
+//                    )
+//                }
             }
         }
     }
@@ -426,7 +403,7 @@ fun BillingSummaryRow(
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal
         )
         Text(
-            currencyFormatter.format(amount),
+            CurrencySettings.format(amount),
             style = if (isTotal) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal
         )
@@ -450,7 +427,7 @@ fun EditableBillingRow(
         Spacer(Modifier.width(8.dp))
         Spacer(Modifier.width(8.dp))
         Text(
-            currencyFormatter.format(amount),
+            CurrencySettings.formatPlain(amount),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.width(80.dp),
             textAlign = TextAlign.End
@@ -483,7 +460,8 @@ fun BillingBottomBar(
                     fontWeight = FontWeight.Bold
                 )
             }
-
+            Spacer(modifier = Modifier.padding(horizontal = 25.dp))
+            Column {
                 MobileOptimizedButton(
                     onClick = {
                         if (orderMasterId != null) {
@@ -494,6 +472,7 @@ fun BillingBottomBar(
                     text = "Proceed to Payment",
                     modifier = Modifier.weight(1f)
                 )
+            }
         }
     }
 }

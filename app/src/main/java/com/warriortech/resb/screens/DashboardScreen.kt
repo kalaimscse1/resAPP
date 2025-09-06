@@ -31,6 +31,8 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
+import com.warriortech.resb.util.CurrencySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
@@ -239,13 +241,13 @@ fun MetricsSection(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ){
                 MetricCard(
                     title = "Running Orders",
                     value = metrics.runningOrders.toString(),
                     color = MaterialTheme.colorScheme.primary,
-                    onClick = onNavigateToOrders
+                    onClick = onNavigateToOrders,
                 )
 
                 MetricCard(
@@ -254,30 +256,28 @@ fun MetricsSection(
                     color = MaterialTheme.colorScheme.secondary,
                     onClick = onNavigateToBilling
                 )
-
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-
                 MetricCard(
                     title = "Total Sales",
-                    value = "₹${String.format("%.2f", metrics.totalSales)}",
+                    value = CurrencySettings.format( metrics.totalSales),
                     color = Color(0xFF4CAF50)
                 )
 
                 MetricCard(
                     title = "Pending Due",
-                    value = "₹${String.format("%.2f", metrics.pendingDue)}",
+                    value = CurrencySettings.format(metrics.pendingDue),
                     color = Color(0xFFF44336)
                 )
-
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MetricCard(
     title: String,
@@ -304,7 +304,7 @@ fun MetricCard(
             ) {
                 Text(
                     title,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -315,9 +315,9 @@ fun MetricCard(
             ) {
                     Text(
                         value,
-                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = color
+                        color = color,
+                        fontSize = 18.sp
                     )
             }
         }
@@ -392,19 +392,20 @@ fun QuickActionsSection(
                 MobileOptimizedButton(
                     onClick = {
                         showOrderTypeDialog = false
-                        onTakeawaySelected()
+                        onDineInSelected()
                     },
-                    text = "Takeaway",
+                    text = "Dine-In",
                     modifier = Modifier.fillMaxWidth()
                 )
+
             },
             dismissButton = {
                 MobileOptimizedButton(
                     onClick = {
                         showOrderTypeDialog = false
-                        onDineInSelected()
+                        onTakeawaySelected()
                     },
-                    text = "Dine-In",
+                    text = "Takeaway",
                     modifier = Modifier.fillMaxWidth()
                 )
             }

@@ -6,7 +6,8 @@ data class OrderItem(
     val id: Long? = null,
     val menuItem: TblMenuItemResponse,
     val quantity: Int,
-    val notes: String? = null
+    val notes: String? = null,
+    val orderDetailsId: Long? = null
 )
 
 /**
@@ -80,6 +81,7 @@ data class OrderDetails(
     var kot_number: Int?,
     var menu_item_id: Long,
     var rate: Double,
+    var actual_rate:Double,
     var qty: Int,
     var total:Double,
     var tax_id:Long,
@@ -132,6 +134,7 @@ data class TblOrderDetailsResponse(
     var kot_number:Int,
     var menuItem: TblMenuItemResponse,
     var rate: Double,
+    var actual_rate:Double,
     var qty:Int,
     var total:Double,
     var tax_id:Long,

@@ -59,7 +59,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onCompanyCodeChange(companyCode: String) {
-        _uiState.update {it.copy(companyCode = companyCode, loginError = null)}
+        _uiState.update {it.copy(companyCode = companyCode.uppercase(), loginError = null)}
     }
 
     /**
@@ -127,6 +127,7 @@ class LoginViewModel @Inject constructor(
                         sessionManager.saveUser(authResponse.user)
                         sessionManager.saveCompanyCode(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
                         sessionManager.saveGeneralSetting(general?.get(0) ?: error("general setting failed"))
+                        sessionManager.saveDecimalPlaces(profile.decimal_point)
                         sessionManager.saveRestaurantProfile(profile)
 
                         _uiState.update{it.copy(isLoading = false, loginSuccess = true)}

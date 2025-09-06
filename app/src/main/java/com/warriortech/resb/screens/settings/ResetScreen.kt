@@ -36,6 +36,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.AreaViewModel
 import com.warriortech.resb.ui.viewmodel.ResetViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
@@ -73,14 +75,17 @@ fun ResetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("RESET SCREEN") },
+                title = { Text("RESET SCREEN",
+                    color = SurfaceLight
+                ) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },

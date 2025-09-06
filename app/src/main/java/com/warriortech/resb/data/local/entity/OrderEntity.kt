@@ -1,67 +1,42 @@
 package com.warriortech.resb.data.local.entity
 
-//import androidx.room.Entity
-//import androidx.room.PrimaryKey
-//import com.warriortech.resb.model.Order
-//
-//@Entity(tableName = "orders")
-//data class OrderEntity(
-//    @PrimaryKey
-//    val id: Long = 0,
-//    val tableId: Long,
-//    val waiterId: Long,
-//    val status: String,
-//    val kotNumber: String,
-//    val totalAmount: Double,
-//    val createdAt: String,
-//    val syncStatus: SyncStatus = SyncStatus.PENDING_SYNC,
-//    val lastModified: Long = System.currentTimeMillis(),
-//    val tempId: String? = null // Used for locally created orders that don't have a server ID yet
-//) {
-//    companion object {
-//        fun fromModel(order: Order, syncStatus: SyncStatus = SyncStatus.SYNCED): OrderEntity {
-//            return OrderEntity(
-//                id = order.id,
-//                tableId = order.tableId,
-//                waiterId = order.waiterId,
-//                status = order.status,
-//                kotNumber = order.kotNumber,
-//                totalAmount = order.totalAmount,
-//                createdAt = order.createdAt,
-//                syncStatus = syncStatus
-//            )
-//        }
-//
-//        fun createLocalOrder(
-//            tableId: Long,
-//            waiterId: Long,
-//            kotNumber: String,
-//            status: String = "pending"
-//        ): OrderEntity {
-//            return OrderEntity(
-//                id = 0, // Will be updated when synced
-//                tableId = tableId,
-//                waiterId = waiterId,
-//                status = status,
-//                kotNumber = kotNumber,
-//                totalAmount = 0.0, // Will be calculated later
-//                createdAt = System.currentTimeMillis().toString(),
-//                syncStatus = SyncStatus.PENDING_SYNC,
-//                tempId = "local_${System.currentTimeMillis()}_${(Math.random() * 1000).toInt()}"
-//            )
-//        }
-//    }
-//
-//    fun toModel(): Order {
-//        return Order(
-//            id = this.id,
-//            tableId = this.tableId,
-//            waiterId = this.waiterId,
-//            status = this.status,
-//            kotNumber = this.kotNumber,
-//            totalAmount = this.totalAmount,
-//            createdAt = this.createdAt,
-//            updatedAt = this.lastModified.toString()
-//        )
-//    }
-//}
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "tbl_order_master",
+    foreignKeys = [
+        ForeignKey(entity = TblTable::class, parentColumns = ["table_id"], childColumns = ["table_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblKitchenCategory::class, parentColumns = ["kitchen_cat_id"], childColumns = ["kitchen_cat_id"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [
+        Index(value = ["table_id"]),
+        Index(value = ["kitchen_cat_id"]),
+    ]
+)
+data class TblOrderMaster(
+    @PrimaryKey val order_master_id: String,
+    val order_date: String?,
+    val order_create_time: String?,
+    val order_completed_time: String?,
+    val staff_id: Int?,
+    val is_dine_in: Boolean?,
+    val is_take_away: Boolean?,
+    val is_delivery: Boolean?,
+    val table_id: Int?,
+    val no_of_person: Int?,
+    val waiter_request_status: Boolean?,
+    val kitchen_response_status: Boolean?,
+    val order_status: String?,
+    val is_delivered: Boolean?,
+    val is_online: Boolean?,
+    val online_ref_no: String?,
+    val online_order_id: Int?,
+    val is_online_paid: Boolean?,
+    val is_merge: Boolean?,
+    val is_active: Boolean?,
+    val is_synced: Boolean = false,
+    val last_synced_at: Long? = null
+)

@@ -10,6 +10,8 @@ import com.warriortech.resb.model.PaymentModeData
 import com.warriortech.resb.model.RunningOrder
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.model.WeeklySalesData
+import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val dashboardRepository: DashboardRepository,
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -38,6 +41,10 @@ class DashboardViewModel @Inject constructor(
         data class Error(val message: String) : UiState()
     }
 
+    init {
+        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+
+    }
     fun loadDashboardData() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading

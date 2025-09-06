@@ -133,8 +133,8 @@ fun SettingsMainScreen(
                 SettingsModule.Customer,
                 SettingsModule.Language,
                 SettingsModule.ChangePassword,
-                SettingsModule.ResetData
-
+                SettingsModule.ResetData,
+                SettingsModule.ChangeCompany
             )
     }
 
@@ -280,7 +280,9 @@ fun SettingsModuleScreen(
         is SettingsModule.ChangePassword -> {
             navController.navigate("change_password")
         }
-
+        is SettingsModule.ChangeCompany -> {
+            navController.navigate("change_company")
+        }
         is SettingsModule.ResetData -> {
             navController.navigate("reset_data")
         }
@@ -300,6 +302,14 @@ sealed class SettingsModule(
         "Manage dining areas and zones",
         Icons.Default.LocationOn,
         listOf("name","status")
+    )
+
+    object ChangeCompany : SettingsModule(
+        "change_company",
+        "Change Company",
+        "Change Company",
+        Icons.Default.Business,
+        listOf("company_id")
     )
 
     object ChangePassword: SettingsModule(

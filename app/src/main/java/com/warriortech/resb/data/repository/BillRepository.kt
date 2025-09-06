@@ -77,22 +77,29 @@ class BillRepository@Inject constructor(
                 note = "",
                 is_active = 1L
             )
-            val response = apiService.addPayment(request,sessionManager.getCompanyCode()?:"")
-            if (response.isSuccessful) {
-                val res = response.body()!!
-                apiService.updateTableAvailability(res.order_master.table_id, "AVAILABLE", sessionManager.getCompanyCode()?:"")
-                apiService.updateOrderStatus(orderMasterId, "COMPLETED", sessionManager.getCompanyCode()?:"")
-                emit(Result.success(res))
-//                val billResponse =
-//                Log.d("BILLTAG", "placeBill: $billResponse")
-//                if (billResponse!=null) {
-//                    emit(Result.success(billResponse))
-//                } else {
-//                    emit(Result.failure(Exception("Failed to create bill: Response body is null.")))
-//                    return@flow
-//                }
-            } else {
-                emit(Result.failure(Exception("Error: ${response.message()}")))
+            val check = apiService.checkBillExists(orderMasterId, sessionManager.getCompanyCode()?:"")
+            val checkExist= check.body()?.data == true
+            if(checkExist) {
+                val response = apiService.addPayment(request, sessionManager.getCompanyCode() ?: "")
+                if (response.isSuccessful) {
+                    val res = response.body()!!
+                    apiService.updateTableAvailability(
+                        res.order_master.table_id,
+                        "AVAILABLE",
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                    apiService.updateOrderStatus(
+                        orderMasterId,
+                        "COMPLETED",
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                    emit(Result.success(res))
+                } else {
+                    emit(Result.failure(Exception("Error: ${response.message()}")))
+                }
+            }
+        else{
+                emit(Result.failure(Exception(check.body()?.message?:"Something went wrong")))
             }
     }
 

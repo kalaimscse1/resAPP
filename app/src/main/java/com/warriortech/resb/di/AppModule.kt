@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
 import com.warriortech.resb.ai.AIRepository
+import com.warriortech.resb.data.local.MIGRATION_2_3
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.dao.ModifierDao
@@ -57,7 +58,7 @@ object AppModule {
             RestaurantDatabase::class.java,
             "kts-resb"
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(MIGRATION_2_3)
             .build()
     }
 

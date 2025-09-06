@@ -15,6 +15,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,6 +58,7 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.TextPrimary
 import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.util.AnimatedSnackbarDemo
+import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.scrollToBottomSmooth
@@ -163,7 +166,7 @@ fun CounterScreen(
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = "Total: ₹${String.format("%.2f", totalAmount)}",
+                            text = "Total: ${CurrencySettings.format(totalAmount)}",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -272,10 +275,13 @@ fun CounterScreen(
                 val filteredMenuItems =
                     if (selectedCategory != null && selectedCategory == "FAVOURITES") {
                         menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
-                    } else if (selectedCategory != null) {
-                        menuItems.filter { it.item_cat_name == selectedCategory }
-                    } else {
+                    } else if (selectedCategory != null && selectedCategory == "ALL") {
                         menuItems
+                    }else if (selectedCategory != null) {
+                        menuItems.filter { it.item_cat_name == selectedCategory } // Show all items if "ALL" is selected
+                    }
+                    else {
+                        menuItems // No filtering if no category is selected
                     }
 
                 if (menuItems.isEmpty()) {
@@ -293,7 +299,7 @@ fun CounterScreen(
                     val bottomBarHeight = 80.dp
 
                     // 👇 Reusable helper: auto-correct when last item overlaps BottomBar
-                    listState.ensureLastItemVisible(bottomBarHeight)
+//                    listState.ensureLastItemVisible(bottomBarHeight)
 
                     Column(
                         modifier = Modifier
@@ -477,7 +483,7 @@ fun CounterMenuItemCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "₹${String.format("%.2f", menuItem.rate)}",
+                            CurrencySettings.format(menuItem.rate),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -488,7 +494,9 @@ fun CounterMenuItemCard(
                             modifier = Modifier
                                 .size(36.dp)
                                 .border(1.dp, ErrorRed, RoundedCornerShape(4.dp))
-                                .clickable { onRemoveItem() },
+                                .pointerInput(Unit) {
+                                    detectTapGestures { onRemoveItem()}
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -501,21 +509,21 @@ fun CounterMenuItemCard(
                         Spacer(modifier = Modifier.padding(horizontal = 2.dp))
                         // ---- QUANTITY ----
 //                        if (quantity > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                        RoundedCornerShape(4.dp)
-                                    ), contentAlignment = Alignment.Center
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                    RoundedCornerShape(4.dp)
+                                ), contentAlignment = Alignment.Center
+                        )
+                        {
+                            Text(
+                                text = quantity.toString(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
-                            {
-                                Text(
-                                    text = quantity.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        }
 //                        } else {
 //                            Spacer(modifier = Modifier.width(36.dp))
 //                        }
@@ -525,7 +533,9 @@ fun CounterMenuItemCard(
                             modifier = Modifier
                                 .size(36.dp)
                                 .border(1.dp, DarkGreen, RoundedCornerShape(4.dp))
-                                .clickable { onAddItem() },
+                                .pointerInput(Unit) {
+                                    detectTapGestures { onAddItem() }
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -538,20 +548,21 @@ fun CounterMenuItemCard(
                         Spacer(modifier = Modifier.padding(horizontal = 16.dp))
                         // ---- MODIFIER BUTTON ----
 
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .border(1.dp, BluePrimary, RoundedCornerShape(4.dp))
-                                .clickable { onModifierClick() },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "A",
-                                color = DarkGreen,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+
+//                        Box(
+//                            modifier = Modifier
+//                                .size(36.dp)
+//                                .border(1.dp, BluePrimary, RoundedCornerShape(4.dp))
+//                                .clickable { onModifierClick() },
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Text(
+//                                "A",
+//                                color = DarkGreen,
+//                                style = MaterialTheme.typography.titleMedium,
+//                                fontWeight = FontWeight.Bold
+//                            )
+//                        }
 //                        IconButton(
 //                            onClick = onModifierClick
 //                        ) {
@@ -585,12 +596,12 @@ fun CounterMenuItemCard(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "$quantity × ₹${String.format("%.2f", menuItem.rate)}",
+                            text = "$quantity × ${CurrencySettings.format( menuItem.rate)}",
                             style = MaterialTheme.typography.bodyMedium
                         )
 
                         Text(
-                            text = "₹${String.format("%.2f", quantity * menuItem.rate)}",
+                            text = CurrencySettings.format(quantity * menuItem.rate),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )

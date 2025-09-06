@@ -1,15 +1,13 @@
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.data.local.dao.MenuItemDao
-import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
+import com.warriortech.resb.data.local.entity.TblMenuItem
 import com.warriortech.resb.model.Menu
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblMenuItemRequest
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.screens.SettingsModule
 import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -68,10 +66,6 @@ class MenuItemRepository @Inject constructor(
         }
     }
 
-    fun getMenuItemsByCategory(categoryId: Long): Flow<List<TblMenuItemResponse>> {
-        return menuItemDao.getMenuItemsByCategory(categoryId.toString())
-            .map { entities -> entities.map { it.toModel() } }
-    }
 
     suspend fun getMenus(): List<Menu>{
         val response = apiService.getAllMenus(sessionManager.getCompanyCode()?:"")
@@ -132,47 +126,40 @@ class MenuItemRepository @Inject constructor(
 }
 
 // Extension functions
-private fun TblMenuItemResponse.toEntity() = MenuItemEntity(
-    menu_item_id = menu_item_id,
+private fun TblMenuItemResponse.toEntity() = TblMenuItem(
+    menu_item_id = menu_item_id.toInt(),
     menu_item_name = menu_item_name,
     menu_item_name_tamil = menu_item_name_tamil,
     rate = rate,
-    item_cat_name = item_cat_name,
     image = image,
-    syncStatus = SyncStatus.SYNCED,
     ac_rate = ac_rate,
     parcel_rate = parcel_rate,
     is_available = is_available,
-    item_cat_id = item_cat_id,
+    item_cat_id = item_cat_id.toInt(),
     parcel_charge = parcel_charge,
-    tax_id = tax_id,
-    tax_name = tax_name,
-    tax_percentage = tax_percentage,
-    kitchen_cat_id = kitchen_cat_id,
-    kitchen_cat_name = kitchen_cat_name,
+    tax_id = tax_id.toInt(),
+    kitchen_cat_id = kitchen_cat_id.toInt(),
     stock_maintain = stock_maintain,
     rate_lock = rate_lock,
-    unit_id = unit_id,
-    unit_name = unit_name,
-    min_stock = min_stock,
+    unit_id = unit_id.toInt(),
+    min_stock = min_stock.toInt(),
     hsn_code = hsn_code,
-    order_by = order_by,
-    is_inventory = is_inventory,
+    order_by = order_by.toInt(),
+    is_inventory = is_inventory.toInt(),
     is_raw = is_raw,
     cess_specific = cess_specific,
-    cess_per = cess_per,
     is_favourite = is_favourite,
     menu_item_code = menu_item_code,
-    menu_id = menu_id,
-    menu_name = menu_name,
-    is_active = is_active,
+    menu_id = menu_id.toInt(),
+    is_active = is_active==1L,
+    preparation_time = preparation_time.toInt()
 )
 
-private fun MenuItemEntity.toModel() = TblMenuItemResponse(
-    menu_item_id = this.menu_item_id,
-    menu_item_name = this.menu_item_name,
-    menu_item_name_tamil = this.menu_item_name_tamil,
-    rate = this.rate,
+private fun TblMenuItem.toModel() = TblMenuItemResponse(
+    menu_item_id = this.menu_item_id.toLong(),
+    menu_item_name = this.menu_item_name.toString(),
+    menu_item_name_tamil = this.menu_item_name_tamil.toString(),
+    rate = this.rate!!,
     item_cat_name = this.item_cat_name,
     image = this.image.toString(),
     ac_rate = this.ac_rate,
@@ -200,5 +187,6 @@ private fun MenuItemEntity.toModel() = TblMenuItemResponse(
     menu_item_code = this.menu_item_code,
     menu_id = this.menu_id,
     menu_name = this.menu_name,
-    is_active = this.is_active
+    is_active = this.is_active,
+    preparation_time = this.preparation_time
 )

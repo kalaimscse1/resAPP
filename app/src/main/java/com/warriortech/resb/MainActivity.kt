@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Payment
@@ -97,6 +98,7 @@ import javax.inject.Inject
 import androidx.core.content.edit
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.warriortech.resb.model.KotResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.RetrofitClient.apiService
@@ -138,51 +140,16 @@ import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
 import com.warriortech.resb.screens.ItemWiseBillScreen
 import com.warriortech.resb.screens.ItemWiseReportScreen
+import com.warriortech.resb.screens.KotModifyScreen
+import com.warriortech.resb.screens.KotReportScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.SubscriptionManager
+import com.warriortech.resb.screens.settings.ChangeCompanyScreen
 
-
-/**
- * MainActivity is the entry point of the RESB application.
- * It sets up the main UI and handles navigation between different screens.
- * It also initializes the network monitor and sync manager to manage network state and data synchronization.
- * * The activity uses Jetpack Compose for UI rendering and Hilt for dependency injection.
- * * @property networkMonitor Monitors the network state to determine if the device is online or offline.
- * * @property syncManager Manages data synchronization tasks when the device is online.
- * * @constructor Creates an instance of MainActivity.
- * * * This activity handles the main navigation of the app, including login, dashboard, menu, orders, settings, and more.
- * * It also manages the responsive design for different screen sizes and orientations.
- * * * The activity uses a drawer for navigation on larger screens and a modal drawer on smaller screens.
- * * It also handles language changes and configuration changes gracefully.
- * * @see [ResbTheme] for theming
- * * @see [NetworkMonitor] for network state monitoring
- * * @see [SyncManager] for data synchronization
- * * @see [LocaleHelper] for handling locale changes
- * * @see [AppNavigation] for setting up the navigation graph
- * * @see [DrawerContent] for the navigation drawer UI
- * * @see [NetworkStatusBar] for displaying network status
- * * @see [SessionManager] for managing user sessions
- * * @see [Table] for representing tables in the restaurant
- * * @see [TblOrderDetailsResponse] for order details response model
- * * * This activity is annotated with @AndroidEntryPoint to enable Hilt dependency injection.
- * * @AndroidEntryPoint annotation is used to enable Hilt dependency injection in this activity.
- * * @see [Hilt Android documentation](https://developer.android.com/training/dependency-injection/hilt-android)
- * * @see [Hilt Navigation Compose documentation](https://developer.android.com/training/dependency-injection/hilt-android#navigation-compose)
- * * @see [Jetpack Compose documentation](https://developer.android.com/jetpack/compose)
- * * @see [Navigation Compose documentation](https://developer.android.com/jetpack/compose/navigation)
- * * @see [Material Design Components](https://material.io/develop/android/components/)
- * * @see [AndroidX Compose documentation](https://developer.android.com/jetpack/compose/documentation)
- * * @see [AndroidX Navigation documentation](https://developer.android.com/jetpack/androidx/releases/navigation)
- * * @see [AndroidX Hilt documentation](https://developer.android.com/jetpack/androidx/releases/hilt)
- * * @see [AndroidX Lifecycle documentation](https://developer.android.com/jetpack/androidx/releases/lifecycle)
- * * @see [AndroidX Core documentation](https://developer.android.com/jetpack/androidx/releases/core)
- * * @see [AndroidX Compose Material documentation](https://developer.android.com/jetpack/androidx/releases/compose-material)
- * * @see [AndroidX Compose Material3 documentation](https://developer.android.com/jetpack/androidx/releases/compose-material3)
- */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -376,6 +343,7 @@ fun AppNavigation(
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
+    var kotRes by remember { mutableStateOf<KotResponse?>(null) }
 
     // Check subscription status
     LaunchedEffect(Unit) {
@@ -401,7 +369,8 @@ fun AppNavigation(
                 },
                 onRegisterClick = {
                     navController.navigate("registration")
-                }
+                },
+                sessionManager = sessionManager
             )
         }
 
@@ -771,6 +740,32 @@ fun AppNavigation(
                 drawerState = drawerState
             )
         }
+
+        composable("change_company") {
+            ChangeCompanyScreen(
+                onBackPressed = { navController.popBackStack() },
+                sessionManager = sessionManager,
+                navController = navController
+            )
+        }
+
+        composable("kot_report") {
+            KotReportScreen(
+                onEditClick = {
+                    navController.navigate("kot_modify/${it.order_master_id}")
+                    kotRes = it
+                },
+                drawerState = drawerState
+            )
+        }
+        composable("kot_modify/{orderId}") { backStackEntry ->
+            val orderId = backStackEntry.arguments?.getString("orderId") ?: ""
+            KotModifyScreen(
+                navController = navController,
+                orderMasterId = orderId,
+                kotResponse = kotRes
+            )
+        }
     }
 }
 
@@ -790,6 +785,7 @@ fun DrawerContent(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val role = sessionManager.getUser()?.role ?: ""
     val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
+    val companyName = sessionManager.getRestaurantProfile()?.company_name ?: "Resb"
 
     // 👇 Single state instead of 4 booleans
     val (expandedMenu, setExpandedMenu) = remember { mutableStateOf(ExpandedMenu.NONE) }
@@ -843,13 +839,14 @@ fun DrawerContent(
                     if (!isCollapsed) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
+
                             Text(
-                                sessionManager.getUser()?.staff_name ?: "",
+                                companyName,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                sessionManager.getUser()?.role ?: "",
-                                style = MaterialTheme.typography.bodyMedium
+                                "${sessionManager.getUser()?.staff_name ?: ""}-${sessionManager.getUser()?.role ?: ""}",
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
@@ -1018,11 +1015,12 @@ fun DrawerContent(
                         "orders",
                         "item_wise",
                         "category_wise",
-                        "due_reports"
+                        "due_reports",
+                        "kot_report"
                     ),
                     onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = subMenuColors
+                    colors = drawerItemColors
                 )
                 AnimatedVisibility(expandedMenu == ExpandedMenu.REPORTS) {
                     Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
@@ -1073,6 +1071,14 @@ fun DrawerContent(
 //                            colors = subMenuColors
 //                        )
 
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("KOT Report") else Text("") },
+                            icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                            selected = currentDestination?.route == "kot_report",
+                            onClick = { onDestinationClicked("kot_report") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
                     }
                 }
             }

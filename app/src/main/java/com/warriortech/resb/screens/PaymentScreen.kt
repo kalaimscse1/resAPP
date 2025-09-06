@@ -34,6 +34,8 @@ import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
 
@@ -85,7 +87,8 @@ fun PaymentScreen(
                     Text(
                         "Complete Payment",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = SurfaceLight
                     ) 
                 },
                 navigationIcon = {
@@ -97,13 +100,12 @@ fun PaymentScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = SurfaceLight
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = PrimaryGreen
                 )
             )
         },

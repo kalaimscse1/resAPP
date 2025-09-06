@@ -1,6 +1,8 @@
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
@@ -43,6 +45,24 @@ class MenuCategoryRepository @Inject constructor(
         val response = apiService.deleteMenuCategory(categoryId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete category: ${response.message()}")
+        }
+    }
+
+    suspend fun getAllKitchenCategories(): List<KitchenCategory> {
+        val response = apiService.getAllKitchenCategories(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch categories: ${response.message()}")
+        }
+    }
+
+    suspend fun getAllUnits(): List<TblUnit> {
+        val response = apiService.getAllUnits(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyList()
+        } else {
+            throw Exception("Failed to fetch units: ${response.message()}")
         }
     }
 }

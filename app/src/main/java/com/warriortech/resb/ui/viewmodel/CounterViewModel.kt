@@ -143,6 +143,7 @@ class CounterViewModel @Inject constructor(
                             _menuState.value = MenuUiState.Success(filteredMenuItems)
                             val data = buildList {
                                 add("FAVOURITES")
+                                add("ALL")
                                 addAll(filteredMenuItems.map { it.item_cat_name }.distinct())
                             }
                             _categories.value = data
@@ -153,6 +154,7 @@ class CounterViewModel @Inject constructor(
                             _menuState.value = MenuUiState.Success(menuItems)
                             val data = buildList {
                                 add("FAVOURITES")
+                                add("ALL")
                                 addAll(menuItems.map { it.item_cat_name }.distinct())
                             }
                             _categories.value = data

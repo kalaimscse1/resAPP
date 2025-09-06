@@ -25,7 +25,10 @@ import com.warriortech.resb.model.Role
 import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblStaff
 import com.warriortech.resb.model.TblStaffRequest
+import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
 import com.warriortech.resb.ui.viewmodel.StaffViewModel
 import com.warriortech.resb.util.AreaDropdown
@@ -64,14 +67,15 @@ fun StaffSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Staff Settings") },
+                title = { Text("Staff Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GradientStart
+                    containerColor = PrimaryGreen
                 )
             )
         },
@@ -79,7 +83,8 @@ fun StaffSettingsScreen(
             FloatingActionButton(
                 onClick = { showAddDialog = true }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Staff")
+                Icon(Icons.Default.Add, contentDescription = "Add Staff",
+                    tint = SurfaceLight)
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -146,7 +151,7 @@ fun StaffCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Card(
+    MobileOptimizedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(

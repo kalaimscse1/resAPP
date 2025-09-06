@@ -84,6 +84,8 @@ import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.TextSecondary
 import com.warriortech.resb.ui.theme.ghostWhite
+import com.warriortech.resb.util.CurrencySettings
+import kotlinx.coroutines.delay
 
 
 //
@@ -109,8 +111,12 @@ fun SelectionScreen(
     val role = sessionManager.getUser()?.role ?: ""
     val areaId = sessionManager.getUser()?.area_name ?: ""
     var selectedArea by remember { mutableStateOf<String?>(areaId) }
+
     LaunchedEffect(Unit) {
-        viewModel.loadTables()
+        while (true) {
+            viewModel.loadTables()
+            delay( 5*1000) // 1 minutes
+        }
     }
 
     // Update selected area and section whenever the page changes
@@ -430,7 +436,7 @@ fun TableItem(table: TableStatusResponse, onClick: () -> Unit, sessionManager: S
                 Spacer(modifier = Modifier.height(4.dp))
                 if (table.grandTotal > 0) {
                     Text(
-                        text = sessionManager.getRestaurantProfile()?.currency + " " + table.grandTotal,
+                        text = CurrencySettings.format(table.grandTotal),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = ErrorRed

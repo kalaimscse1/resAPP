@@ -6,7 +6,9 @@ import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TableStatusResponse
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.ConnectionState
+import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.NetworkMonitor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class TableViewModel @Inject constructor(
     private val tableRepository: TableRepository,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     // Network connection state
@@ -41,6 +44,11 @@ class TableViewModel @Inject constructor(
 
     // Selected section
     private val _selectedSection = MutableStateFlow<Long?>(null)
+
+    init {
+        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+
+    }
 
     fun loadTables(){
         // Load tables when section changes or just all tables if no section selected

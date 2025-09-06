@@ -219,7 +219,8 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             menu_item_code = this.menu_item_code,
             menu_id = this.menu_id,
             menu_name = this.menu_name,
-            is_active = this.is_active
+            is_active = this.is_active,
+            preparation_time = this.preparation_time
         )
     }
 

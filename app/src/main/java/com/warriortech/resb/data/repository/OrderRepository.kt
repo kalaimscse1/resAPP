@@ -15,8 +15,11 @@ import com.warriortech.resb.util.getCurrentDateModern
 import com.warriortech.resb.util.getCurrentTimeModern
 import kotlinx.coroutines.flow.*
 import retrofit2.Response
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.map
 
 /**
  * Repository for Order-related API operations
@@ -141,22 +144,23 @@ class OrderRepository @Inject constructor(
                     order_details_id = 0, // Backend should generate this or handle it
                     kot_number = newKotNumber, // KOT number for this specific batch
                     menu_item_id = item.menuItem.menu_item_id,
-                    rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice else cess.basePrice, // Rate per unit (base price)
+                    rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
+                    actual_rate = pricePerUnit,// Rate per unit (base price)
                     qty = item.quantity,
-                    total = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice * item.quantity else cess.basePrice * item.quantity, // Total base price for this item line
+                    total = if (item.menuItem.is_inventory !=1L) (taxAmount.basePrice * item.quantity).roundTo2() else (cess.basePrice * item.quantity).roundTo2(), // Total base price for this item line
                     tax_id = item.menuItem.tax_id,
                     tax_name = item.menuItem.tax_name,
-                    tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount * item.quantity  else cess.gstAmount* item.quantity,
+                    tax_amount = if (item.menuItem.is_inventory !=1L) (taxAmount.gstAmount * item.quantity).roundTo2()  else (cess.gstAmount* item.quantity).roundTo2(),
                     sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
-                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.sgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.sgst * item.quantity else 0.0},
+                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.sgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.sgst * item.quantity).roundTo2() else 0.0},
                     cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
-                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.cgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.cgst * item.quantity else 0.0}, // Adjust if your backend calculates differently
+                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.cgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0}, // Adjust if your backend calculates differently
                     igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
-                    igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount else 0.0 ,
+                    igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0 ,
                     cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
-                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.cessAmount * item.quantity else 0.0,
-                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) item.menuItem.cess_specific * item.quantity else 0.0 ,
-                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.totalPrice * item.quantity else taxAmount.totalPrice* item.quantity,
+                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
+                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0 ,
+                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.totalPrice * item.quantity).roundTo2() else (taxAmount.totalPrice* item.quantity).roundTo2(),
                     prepare_status = true, // Item needs preparation
                     item_add_mode = existingOpenOrderMasterId != null, // True if adding to an existing order
                     is_flag = false,
@@ -311,22 +315,23 @@ class OrderRepository @Inject constructor(
                     order_details_id = 0, // Backend should generate this or handle it
                     kot_number = newKotNumber, // KOT number for this specific batch
                     menu_item_id = item.menuItem.menu_item_id,
-                    rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice else cess.basePrice, // Rate per unit (base price)
+                    rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
+                    actual_rate = pricePerUnit,// Rate per unit (base price)
                     qty = item.quantity,
-                    total = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice * item.quantity else cess.basePrice * item.quantity, // Total base price for this item line
+                    total = if (item.menuItem.is_inventory !=1L) (taxAmount.basePrice * item.quantity).roundTo2() else (cess.basePrice * item.quantity).roundTo2(), // Total base price for this item line
                     tax_id = item.menuItem.tax_id,
                     tax_name = item.menuItem.tax_name,
-                    tax_amount = if (item.menuItem.is_inventory !=1L) taxAmount.gstAmount * item.quantity  else cess.gstAmount* item.quantity,
+                    tax_amount = if (item.menuItem.is_inventory !=1L) (taxAmount.gstAmount * item.quantity).roundTo2()  else (cess.gstAmount* item.quantity).roundTo2(),
                     sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
-                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.sgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.sgst * item.quantity else 0.0},
+                    sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.sgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.sgst * item.quantity).roundTo2() else 0.0},
                     cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
-                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") taxAmount.cgst * item.quantity else 0.0} else{if (tableStatus!="DELIVERY") cess.cgst * item.quantity else 0.0}, // Adjust if your backend calculates differently
+                    cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.cgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0}, // Adjust if your backend calculates differently
                     igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
-                    igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount else 0.0 ,
+                    igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0 ,
                     cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
-                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.cessAmount * item.quantity else 0.0,
-                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) item.menuItem.cess_specific * item.quantity else 0.0 ,
-                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) cess.totalPrice * item.quantity else taxAmount.totalPrice* item.quantity,
+                    cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
+                    cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0 ,
+                    grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.totalPrice * item.quantity).roundTo2() else (taxAmount.totalPrice* item.quantity).roundTo2(),
                     prepare_status = true, // Item needs preparation
                     item_add_mode = existingOpenOrderMasterId != null, // True if adding to an existing order
                     is_flag = false,
@@ -360,6 +365,84 @@ class OrderRepository @Inject constructor(
         }
     }
 
+    suspend fun updateOrderDetails(
+        orderId: String?,
+        items: List<OrderItem>,
+        kotNumber: Int,
+        tableStatus:String
+    ) : Flow<Result<List<TblOrderDetailsResponse>>> = flow {
+        val orderDetails = items.map { item->
+
+                val tax = apiService.getTaxSplit(item.menuItem.tax_id,sessionManager.getCompanyCode()?:"")
+                val cgst = tax[0].tax_split_percentage
+                val sgst= tax[1].tax_split_percentage
+                val totalAmountForTaxCalc = item.menuItem.actual_rate
+                val taxAmount = com.warriortech.resb.data.repository.calculateGst(
+                    totalAmountForTaxCalc,
+                    item.menuItem.tax_percentage.toDouble(),
+                    true,
+                    sgst.toDouble(),
+                    cgst.toDouble()
+                )
+                val cess = com.warriortech.resb.data.repository.calculateGstAndCess(
+                    totalAmountForTaxCalc,
+                    item.menuItem.tax_percentage.toDouble(),
+                    item.menuItem.cess_per.toDouble(),
+                    true,
+                    item.menuItem.cess_specific,
+                    sgst.toDouble(),
+                    cgst.toDouble()
+                )
+
+                OrderDetails(
+                order_master_id = orderId?:"", // Link to existing or new OrderMaster
+                order_details_id = item.orderDetailsId?:0L , // Backend should generate this or handle it
+                kot_number = kotNumber.toInt(), // KOT number for this specific batch
+                menu_item_id = item.menuItem.menu_item_id,
+                rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
+                actual_rate = item.menuItem.actual_rate,// Rate per unit (base price)
+                qty = item.quantity,
+                total = if (item.menuItem.is_inventory !=1L) (taxAmount.basePrice * item.quantity).roundTo2() else (cess.basePrice * item.quantity).roundTo2(), // Total base price for this item line
+                tax_id = item.menuItem.tax_id,
+                tax_name = item.menuItem.tax_name,
+                tax_amount = if (item.menuItem.is_inventory !=1L) (taxAmount.gstAmount * item.quantity).roundTo2()  else (cess.gstAmount* item.quantity).roundTo2(),
+                sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
+                sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.sgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.sgst * item.quantity).roundTo2() else 0.0},
+                cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
+                cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.cgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0}, // Adjust if your backend calculates differently
+                igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
+                igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0 ,
+                cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
+                cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
+                cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0 ,
+                grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.totalPrice * item.quantity).roundTo2() else (taxAmount.totalPrice* item.quantity).roundTo2(),
+                prepare_status = true, // Item needs preparation
+                item_add_mode = orderId != null, // True if adding to an existing order
+                is_flag = false,
+                merge_order_nos = "",
+                merge_order_tables = "", // Name of the current table
+                merge_pax = 0, // Pax of the current table
+                is_active = 1
+            )
+        }
+        val response = apiService.updateOrderDetails(orderDetails,sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            val response = response.body()
+            // If TblOrderResponse needs to be the master order, ensure orderMasterResponse is not null
+            if (response != null) {
+                // Update the KOT number on the response object to reflect the latest KOT generated
+                // Note: TblOrderResponse might represent the master, which can have multiple KOTs.
+                // This assignment implies the response primarily reflects the latest action.
+                emit(Result.success(response))
+            } else {
+                // This case should ideally be handled earlier by ensuring orderMasterResponse is fetched/created
+                emit(Result.failure(Exception("Order details created, but failed to package final response.")))
+            }
+        } else {
+            emit(Result.failure(Exception("Error creating OrderDetails: ${response.code()}, ${response.errorBody()?.string()}")))
+        }
+    }
+
     suspend fun getOpenOrderItemsForTable(tableId: Long): List<TblOrderDetailsResponse> {
         // This implementation needs to correctly find the OPEN OrderMaster(s) for the table
         // and then fetch all its details.
@@ -386,6 +469,17 @@ class OrderRepository @Inject constructor(
         return emptyList() // Return empty if no open order or error
     }
 
+
+    @SuppressLint("DefaultLocale")
+    fun Double.roundTo2(): Double {
+        val dec = sessionManager.getDecimalPlaces()
+        return if (dec==2L)
+            BigDecimal.valueOf(this).setScale(2, RoundingMode.HALF_UP).toDouble()
+        else if (dec==3L)
+            BigDecimal.valueOf(this).setScale(3, RoundingMode.HALF_UP).toDouble()
+        else
+            BigDecimal.valueOf(this).setScale(4, RoundingMode.HALF_UP).toDouble()
+    }
 
     /**
      * Get all orders
@@ -547,6 +641,11 @@ class OrderRepository @Inject constructor(
 
     suspend fun getOrdersByOrderId(lng: String): Response<List<TblOrderDetailsResponse>> {
         return apiService.getOpenOrderDetailsForTable(lng,sessionManager.getCompanyCode()?:"")
+    }
+
+    suspend fun deleteByid(orderDeatailId:Long): Int{
+        val response = apiService.deleteOrderDetails(orderDeatailId,sessionManager.getCompanyCode()?:"")
+       return if (response.isSuccessful) response.body()!! else 0
     }
 }
 data class GstResult(

@@ -1,5 +1,6 @@
 package com.warriortech.resb.network
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -27,6 +28,7 @@ class SessionManager @Inject constructor(
         private const val KEY_COMPANY_CODE = "company_code"
         private const val KEY_LAST_SYNC = "last_sync_timestamp"
         private const val KEY_GENERAL_SETTING = "general_setting"
+        private const val DECIMAL = "decimal_places"
     }
     
     private lateinit var prefs: SharedPreferences
@@ -98,6 +100,16 @@ class SessionManager @Inject constructor(
         } else {
             null
         }
+    }
+
+    fun saveDecimalPlaces(decimalPlaces: Long) {
+        checkInitialization()
+        prefs.edit { putLong(DECIMAL, decimalPlaces) }
+    }
+
+    fun getDecimalPlaces(): Long {
+        checkInitialization()
+        return prefs.getLong(DECIMAL, 2)
     }
 
     fun saveGeneralSetting(setting: GeneralSettings){
