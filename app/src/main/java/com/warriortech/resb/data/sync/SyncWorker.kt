@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.local.RestaurantDatabase
-import com.warriortech.resb.data.local.entity.MenuItemEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
-import com.warriortech.resb.data.local.entity.TableEntity
+import com.warriortech.resb.data.local.entity.TblMenuItem
+import com.warriortech.resb.data.local.entity.TblTable
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblMenuItemResponse
@@ -26,8 +26,6 @@ class SyncWorker(
 private val database = RestaurantDatabase.getDatabase(appContext)
     private val tableDao = database.tableDao()
     private val menuItemDao = database.menuItemDao()
-//    private val orderDao = database.orderDao()
-//    private val orderItemDao = database.orderItemDao()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -36,9 +34,6 @@ private val database = RestaurantDatabase.getDatabase(appContext)
 
             // Sync menu items
             syncMenuItems()
-
-            // Sync orders (most important, as they affect revenue)
-//            syncOrders()
 
             Result.success()
         } catch (e: Exception) {
@@ -110,117 +105,51 @@ private val database = RestaurantDatabase.getDatabase(appContext)
         }
     }
 
-    //    private suspend fun syncOrders() {
-//        // Get local orders that need to be synced
-//        val pendingOrders = orderDao.getOrdersBySyncStatus(SyncStatus.PENDING_SYNC)
-//
-//        for (order in pendingOrders) {
-//            try {
-//                // Check if this is a new order (tempId is not null and id is 0)
-//                if (order.tempId != null && order.id == 0L) {
-//                    // New order to be created on server
-//                    val orderItems = orderItemDao.getOrderItemsByTempOrderId(order.tempId)
-//                    val response = apiService.createOrder(order.toModel(), orderItems.map { it.toModel() })
-//
-//                    if (response.isSuccessful) {
-//                        val createdOrder = response.body()
-//                        if (createdOrder != null) {
-//                            // Update local order with server ID
-//                            orderDao.updateOrderWithServerId(order.tempId, createdOrder.id, SyncStatus.SYNCED)
-//                            // Update order items with server order ID
-//                            orderItemDao.updateOrderItemsWithOrderId(order.tempId, createdOrder.id)
-//                        }
-//                    }
-//                } else {
-//                    // Existing order to update on server
-//                    val response = apiService.updateOrder(order.id, order.toModel())
-//
-//                    if (response.isSuccessful) {
-//                        // Mark as synced
-//                        orderDao.updateOrderSyncStatus(order.id, SyncStatus.SYNCED)
-//                    } else {
-//                        // Mark as failed
-//                        orderDao.updateOrderSyncStatus(order.id, SyncStatus.SYNC_FAILED)
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                orderDao.updateOrderSyncStatus(order.id, SyncStatus.SYNC_FAILED)
-//                Timber.e(e, "Failed to sync order ${order.id}")
-//            }
-//        }
-//
-//        // For order items, we need to sync those that have pending status
-//        val pendingOrderItems = orderItemDao.getOrderItemsBySyncStatus(SyncStatus.PENDING_SYNC)
-//
-//        for (orderItem in pendingOrderItems) {
-//            try {
-//                // Skip items with temp order IDs - they're handled in the order sync
-//                if (orderItem.tempOrderId != null) continue
-//
-//                val response = apiService.updateOrderItem(orderItem.id, orderItem.toModel())
-//
-//                if (response.isSuccessful) {
-//                    // Mark as synced
-//                    orderItemDao.updateOrderItemSyncStatus(orderItem.id, SyncStatus.SYNCED)
-//                } else {
-//                    // Mark as failed
-//                    orderItemDao.updateOrderItemSyncStatus(orderItem.id, SyncStatus.SYNC_FAILED)
-//                }
-//            } catch (e: Exception) {
-//                orderItemDao.updateOrderItemSyncStatus(orderItem.id, SyncStatus.SYNC_FAILED)
-//                Timber.e(e, "Failed to sync order item ${orderItem.id}")
-//            }
-//        }
-//    }
-    private fun Table.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TableEntity {
-        return TableEntity(
+    private fun Table.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TblTable {
+        return TblTable(
             table_id = this.table_id,
+            area_id = this.area_id,
             table_name = this.table_name,
             seating_capacity = this.seating_capacity,
             is_ac = this.is_ac,
             table_status = this.table_status,
-            syncStatus = syncStatus,
-            area_id = this.area_id,
-            table_availabiltiy = this.table_availability,
-            is_active = true
+            table_availability = this.table_availability,
+            is_active = this.is_active,
+            is_synced = syncStatus == SyncStatus.SYNCED,
+            last_synced_at = if (syncStatus == SyncStatus.SYNCED) System.currentTimeMillis() else null
         )
     }
-    private fun TblMenuItemResponse.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): MenuItemEntity {
-        return return MenuItemEntity(
+    
+    private fun TblMenuItemResponse.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TblMenuItem {
+        return TblMenuItem(
             menu_item_id = this.menu_item_id,
+            menu_item_code = this.menu_item_code,
             menu_item_name = this.menu_item_name,
             menu_item_name_tamil = this.menu_item_name_tamil,
-            rate = this.rate,
-            item_cat_name = this.item_cat_name,
+            menu_id = this.menu_id.toInt(),
+            item_cat_id = this.item_cat_id.toInt(),
             image = this.image,
-            syncStatus = syncStatus,
+            rate = this.rate,
             ac_rate = this.ac_rate,
             parcel_rate = this.parcel_rate,
-            is_available = this.is_available,
-            item_cat_id = this.item_cat_id,
             parcel_charge = this.parcel_charge,
-            tax_id = this.tax_id,
-            tax_name = this.tax_name,
-            tax_percentage = this.tax_percentage,
-            kitchen_cat_id = this.kitchen_cat_id,
-            kitchen_cat_name = this.kitchen_cat_name,
-            stock_maintain = this.stock_maintain,
-            rate_lock = this.rate_lock,
-            unit_id = this.unit_id,
-            unit_name = this.unit_name,
-            min_stock = this.min_stock,
-            hsn_code = this.hsn_code,
-            order_by = this.order_by,
-            is_inventory = this.is_inventory,
-            is_raw = this.is_raw,
-            cess_per = this.cess_per,
-            cess_specific = this.cess_specific,
+            tax_id = this.tax_id.toInt(),
+            kitchen_cat_id = this.kitchen_cat_id.toInt(),
+            is_available = this.is_available,
             is_favourite = this.is_favourite,
-            menu_item_code = this.menu_item_code,
-            menu_id = this.menu_id,
-            menu_name = this.menu_name,
-            is_active = this.is_active,
-            preparation_time = this.preparation_time
+            stock_maintain = this.stock_maintain,
+            preparation_time = this.preparation_time.toInt(),
+            rate_lock = this.rate_lock,
+            unit_id = this.unit_id.toInt(),
+            min_stock = this.min_stock.toInt(),
+            hsn_code = this.hsn_code,
+            order_by = this.order_by.toInt(),
+            is_inventory = this.is_inventory.toInt(),
+            is_raw = this.is_raw,
+            cess_specific = this.cess_specific,
+            is_active = this.is_active == 1L,
+            is_synced = syncStatus == SyncStatus.SYNCED,
+            last_synced_at = if (syncStatus == SyncStatus.SYNCED) System.currentTimeMillis() else null
         )
     }
 

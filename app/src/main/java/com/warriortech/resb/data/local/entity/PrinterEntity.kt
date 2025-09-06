@@ -8,10 +8,10 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "tbl_printer",
     foreignKeys = [
-        ForeignKey(entity = TblAddOn::class, parentColumns = ["add_on_id"], childColumns = ["item_add_on_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblAddOn::class, parentColumns = ["add_on_id"], childColumns = ["kitchen_cat_id"], onDelete = ForeignKey.CASCADE),
     ],
     indices = [
-        Index(value = ["item_add_on_id"]),
+        Index(value = ["kitchen_cat_id"]),
     ]
 )
 data class TblPrinter(

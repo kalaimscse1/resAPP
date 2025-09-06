@@ -1,11 +1,6 @@
 package com.warriortech.resb.data.repository
 
-import com.warriortech.resb.data.local.dao.ModifierDao
-import com.warriortech.resb.data.local.dao.OrderItemModifierDao
-import com.warriortech.resb.data.local.entity.OrderItemModifierEntity
 import com.warriortech.resb.data.local.entity.SyncStatus
-import com.warriortech.resb.data.local.entity.toModel
-import com.warriortech.resb.data.local.entity.toEntity
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.OrderItemModifier
 import com.warriortech.resb.network.ApiService
@@ -22,59 +17,10 @@ import kotlin.let
 
 @Singleton
 class ModifierRepository @Inject constructor(
-    private val modifierDao: ModifierDao,
-    private val orderItemModifierDao: OrderItemModifierDao,
     private val apiService: ApiService,
     networkMonitor: NetworkMonitor,
     private val sessionManager: SessionManager
 ) : OfflineFirstRepository(networkMonitor) {
-
-    fun getAllAvailableModifiers(): Flow<List<Modifiers>> {
-        return modifierDao.getAllAvailableModifiers()
-            .map { entities -> entities.map { it.toModel() } }
-    }
-
-    fun getModifiersByCategory(categoryId: Long): Flow<List<Modifiers>> {
-        return modifierDao.getModifiersByCategory(categoryId)
-            .map { entities -> entities.map { it.toModel() } }
-    }
-
-    fun getModifiersByMenuItem(menuItemId: Long): Flow<List<Modifiers>> {
-        return modifierDao.getModifiersByMenuItem(menuItemId)
-            .map { entities -> entities.map { it.toModel() } }
-    }
-
-    suspend fun getModifierById(id: Long): Modifiers? {
-        return modifierDao.getModifierById(id)?.toModel()
-    }
-
-    suspend fun saveOrderItemModifiers(orderDetailId: Long, modifiers: List<Modifiers>) {
-        val modifierEntities = modifiers.map { modifier ->
-            OrderItemModifierEntity(
-                order_detail_id = orderDetailId,
-                modifier_id = modifier.add_on_id,
-                modifier_name = modifier.add_on_name,
-                price_adjustment = modifier.add_on_price
-            )
-        }
-        orderItemModifierDao.insertOrderItemModifiers(modifierEntities)
-    }
-
-    suspend fun getOrderItemModifiers(orderDetailId: Long): List<OrderItemModifier> {
-        return orderItemModifierDao.getModifiersByOrderDetailId(orderDetailId).map { entity ->
-            OrderItemModifier(
-                id = entity.id,
-                order_detail_id = entity.order_detail_id,
-                modifier_id = entity.modifier_id,
-                modifier_name = entity.modifier_name,
-                price_adjustment = entity.price_adjustment
-            )
-        }
-    }
-
-    suspend fun deleteOrderItemModifiers(orderDetailId: Long) {
-        orderItemModifierDao.deleteModifiersByOrderDetailId(orderDetailId)
-    }
 
     suspend fun getAllModifiers(): List<Modifiers>{
         val response = apiService.getAllModifiers(sessionManager.getCompanyCode()?:"")
@@ -85,19 +31,6 @@ class ModifierRepository @Inject constructor(
             emptyList()
         }
     }
-    suspend fun syncData() {
-        try {
-            val response = apiService.getAllModifiers(sessionManager.getCompanyCode()?:"")
-            if (response.isSuccessful) {
-                response.body()?.let { modifiers ->
-                    val modifierEntities = modifiers.map { it.toEntity() }
-                    modifierDao.insertModifiers(modifierEntities)
-                }
-            }
-        } catch (e: Exception) {
-            Timber.e(e,"Error Sync in modifier")
-        }
-    }
 
     suspend fun createModifier(modifier: Modifiers): Result<Modifiers> {
         return try {
@@ -105,7 +38,6 @@ class ModifierRepository @Inject constructor(
                 val response = apiService.createModifier(modifier,sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     response.body()?.let { createdModifier ->
-                        modifierDao.insertModifier(createdModifier.toEntity())
                         Result.success(createdModifier)
                     } ?: Result.failure(Exception("Empty response"))
                 } else {
@@ -113,10 +45,7 @@ class ModifierRepository @Inject constructor(
                 }
             } else {
                 // Store locally with pending sync status
-                val localModifier = modifier.copy(add_on_id = System.currentTimeMillis())
-                val entity = localModifier.toEntity().copy(syncStatus = SyncStatus.PENDING_SYNC)
-                modifierDao.insertModifier(entity)
-                Result.success(localModifier)
+                Result.success(modifier)
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -129,15 +58,12 @@ class ModifierRepository @Inject constructor(
                 val response = apiService.updateModifier(modifier.add_on_id, modifier,sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
                     response.body()?.let { updatedModifier ->
-                        modifierDao.updateModifier(updatedModifier.toEntity())
                         Result.success(updatedModifier)
                     } ?: Result.failure(Exception("Empty response"))
                 } else {
                     Result.failure(Exception("API Error: ${response.code()}"))
                 }
             } else {
-                val entity = modifier.toEntity().copy(syncStatus = SyncStatus.PENDING_UPDATE)
-                modifierDao.updateModifier(entity)
                 Result.success(modifier)
             }
         } catch (e: Exception) {
@@ -150,18 +76,11 @@ class ModifierRepository @Inject constructor(
             if (isOnline()) {
                 val response = apiService.deleteModifier(modifierId,sessionManager.getCompanyCode()?:"")
                 if (response.isSuccessful) {
-                    modifierDao.getModifierById(modifierId)?.let { entity ->
-                        modifierDao.deleteModifier(entity)
-                    }
                     Result.success(Unit)
                 } else {
                     Result.failure(Exception("API Error: ${response.code()}"))
                 }
             } else {
-                modifierDao.getModifierById(modifierId)?.let { entity ->
-                    val updatedEntity = entity.copy(syncStatus = SyncStatus.PENDING_DELETE)
-                    modifierDao.updateModifier(updatedEntity)
-                }
                 Result.success(Unit)
             }
         } catch (e: Exception) {
@@ -169,48 +88,6 @@ class ModifierRepository @Inject constructor(
         }
     }
 
-    // Predefined modifiers for common use cases
-//    suspend fun initializeDefaultModifiers() {
-//        val defaultModifiers = listOf(
-//            Modifiers(
-//                add_on_id = 1,
-//                add_on_name = "Less Sugar",
-//                modifier_type = ModifierType.REMOVAL,
-//                price_adjustment = 0.0
-//            ),
-//            Modifiers(
-//                modifier_id = 2,
-//                modifier_name = "No Sugar",
-//                modifier_name_tamil = "சர்க்கரை இல்லாமல்",
-//                modifier_type = ModifierType.REMOVAL,
-//                price_adjustment = 0.0
-//            ),
-//            Modifiers(
-//                modifier_id = 3,
-//                modifier_name = "Extra Strong",
-//                modifier_name_tamil = "கூடுதல் வலிமை",
-//                modifier_type = ModifierType.ADDITION,
-//                price_adjustment = 5.0
-//            ),
-//            Modifiers(
-//                modifier_id = 4,
-//                modifier_name = "Less Milk",
-//                modifier_name_tamil = "குறைந்த பால்",
-//                modifier_type = ModifierType.REMOVAL,
-//                price_adjustment = 0.0
-//            ),
-//            Modifiers(
-//                modifier_id = 5,
-//                modifier_name = "Extra Hot",
-//                modifier_name_tamil = "அதிக சூடு",
-//                modifier_type = ModifierType.ADDITION,
-//                price_adjustment = 0.0
-//            )
-//        )
-//
-//        val entities = defaultModifiers.map { it.toEntity() }
-//        modifierDao.insertModifiers(entities)
-//    }
     fun getModifierGroupsForMenuItem(menuItemId: Long): Flow<Result<List<Modifiers>>> = flow {
         try {
             val tenantId = sessionManager.getCompanyCode()
@@ -234,18 +111,11 @@ class ModifierRepository @Inject constructor(
 
     suspend fun getModifiersByMenuItems(menuItemId: Long): Flow<Result<List<Modifiers>>> = flow {
         try {
-            // First try to get from local database
-            modifierDao.getModifiersByMenuItem(menuItemId).collect { localModifiers ->
-                val modifiers = localModifiers.map { entity ->
-                    Modifiers(
-                        add_on_id = entity.add_on_id,
-                        item_cat_id = entity.item_cat_id,
-                        add_on_name = entity.add_on_name,
-                        add_on_price = entity.add_on_price,
-                        is_active = entity.is_active
-                    )
-                }
-                emit(Result.success(modifiers))
+            val response = apiService.getModifiersByMenuItem(menuItemId, sessionManager.getCompanyCode()?:"")
+            if (response.isNotEmpty()) {
+                emit(Result.success(response))
+            } else {
+                emit(Result.success(emptyList()))
             }
         } catch (e: Exception) {
             Timber.e(e, "Error fetching modifiers for menu item")
@@ -253,6 +123,3 @@ class ModifierRepository @Inject constructor(
         }
     }
     }
-
-    // Mock data for demonstration - replace with actual API call
-//

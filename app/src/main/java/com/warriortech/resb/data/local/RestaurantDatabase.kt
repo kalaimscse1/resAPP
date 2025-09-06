@@ -84,9 +84,6 @@ abstract class RestaurantDatabase : RoomDatabase() {
     abstract fun tblCounterRelationDao(): TblCounterRelationDao
     abstract fun tblRoleRelationDao(): TblRoleRelationDao
 
-    //    abstract fun orderDao(): OrderDao
-//    abstract fun orderItemDao(): OrderItemDao
-    
     companion object {
         @Volatile
         private var INSTANCE: RestaurantDatabase? = null

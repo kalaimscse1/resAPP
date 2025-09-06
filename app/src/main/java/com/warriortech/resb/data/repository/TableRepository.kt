@@ -2,7 +2,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.local.entity.SyncStatus
-import com.warriortech.resb.data.local.entity.TableEntity
+import com.warriortech.resb.data.local.entity.TblTable as TblTableEntity
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TableStatusResponse
@@ -144,7 +144,19 @@ class TableRepository @Inject constructor(
     }
     suspend fun insertTable(table: TblTable) {
         safeApiCall {
-            val entity = table.toEntity()
+            // Convert TblTable to TblTableEntity for database storage
+            val entity = TblTableEntity(
+                table_id = table.table_id.toInt(),
+                area_id = table.area_id.toInt(),
+                table_name = table.table_name,
+                seating_capacity = table.seating_capacity,
+                is_ac = table.is_ac,
+                table_status = table.table_status,
+                table_availability = table.table_availability,
+                is_active = table.is_active,
+                is_synced = false,
+                last_synced_at = null
+            )
             tableDao.insertTable(entity)
             if (isOnline()) {
                 // Sync with remote if online
@@ -157,7 +169,19 @@ class TableRepository @Inject constructor(
     suspend fun getPendingSyncTables() = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
     suspend fun updateTable(table: TblTable) {
         safeApiCall {
-            val entity = table.toEntity()
+            // Convert TblTable to TblTableEntity for database storage
+            val entity = TblTableEntity(
+                table_id = table.table_id.toInt(),
+                area_id = table.area_id.toInt(),
+                table_name = table.table_name,
+                seating_capacity = table.seating_capacity,
+                is_ac = table.is_ac,
+                table_status = table.table_status,
+                table_availability = table.table_availability,
+                is_active = table.is_active,
+                is_synced = false,
+                last_synced_at = null
+            )
             tableDao.updateTable(entity)
             if (isOnline()) {
                 // Sync with remote if online
@@ -176,30 +200,19 @@ class TableRepository @Inject constructor(
     }
 
     suspend fun getTableById(tableId: Long): Table? {
-        return tableDao.getTableById(tableId)?.toModel() as Table?
+        val entity = tableDao.getTableById(tableId)
+        return entity?.let {
+            Table(
+                table_id = it.table_id.toLong(),
+                area_id = it.area_id?.toLong() ?: 0L,
+                area_name = "",
+                table_name = it.table_name ?: "",
+                seating_capacity = it.seating_capacity ?: 0,
+                is_ac = it.is_ac ?: "",
+                table_status = it.table_status ?: "",
+                table_availability = it.table_availability ?: "",
+                is_active = it.is_active ?: false
+            )
+        }
     }
 }
-
-// Extension functions for entity conversion
-private fun TblTable.toEntity() = TableEntity(
-    table_id = table_id,
-    table_name = table_name,
-    table_status = table_status,
-    area_id = area_id,
-    syncStatus = SyncStatus.SYNCED,
-    seating_capacity = seating_capacity,
-    is_ac = is_ac,
-    table_availabiltiy = table_availability,
-    is_active = is_active
-)
-
-private fun TableEntity.toModel() = TblTable(
-    table_id = table_id,
-    table_name = table_name,
-    table_status = table_status,
-    area_id = area_id,
-    seating_capacity = seating_capacity,
-    is_ac = is_ac,
-    table_availability = table_availabiltiy,
-    is_active = is_active
-)

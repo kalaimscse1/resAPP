@@ -7,8 +7,6 @@ import com.warriortech.resb.ai.AIRepository
 import com.warriortech.resb.data.local.MIGRATION_2_3
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
-import com.warriortech.resb.data.local.dao.ModifierDao
-import com.warriortech.resb.data.local.dao.OrderItemModifierDao
 import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.repository.AreaRepository
 import com.warriortech.resb.data.repository.DashboardRepository
@@ -352,18 +350,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideModifierDao(database: RestaurantDatabase): ModifierDao {
-        return database.modifierDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideOrderItemModifierDao(database: RestaurantDatabase): OrderItemModifierDao {
-        return database.orderItemModifierDao()
-    }
-
-    @Provides
-    @Singleton
     fun provideMenuRepository(
         apiService: ApiService,
         sessionManager: SessionManager
@@ -372,10 +358,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideModifierRepository(
-        modifierDao: ModifierDao,
-        orderItemModifierDao: OrderItemModifierDao,
         apiService: ApiService,
         networkMonitor: NetworkMonitor,
         sessionManager: SessionManager
-    ): ModifierRepository = ModifierRepository(modifierDao,orderItemModifierDao,apiService,networkMonitor,sessionManager)
+    ): ModifierRepository = ModifierRepository(apiService,networkMonitor,sessionManager)
 }
