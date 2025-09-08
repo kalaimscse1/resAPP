@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 object ReportExport {
+
     fun exportToPdf(context: Context, bills: List<TblBillingResponse>) {
         try {
             val pdfDir = File(context.getExternalFilesDir(null), "reports")
@@ -121,7 +122,7 @@ object ReportExport {
             summaryCell.backgroundColor = BaseColor.YELLOW
             table.addCell(summaryCell)
 
-            val totalBillCell = PdfPCell(Phrase("₹$totalBillAmount", boldFont))
+            val totalBillCell = PdfPCell(Phrase("$totalBillAmount", boldFont))
             totalBillCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalBillCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalBillCell)
@@ -149,6 +150,7 @@ object ReportExport {
 
     fun exportToExcel(context: Context, bills: List<TblBillingResponse>) {
         try {
+            
             val excelDir = File(context.getExternalFilesDir(null), "reports")
             if (!excelDir.exists()) excelDir.mkdirs()
 

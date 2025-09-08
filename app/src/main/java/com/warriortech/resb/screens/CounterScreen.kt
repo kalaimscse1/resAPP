@@ -62,6 +62,7 @@ import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.scrollToBottomSmooth
+import kotlinx.coroutines.delay
 
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,10 +101,13 @@ fun CounterScreen(
 
     // Observe when order is successfully placed and proceed to billing
     LaunchedEffect(orderDetailsResponse, isOrderPlaced) {
-        if (isOrderPlaced && orderDetailsResponse.isNotEmpty()) {
-            onProceedToBilling(orderDetailsResponse, orderId ?: "")
-            showConfirmDialog = false
-            isOrderPlaced = false
+        scope.launch {
+            if (isOrderPlaced && orderDetailsResponse.isNotEmpty()) {
+//                delay(2000)
+                onProceedToBilling(orderDetailsResponse, orderId ?: "")
+                showConfirmDialog = false
+                isOrderPlaced = false
+            }
         }
     }
 
@@ -211,74 +215,6 @@ fun CounterScreen(
                     CircularProgressIndicator()
                 }
             }
-
-//            is CounterViewModel.MenuUiState.Success -> {
-//                val menuItems = currentMenuState.menuItems
-//                val filteredMenuItems = if (selectedCategory != null) {
-//                    menuItems.filter { it.item_cat_name == selectedCategory }
-//                } else {
-//                    menuItems
-//                }
-//
-//                if (menuItems.isEmpty()) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(paddingValues),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                        Text("No menu items available")
-//                    }
-//                } else {
-//                    Column(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(paddingValues)
-//                            .background(color = Color.White)
-//                    ) {
-//                        // Categories TabRow
-//                        if (categories.isNotEmpty()) {
-//                            ScrollableTabRow(
-//                                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
-//                                backgroundColor = Color.White,
-//                                contentColor = TextPrimary
-//                            ) {
-//                                categories.forEachIndexed { index, category ->
-//                                    Tab(
-//                                        selected = selectedCategory == category,
-//                                        onClick = { viewModel.selectedCategory.value = category },
-//                                        text = { androidx.compose.material.Text(category) }
-//                                    )
-//                                }
-//                            }
-//                        }
-//
-//                        LazyColumn(
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                                .padding(top = 2.dp)
-//                                .background(color = Color.White),
-//                            verticalArrangement = Arrangement.spacedBy(8.dp),
-//                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-//                        ) {
-//                            item { Spacer(modifier = Modifier.padding(top = 5.dp)) }
-//
-//                            items(filteredMenuItems, key = { it.menu_item_id }) { menuItem ->
-//                                CounterMenuItemCard(
-//                                    menuItem = menuItem,
-//                                    quantity = selectedItems[menuItem] ?: 0,
-//                                    onAddItem = { viewModel.addItemToOrder(menuItem) },
-//                                    onRemoveItem = { viewModel.removeItemFromOrder(menuItem) },
-//                                    onModifierClick = {
-//                                        viewModel.showModifierDialog(menuItem)
-//                                    }
-//                                )
-//                            }
-//                            item { Spacer(modifier = Modifier.height(80.dp)) }
-//                        }
-//                    }
-//                }
-//            }
 
             is CounterViewModel.MenuUiState.Success -> {
 

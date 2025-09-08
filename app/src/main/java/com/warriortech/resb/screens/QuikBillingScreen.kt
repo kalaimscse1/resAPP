@@ -46,7 +46,6 @@ import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.MessageBox
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.geometry.Offset
@@ -159,11 +158,11 @@ fun ItemWiseBillScreen(
                             // Navigate immediately after placing order, no artificial delay
                             scope.launch {
                                 // Small delay to ensure order is placed before navigation
-                                delay(500) 
+                                delay(3000)
+                                onProceedToBilling(orderDetailsResponse, orderId ?: "")
                                 navController.navigate("billing_screen/${orderId ?: ""}") {
                                     launchSingleTop = true
                                 }
-                                onProceedToBilling(orderDetailsResponse, orderId ?: "")
                                 isProcessingOthers = false
                             }
                         }

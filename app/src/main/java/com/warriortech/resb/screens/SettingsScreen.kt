@@ -111,7 +111,7 @@ fun SettingsMainScreen(
             SettingsModule.PrinterSetting,
             SettingsModule.Modifiers,
             SettingsModule.ChangePassword,
-            SettingsModule.Support,
+//            SettingsModule.Support,
             SettingsModule.ResetData
         )
         else
@@ -134,7 +134,7 @@ fun SettingsMainScreen(
                 SettingsModule.Customer,
                 SettingsModule.Language,
                 SettingsModule.ChangePassword,
-                SettingsModule.Support,
+//                SettingsModule.Support,
                 SettingsModule.ResetData,
                 SettingsModule.ChangeCompany
             )

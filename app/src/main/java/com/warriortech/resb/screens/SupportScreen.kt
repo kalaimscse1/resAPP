@@ -129,7 +129,7 @@ fun AppOverviewCard(onVideoClick: (String) -> Unit) {
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "resAPP - Restaurant Billing System",
+                        text = "RES-B - Restaurant Billing System",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -145,7 +145,7 @@ fun AppOverviewCard(onVideoClick: (String) -> Unit) {
             
             Text(
                 text = "A comprehensive restaurant billing and management system built with modern Android technologies. " +
-                       "resAPP provides complete solution for restaurant operations including order management, " +
+                       "Res-B provides complete solution for restaurant operations including order management, " +
                        "billing, inventory tracking, payment processing, and detailed reporting.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Justify

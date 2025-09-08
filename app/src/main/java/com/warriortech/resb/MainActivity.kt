@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.TableRestaurant
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -1103,6 +1104,16 @@ fun DrawerContent(
                 )
             }
 
+            if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER", "CHEF")) {
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Support") else Text("") },
+                    icon = { Icon(Icons.Default.SupportAgent, contentDescription = null) },
+                    selected = currentDestination?.route == "support_screen",
+                    onClick = { onDestinationClicked("support_screen") },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = drawerItemColors
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
 
             // 🔹 Collapse Toggle
