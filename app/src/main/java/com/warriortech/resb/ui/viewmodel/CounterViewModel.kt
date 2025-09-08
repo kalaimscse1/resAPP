@@ -140,6 +140,7 @@ class CounterViewModel @Inject constructor(
                                 val endTime = menu?.end_time ?: 24f
                                 currentTime in startTime..endTime
                             }
+                            lastSuccessfulMenuItems = filteredMenuItems
                             _menuState.value = MenuUiState.Success(filteredMenuItems)
                             val data = buildList {
                                 add("FAVOURITES")
@@ -151,6 +152,7 @@ class CounterViewModel @Inject constructor(
                             selectedCategory.value = categories.value.firstOrNull()
                         }
                         else{
+                            lastSuccessfulMenuItems = menuItems
                             _menuState.value = MenuUiState.Success(menuItems)
                             val data = buildList {
                                 add("FAVOURITES")
@@ -234,6 +236,18 @@ class CounterViewModel @Inject constructor(
 
     fun clearOrder() {
         _selectedItems.value = emptyMap()
+    }
+    
+    private var lastSuccessfulMenuItems: List<TblMenuItemResponse> = emptyList()
+    
+    fun resetToSuccessState() {
+        // Reset to success state with the last known menu items
+        if (lastSuccessfulMenuItems.isNotEmpty()) {
+            _menuState.value = MenuUiState.Success(lastSuccessfulMenuItems)
+        } else {
+            // If no previous menu items, reload them
+            loadMenuItems()
+        }
     }
     
     fun setCurrentCounter(counter: Counters) {

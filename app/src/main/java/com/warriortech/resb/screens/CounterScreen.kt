@@ -114,7 +114,11 @@ fun CounterScreen(
                 isOrderPlaced = true
                 viewModel.placeOrder(2, "")
             },
-            onDismiss = { showConfirmDialog = false }
+            onDismiss = { 
+                showConfirmDialog = false
+                // Reset loading state if it was set
+                viewModel.resetToSuccessState()
+            }
         )
     }
     Scaffold(
