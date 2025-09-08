@@ -26,6 +26,6 @@ data class TblGeneralSettings(
     val is_waiter_allowed: Boolean?,
     val menu_show_in_time: Boolean?,
     val tamil_receipt_print: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

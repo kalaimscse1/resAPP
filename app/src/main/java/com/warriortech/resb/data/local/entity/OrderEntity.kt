@@ -37,6 +37,6 @@ data class TblOrderMaster(
     val is_online_paid: Boolean?,
     val is_merge: Boolean?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

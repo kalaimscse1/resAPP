@@ -20,6 +20,6 @@ data class TblTaxSplit(
     val tax_split_name: String?,
     val tax_split_percentage: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

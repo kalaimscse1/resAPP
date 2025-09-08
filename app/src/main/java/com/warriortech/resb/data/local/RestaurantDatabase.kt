@@ -79,7 +79,7 @@ abstract class RestaurantDatabase : RoomDatabase() {
                     context.applicationContext,
                     RestaurantDatabase::class.java,
                     "KTS_RESB"
-                )
+                ).fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance

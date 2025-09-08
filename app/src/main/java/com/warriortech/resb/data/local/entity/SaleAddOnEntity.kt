@@ -22,6 +22,6 @@ data class TblSaleAddOn(
     val menu_item_id: Int?,
     val status: Boolean?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

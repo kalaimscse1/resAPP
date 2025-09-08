@@ -12,6 +12,6 @@ data class TblMenu(
     val is_active: Boolean?,
     val start_time: Double?, // float -> Double
     val end_time: Double?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

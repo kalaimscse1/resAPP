@@ -33,6 +33,6 @@ data class TblStaff(
     val counter_id: Int?,
     val area_id: Int?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

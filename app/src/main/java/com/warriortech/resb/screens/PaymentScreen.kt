@@ -227,7 +227,8 @@ fun PaymentScreen(
                     item {
                         PaymentMethodCard(
                             uiState = uiState,
-                            onPaymentMethodChange = { viewModel.updatePaymentMethod(it) }
+                            onPaymentMethodChange = { viewModel.updatePaymentMethod(it) },
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -241,28 +242,28 @@ fun PaymentBottomBar(
     uiState: BillingPaymentUiState,
     onConfirmPayment: () -> Unit
 ) {
-    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val payingAmount = if (uiState.selectedPaymentMethod?.name == "OTHERS") {
+        uiState.cashAmount + uiState.cardAmount + uiState.upiAmount
+    } else {
+        uiState.amountToPay
+    }
+
     BottomAppBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                "Paying: ${CurrencySettings.format(uiState.amountToPay)}",
-                style = MaterialTheme.typography.titleMedium
-            )
-            MobileOptimizedButton(
+            Text("Paying: ${CurrencySettings.format(payingAmount)}", style = MaterialTheme.typography.titleMedium)
+            Button(
                 onClick = onConfirmPayment,
-                enabled = uiState.selectedPaymentMethod != null &&
-                        uiState.amountToPay > 0 &&
-                        uiState.paymentProcessingState == PaymentProcessingState.Idle,
-                text = "Confirm Payment"
-            )
+                enabled = uiState.selectedPaymentMethod != null && payingAmount > 0 &&
+                        uiState.paymentProcessingState == PaymentProcessingState.Idle
+            ) {
+                Text("Confirm Payment")
+            }
         }
     }
 }

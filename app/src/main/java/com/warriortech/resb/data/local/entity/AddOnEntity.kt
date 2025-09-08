@@ -21,6 +21,6 @@ data class TblAddOn(
     val add_on_name: String?,
     val add_on_price: Double?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

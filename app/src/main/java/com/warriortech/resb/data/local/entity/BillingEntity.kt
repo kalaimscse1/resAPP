@@ -45,6 +45,6 @@ data class TblBilling(
     val change: Double?,
     val note: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

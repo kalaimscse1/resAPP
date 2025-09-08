@@ -8,6 +8,6 @@ data class TblUnit(
     @PrimaryKey(autoGenerate = true) val unit_id: Int = 0,
     val unit_name: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

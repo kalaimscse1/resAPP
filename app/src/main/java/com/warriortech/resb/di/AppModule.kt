@@ -54,9 +54,8 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             RestaurantDatabase::class.java,
-            "kts-resb"
-        )
-            .addMigrations(MIGRATION_2_3)
+            "KTS-RESB"
+        )   .fallbackToDestructiveMigration()
             .build()
     }
 

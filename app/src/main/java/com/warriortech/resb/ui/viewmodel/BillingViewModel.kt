@@ -73,7 +73,10 @@ data class BillingPaymentUiState(
     val changeAmount: Double = 0.0,
     // General
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val cashAmount: Double = 0.0,
+    val cardAmount: Double = 0.0,
+    val upiAmount: Double = 0.0
 )
 
 @HiltViewModel
@@ -364,11 +367,28 @@ class BillingViewModel @Inject constructor(
         // Add validation if needed (e.g., amount <= total due)
         _uiState.update { it.copy(orderMasterId = orderId) }
     }
+    fun updateCashAmount(amount: Double) {
+        _uiState.update { it.copy(cashAmount = amount) }
+    }
+
+    fun updateCardAmount(amount: Double) {
+        _uiState.update { it.copy(cardAmount = amount) }
+    }
+
+    fun updateUpiAmount(amount: Double) {
+        _uiState.update { it.copy(upiAmount = amount) }
+    }
+
+
 
     fun processPayment() {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
-        val amount = currentState.amountToPay
+        val amount = if (paymentMethod?.name == "OTHERS") {
+            currentState.cashAmount + currentState.cardAmount + currentState.upiAmount
+        } else {
+            currentState.amountToPay
+        }
 
         if (paymentMethod == null) {
             _uiState.update { it.copy(errorMessage = "Please select a payment method.") }

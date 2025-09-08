@@ -5,6 +5,8 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.local.RestaurantDatabase
+import com.warriortech.resb.data.local.dao.MenuItemDao
+import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TblMenuItem
 import com.warriortech.resb.data.local.entity.TblTableEntity
@@ -25,11 +27,12 @@ class SyncWorker @AssistedInject constructor(
     @Assisted private val workerParams: WorkerParameters,
     private val apiService: ApiService,
     private val sessionManager: SessionManager,
-    private val database: RestaurantDatabase
+    private val menuDao: MenuItemDao,
+    private val tableDao: TableDao
 ) : CoroutineWorker(appContext, workerParams) {
 
-    private val tableDao = database.tableDao()
-    private val menuItemDao = database.menuItemDao()
+    val database: RestaurantDatabase = RestaurantDatabase.getDatabase(context = appContext)
+
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -65,7 +68,7 @@ class SyncWorker @AssistedInject constructor(
             val remoteTables = apiService.getAllTables(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
             val localTables = remoteTables.map { remote ->
                 tableDao.getTableById(remote.table_id)?.let { local ->
-                    if (local.is_synced != false) local else remote.toEntity()
+                    if (local.is_synced != SyncStatus.SYNCED) local else remote.toEntity()
                 } ?: remote.toEntity()
             }
             tableDao.insertTables(localTables)
@@ -78,11 +81,11 @@ class SyncWorker @AssistedInject constructor(
         try {
             val remoteMenuItems = apiService.getAllMenuItems(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
             val localMenuItems = remoteMenuItems.map { remote ->
-                menuItemDao.getMenuItemById(remote.menu_item_id)?.let { local ->
-                    if (local.is_synced != false) local else remote.toEntity()
+                menuDao.getMenuItemById(remote.menu_item_id)?.let { local ->
+                    if (local.is_synced != SyncStatus.SYNCED) local else remote.toEntity()
                 } ?: remote.toEntity()
             }
-            menuItemDao.insertMenuItems(localMenuItems)
+            menuDao.insertMenuItems(localMenuItems)
         } catch (e: Exception) {
             Timber.e(e, "Failed to fetch menu items from server")
         }
@@ -99,7 +102,7 @@ class SyncWorker @AssistedInject constructor(
             table_status = this.table_status,
             table_availability = this.table_availability,
             is_active = this.is_active,
-            is_synced = syncStatus == SyncStatus.SYNCED,
+            is_synced = SyncStatus.SYNCED,
             last_synced_at = if (syncStatus == SyncStatus.SYNCED) System.currentTimeMillis() else null
         )
     }
@@ -133,7 +136,7 @@ class SyncWorker @AssistedInject constructor(
             is_raw = this.is_raw,
             cess_specific = this.cess_specific,
             is_active = this.is_active == 1L,
-            is_synced = syncStatus == SyncStatus.SYNCED,
+            is_synced = SyncStatus.SYNCED,
             last_synced_at = if (syncStatus == SyncStatus.SYNCED) System.currentTimeMillis() else null
         )
     }
@@ -142,3 +145,71 @@ class SyncWorker @AssistedInject constructor(
         const val WORK_NAME = "SyncWorker"
     }
 }
+
+//package com.warriortech.resb.data.sync
+//
+//import android.content.Context
+//import androidx.hilt.work.HiltWorker
+//import androidx.work.CoroutineWorker
+//import androidx.work.WorkerParameters
+//import com.warriortech.resb.network.ApiService
+//import com.warriortech.resb.network.SessionManager
+//import com.warriortech.resb.data.local.RestaurantDatabase
+//import dagger.assisted.Assisted
+//import dagger.assisted.AssistedInject
+//import kotlinx.coroutines.Dispatchers
+//import kotlinx.coroutines.withContext
+//import timber.log.Timber
+//
+//@HiltWorker
+//class SyncWorker @AssistedInject constructor(
+//    @Assisted private val appContext: Context,
+//    @Assisted private val workerParams: WorkerParameters,
+//    private val apiService: ApiService,
+//    private val sessionManager: SessionManager,
+//    private val database: RestaurantDatabase
+//) : CoroutineWorker(appContext, workerParams) {
+//
+//    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+//        try {
+//            Timber.d("Starting sync...")
+//
+//            val token = sessionManager.getAuthToken()
+//            if (token.isNullOrEmpty()) {
+//                Timber.e("Sync failed: No auth token")
+//                return@withContext Result.retry()
+//            }
+//
+//            // 🔹 Example: sync menu
+//            val menuResponse = apiService.getMenu("Bearer $token")
+//            if (menuResponse.isSuccessful) {
+//                menuResponse.body()?.let { menuItems ->
+//                    database.menuItemDao().insertOrUpdate(menuItems)
+//                    Timber.d("Menu synced successfully")
+//                }
+//            } else {
+//                Timber.e("Failed to sync menu: ${menuResponse.code()}")
+//                return@withContext Result.retry()
+//            }
+//
+//            // 🔹 Example: sync tables
+//            val tableResponse = apiService.getTables("Bearer $token")
+//            if (tableResponse.isSuccessful) {
+//                tableResponse.body()?.let { tables ->
+//                    database.tableDao().insertOrUpdate(tables)
+//                    Timber.d("Tables synced successfully")
+//                }
+//            } else {
+//                Timber.e("Failed to sync tables: ${tableResponse.code()}")
+//                return@withContext Result.retry()
+//            }
+//
+//            Timber.d("Sync finished successfully")
+//            Result.success()
+//
+//        } catch (e: Exception) {
+//            Timber.e(e, "SyncWorker failed")
+//            Result.retry()
+//        }
+//    }
+//}

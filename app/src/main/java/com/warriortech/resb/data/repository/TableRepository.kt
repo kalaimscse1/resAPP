@@ -153,7 +153,7 @@ class TableRepository @Inject constructor(
                 table_status = table.table_status,
                 table_availability = table.table_availability,
                 is_active = table.is_active,
-                is_synced = false,
+                is_synced = SyncStatus.PENDING_SYNC,
                 last_synced_at = null
             )
             tableDao.insertTable(entity)
@@ -178,7 +178,7 @@ class TableRepository @Inject constructor(
                 table_status = table.table_status,
                 table_availability = table.table_availability,
                 is_active = table.is_active,
-                is_synced = false,
+                is_synced = SyncStatus.PENDING_SYNC,
                 last_synced_at = null
             )
             tableDao.updateTable(entity)

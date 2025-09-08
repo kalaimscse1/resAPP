@@ -8,6 +8,6 @@ data class TblKitchenCategory(
     @PrimaryKey(autoGenerate = true) val kitchen_cat_id: Int = 0,
     val kitchen_cat_name: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

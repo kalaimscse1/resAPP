@@ -8,6 +8,6 @@ data class TblArea(
     @PrimaryKey(autoGenerate = true) val area_id: Int,
     val area_name: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

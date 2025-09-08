@@ -19,6 +19,6 @@ data class TblCompany(
     val currency: String?,
     val tax_no: String?,
     val decimal_point: Int?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

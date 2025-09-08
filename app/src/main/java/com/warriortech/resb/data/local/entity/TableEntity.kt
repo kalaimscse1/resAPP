@@ -23,7 +23,7 @@ data class TblTableEntity(
     val table_status: String?,
     val table_availability: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )
 

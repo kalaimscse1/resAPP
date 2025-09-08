@@ -51,7 +51,7 @@ data class TblMenuItem(
     val is_raw: String?,
     val cess_specific: Double?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 ) {
     fun toModel(): TblMenuItemResponse {

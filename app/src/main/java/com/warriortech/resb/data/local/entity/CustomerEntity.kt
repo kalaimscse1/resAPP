@@ -13,6 +13,6 @@ data class TblCustomer(
     val gst_no: String?,
     val igst_status: Boolean?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

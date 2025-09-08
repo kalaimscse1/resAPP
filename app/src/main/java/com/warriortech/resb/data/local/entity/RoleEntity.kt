@@ -8,6 +8,6 @@ data class TblRole(
     @PrimaryKey(autoGenerate = true) val role_id: Int,
     val role: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

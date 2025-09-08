@@ -42,6 +42,6 @@ data class TblOrderDetails(
     val merge_order_tables: String?,
     val merge_pax: Int?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

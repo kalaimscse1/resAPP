@@ -10,6 +10,6 @@ data class TblItemCategory(
     val item_cat_name: String?,
     val order_by: Int?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )

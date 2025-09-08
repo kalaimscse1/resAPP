@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -12,7 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.util.CurrencySettings
 
 @Composable
@@ -96,7 +99,8 @@ private fun PaymentSummaryRow(label: String, amount: String) {
 @Composable
 fun PaymentMethodCard(
     uiState: BillingPaymentUiState,
-    onPaymentMethodChange: (String) -> Unit
+    onPaymentMethodChange: (String) -> Unit,
+    viewModel : BillingViewModel
 ) {
     ModernCard(
         modifier = Modifier.fillMaxWidth()
@@ -139,9 +143,39 @@ fun PaymentMethodCard(
                     isSelected = uiState.selectedPaymentMethod?.name == method,
                     onSelect = { onPaymentMethodChange(method) }
                 )
+
                 if (method != paymentMethods.last().first) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+            }
+            if (uiState.selectedPaymentMethod?.name == "OTHERS") {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = if (uiState.cashAmount == 0.0) "" else uiState.cashAmount.toString(),
+                    onValueChange = { viewModel.updateCashAmount(it.toDoubleOrNull() ?: 0.0) },
+                    label = { Text("Cash") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = if (uiState.cardAmount == 0.0) "" else uiState.cardAmount.toString(),
+                    onValueChange = { viewModel.updateCardAmount(it.toDoubleOrNull() ?: 0.0) },
+                    label = { Text("Card") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = if (uiState.upiAmount == 0.0) "" else uiState.upiAmount.toString(),
+                    onValueChange = { viewModel.updateUpiAmount(it.toDoubleOrNull() ?: 0.0) },
+                    label = { Text("UPI") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

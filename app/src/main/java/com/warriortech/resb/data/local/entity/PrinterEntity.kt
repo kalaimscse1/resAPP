@@ -20,6 +20,6 @@ data class TblPrinter(
     val printer_name: String?,
     val ip_address: String?,
     val is_active: Boolean?,
-    val is_synced: Boolean = false,
+    val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null
 )
