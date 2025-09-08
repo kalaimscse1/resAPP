@@ -207,10 +207,8 @@ object AppModule {
     fun provideSyncManager(
         @ApplicationContext context: Context,
         networkMonitor: NetworkMonitor,
-        apiService: ApiService,
-        sessionManager: SessionManager
     ): SyncManager {
-        return SyncManager(context, networkMonitor, apiService,sessionManager)
+        return SyncManager(context, networkMonitor)
     }
 
     @Provides

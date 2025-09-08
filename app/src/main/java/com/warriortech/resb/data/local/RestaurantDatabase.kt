@@ -30,7 +30,7 @@ import com.warriortech.resb.data.local.entity.*
         TblRole::class,
         TblSaleAddOn::class,
         TblStaff::class,
-        TblTable::class,
+        TblTableEntity::class,
         TblTax::class,
         TblTaxSplit::class,
         TblUnit::class,
@@ -68,21 +68,6 @@ abstract class RestaurantDatabase : RoomDatabase() {
     abstract fun tblUnitDao(): TblUnitDao
     abstract fun tblVoucherDao(): TblVoucherDao
     abstract fun tblVoucherTypeDao(): TblVoucherTypeDao
-    abstract fun tblItemCategoryRelationDao(): TblItemCategoryRelationDao
-    abstract fun tblCustomerRelationDao(): TblCustomerRelationDao
-    abstract fun tblOrderMasterRelationDao(): TblOrderMasterRelationDao
-    abstract fun tblStaffRelationDao(): TblStaffRelationDao
-    abstract fun tblVoucherRelationDao(): TblVoucherRelationDao
-    abstract fun tblKitchenCategoryRelationDao(): TblKitchenCategoryRelationDao
-    abstract fun tblMenuRelationDao(): TblMenuRelationDao
-    abstract fun tblTaxRelationDao(): TblTaxRelationDao
-    abstract fun tblUnitRelationDao(): TblUnitRelationDao
-    abstract fun tblMenuItemRelationDao(): TblMenuItemRelationDao
-    abstract fun tblTableRelationDao(): TblTableRelationDao
-    abstract fun tblAddOnRelationDao(): TblAddOnRelationDao
-    abstract fun tblAreaRelationDao(): TblAreaRelationDao
-    abstract fun tblCounterRelationDao(): TblCounterRelationDao
-    abstract fun tblRoleRelationDao(): TblRoleRelationDao
 
     companion object {
         @Volatile
@@ -95,7 +80,6 @@ abstract class RestaurantDatabase : RoomDatabase() {
                     RestaurantDatabase::class.java,
                     "KTS_RESB"
                 )
-                .addMigrations(MIGRATION_2_3)
                 .build()
                 INSTANCE = instance
                 instance

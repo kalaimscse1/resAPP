@@ -79,9 +79,11 @@ import com.warriortech.resb.ui.theme.MintGreenPrimary
 import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
+import com.warriortech.resb.util.SuccessDialog
 import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.scrollToBottomSmooth
+import kotlinx.coroutines.delay
 
 @SuppressLint(
     "StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation",
@@ -123,6 +125,9 @@ fun MenuScreen(
 
     var showConfirmDialog by remember { mutableStateOf(false) }
     var showOrderDialog by remember { mutableStateOf(false) }
+    var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
+    var sucess by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
 
     // Determine the effective status string for pricing and display
     val effectiveStatus = remember(isTakeaway, tableStatusFromVM) {
@@ -146,11 +151,12 @@ fun MenuScreen(
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
                     if (sessionManager.getGeneralSetting()?.is_kot!!) {
-
-                        snackbarHostState.showSnackbar("Order placed successfully and KOT sent to kitchen")
+                       sucess = true
+                        delay(2000)
                         onOrderPlaced()
                     } else {
-                        snackbarHostState.showSnackbar("Order placed successfully")
+                        sucess = true
+                        delay(2000)
                         onOrderPlaced() // This should navigate away or reset the screen
                     }
                 }
@@ -361,7 +367,7 @@ fun MenuScreen(
             AnimatedSnackbarDemo(snackbarHostState)
         },
     ) { paddingValues ->
-
+        values = paddingValues
         when (val currentMenuState = menuState) { // Use stable val
             is MenuViewModel.MenuUiState.Loading -> {
                 Box(
@@ -519,7 +525,20 @@ fun MenuScreen(
             }
         }
     }
-
+    if (sucess) {
+        SuccessDialog(
+            title = "Order Success",
+            description = "Order placed successfully",
+            paddingValues = values
+        )
+    }
+    if (failed) {
+        SuccessDialog(
+            title = "Order Failed",
+            description = "Failed to place order",
+            paddingValues = values
+        )
+    }
     // Modifier Selection Dialog
     if (showModifierDialog && selectedMenuItemForModifier != null) {
         ModifierSelectionDialog(

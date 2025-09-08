@@ -185,8 +185,8 @@ private fun TblMenuItem.toModel() = TblMenuItemResponse(
     is_inventory = this.is_inventory?.toLong() ?: 0L,
     is_raw = this.is_raw ?: "NO",
     cess_per = "",
-    cess_specific = this.cess_specific,
-    is_favourite = this.is_favourite,
+    cess_specific = this.cess_specific!!,
+    is_favourite = this.is_favourite!!,
     is_active = if (this.is_active == true) 1L else 0L,
     preparation_time = this.preparation_time?.toLong() ?: 0L
 )

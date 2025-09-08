@@ -2,7 +2,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.local.entity.SyncStatus
-import com.warriortech.resb.data.local.entity.TblTable as TblTableEntity
+import com.warriortech.resb.data.local.entity.TblTableEntity
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TableStatusResponse
@@ -114,16 +114,15 @@ class TableRepository @Inject constructor(
         safeApiCall(
             onSuccess = { remoteTables: List<Table> ->
                 withContext(Dispatchers.IO) {
-                    val entities = remoteTables.map { TableEntity(
-                        table_id = it.table_id,
+                    val entities = remoteTables.map { TblTableEntity(
+                        table_id = it.table_id.toInt(),
                         table_name = it.table_name,
                         seating_capacity = it.seating_capacity,
                         is_ac = it.is_ac,
                         table_status = it.table_status,
-                        area_id = it.area_id,
-                        table_availabiltiy = it.table_availability,
+                        area_id = it.area_id.toInt(),
+                        table_availability = it.table_availability,
                         is_active = it.is_active,
-                        syncStatus = SyncStatus.SYNCED
                     ) }
                     tableDao.insertTables(entities)
                 }

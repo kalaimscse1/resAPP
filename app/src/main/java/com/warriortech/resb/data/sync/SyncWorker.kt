@@ -1,82 +1,73 @@
 package com.warriortech.resb.data.sync
 
 import android.content.Context
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TblMenuItem
-import com.warriortech.resb.data.local.entity.TblTable
+import com.warriortech.resb.data.local.entity.TblTableEntity
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class SyncWorker(
-    appContext: Context,
-    workerParams: WorkerParameters,
+
+@HiltWorker
+class SyncWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters,
     private val apiService: ApiService,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val database: RestaurantDatabase
 ) : CoroutineWorker(appContext, workerParams) {
 
-private val database = RestaurantDatabase.getDatabase(appContext)
     private val tableDao = database.tableDao()
     private val menuItemDao = database.menuItemDao()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
-            // Sync tables
             syncTables()
-
-            // Sync menu items
             syncMenuItems()
-
             Result.success()
         } catch (e: Exception) {
-            Timber.e(e, "Error syncing data with server")
+            Timber.e(e, "Error syncing data")
             Result.retry()
         }
     }
 
     private suspend fun syncTables() {
-        // Get local tables that need to be synced
+        // 1️⃣ Sync pending local tables to server
         val pendingTables = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
-
         for (table in pendingTables) {
             try {
-                // Update table status on server
-                val response = apiService.updateTableStatus(table.table_id, table.table_status,sessionManager.getCompanyCode()?:"")
-
-                if (response.isSuccessful) {
-                    // Mark as synced
-                    tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNCED)
-                } else {
-                    // Mark as failed
-                    tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNC_FAILED)
-                }
+                val response = apiService.updateTableStatus(
+                    table.table_id.toLong(),
+                    table.table_status.toString(),
+                    sessionManager.getCompanyCode() ?: ""
+                )
+                val newStatus = if (response.isSuccessful) SyncStatus.SYNCED else SyncStatus.SYNC_FAILED
+                tableDao.updateTableSyncStatus(table.table_id.toLong(), newStatus)
             } catch (e: Exception) {
-                tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNC_FAILED)
+                tableDao.updateTableSyncStatus(table.table_id.toLong(), SyncStatus.SYNC_FAILED)
                 Timber.e(e, "Failed to sync table ${table.table_id}")
             }
         }
 
-        // Get latest tables from server and update local cache
+        // 2️⃣ Fetch remote tables and update local database
         try {
-            val remoteTables = apiService.getAllTables(sessionManager.getCompanyCode()?:"").body()!!
-            val localTables = remoteTables.map {
-                tableDao.getTableById(it.table_id)?.let { localTable ->
-                    // Preserve local sync status if it's pending or failed
-                    if (localTable.syncStatus != SyncStatus.SYNCED) {
-                        localTable
-                    } else {
-                        // Otherwise update with remote data
-                        it.toEntity()
-                    }
-                } ?: it.toEntity() // If doesn't exist locally, add it
+            val remoteTables = apiService.getAllTables(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
+            val localTables = remoteTables.map { remote ->
+                tableDao.getTableById(remote.table_id)?.let { local ->
+                    if (local.is_synced != false) local else remote.toEntity()
+                } ?: remote.toEntity()
             }
             tableDao.insertTables(localTables)
         } catch (e: Exception) {
@@ -85,19 +76,12 @@ private val database = RestaurantDatabase.getDatabase(appContext)
     }
 
     private suspend fun syncMenuItems() {
-        // Similar to tables, menu items are mostly read-only from client side
         try {
-            val remoteMenuItems = apiService.getAllMenuItems(sessionManager.getCompanyCode()?:"").body()!!
-            val localMenuItems = remoteMenuItems.map {
-                menuItemDao.getMenuItemById(it.menu_item_id)?.let { localItem ->
-                    // Preserve local sync status if it's pending or failed
-                    if (localItem.syncStatus != SyncStatus.SYNCED) {
-                        localItem
-                    } else {
-                        // Otherwise update with remote data
-                        it.toEntity()
-                    }
-                } ?: it.toEntity() // If doesn't exist locally, add it
+            val remoteMenuItems = apiService.getAllMenuItems(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
+            val localMenuItems = remoteMenuItems.map { remote ->
+                menuItemDao.getMenuItemById(remote.menu_item_id)?.let { local ->
+                    if (local.is_synced != false) local else remote.toEntity()
+                } ?: remote.toEntity()
             }
             menuItemDao.insertMenuItems(localMenuItems)
         } catch (e: Exception) {
@@ -105,10 +89,11 @@ private val database = RestaurantDatabase.getDatabase(appContext)
         }
     }
 
-    private fun Table.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TblTable {
-        return TblTable(
-            table_id = this.table_id,
-            area_id = this.area_id,
+    /** Convert remote Table model to local entity */
+    private fun Table.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TblTableEntity {
+        return TblTableEntity(
+            table_id = this.table_id.toInt(),
+            area_id = this.area_id.toInt(),
             table_name = this.table_name,
             seating_capacity = this.seating_capacity,
             is_ac = this.is_ac,
@@ -119,10 +104,11 @@ private val database = RestaurantDatabase.getDatabase(appContext)
             last_synced_at = if (syncStatus == SyncStatus.SYNCED) System.currentTimeMillis() else null
         )
     }
-    
+
+    /** Convert remote MenuItemResponse to local entity */
     private fun TblMenuItemResponse.toEntity(syncStatus: SyncStatus = SyncStatus.SYNCED): TblMenuItem {
         return TblMenuItem(
-            menu_item_id = this.menu_item_id,
+            menu_item_id = this.menu_item_id.toInt(),
             menu_item_code = this.menu_item_code,
             menu_item_name = this.menu_item_name,
             menu_item_name_tamil = this.menu_item_name_tamil,

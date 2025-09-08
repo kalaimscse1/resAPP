@@ -4,19 +4,17 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.warriortech.resb.model.Table
-import com.warriortech.resb.model.TblTable
 
 @Entity(
     tableName = "tbl_table",
     foreignKeys = [
-        ForeignKey(entity = TblTax::class, parentColumns = ["tax_id"], childColumns = ["tax_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblArea::class, parentColumns = ["area_id"], childColumns = ["area_id"], onDelete = ForeignKey.CASCADE),
     ],
     indices = [
-        Index(value = ["tax_id"]),
+        Index(value = ["area_id"]),
     ]
 )
-data class TblTable(
+data class TblTableEntity(
     @PrimaryKey(autoGenerate = true) val table_id: Int = 0,
     val area_id: Int?,
     val table_name: String?,

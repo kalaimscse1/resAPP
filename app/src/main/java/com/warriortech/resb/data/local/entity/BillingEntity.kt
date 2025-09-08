@@ -11,13 +11,11 @@ import androidx.room.PrimaryKey
         ForeignKey(entity = TblOrderMaster::class, parentColumns = ["order_master_id"], childColumns = ["order_master_id"], onDelete = ForeignKey.CASCADE),
         ForeignKey(entity = TblStaff::class, parentColumns = ["staff_id"], childColumns = ["staff_id"], onDelete = ForeignKey.CASCADE),
         ForeignKey(entity = TblVoucher::class, parentColumns = ["voucher_id"], childColumns = ["voucher_id"], onDelete = ForeignKey.CASCADE),
-        ForeignKey(entity = TblItemCategory::class, parentColumns = ["item_cat_id"], childColumns = ["item_cat_id"], onDelete = ForeignKey.CASCADE),
     ],
     indices = [
         Index(value = ["order_master_id"]),
         Index(value = ["staff_id"]),
         Index(value = ["voucher_id"]),
-        Index(value = ["item_cat_id"]),
     ]
 )
 data class TblBilling(

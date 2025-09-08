@@ -53,4 +53,42 @@ data class TblMenuItem(
     val is_active: Boolean?,
     val is_synced: Boolean = false,
     val last_synced_at: Long? = null
-)
+) {
+    fun toModel(): TblMenuItemResponse {
+       return TblMenuItemResponse(
+            menu_item_id = this.menu_item_id.toLong(),
+            menu_item_code = this.menu_item_code ?: "",
+            menu_item_name = this.menu_item_name.toString(),
+            menu_item_name_tamil = this.menu_item_name_tamil.toString(),
+            menu_id = this.menu_id?.toLong() ?: 0L,
+            menu_name = "",
+            rate = this.rate!!,
+            item_cat_id = this.item_cat_id?.toLong() ?: 0L,
+            item_cat_name = "",
+            image = this.image.toString(),
+            ac_rate = this.ac_rate ?: 0.0,
+            is_available = this.is_available ?: "YES",
+            parcel_rate = this.parcel_rate ?: 0.0,
+            parcel_charge = this.parcel_charge ?: 0.0,
+            tax_id = this.tax_id?.toLong() ?: 0L,
+            tax_name = "",
+            tax_percentage = "",
+            kitchen_cat_id = this.kitchen_cat_id?.toLong() ?: 0L,
+            kitchen_cat_name = "",
+            stock_maintain = this.stock_maintain ?: "NO",
+            rate_lock = this.rate_lock ?: "NO",
+            unit_id = this.unit_id?.toLong() ?: 0L,
+            unit_name = "",
+            min_stock = this.min_stock?.toLong() ?: 0L,
+            hsn_code = this.hsn_code ?: "",
+            order_by = this.order_by?.toLong() ?: 0L,
+            is_inventory = this.is_inventory?.toLong() ?: 0L,
+            is_raw = this.is_raw ?: "NO",
+            cess_per = "",
+            cess_specific = this.cess_specific!!,
+            is_favourite = this.is_favourite!!,
+            is_active = if (this.is_active == true) 1L else 0L,
+            preparation_time = this.preparation_time?.toLong() ?: 0L
+        )
+    }
+}

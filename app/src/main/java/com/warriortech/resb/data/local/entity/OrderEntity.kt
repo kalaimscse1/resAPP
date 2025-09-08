@@ -8,12 +8,12 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "tbl_order_master",
     foreignKeys = [
-        ForeignKey(entity = TblTable::class, parentColumns = ["table_id"], childColumns = ["table_id"], onDelete = ForeignKey.CASCADE),
-        ForeignKey(entity = TblKitchenCategory::class, parentColumns = ["kitchen_cat_id"], childColumns = ["kitchen_cat_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblTableEntity::class, parentColumns = ["table_id"], childColumns = ["table_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblStaff::class, parentColumns = ["staff_id"], childColumns = ["staff_id"], onDelete = ForeignKey.CASCADE),
     ],
     indices = [
         Index(value = ["table_id"]),
-        Index(value = ["kitchen_cat_id"]),
+        Index(value = ["staff_id"]),
     ]
 )
 data class TblOrderMaster(

@@ -8,10 +8,10 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "tbl_tax_split",
     foreignKeys = [
-        ForeignKey(entity = TblCounter::class, parentColumns = ["counter_id"], childColumns = ["counter_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblTax::class, parentColumns = ["tax_id"], childColumns = ["tax_id"], onDelete = ForeignKey.CASCADE),
     ],
     indices = [
-        Index(value = ["counter_id"]),
+        Index(value = ["tax_id"]),
     ]
 )
 data class TblTaxSplit(

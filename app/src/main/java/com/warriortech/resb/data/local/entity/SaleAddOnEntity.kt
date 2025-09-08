@@ -9,10 +9,10 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "tbl_sale_add_on",
     foreignKeys = [
-        ForeignKey(entity = TblArea::class, parentColumns = ["area_id"], childColumns = ["area_id"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TblAddOn::class, parentColumns = ["add_on_id"], childColumns = ["item_add_on_id"], onDelete = ForeignKey.CASCADE),
     ],
     indices = [
-        Index(value = ["area_id"]),
+        Index(value = ["item_add_on_id"]),
     ]
 )
 data class TblSaleAddOn(

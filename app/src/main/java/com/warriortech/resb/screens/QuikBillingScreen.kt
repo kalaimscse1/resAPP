@@ -54,6 +54,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.util.SuccessDialog
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +78,9 @@ fun ItemWiseBillScreen(
     var showBillDialog by remember { mutableStateOf(false) }
     var cartOffset by remember { mutableStateOf(Offset.Zero) }
     val density = LocalDensity.current
+    var success by remember { mutableStateOf(false) }
+
+    var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
@@ -127,7 +131,9 @@ fun ItemWiseBillScreen(
                             viewModel.cashPrintBill()
                             scope.launch {
                                 delay(3000)
-                                snackbarHostState.showSnackbar("Payment Done Successfully")
+                                success = true
+                               delay(1000)
+                                success = false
                             }
                         }
                         else{
@@ -159,6 +165,7 @@ fun ItemWiseBillScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            values = padding
             // Header Row
             Row(
                 modifier = Modifier
@@ -371,6 +378,13 @@ fun ItemWiseBillScreen(
             title = "Alert",
             message = "Please select items to proceed billing.",
             onDismiss = { showBillDialog = false }
+        )
+    }
+    if (success) {
+        SuccessDialog(
+            title = "Payment Successful",
+            description = "Payment Done Successfully",
+            paddingValues = values
         )
     }
 }
