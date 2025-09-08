@@ -3,6 +3,7 @@ package com.warriortech.resb.di
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.warriortech.resb.ai.AIRepository
 import com.warriortech.resb.data.local.MIGRATION_2_3
 import com.warriortech.resb.data.local.RestaurantDatabase
@@ -206,8 +207,15 @@ object AppModule {
     fun provideSyncManager(
         @ApplicationContext context: Context,
         networkMonitor: NetworkMonitor,
+        workManager: WorkManager
     ): SyncManager {
-        return SyncManager(context, networkMonitor)
+        return SyncManager(context, networkMonitor, workManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
+        return WorkManager.getInstance(context)
     }
 
     @Provides

@@ -19,8 +19,8 @@ import javax.inject.Singleton
 class SyncManager @Inject constructor(
     private val context: Context,
     private val networkMonitor: NetworkMonitor,
+    private val workManager: WorkManager
 ) {
-    private val workManager = WorkManager.getInstance(context)
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     init {
