@@ -79,6 +79,8 @@ fun ItemWiseBillScreen(
     var cartOffset by remember { mutableStateOf(Offset.Zero) }
     val density = LocalDensity.current
     var success by remember { mutableStateOf(false) }
+    var isProcessingCash by remember { mutableStateOf(false) }
+    var isProcessingOthers by remember { mutableStateOf(false) }
 
     var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
 
@@ -125,31 +127,44 @@ fun ItemWiseBillScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    ActionButton("Clear", Color.Red) { showDialog = true }
-                    ActionButton("Cash", Color(0xFF4CAF50)) {
+                    ActionButton("Clear", Color.Red, enabled = true) { showDialog = true }
+                    ActionButton(
+                        text = if (isProcessingCash) "Processing..." else "Cash", 
+                        color = Color(0xFF4CAF50),
+                        enabled = !isProcessingCash
+                    ) {
                         if (selectedItems.isNotEmpty()){
+                            isProcessingCash = true
                             viewModel.cashPrintBill()
+                            // Show immediate feedback without blocking delays
                             scope.launch {
-                                delay(3000)
                                 success = true
-                               delay(1000)
+                                delay(2000) // Reduced delay for success message
                                 success = false
+                                isProcessingCash = false
                             }
                         }
                         else{
                             showBillDialog = true
                         }
-
                     }
-                    ActionButton("Others", Color.Gray) {
+                    ActionButton(
+                        text = if (isProcessingOthers) "Processing..." else "Others", 
+                        color = Color.Gray,
+                        enabled = !isProcessingOthers
+                    ) {
                         if(selectedItems.isNotEmpty()){
+                            isProcessingOthers = true
                             viewModel.placeOrder(2, null)
+                            // Navigate immediately after placing order, no artificial delay
                             scope.launch {
-                                delay(3000)
+                                // Small delay to ensure order is placed before navigation
+                                delay(500) 
                                 navController.navigate("billing_screen/${orderId ?: ""}") {
                                     launchSingleTop = true
                                 }
                                 onProceedToBilling(orderDetailsResponse, orderId ?: "")
+                                isProcessingOthers = false
                             }
                         }
                         else{
@@ -390,10 +405,19 @@ fun ItemWiseBillScreen(
 }
 
 @Composable
-fun ActionButton(text: String, color: Color, onClick: () -> Unit) {
+fun ActionButton(
+    text: String, 
+    color: Color, 
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = color),
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = color,
+            disabledContainerColor = color.copy(alpha = 0.6f)
+        ),
         modifier = Modifier.padding(horizontal = 2.dp)
     ) {
         Text(text, color = Color.White)

@@ -404,7 +404,7 @@ class CounterViewModel @Inject constructor(
                 printResponse.collect { result->
                     result.fold(
                         onSuccess = { message ->
-                            delay(2000) // Simulate network delay
+                            // Removed artificial delay for better performance
                             // Example: If payment is successful
                             val transactionId = UUID.randomUUID().toString()
 
