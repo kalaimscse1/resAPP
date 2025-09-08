@@ -95,15 +95,15 @@ object ReportExport {
                 table.addCell(bill.customer.customer_name)
                 table.addCell(payMode)
 
-                val billAmtCell = PdfPCell(Phrase("₹${bill.rounded_amt}"))
+                val billAmtCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.rounded_amt)}"))
                 billAmtCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(billAmtCell)
 
-                val discCell = PdfPCell(Phrase("${bill.disc_amt}"))
+                val discCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.disc_amt)}"))
                 discCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(discCell)
 
-                val receivedCell = PdfPCell(Phrase("${bill.received_amt}"))
+                val receivedCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.received_amt)}"))
                 receivedCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(receivedCell)
 
@@ -122,17 +122,17 @@ object ReportExport {
             summaryCell.backgroundColor = BaseColor.YELLOW
             table.addCell(summaryCell)
 
-            val totalBillCell = PdfPCell(Phrase("$totalBillAmount", boldFont))
+            val totalBillCell = PdfPCell(Phrase("₹${String.format("%.2f", totalBillAmount)}", boldFont))
             totalBillCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalBillCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalBillCell)
 
-            val totalDiscCell = PdfPCell(Phrase("$totalDiscount", boldFont))
+            val totalDiscCell = PdfPCell(Phrase("₹${String.format("%.2f", totalDiscount)}", boldFont))
             totalDiscCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalDiscCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalDiscCell)
 
-            val totalReceivedCell = PdfPCell(Phrase("$totalReceived", boldFont))
+            val totalReceivedCell = PdfPCell(Phrase("₹${String.format("%.2f", totalReceived)}", boldFont))
             totalReceivedCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalReceivedCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalReceivedCell)
@@ -294,7 +294,7 @@ object ReportExport {
                 table.addCell(bill.menu_item_name)
                 table.addCell(bill.item_cat_name)
 
-                val rateCell = PdfPCell(Phrase("₹${bill.rate}"))
+                val rateCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.rate)}"))
                 rateCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(rateCell)
 
@@ -302,23 +302,23 @@ object ReportExport {
                 qtyCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(qtyCell)
 
-                val totalCell = PdfPCell(Phrase("₹${bill.total}"))
+                val totalCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.total)}"))
                 totalCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(totalCell)
 
-                val taxCell = PdfPCell(Phrase("₹${bill.tax_amount}"))
+                val taxCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.tax_amount)}"))
                 taxCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(taxCell)
 
-                val cessCell = PdfPCell(Phrase("₹${bill.cess}"))
+                val cessCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.cess)}"))
                 cessCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(cessCell)
 
-                val cessSpecCell = PdfPCell(Phrase("₹${bill.cess_specific}"))
+                val cessSpecCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.cess_specific)}"))
                 cessSpecCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(cessSpecCell)
 
-                val grandCell = PdfPCell(Phrase("₹${bill.grand_total}"))
+                val grandCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.grand_total)}"))
                 grandCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(grandCell)
 
@@ -341,7 +341,7 @@ object ReportExport {
             summaryCell.backgroundColor = BaseColor.YELLOW
             table.addCell(summaryCell)
 
-            val totalRateCell = PdfPCell(Phrase("₹$totalRate", boldFont))
+            val totalRateCell = PdfPCell(Phrase("₹${String.format("%.2f", totalRate)}", boldFont))
             totalRateCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalRateCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalRateCell)
@@ -351,27 +351,27 @@ object ReportExport {
             totalQtyCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalQtyCell)
 
-            val totalAmountCell = PdfPCell(Phrase("₹$totalAmount", boldFont))
+            val totalAmountCell = PdfPCell(Phrase("₹${String.format("%.2f", totalAmount)}", boldFont))
             totalAmountCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalAmountCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalAmountCell)
 
-            val totalTaxCell = PdfPCell(Phrase("₹$totalTax", boldFont))
+            val totalTaxCell = PdfPCell(Phrase("₹${String.format("%.2f", totalTax)}", boldFont))
             totalTaxCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalTaxCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalTaxCell)
 
-            val totalCessCell = PdfPCell(Phrase("₹$totalCess", boldFont))
+            val totalCessCell = PdfPCell(Phrase("₹${String.format("%.2f", totalCess)}", boldFont))
             totalCessCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalCessCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalCessCell)
 
-            val totalCessSpecCell = PdfPCell(Phrase("₹$totalCessSpecific", boldFont))
+            val totalCessSpecCell = PdfPCell(Phrase("₹${String.format("%.2f", totalCessSpecific)}", boldFont))
             totalCessSpecCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalCessSpecCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalCessSpecCell)
 
-            val totalGrandCell = PdfPCell(Phrase("₹$totalGrand", boldFont))
+            val totalGrandCell = PdfPCell(Phrase("₹${String.format("%.2f", totalGrand)}", boldFont))
             totalGrandCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalGrandCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalGrandCell)
@@ -433,7 +433,7 @@ object ReportExport {
                 qtyCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(qtyCell)
 
-                val grandCell = PdfPCell(Phrase("₹${bill.grand_total}"))
+                val grandCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.grand_total)}"))
                 grandCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(grandCell)
 
@@ -454,7 +454,7 @@ object ReportExport {
             totalQtyCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalQtyCell)
 
-            val totalGrandCell = PdfPCell(Phrase("₹$totalGrand", boldFont))
+            val totalGrandCell = PdfPCell(Phrase("₹${String.format("%.2f", totalGrand)}", boldFont))
             totalGrandCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalGrandCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalGrandCell)
