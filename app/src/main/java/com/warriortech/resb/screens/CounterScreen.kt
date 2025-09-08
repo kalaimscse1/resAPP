@@ -85,6 +85,7 @@ fun CounterScreen(
     val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
     val orderId by viewModel.orderId.collectAsStateWithLifecycle()
     var showConfirmDialog by remember { mutableStateOf(false) }
+    var isOrderPlaced by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
@@ -97,14 +98,21 @@ fun CounterScreen(
         }
     }
 
+    // Observe when order is successfully placed and proceed to billing
+    LaunchedEffect(orderDetailsResponse, isOrderPlaced) {
+        if (isOrderPlaced && orderDetailsResponse.isNotEmpty()) {
+            onProceedToBilling(orderDetailsResponse, orderId ?: "")
+            showConfirmDialog = false
+            isOrderPlaced = false
+        }
+    }
+
     if (showConfirmDialog) {
-        BillConfirmationDialog(// Use effectiveStatus
+        BillConfirmationDialog(
             onConfirm = {
-                // The tableId passed here is the one this screen was launched with.
-                // For takeaway/delivery, it might be a specific ID like 0, 1, or 2 as per your existing logic.
-                // For table orders, it's the actual tableId.
-                onProceedToBilling(orderDetailsResponse, orderId ?: "") // Use effectiveStatus
-                showConfirmDialog = false
+                // Set flag to indicate order should be placed and processed
+                isOrderPlaced = true
+                viewModel.placeOrder(2, "")
             },
             onDismiss = { showConfirmDialog = false }
         )
@@ -174,7 +182,6 @@ fun CounterScreen(
 
                     MobileOptimizedButton(
                         onClick = {
-                            viewModel.placeOrder(2, "")
                             showConfirmDialog = true
                         },
                         enabled = selectedItems.isNotEmpty(),
