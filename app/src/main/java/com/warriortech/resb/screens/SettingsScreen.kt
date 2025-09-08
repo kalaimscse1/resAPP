@@ -103,14 +103,15 @@ fun SettingsMainScreen(
             SettingsModule.Printer,
             SettingsModule.Tax,
             SettingsModule.TaxSplit,
-			SettingsModule.RestaurantProfile,
-			SettingsModule.GeneralSettings,
-			SettingsModule.CreateVoucher,
-			SettingsModule.Counter,
+                        SettingsModule.RestaurantProfile,
+                        SettingsModule.GeneralSettings,
+                        SettingsModule.CreateVoucher,
+                        SettingsModule.Counter,
             SettingsModule.Language,
             SettingsModule.PrinterSetting,
             SettingsModule.Modifiers,
             SettingsModule.ChangePassword,
+            SettingsModule.Support,
             SettingsModule.ResetData
         )
         else
@@ -133,6 +134,7 @@ fun SettingsMainScreen(
                 SettingsModule.Customer,
                 SettingsModule.Language,
                 SettingsModule.ChangePassword,
+                SettingsModule.Support,
                 SettingsModule.ResetData,
                 SettingsModule.ChangeCompany
             )
@@ -283,6 +285,9 @@ fun SettingsModuleScreen(
         is SettingsModule.ChangeCompany -> {
             navController.navigate("change_company")
         }
+        is SettingsModule.Support -> {
+            navController.navigate("support_screen")
+        }
         is SettingsModule.ResetData -> {
             navController.navigate("reset_data")
         }
@@ -398,7 +403,7 @@ sealed class SettingsModule(
         Icons.Default.CallSplit,
         listOf("name", "description", "split_type", "percentage")
     )
-	object RestaurantProfile : SettingsModule(
+        object RestaurantProfile : SettingsModule(
         "restaurant_profile",
         "Restaurant Profile",
         "Manage restaurant profile",
@@ -449,6 +454,13 @@ sealed class SettingsModule(
         "Manage menu item modifiers",
         Icons.Default.Add,
         listOf("name", "price", "category")
+    )
+    object Support : SettingsModule(
+        "support",
+        "Help & Support",
+        "Get help and tutorials for using the app",
+        Icons.Default.Help,
+        listOf("tutorials", "documentation")
     )
     object ResetData : SettingsModule(
         "reset_data",

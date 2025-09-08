@@ -106,6 +106,7 @@ import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
 import com.warriortech.resb.screens.SettingsScreen
+import com.warriortech.resb.screens.SupportScreen
 import com.warriortech.resb.screens.DashboardScreen
 import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
@@ -746,6 +747,13 @@ fun AppNavigation(
                 onBackPressed = { navController.popBackStack() },
                 sessionManager = sessionManager,
                 navController = navController
+            )
+        }
+
+        composable("support_screen") {
+            SupportScreen(
+                onBackPressed = { navController.popBackStack() },
+                drawerState = drawerState
             )
         }
 
