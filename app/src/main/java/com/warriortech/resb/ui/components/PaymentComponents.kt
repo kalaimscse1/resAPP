@@ -102,6 +102,15 @@ fun PaymentMethodCard(
     onPaymentMethodChange: (String) -> Unit,
     viewModel : BillingViewModel
 ) {
+    // Cache the payment methods list to prevent recreation on every recomposition
+    val paymentMethods = remember {
+        listOf(
+            "CASH" to Icons.Default.Money,
+            "CARD" to Icons.Default.CreditCard,
+            "UPI" to Icons.Default.QrCode,
+            "OTHERS" to Icons.Default.MoreHoriz
+        )
+    }
     ModernCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -128,20 +137,14 @@ fun PaymentMethodCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val paymentMethods = listOf(
-                "CASH" to Icons.Default.Money,
-                "CARD" to Icons.Default.CreditCard,
-                "UPI" to Icons.Default.QrCode,
-//                "DUE" to Icons.Default.Payment,
-                "OTHERS" to Icons.Default.MoreHoriz
-            )
-
             paymentMethods.forEach { (method, icon) ->
+                // Use remember to create stable callback to prevent unnecessary recompositions
+                val onSelectMethod = remember(method) { { onPaymentMethodChange(method) } }
                 PaymentMethodOption(
                     method = method,
                     icon = icon,
                     isSelected = uiState.selectedPaymentMethod?.name == method,
-                    onSelect = { onPaymentMethodChange(method) }
+                    onSelect = onSelectMethod
                 )
 
                 if (method != paymentMethods.last().first) {
@@ -151,8 +154,19 @@ fun PaymentMethodCard(
             if (uiState.selectedPaymentMethod?.name == "OTHERS") {
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Memoize the text field values to prevent unnecessary string conversions
+                val cashValue = remember(uiState.cashAmount) { 
+                    if (uiState.cashAmount == 0.0) "" else uiState.cashAmount.toString()
+                }
+                val cardValue = remember(uiState.cardAmount) { 
+                    if (uiState.cardAmount == 0.0) "" else uiState.cardAmount.toString()
+                }
+                val upiValue = remember(uiState.upiAmount) { 
+                    if (uiState.upiAmount == 0.0) "" else uiState.upiAmount.toString()
+                }
+
                 OutlinedTextField(
-                    value = if (uiState.cashAmount == 0.0) "" else uiState.cashAmount.toString(),
+                    value = cashValue,
                     onValueChange = { viewModel.updateCashAmount(it.toDoubleOrNull() ?: 0.0) },
                     label = { Text("Cash") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -161,7 +175,7 @@ fun PaymentMethodCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = if (uiState.cardAmount == 0.0) "" else uiState.cardAmount.toString(),
+                    value = cardValue,
                     onValueChange = { viewModel.updateCardAmount(it.toDoubleOrNull() ?: 0.0) },
                     label = { Text("Card") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -170,7 +184,7 @@ fun PaymentMethodCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = if (uiState.upiAmount == 0.0) "" else uiState.upiAmount.toString(),
+                    value = upiValue,
                     onValueChange = { viewModel.updateUpiAmount(it.toDoubleOrNull() ?: 0.0) },
                     label = { Text("UPI") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

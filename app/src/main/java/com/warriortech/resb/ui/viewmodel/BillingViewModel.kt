@@ -368,15 +368,27 @@ class BillingViewModel @Inject constructor(
         _uiState.update { it.copy(orderMasterId = orderId) }
     }
     fun updateCashAmount(amount: Double) {
-        _uiState.update { it.copy(cashAmount = amount) }
+        val currentState = _uiState.value
+        // Only update if the amount actually changed
+        if (currentState.cashAmount != amount) {
+            _uiState.update { it.copy(cashAmount = amount) }
+        }
     }
 
     fun updateCardAmount(amount: Double) {
-        _uiState.update { it.copy(cardAmount = amount) }
+        val currentState = _uiState.value
+        // Only update if the amount actually changed
+        if (currentState.cardAmount != amount) {
+            _uiState.update { it.copy(cardAmount = amount) }
+        }
     }
 
     fun updateUpiAmount(amount: Double) {
-        _uiState.update { it.copy(upiAmount = amount) }
+        val currentState = _uiState.value
+        // Only update if the amount actually changed
+        if (currentState.upiAmount != amount) {
+            _uiState.update { it.copy(upiAmount = amount) }
+        }
     }
 
 
@@ -579,8 +591,14 @@ class BillingViewModel @Inject constructor(
 
 
     fun updatePaymentMethod(paymentMethodName: String) {
-        val paymentMethod = _uiState.value.availablePaymentMethods.find { it.name == paymentMethodName }
-        _uiState.update { it.copy(selectedPaymentMethod = paymentMethod) }
+        val currentState = _uiState.value
+        // Only update if the payment method actually changed to prevent unnecessary recomposition
+        if (currentState.selectedPaymentMethod?.name != paymentMethodName) {
+            val paymentMethod = currentState.availablePaymentMethods.find { it.name == paymentMethodName }
+            _uiState.update { 
+                currentState.copy(selectedPaymentMethod = paymentMethod) 
+            }
+        }
     }
 
     fun resetPaymentState() {
