@@ -1,20 +1,37 @@
-# resAPP
+# resAPP - Restaurant Billing System
 
 ## Overview
-This is a minimal project repository containing only a basic README file. The project appears to be in its initial setup phase with no established architecture, dependencies, or functionality yet implemented.
+A comprehensive Android restaurant billing system built with Kotlin, Jetpack Compose, Hilt dependency injection, and WorkManager. The system provides counter billing, table management, inventory tracking, payment processing, background data synchronization, and user support documentation.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## System Architecture
-No architectural decisions have been made yet as the project is in its initial state. The repository structure and core components are yet to be established.
+## Recent Changes (Latest: September 08, 2025)
+- Fixed amount formatting in PDF reports to display exactly 2 decimal places for all monetary values
+- Updated itemwise report PDF to show proper currency formatting (₹123.45 instead of ₹123.4500000)
+- Applied consistent decimal formatting across all report types (sales, itemwise, category-wise)
+- Established proper Java development environment for Android compilation
 
-Key areas that will likely need architectural decisions:
-- Frontend framework selection
-- Backend technology choice
-- Database solution
-- Authentication mechanism
-- Deployment strategy
+## System Architecture
+Android application structure:
+- **Frontend**: Jetpack Compose with Material Design
+- **Backend Logic**: Kotlin with Hilt dependency injection
+- **Background Tasks**: WorkManager for data synchronization
+- **Reports**: PDF generation using iTextPDF library
+- **Database**: Local SQLite with API integration capabilities
+
+Key components:
+- Counter billing and quick billing screens
+- Table management system
+- Inventory tracking
+- Payment processing (Cash, Card, UPI, Due)
+- Comprehensive reporting (Sales, Itemwise, Category-wise)
+- User support documentation with video tutorials
 
 ## External Dependencies
-No external dependencies have been identified as the project has not been developed beyond the initial repository setup.
+- Kotlin & Jetpack Compose for UI
+- Hilt for dependency injection
+- WorkManager for background tasks
+- iTextPDF for report generation
+- Apache POI for Excel exports
+- Material Design components
