@@ -4,20 +4,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import com.warriortech.resb.R
 import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.components.ReusableBottomSheet
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.VoucherTypeSettingsViewModel
@@ -90,7 +91,7 @@ fun VoucherTypeSettingsScreen(
                         items(state.voucherTypes) { voucherType ->
                             VoucherTypeCard(
                                 voucherType = voucherType,
-                                onEdit = { 
+                                onEdit = {
                                     editingVoucherType = voucherType
                                     showAddDialog = true
                                 },
@@ -126,28 +127,82 @@ fun VoucherTypeSettingsScreen(
         }
 
         if (showAddDialog || editingVoucherType != null) {
-            VoucherTypeDialog(
-                voucherType = editingVoucherType,
+            ReusableBottomSheet(
+                isVisible = showAddDialog || editingVoucherType != null,
                 onDismiss = {
                     showAddDialog = false
                     editingVoucherType = null
                 },
-                onSave = { voucherType ->
-                    if (editingVoucherType == null) {
-                        scope.launch {
-                            viewModel.addVoucherType(voucherType)
-                            snackbarHostState.showSnackbar("Voucher type added successfully")
+                title = if (editingVoucherType == null) "Add Voucher Type" else "Edit Voucher Type"
+            ) {
+                var voucherTypeName by remember { mutableStateOf(editingVoucherType?.voucher_type_name ?: "") }
+                var isActive by remember { mutableStateOf(editingVoucherType?.is_active ?: true) }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = voucherTypeName,
+                        onValueChange = { voucherTypeName = it.uppercase() },
+                        label = { Text("Voucher Type Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Switch(
+                            checked = isActive,
+                            onCheckedChange = { isActive = it }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Active")
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                showAddDialog = false
+                                editingVoucherType = null
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Cancel")
                         }
-                    } else {
-                        scope.launch {
-                            viewModel.updateVoucherType(voucherType)
-                            snackbarHostState.showSnackbar("Voucher type updated successfully")
+
+                        Button(
+                            onClick = {
+                                val newVoucherType = TblVoucherType(
+                                    voucher_Type_id = editingVoucherType?.voucher_Type_id ?: 0,
+                                    voucher_type_name = voucherTypeName,
+                                    is_active = isActive
+                                )
+                                if (editingVoucherType == null) {
+                                    scope.launch {
+                                        viewModel.addVoucherType(newVoucherType)
+                                        snackbarHostState.showSnackbar("Voucher type added successfully")
+                                    }
+                                } else {
+                                    scope.launch {
+                                        viewModel.updateVoucherType(newVoucherType)
+                                        snackbarHostState.showSnackbar("Voucher type updated successfully")
+                                    }
+                                }
+                                showAddDialog = false
+                                editingVoucherType = null
+                            },
+                            modifier = Modifier.weight(1f),
+                            enabled = voucherTypeName.isNotBlank()
+                        ) {
+                            Text(if (editingVoucherType != null) "Update" else "Save")
                         }
                     }
-                    showAddDialog = false
-                    editingVoucherType = null
                 }
-            )
+            }
         }
     }
 }
@@ -159,7 +214,8 @@ fun VoucherTypeCard(
     onDelete: () -> Unit
 ) {
     MobileOptimizedCard(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onEdit // Set onClick to trigger edit
     ) {
         Row(
             modifier = Modifier
@@ -182,69 +238,11 @@ fun VoucherTypeCard(
             }
 
             Row {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                }
+                // Edit icon is now handled by the card's onClick
                 IconButton(onClick = onDelete) {
                     Icon(Icons.Default.Delete, contentDescription = "Delete")
                 }
             }
         }
     }
-}
-
-@Composable
-fun VoucherTypeDialog(
-    voucherType: TblVoucherType?,
-    onDismiss: () -> Unit,
-    onSave: (TblVoucherType) -> Unit
-) {
-    var voucherTypeName by remember { mutableStateOf(voucherType?.voucher_type_name ?: "") }
-    var isActive by remember { mutableStateOf(voucherType?.is_active ?: true) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (voucherType != null) "Edit Voucher Type" else "Add Voucher Type") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = voucherTypeName,
-                    onValueChange = { voucherTypeName = it.uppercase() },
-                    label = { Text("Voucher Type Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isActive,
-                        onCheckedChange = { isActive = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Active")
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val newVoucherType = TblVoucherType(
-                        voucher_Type_id = voucherType?.voucher_Type_id ?: 0,
-                        voucher_type_name = voucherTypeName,
-                        is_active = isActive
-                    )
-                    onSave(newVoucherType)
-                },
-                enabled = voucherTypeName.isNotBlank()
-            ) {
-                Text(if (voucherType != null) "Update" else "Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }
