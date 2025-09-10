@@ -25,6 +25,8 @@ import com.warriortech.resb.data.repository.StaffRepository
 import com.warriortech.resb.data.repository.TaxRepository
 import com.warriortech.resb.data.repository.TaxSplitRepository
 import com.warriortech.resb.data.repository.TemplateRepository
+import com.warriortech.resb.data.repository.UnitRepository
+import com.warriortech.resb.data.repository.VoucherTypeRepository
 import com.warriortech.resb.data.repository.VoucherRepository
 import com.warriortech.resb.data.sync.SyncManager
 import com.warriortech.resb.network.ApiService
@@ -367,4 +369,18 @@ object AppModule {
         networkMonitor: NetworkMonitor,
         sessionManager: SessionManager
     ): ModifierRepository = ModifierRepository(apiService,networkMonitor,sessionManager)
+
+    @Provides
+    @Singleton
+    fun provideUnitRepository(
+        apiService: ApiService,
+        sessionManager: SessionManager
+    ): UnitRepository = UnitRepository(apiService, sessionManager)
+
+    @Provides
+    @Singleton
+    fun provideVoucherTypeRepository(
+        apiService: ApiService,
+        sessionManager: SessionManager
+    ): VoucherTypeRepository = VoucherTypeRepository(apiService, sessionManager)
 }

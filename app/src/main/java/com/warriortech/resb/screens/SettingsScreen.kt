@@ -25,6 +25,9 @@ import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.screens.settings.UnitSettingsScreen
+import com.warriortech.resb.screens.settings.KitchenCategorySettingsScreen
+import com.warriortech.resb.screens.settings.VoucherTypeSettingsScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,6 +106,9 @@ fun SettingsMainScreen(
             SettingsModule.Printer,
             SettingsModule.Tax,
             SettingsModule.TaxSplit,
+            SettingsModule.Unit,
+            SettingsModule.KitchenCategory,
+            SettingsModule.VoucherType,
                         SettingsModule.RestaurantProfile,
                         SettingsModule.GeneralSettings,
                         SettingsModule.CreateVoucher,
@@ -132,6 +138,9 @@ fun SettingsMainScreen(
                 SettingsModule.CreateVoucher,
                 SettingsModule.Counter,
                 SettingsModule.Customer,
+                SettingsModule.Unit,
+                SettingsModule.KitchenCategory,
+                SettingsModule.VoucherType,
                 SettingsModule.Language,
                 SettingsModule.ChangePassword,
 //                SettingsModule.Support,
@@ -278,6 +287,15 @@ fun SettingsModuleScreen(
         }
         is SettingsModule.Modifiers -> {
             navController.navigate("modifier_setting")
+        }
+        is SettingsModule.Unit -> {
+            navController.navigate("unit_setting")
+        }
+        is SettingsModule.KitchenCategory -> {
+            navController.navigate("kitchen_category_setting")
+        }
+        is SettingsModule.VoucherType -> {
+            navController.navigate("voucher_type_setting")
         }
         is SettingsModule.ChangePassword -> {
             navController.navigate("change_password")
@@ -454,6 +472,27 @@ sealed class SettingsModule(
         "Manage menu item modifiers",
         Icons.Default.Add,
         listOf("name", "price", "category")
+    )
+    object Unit : SettingsModule(
+        "unit",
+        "Unit",
+        "Manage measurement units",
+        Icons.Default.Scale,
+        listOf("name", "is_active")
+    )
+    object KitchenCategory : SettingsModule(
+        "kitchen_category",
+        "Kitchen Category",
+        "Manage kitchen categories",
+        Icons.Default.Kitchen,
+        listOf("name", "is_active")
+    )
+    object VoucherType : SettingsModule(
+        "voucher_type",
+        "Voucher Type",
+        "Manage voucher types",
+        Icons.Default.Category,
+        listOf("name", "is_active")
     )
     object Support : SettingsModule(
         "support",
