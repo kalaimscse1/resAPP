@@ -151,6 +151,9 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.SubscriptionManager
 import com.warriortech.resb.screens.settings.ChangeCompanyScreen
+import com.warriortech.resb.screens.settings.KitchenCategorySettingsScreen
+import com.warriortech.resb.screens.settings.UnitSettingsScreen
+import com.warriortech.resb.screens.settings.VoucherTypeSettingsScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -774,6 +777,21 @@ fun AppNavigation(
                 orderMasterId = orderId,
                 kotResponse = kotRes
             )
+        }
+        composable("modifier_setting") {
+            ModifierSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("unit_setting") {
+            UnitSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("kitchen_category_setting") {
+            KitchenCategorySettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("voucher_type_setting") {
+            VoucherTypeSettingsScreen(onBackPressed = { navController.popBackStack() })
+        }
+        composable("change_password") {
+            ChangePasswordScreen(onBackPressed = { navController.popBackStack() })
         }
     }
 }
