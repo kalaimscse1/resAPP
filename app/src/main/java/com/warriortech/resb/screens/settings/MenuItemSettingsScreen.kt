@@ -105,23 +105,35 @@ fun MenuItemSettingsScreen(
                 }
 
                 is MenuItemSettingsUiState.Success -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.menuItems) { menuItem ->
-                            MenuItemCard(
-                                menuItem = menuItem,
-                                onEdit = { editingMenuItem = menuItem },
-                                onDelete = {
-                                    scope.launch {
-                                        viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
-                                    }
-                                }
+                    if (state.menuItems.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No menu items available",
+                                style = MaterialTheme.typography.bodyLarge
                             )
+                        }
+                    } else{
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(state.menuItems) { menuItem ->
+                                MenuItemCard(
+                                    menuItem = menuItem,
+                                    onEdit = { editingMenuItem = menuItem },
+                                    onDelete = {
+                                        scope.launch {
+                                            viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }

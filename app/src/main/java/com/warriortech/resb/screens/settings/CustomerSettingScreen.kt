@@ -1,202 +1,329 @@
 package com.warriortech.resb.screens.settings
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Customer
-import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.components.ReusableBottomSheet
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
+import com.warriortech.resb.util.ReusableBottomSheet
+import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomerSettingScreen(
-    navController: NavController,
-    viewModel: CustomerSettingsViewModel = hiltViewModel()
+fun CustomerSettingsScreen(
+    viewModel: CustomerSettingsViewModel = hiltViewModel(),
+    onBackPressed: () -> Unit
 ) {
-    val customers by viewModel.customers.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var selectedCustomer by remember { mutableStateOf<Customer?>(null) }
-    var customerName by remember { mutableStateOf("") }
-    var customerPhone by remember { mutableStateOf("") }
-    var customerEmail by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showAddDialog by remember { mutableStateOf(false) }
+    var editingCustomer by remember { mutableStateOf<Customer?>(null) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadCustomers()
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Customer Settings", color = SurfaceLight) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = SurfaceLight)
+                    IconButton(onClick = onBackPressed) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = PrimaryGreen)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = PrimaryGreen
+                ),
+                actions = {
+                    IconButton(onClick = { showAddDialog = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Add Customer",
+                            tint = SurfaceLight)}
+                }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    selectedCustomer = null
-                    customerName = ""
-                    customerPhone = ""
-                    customerEmail = ""
-                    showBottomSheet = true
-                },
-                containerColor = PrimaryGreen
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Customer", tint = SurfaceLight)
-            }
-        }
-    ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = PrimaryGreen)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(customers) { customer ->
-                    MobileOptimizedCard(
-                        onClick = {
-                            selectedCustomer = customer
-                            customerName = customer.name
-                            customerPhone = customer.phone ?: ""
-                            customerEmail = customer.email ?: ""
-                            showBottomSheet = true
-                        }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = customer.name,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                if (!customer.phone.isNullOrEmpty()) {
-                                    Text(
-                                        text = customer.phone,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                if (!customer.email.isNullOrEmpty()) {
-                                    Text(
-                                        text = customer.email,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    viewModel.deleteCustomer(customer.id)
-                                }
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ReusableBottomSheet(
-            isVisible = showBottomSheet,
-            onDismiss = { showBottomSheet = false },
-            title = if (selectedCustomer == null) "Add Customer" else "Edit Customer"
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = customerName,
-                    onValueChange = { customerName = it },
-                    label = { Text("Customer Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = customerPhone,
-                    onValueChange = { customerPhone = it },
-                    label = { Text("Phone Number") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = customerEmail,
-                    onValueChange = { customerEmail = it },
-                    label = { Text("Email") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+//        floatingActionButton = {
+//            FloatingActionButton(
+//                onClick = { showAddDialog = true }
+//            ) {
+//                Icon(Icons.Default.Add, contentDescription = "Add Customer",
+//                    tint = SurfaceLight)
+//            }
+//        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ){ paddingValues ->
+        when (val state = uiState) {
+            is CustomerSettingsViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    OutlinedButton(
-                        onClick = { showBottomSheet = false },
-                        modifier = Modifier.weight(1f)
+                    CircularProgressIndicator()
+                }
+            }
+            is CustomerSettingsViewModel.UiState.Success -> {
+                if (state.customers.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Cancel")
+                        Text(
+                            text = "No customers available",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
-
-                    Button(
-                        onClick = {
-                            if (selectedCustomer == null) {
-                                viewModel.addCustomer(customerName, customerPhone, customerEmail)
-                            } else {
-                                viewModel.updateCustomer(
-                                    selectedCustomer!!.copy(
-                                        name = customerName,
-                                        phone = customerPhone,
-                                        email = customerEmail
-                                    )
-                                )
+                    return@Scaffold
+                }
+                else{
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(state.customers) { customer ->
+                        CustomerCard(
+                            customer = customer,
+                            onEdit = { editingCustomer = it },
+                            onDelete = {
+                                scope.launch {
+                                    viewModel.deleteCustomer(it.customer_id)
+                                }
                             }
-                            showBottomSheet = false
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
-                    ) {
-                        Text(if (selectedCustomer == null) "Add" else "Update")
+                        )
                     }
                 }
+            }
+            }
+            is CustomerSettingsViewModel.UiState.Error -> {
+
+                Text(
+                    text = state.message,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+
+
+        if (showAddDialog) {
+            CustomerDialog(
+                customer = null,
+                onDismiss = { showAddDialog = false },
+                onConfirm = { name, phone, email, address ->
+                    scope.launch {
+                        viewModel.addCustomer(name, phone, email, address)
+                        showAddDialog = false
+                    }
+                }
+            )
+        }
+
+        editingCustomer?.let { customer ->
+            CustomerDialog(
+                customer = customer,
+                onDismiss = { editingCustomer = null },
+                onConfirm = { name, phone, email, address ->
+                    scope.launch {
+                        viewModel.updateCustomer(customer.customer_id, name, phone, email, address)
+                        editingCustomer = null
+                    }
+                }
+            )
+        }
+    }
+}
+@Composable
+fun CustomerCard(
+    customer: Customer,
+    onEdit: (Customer) -> Unit,
+    onDelete: (Customer) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = customer.customer_name,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = customer.customer_phone,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = customer.customer_email.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = customer.customer_address.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(onClick = { onEdit(customer) }) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit")
+            }
+
+            IconButton(onClick = { onDelete(customer) }) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete")
             }
         }
     }
+}
+
+@Composable
+fun CustomerDialog(
+    customer: Customer?,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(customer?.customer_name ?: "") }
+    var phone by remember { mutableStateOf(customer?.customer_phone ?: "") }
+    var email by remember { mutableStateOf(customer?.customer_email ?: "") }
+    var address by remember { mutableStateOf(customer?.customer_address ?: "") }
+
+    ReusableBottomSheet(
+        onDismiss = onDismiss,
+        title = if (customer == null) "Add Customer" else "Edit Customer",
+        onSave = { onConfirm(name, phone, email, address) },
+        isSaveEnabled = name.isNotBlank() && phone.isNotBlank()
+    ){
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text("Phone") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = address,
+                onValueChange = { address = it },
+                label = { Text("Address") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = { Text(if (customer == null) "Add Customer" else "Edit Customer") },
+//        text = {
+//            Column {
+//                OutlinedTextField(
+//                    value = name,
+//                    onValueChange = { name = it },
+//                    label = { Text("Name") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = phone,
+//                    onValueChange = { phone = it },
+//                    label = { Text("Phone") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = email,
+//                    onValueChange = { email = it },
+//                    label = { Text("Email") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = address,
+//                    onValueChange = { address = it },
+//                    label = { Text("Address") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//            }
+//        },
+//        confirmButton = {
+//            TextButton(
+//                onClick = { onConfirm(name, phone, email, address) }
+//            ) {
+//                Text(if (customer == null) "Add" else "Update")
+//            }
+//        },
+//        dismissButton = {
+//            TextButton(onClick = onDismiss) {
+//                Text("Cancel")
+//            }
+//        }
+//    )
 }

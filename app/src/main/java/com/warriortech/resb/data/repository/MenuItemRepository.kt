@@ -1,5 +1,6 @@
 package com.warriortech.resb.data.repository
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TblMenuItem
@@ -24,18 +25,35 @@ class MenuItemRepository @Inject constructor(
     private val sessionManager: SessionManager
 ) : OfflineFirstRepository(networkMonitor) {
 
-    fun getAllMenuItems(): Flow<List<TblMenuItemResponse>> {
-        return menuItemDao.getAllMenuItems()
-            .map { entities -> entities.map { it.toModel() } }
-            .onStart {
-                if (isOnline()) {
-                    syncMenuItemsFromRemote()
-                }
+//    fun getAllMenuItems(): Flow<List<TblMenuItemResponse>> {
+//
+//        val response = apiService.getMenuItems(sessionManager.getCompanyCode()?:"")
+//        return menuItemDao.getAllMenuItems()
+//            .map { entities -> entities.map { it.toModel() } }
+//            .onStart {
+//                if (isOnline()) {
+//                    syncMenuItemsFromRemote()
+//                }
+//            }
+//    }
+
+
+    suspend fun getAllMenuItems(): Flow<List<TblMenuItemResponse>> = flow{
+        val response = apiService.getMenuItems(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            val menuItems = response.body()
+            if (menuItems != null) {
+                emit(menuItems)
+            } else {
+                emit(emptyList())
             }
+        } else {
+            emit(emptyList())
+        }
     }
     suspend fun getMenuItems(category: String? = null): Flow<Result<List<TblMenuItemResponse>>> = flow {
         try {
-            getAllMenuItems()
+//            getAllMenuItems()
             val response = apiService.getMenuItems(sessionManager.getCompanyCode()?:"")
 
             if (response.isSuccessful) {
