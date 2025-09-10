@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Printer
+import com.warriortech.resb.model.TblPrinterResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
@@ -30,7 +31,7 @@ fun PrinterSettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingPrinter by remember { mutableStateOf<Printer?>(null) }
+    var editingPrinter by remember { mutableStateOf<TblPrinterResponse?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadPrinters()
@@ -60,68 +61,83 @@ fun PrinterSettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+            when(val state= uiState) {
+                is PrinterSettingsViewModel.PrinterSettingsUiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.printers) { printer ->
-                        MobileOptimizedCard(
-                            modifier = Modifier.fillMaxWidth()
+                is PrinterSettingsViewModel.PrinterSettingsUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Error: ${state.message}")
+                    }
+                }
+                is PrinterSettingsViewModel.PrinterSettingsUiState.Success -> {
+                    if (state.printers.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Text("No Printer available", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    } else{
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.printers) { printer ->
+                            MobileOptimizedCard(
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = printer.printer_name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Text(
-                                        text = printer.ip_address,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = if (printer.is_active) "ACTIVE" else "INACTIVE",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (printer.is_active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                    )
-                                }
-
-                                Row {
-                                    IconButton(onClick = { editingPrinter = printer }) {
-                                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = printer.printer_name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Text(
+                                            text = printer.ip_address,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
-                                    IconButton(onClick = { viewModel.deletePrinter(printer.printer_id) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+
+                                    Row {
+                                        IconButton(onClick = { editingPrinter = printer }) {
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = stringResource(R.string.edit)
+                                            )
+                                        }
+                                        IconButton(onClick = { viewModel.deletePrinter(printer.printer_id) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = stringResource(R.string.delete)
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+                }
             }
-        }
     }
 
     if (showAddDialog) {
@@ -150,13 +166,13 @@ fun PrinterSettingsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrinterDialog(
-    printer: Printer?,
+    printer: TblPrinterResponse?,
     onDismiss: () -> Unit,
     onSave: (Printer) -> Unit
 ) {
     var name by remember { mutableStateOf(printer?.printer_name ?: "") }
     var ipAddress by remember { mutableStateOf(printer?.ip_address ?: "") }
-    var isActive by remember { mutableStateOf(printer?.is_active ?: true) }
+    var isActive by remember { mutableStateOf(printer?.is_active ?: 1) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -181,8 +197,8 @@ fun PrinterDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Switch(
-                        checked = isActive,
-                        onCheckedChange = { isActive = it }
+                        checked = isActive.toInt() ==1,
+                        onCheckedChange = { isActive = if(it) 1 else 0 }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Active")
@@ -192,14 +208,10 @@ fun PrinterDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val newPrinter = printer?.copy(
-                       printer_name = name,
-                        ip_address = ipAddress,
-                        is_active = isActive
-                    ) ?: Printer(
-                       printer_id = 0, // Use 0 for new printers
+                    val newPrinter =  Printer(
+                       printer_id = printer?.printer_id?:0, // Use 0 for new printers
                         printer_name = name,
-                        kitchen_cat_id = 0, // Default or selected category ID
+                        kitchen_cat_id = printer?.kitchen_cat?.kitchen_cat_id?.toLong()?:0L, // Default or selected category ID
                         ip_address = ipAddress,
                         is_active = isActive
                     )

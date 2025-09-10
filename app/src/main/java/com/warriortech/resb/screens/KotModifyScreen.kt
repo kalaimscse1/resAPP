@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,6 +71,7 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import com.warriortech.resb.ui.viewmodel.KotViewModel
 import com.warriortech.resb.util.CurrencySettings
+import com.warriortech.resb.util.SuccessDialog
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -85,6 +87,10 @@ fun KotModifyScreen(
     val uiState = viewModel.kotActionState.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var menuItems by remember { mutableStateOf<TblMenuItemResponse?>(null) }
+    var success by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
+    var msg by remember { mutableStateOf("") }
 
     LaunchedEffect(orderMasterId, kotResponse) {
         when {
@@ -104,8 +110,10 @@ fun KotModifyScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -116,30 +124,51 @@ fun KotModifyScreen(
         bottomBar = {
             BottomAppBar(backgroundColor = SecondaryGreen) {
                 Button(
-                    onClick = { viewModel.reprint()
-                              navController.navigate("kot_report")},
-                    modifier = Modifier.weight(1f).padding(8.dp),
+                    onClick = {
+                        val res = viewModel.reprint()
+                        if (res.data == true) {
+                            success = true
+                            msg = res.message
+                        } else {
+                            failed = true
+                            msg = res.message
+                        }
+                        navController.navigate("kot_report")
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(8.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = DarkGreen
                     )
                 ) {
-                    Text("Reprint",color=SurfaceLight)
+                    Text("Reprint", color = SurfaceLight)
                 }
                 Button(
                     onClick = {
-                        viewModel.modify()
+                        val res = viewModel.modify()
+                        if (res.data == true) {
+                            success = true
+                            msg = res.message
+                        } else {
+                            failed = true
+                            msg = res.message
+                        }
                         navController.navigate("kot_report")
                     },
-                    modifier = Modifier.weight(1f).padding(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(8.dp),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = DarkGreen
                     )
                 ) {
-                    Text("Modify",color=SurfaceLight)
+                    Text("Modify", color = SurfaceLight)
                 }
             }
         }
-    ){ paddingValues ->
+    ) { paddingValues ->
+        values = paddingValues
         Column(modifier = Modifier.padding(paddingValues)) {
             when (val state = uiState.value) {
                 is KotViewModel.KotActionState.Idle -> {
@@ -154,6 +183,7 @@ fun KotModifyScreen(
                         )
                     }
                 }
+
                 is KotViewModel.KotActionState.Processing -> {
                     // Show a loading indicator
                     Box(
@@ -166,6 +196,7 @@ fun KotModifyScreen(
                     }
 
                 }
+
                 is KotViewModel.KotActionState.Success -> {
                     // Show the loaded data
                     KotItemsContent(
@@ -182,6 +213,7 @@ fun KotModifyScreen(
                     )
 
                 }
+
                 is KotViewModel.KotActionState.Error -> {
                     // Show error message
                     Text("Error: ${state.message}")
@@ -189,7 +221,7 @@ fun KotModifyScreen(
             }
         }
     }
-    if (showDialog){
+    if (showDialog) {
         KotDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
@@ -198,12 +230,26 @@ fun KotModifyScreen(
             }
         )
     }
+    if (success) {
+        SuccessDialog(
+            title = msg,
+            description = msg,
+            paddingValues = values
+        )
+    }
+    if (failed) {
+        SuccessDialog(
+            title = msg,
+            description = msg,
+            paddingValues = values
+        )
+    }
 }
 
 @Composable
 fun KotDialog(
     onDismiss: () -> Unit,
-    onConfirm:() -> Unit
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -224,11 +270,12 @@ fun KotDialog(
         }
     )
 }
+
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun KotItemsContent(
     modifier: Modifier = Modifier,
-    items : Map<TblMenuItemResponse, Int>,
+    items: Map<TblMenuItemResponse, Int>,
     uiState: KotViewModel,
     onUpdateQuantity: (TblMenuItemResponse, Int) -> Unit,
     onRemoveItem: (TblMenuItemResponse) -> Unit
@@ -292,7 +339,7 @@ fun KotItemsContent(
                 currencyFormatter = currencyFormatter
             )
         }
-        if (uiState._cessAmount.value>0) {
+        if (uiState._cessAmount.value > 0) {
             item {
                 EditableBillingRow(
                     label = "Cess Amount",
@@ -301,7 +348,7 @@ fun KotItemsContent(
                 )
             }
         }
-        if (uiState._cessSpecific.value>0) {
+        if (uiState._cessSpecific.value > 0) {
             item {
                 EditableBillingRow(
                     label = "Cess Specific",

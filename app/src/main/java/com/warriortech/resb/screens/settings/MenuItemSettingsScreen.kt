@@ -93,11 +93,7 @@ fun MenuItemSettingsScreen(
 //        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+
             when (val state = uiState) {
                 is MenuItemSettingsUiState.Loading -> {
                     Box(
@@ -150,7 +146,7 @@ fun MenuItemSettingsScreen(
                     }
                 }
             }
-        }
+
 
         if (showAddDialog || editingMenuItem != null) {
             MenuItemDialog(

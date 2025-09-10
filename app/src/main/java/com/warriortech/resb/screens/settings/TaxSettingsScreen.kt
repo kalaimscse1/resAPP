@@ -65,12 +65,6 @@ fun TaxSettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-
             when (val state=uiState) {
                 is TaxSettingsViewModel.UiState.Loading -> {
                     Box(
@@ -137,7 +131,6 @@ fun TaxSettingsScreen(
                     }
                 }
             }
-        }
 
         if (showAddDialog || editingTax != null) {
             TaxDialog(

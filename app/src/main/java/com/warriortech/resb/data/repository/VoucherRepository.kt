@@ -1,5 +1,8 @@
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.model.TblVoucher
+import com.warriortech.resb.model.TblVoucherRequest
+import com.warriortech.resb.model.TblVoucherResponse
 import com.warriortech.resb.model.Voucher
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -11,7 +14,7 @@ class VoucherRepository @Inject constructor(
     private val apiService: ApiService,
     private val sessionManager: SessionManager
 ) {
-    suspend fun getAllVouchers(): List<Voucher> {
+    suspend fun getAllVouchers(): List<TblVoucherResponse> {
         return try {
             apiService.getVouchers(sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
@@ -19,7 +22,7 @@ class VoucherRepository @Inject constructor(
         }
     }
 
-    suspend fun getVoucherById(id: Int): Voucher? {
+    suspend fun getVoucherById(id: Int): TblVoucherResponse? {
         return try {
             apiService.getVoucherById(id,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
@@ -27,7 +30,7 @@ class VoucherRepository @Inject constructor(
         }
     }
 
-    suspend fun createVoucher(voucher: Voucher): Voucher? {
+    suspend fun createVoucher(voucher: TblVoucherRequest): TblVoucherResponse? {
         return try {
             apiService.createVoucher(voucher,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
@@ -35,9 +38,9 @@ class VoucherRepository @Inject constructor(
         }
     }
 
-    suspend fun updateVoucher(voucher: Voucher): Voucher? {
+    suspend fun updateVoucher(voucher: TblVoucherRequest): Int? {
         return try {
-            apiService.updateVoucher(voucher.id, voucher,sessionManager.getCompanyCode()?:"")
+            apiService.updateVoucher(voucher.voucher_id, voucher,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
             null
         }

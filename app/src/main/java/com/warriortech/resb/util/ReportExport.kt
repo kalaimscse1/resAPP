@@ -1,5 +1,6 @@
 package com.warriortech.resb.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -243,6 +244,7 @@ object ReportExport {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     fun itemExportToPdf(context: Context, bills: List<ItemReport>) {
         try {
             val pdfDir = File(context.getExternalFilesDir(null), "reports")
@@ -294,7 +296,7 @@ object ReportExport {
                 table.addCell(bill.menu_item_name)
                 table.addCell(bill.item_cat_name)
 
-                val rateCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.rate)}"))
+                val rateCell = PdfPCell(Phrase(String.format("%.2f", bill.rate)))
                 rateCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(rateCell)
 
@@ -302,23 +304,23 @@ object ReportExport {
                 qtyCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(qtyCell)
 
-                val totalCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.total)}"))
+                val totalCell = PdfPCell(Phrase(String.format("%.2f", bill.total)))
                 totalCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(totalCell)
 
-                val taxCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.tax_amount)}"))
+                val taxCell = PdfPCell(Phrase(String.format("%.2f", bill.tax_amount)))
                 taxCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(taxCell)
 
-                val cessCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.cess)}"))
+                val cessCell = PdfPCell(Phrase(String.format("%.2f", bill.cess)))
                 cessCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(cessCell)
 
-                val cessSpecCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.cess_specific)}"))
+                val cessSpecCell = PdfPCell(Phrase(String.format("%.2f", bill.cess_specific)))
                 cessSpecCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(cessSpecCell)
 
-                val grandCell = PdfPCell(Phrase("₹${String.format("%.2f", bill.grand_total)}"))
+                val grandCell = PdfPCell(Phrase(String.format("%.2f", bill.grand_total)))
                 grandCell.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(grandCell)
 

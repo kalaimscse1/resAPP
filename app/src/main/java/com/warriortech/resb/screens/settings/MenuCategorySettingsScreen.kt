@@ -68,11 +68,7 @@ fun MenuCategorySettingsScreen(
 //        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+
 //            Button(
 //                onClick = { showAddDialog = true },
 //                modifier = Modifier.fillMaxWidth()
@@ -102,7 +98,6 @@ fun MenuCategorySettingsScreen(
                         ) {
                             Text("No categories found", style = MaterialTheme.typography.bodyLarge)
                         }
-                        return@Column
                     }else{
                     LazyColumn(modifier = Modifier
                         .fillMaxSize()
@@ -131,7 +126,7 @@ fun MenuCategorySettingsScreen(
                     )
                 }
             }
-        }
+
 
         if (showAddDialog) {
             CategoryDialog(

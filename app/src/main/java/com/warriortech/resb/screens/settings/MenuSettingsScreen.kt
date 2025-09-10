@@ -63,12 +63,6 @@ fun MenuSettingsScreen(
 
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-
             when (val state = uiState) {
                 is MenuSettingsViewModel.UiState.Loading -> {
                     Box(
@@ -162,7 +156,6 @@ fun MenuSettingsScreen(
                     order = order
                 )
             }
-        }
     }
 }
 

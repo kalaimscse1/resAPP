@@ -9,6 +9,7 @@ import com.warriortech.resb.data.repository.KotRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.calculateGst
 import com.warriortech.resb.data.repository.calculateGstAndCess
+import com.warriortech.resb.model.ApiResponse
 import com.warriortech.resb.model.KOTItem
 import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.KotResponse
@@ -234,7 +235,9 @@ class KotViewModel @Inject constructor(
 
     }
 
-    fun reprint(){
+    fun reprint(): ApiResponse<Boolean>{
+        var data = false
+        var msg = ""
         viewModelScope.launch {
             val orderItems = _billedItems.value.entries.map { (menuItem, quantity) ->
                 OrderItem(
@@ -269,9 +272,12 @@ class KotViewModel @Inject constructor(
                         result ->
                         result.fold(
                             onSuccess = {
-
+                                data = true
+                                msg = "KOT Printed Successfully for $category"
                             },
                             onFailure = {
+                                data = false
+                                msg = "Failed to print KOT for $category"
                                 _kotActionState.value = KotActionState.Error("Failed to print KOT for $category")
                             }
                         )
@@ -279,10 +285,12 @@ class KotViewModel @Inject constructor(
                 }
             }
         }
-
+        return ApiResponse(data = data, message = msg, success = true)
     }
 
-    fun modify(){
+    fun modify():ApiResponse<Boolean>{
+        var data = false
+        var msg = ""
         val orderItems = _billedItems.value.entries.map { (menuItem, quantity) ->
             val id = _orderDetails.value.filter { it.menuItem.menu_item_id == menuItem.menu_item_id }
             OrderItem(
@@ -330,7 +338,20 @@ class KotViewModel @Inject constructor(
                                     paperWidth = 48
                                 )
                                 val ip = orderRepository.getIpAddress(category)
-                                orderRepository.printKOT(kotForCategory, ip)
+                                orderRepository.printKOT(kotForCategory, ip).collect {
+                                    result ->
+                                    result.fold(
+                                        onSuccess = {
+                                            data = true
+                                            msg = "Order Modified and KOT Printed Successfully for $category"
+                                        },
+                                        onFailure = {
+                                            data = false
+                                            msg = "Order Modified but Failed to print KOT for $category"
+                                            _kotActionState.value = KotActionState.Error("Failed to print KOT for $category")
+                                        }
+                                    )
+                                }
                             }
                         }
                         _kotActionState.value = KotActionState.Success(_billedItems.value)
@@ -341,7 +362,7 @@ class KotViewModel @Inject constructor(
                 )
             }
         }
-
+        return ApiResponse(data = data, message = msg, success = true)
     }
 
 }

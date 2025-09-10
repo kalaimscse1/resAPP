@@ -1,12 +1,21 @@
 package com.warriortech.resb.screens.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DomainAdd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,14 +23,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.warriortech.resb.model.Area
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.AreaViewModel
+import com.warriortech.resb.model.Area
+import kotlinx.coroutines.launch
 
 /**
  * Screen for managing areas in the application.
@@ -115,8 +125,8 @@ fun AreaSettingsScreen(
     if (showAddDialog) {
         AddAreaDialog(
             onDismiss = { showAddDialog = false },
-            onAdd = { name, description ->
-                viewModel.addArea(name, description)
+            onAdd = { name ->
+                viewModel.addArea(name)
                 showAddDialog = false
             }
         )
@@ -174,51 +184,98 @@ fun AreaCard(
     }
 }
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAreaDialog(
     onDismiss: () -> Unit,
-    onAdd: (String, String) -> Unit
+    onAdd: (String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
 
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val scope = rememberCoroutineScope()
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Add Area") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        sheetState = sheetState,
+        dragHandle = {
+            // Small drag indicator at the top
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it.uppercase() },
-                    label = { Text("Area Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it.uppercase() },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
+                Box(
+                    modifier = Modifier
+                        .size(width = 40.dp, height = 4.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(50)
+                        )
                 )
             }
         },
-        confirmButton = {
-            TextButton(
-                onClick = { onAdd(name, description) },
-                enabled = name.isNotBlank()
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Title
+            Text(
+                text = "Add Area",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // Text fields
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.uppercase() },
+                label = { Text("Area Name") },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                TextButton(onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        onDismiss()
+                    }
+                }) {
+                    Text("Cancel")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            onAdd(name)
+                        }
+                    },
+                    enabled = name.isNotBlank(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Add")
+                }
             }
         }
-    )
+    }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditAreaDialog(
     area: Area,
@@ -228,43 +285,93 @@ fun EditAreaDialog(
     var name by remember { mutableStateOf(area.area_name) }
     var isActive by remember { mutableStateOf(area.isActvice) }
 
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val scope = rememberCoroutineScope()
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Area") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        sheetState = sheetState,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it.uppercase() },
-                    label = { Text("Area Name") },
-                    modifier = Modifier.fillMaxWidth()
+                Box(
+                    modifier = Modifier
+                        .size(width = 40.dp, height = 4.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(50)
+                        )
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Title
+            Text(
+                text = "Edit Area",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // Text field
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.uppercase() },
+                label = { Text("Area Name") },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Active checkbox
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = isActive,
+                    onCheckedChange = { isActive = it }
+                )
+                Text("Active")
+            }
+
+            // Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        onDismiss()
+                    }
+                }) {
+                    Text("Cancel")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            onUpdate(area.copy(area_name = name, isActvice = isActive))
+                        }
+                    },
+                    enabled = name.isNotBlank(),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Checkbox(
-                        checked = isActive,
-                        onCheckedChange = { isActive = it }
-                    )
-                    Text("Active")
+                    Text("Update")
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onUpdate(area.copy(area_name = name)) },
-                enabled = name.isNotBlank()
-            ) {
-                Text("Update")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
         }
-    )
+    }
 }

@@ -1,6 +1,7 @@
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.Printer
+import com.warriortech.resb.model.TblPrinterResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import javax.inject.Inject
@@ -11,7 +12,7 @@ class PrinterRepository @Inject constructor(
     private val apiService: ApiService,
     private val sessionManager: SessionManager
 ) {
-    suspend fun getAllPrinters(): List<Printer> {
+    suspend fun getAllPrinters(): List<TblPrinterResponse> {
         return try {
             apiService.getPrinters(sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
@@ -19,7 +20,7 @@ class PrinterRepository @Inject constructor(
         }
     }
 
-    suspend fun getPrinterById(id: Int): Printer? {
+    suspend fun getPrinterById(id: Int): TblPrinterResponse? {
         return try {
             apiService.getPrinterById(id,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
@@ -27,7 +28,7 @@ class PrinterRepository @Inject constructor(
         }
     }
 
-    suspend fun createPrinter(printer: Printer): Printer? {
+    suspend fun createPrinter(printer: Printer): TblPrinterResponse? {
         return try {
             apiService.createPrinter(printer,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
@@ -35,7 +36,7 @@ class PrinterRepository @Inject constructor(
         }
     }
 
-    suspend fun updatePrinter(printer: Printer): Printer? {
+    suspend fun updatePrinter(printer: Printer): Int? {
         return try {
             apiService.updatePrinter(printer.printer_id, printer,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {

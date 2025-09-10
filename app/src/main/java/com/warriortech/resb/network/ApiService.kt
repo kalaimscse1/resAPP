@@ -524,32 +524,32 @@ interface ApiService {
      */
 
     @GET("settings/voucher/getVoucherByIsActive")
-    suspend fun getVouchers(@Header("X-Tenant-ID") tenantId: String): List<Voucher>
+    suspend fun getVouchers(@Header("X-Tenant-ID") tenantId: String): List<TblVoucherResponse>
 
     @GET("settings/voucher/getVoucher/{voucher_id}")
     suspend fun getVoucherById(
         @Path("voucher_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
-    ): Voucher
+    ): TblVoucherResponse
 
     @POST("settings/voucher/addVoucher")
     suspend fun createVoucher(
-        @Body voucher: Voucher,
+        @Body voucher: TblVoucherRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Voucher
+    ): TblVoucherResponse
 
     @PUT("settings/voucher/updateVoucher/{voucher_id}")
     suspend fun updateVoucher(
         @Path("voucher_id") id: Long,
-        @Body voucher: Voucher,
+        @Body voucher: TblVoucherRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Voucher
+    ): Int
 
     @DELETE("settings/voucher/deleteVoucherById/{voucher_id}")
     suspend fun deleteVoucher(
         @Path("voucher_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    )
+    ): Int
 
     @GET("settings/voucher/getVoucherByCounterId/{counter_id}")
     suspend fun getVoucherByCounterId(
@@ -559,36 +559,71 @@ interface ApiService {
     ): Response<TblVoucherResponse>
 
     /**
+     * VoucherTypeSettings Management
+     */
+
+    @GET("settings/voucher/voucherType/getVoucherTypeByIsActive")
+    suspend fun getVoucherTypes(
+        @Header("X-Tenant-ID") tenantId: String): List<TblVoucherType>
+
+    @GET("settings/voucher/voucherType/getVoucherType/{voucher_Type_id}")
+    suspend fun getVoucherTypeById(
+        @Path("voucher_Type_id") id: Int,
+        @Header("X-Tenant-ID") tenantId: String
+    ): TblVoucherType
+
+    @POST("settings/voucher/voucherType/addVoucherType")
+    suspend fun createVoucherType(
+        @Body voucherType: TblVoucherType,
+        @Header("X-Tenant-ID") tenantId: String
+    ): TblVoucherType
+
+    @PUT("settings/voucher/voucherType/updateVoucherType/{voucher_Type_id}")
+    suspend fun updateVoucherType(
+        @Path("voucher_Type_id") id: Long,
+        @Body voucherType: TblVoucherType,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Int
+
+    @DELETE("settings/voucher/voucherType/deleteVoucherTypeById/{voucher_Type_id}")
+    suspend fun deleteVoucherType(
+        @Path("voucher_Type_id") id: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Int
+
+
+
+    /**
      * PrinterSettings Management
      */
 
     @GET("settings/printer/getPrinterByIsActive")
-    suspend fun getPrinters(@Header("X-Tenant-ID") tenantId: String): List<Printer>
+    suspend fun getPrinters(@Header("X-Tenant-ID") tenantId: String): List<TblPrinterResponse>
 
     @GET("settings/printer/getPrinter/{printer_id}  ")
     suspend fun getPrinterById(
         @Path("printer_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
-    ): Printer
+    ): TblPrinterResponse
 
     @POST("settings/printer/addPrinter")
     suspend fun createPrinter(
         @Body printer: Printer,
         @Header("X-Tenant-ID") tenantId: String
-    ): Printer
+    ): TblPrinterResponse
 
     @PUT("settings/printer/updatePrinter/{printer_id}")
     suspend fun updatePrinter(
         @Path("printer_id") id: Long,
         @Body printer: Printer,
         @Header("X-Tenant-ID") tenantId: String
-    ): Printer
+    ): Int
 
     @DELETE("settings/printer/deletePrinterById/{printer_id}")
     suspend fun deletePrinter(
         @Path("printer_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    )
+    ): Int
 
     /**
      * Payment Management
@@ -823,18 +858,26 @@ interface ApiService {
      */
 
     @GET("settings/kitchenCategory/getKitchenCategoryByIsActive")
-    suspend fun getAllKitchenCategories(@Header("X-Tenant-ID") tenantId: String): Response<List<KitchenCategory>>
+    suspend fun getAllKitchenCategories(
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<KitchenCategory>>
+
+    @GET("settings/kitchenCategory/getKitchenCategory/{kitchen_cat_id}")
+    suspend fun getKitchenCategoryById(
+        @Path("kitchen_cat_id") id: Int,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<KitchenCategory>
 
     @POST("settings/kitchenCategory/addKitchenCategory")
     suspend fun createKitchenCategory(
-        @Body category: KitchenCategory,
+        @Body kitchenCategory: KitchenCategory,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<KitchenCategory>
 
     @PUT("settings/kitchenCategory/updateKitchenCategory/{kitchen_cat_id}")
     suspend fun updateKitchenCategory(
         @Path("kitchen_cat_id") id: Long,
-        @Body category: KitchenCategory,
+        @Body kitchenCategory: KitchenCategory,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
@@ -845,12 +888,19 @@ interface ApiService {
     ): Response<Int>
 
 
+
     /**
      * Unit Management
      */
 
     @GET("settings/unit/getUnitsByIsActive")
     suspend fun getAllUnits(@Header("X-Tenant-ID") tenantId: String): Response<List<TblUnit>>
+
+    @GET("settings/unit/getUnit/{unit_id}")
+    suspend fun getUnitById(
+        @Path("unit_id") id: Int,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblUnit>
 
     @POST("settings/unit/addUnit")
     suspend fun createUnit(

@@ -64,11 +64,6 @@ fun RoleSettingsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -98,7 +93,6 @@ fun RoleSettingsScreen(
                     }
                 }
             }
-        }
     }
 
     if (showAddDialog) {

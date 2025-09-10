@@ -71,11 +71,7 @@ fun ModifierSettingsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+
             when (val state = uiState) {
                 is ModifierSettingsUiState.Loading -> {
                     Box(
@@ -123,7 +119,6 @@ fun ModifierSettingsScreen(
                     }
                 }
             }
-        }
 
         if (showAddDialog) {
             ModifierDialog(

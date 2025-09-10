@@ -70,12 +70,6 @@ fun TableSettingsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-
             when (val state=uiState) {
                 is TableSettingsUiState.Loading -> {
                     Box(
@@ -138,7 +132,6 @@ fun TableSettingsScreen(
                     }
                 }
             }
-        }
 
         if (showAddDialog || editingTable != null) {
             TableDialog(

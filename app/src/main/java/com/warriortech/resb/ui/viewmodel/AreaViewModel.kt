@@ -51,7 +51,7 @@ class AreaViewModel @Inject constructor(
         }
     }
 
-    fun addArea(name: String, description: String) {
+    fun addArea(name: String) {
         viewModelScope.launch {
             try {
                 val area = Area(0, name, true)

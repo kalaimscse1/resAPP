@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.util.ReusableBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,11 +64,7 @@ fun CounterSettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+
             when (val state = uiState) {
                 is CounterSettingsViewModel.UiState.Loading -> {
                     Box(
@@ -146,7 +143,7 @@ fun CounterSettingsScreen(
                     }
                 )
             }
-        }
+
     }
 }
 
@@ -160,59 +157,49 @@ fun AddEditCounterDialog(
     var ipAddress by remember { mutableStateOf(counter?.ip_address ?: "") }
     var isActive by remember { mutableStateOf(counter?.is_active ?: true) }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(if (counter != null) "Edit Counter" else "Add Counter") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = counterName,
-                    onValueChange = { counterName = it.uppercase() },
-                    label = { Text("Counter Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = ipAddress,
-                    onValueChange = { ipAddress = it },
-                    label = { Text("IpAddress") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isActive,
-                        onCheckedChange = { isActive = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Active")
-                }
-            }
+    ReusableBottomSheet(
+        title = if (counter != null) "Edit Counter" else "Add Counter",
+        onDismiss = onDismissRequest,
+        onSave = {
+            val newCounter = TblCounter(
+                counter_id = counter?.counter_id ?: 0,
+                counter_name = counterName,
+                ip_address = ipAddress,
+                is_active = isActive
+            )
+            onSave(newCounter)
         },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val newTable = TblCounter(
-                        counter_id = counter?.counter_id ?: 0,
-                        counter_name = counter?.counter_name ?: counterName,
-                        ip_address = counter?.ip_address ?: ipAddress,
-                        is_active = counter?.is_active ?: isActive
-                    )
-                    onSave(newTable)
-                },
-                enabled = counterName.isNotBlank() && ipAddress.isNotBlank()
+        isSaveEnabled = counterName.isNotBlank() && ipAddress.isNotBlank()
+    ) {
+        Column {
+            OutlinedTextField(
+                value = counterName,
+                onValueChange = { counterName = it.uppercase() },
+                label = { Text("Counter Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = ipAddress,
+                onValueChange = { ipAddress = it },
+                label = { Text("IP Address") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (counter != null) "Update" else "Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancel")
+                Switch(
+                    checked = isActive,
+                    onCheckedChange = { isActive = it }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Active")
             }
         }
-    )
+    }
 }
 
 @Composable

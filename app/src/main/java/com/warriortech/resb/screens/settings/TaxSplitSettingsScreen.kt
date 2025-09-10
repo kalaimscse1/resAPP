@@ -72,12 +72,6 @@ fun TaxSplitSettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-
             when (val state=uiState) {
                 is TaxSplitSettingsViewModel.UiState.Loading -> {
                     Box(
@@ -144,7 +138,6 @@ fun TaxSplitSettingsScreen(
                     }
                 }
             }
-        }
 
         if (showAddDialog || editingTaxSplit != null) {
            TaxSplitDialog(

@@ -3,47 +3,47 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.VoucherRepository
+import com.warriortech.resb.model.TblCounter
+import com.warriortech.resb.model.TblVoucher
+import com.warriortech.resb.model.TblVoucherRequest
+import com.warriortech.resb.model.TblVoucherResponse
 import com.warriortech.resb.model.Voucher
+import com.warriortech.resb.ui.viewmodel.CounterSettingsViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class VoucherSettingsUiState(
-    val vouchers: List<Voucher> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 @HiltViewModel
 class VoucherSettingsViewModel @Inject constructor(
     private val voucherRepository: VoucherRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(VoucherSettingsUiState())
-    val uiState: StateFlow<VoucherSettingsUiState> = _uiState
+    private val _uiState = MutableStateFlow<VoucherSettingsUiState>(
+        VoucherSettingsUiState.Loading)
+    val uiState: StateFlow<VoucherSettingsUiState> = _uiState.asStateFlow()
+
+    sealed class VoucherSettingsUiState {
+        object Loading : VoucherSettingsUiState()
+        data class Success(val vouchers: List<TblVoucherResponse>) : VoucherSettingsUiState()
+        data class Error(val message: String) : VoucherSettingsUiState()
+    }
 
     fun loadVouchers() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.value = VoucherSettingsUiState.Loading
             try {
                 val vouchers = voucherRepository.getAllVouchers()
-                _uiState.value = _uiState.value.copy(
-                    vouchers = vouchers,
-                    isLoading = false,
-                    error = null
-                )
+                _uiState.value = VoucherSettingsUiState.Success(vouchers.filter { it.voucher_name !="--" })
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.value = VoucherSettingsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    fun addVoucher(voucher: Voucher) {
+    fun addVoucher(voucher: TblVoucherRequest) {
         viewModelScope.launch {
             try {
                 val newVoucher = voucherRepository.createVoucher(voucher)
@@ -51,12 +51,12 @@ class VoucherSettingsViewModel @Inject constructor(
                     loadVouchers()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = VoucherSettingsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    fun updateVoucher(voucher: Voucher) {
+    fun updateVoucher(voucher: TblVoucherRequest) {
         viewModelScope.launch {
             try {
                 val updatedVoucher = voucherRepository.updateVoucher(voucher)
@@ -64,7 +64,7 @@ class VoucherSettingsViewModel @Inject constructor(
                     loadVouchers()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = VoucherSettingsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -77,7 +77,7 @@ class VoucherSettingsViewModel @Inject constructor(
                     loadVouchers()
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
+                _uiState.value = VoucherSettingsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
