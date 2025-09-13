@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Customer
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
@@ -65,7 +66,7 @@ fun CustomerSettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingCustomer by remember { mutableStateOf<Customer?>(null) }
+    var editingCustomer by remember { mutableStateOf<TblCustomer?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -185,9 +186,9 @@ fun CustomerSettingsScreen(
 }
 @Composable
 fun CustomerCard(
-    customer: Customer,
-    onEdit: (Customer) -> Unit,
-    onDelete: (Customer) -> Unit
+    customer: TblCustomer,
+    onEdit: (TblCustomer) -> Unit,
+    onDelete: (TblCustomer) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -206,16 +207,16 @@ fun CustomerCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = customer.customer_phone,
+                    text = customer.contact_no,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = customer.customer_email.toString(),
+                    text = customer.email_address.toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = customer.customer_address.toString(),
+                    text = customer.address.toString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -234,20 +235,21 @@ fun CustomerCard(
 
 @Composable
 fun CustomerDialog(
-    customer: Customer?,
+    customer: TblCustomer?,
     onDismiss: () -> Unit,
     onConfirm: (String, String, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf(customer?.customer_name ?: "") }
-    var phone by remember { mutableStateOf(customer?.customer_phone ?: "") }
-    var email by remember { mutableStateOf(customer?.customer_email ?: "") }
-    var address by remember { mutableStateOf(customer?.customer_address ?: "") }
+    var phone by remember { mutableStateOf(customer?.contact_no ?: "") }
+    var email by remember { mutableStateOf(customer?.email_address ?: "") }
+    var address by remember { mutableStateOf(customer?.address ?: "") }
 
     ReusableBottomSheet(
         onDismiss = onDismiss,
         title = if (customer == null) "Add Customer" else "Edit Customer",
         onSave = { onConfirm(name, phone, email, address) },
-        isSaveEnabled = name.isNotBlank() && phone.isNotBlank()
+        isSaveEnabled = name.isNotBlank() && phone.isNotBlank(),
+        buttonText = if (customer == null) "Add" else "Update"
     ){
         Column {
             OutlinedTextField(

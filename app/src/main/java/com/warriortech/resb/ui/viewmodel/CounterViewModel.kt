@@ -322,11 +322,11 @@ class CounterViewModel @Inject constructor(
                         billRepository.bill(order.firstOrNull()?.order_master_id?:"",
                             payment,amount,null).collect{ billResult->
                             billResult.fold(
-                                onSuccess = {response ->
+                                onSuccess = { response ->
                                     var sn = 1
                                     val orderDetails = orderRepository.getOrdersByOrderId(response.order_master.order_master_id).body()!!
                                     val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
-                                    val billItems = orderDetails.map {detail ->
+                                    val billItems = orderDetails.map { detail ->
                                         val menuItem = detail.menuItem
                                         val qty = detail.qty
                                         BillItem(
@@ -334,6 +334,7 @@ class CounterViewModel @Inject constructor(
                                             itemName = menuItem.menu_item_name,
                                             qty = qty,
                                             price = menuItem.rate,
+                                            basePrice = detail.rate,
                                             amount = qty * menuItem.rate,
                                             sgstPercent = menuItem.tax_percentage.toDouble()/ 2,
                                             cgstPercent = menuItem.tax_percentage.toDouble()/ 2,
@@ -343,7 +344,9 @@ class CounterViewModel @Inject constructor(
                                             cgst = detail.cgst,
                                             igst = if (detail.igst> 0) detail.igst else 0.0,
                                             cess = if (detail.cess > 0) detail.cess else 0.0,
-                                            cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0
+                                            cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0,
+                                            taxPercent = menuItem.tax_percentage.toDouble(),
+                                            taxAmount = detail.tax_amount
                                         )
                                     }
                                     val billDetails = Bill(
@@ -354,10 +357,10 @@ class CounterViewModel @Inject constructor(
                                         orderNo = response.order_master.order_master_id,
                                         counter = counter,
                                         tableNo = response.order_master.table_name,
-                                        custName = "Customer Name",
-                                        custNo = "1234567890",
-                                        custAddress = "Customer Address",
-                                        custGstin = "GSTIN123456",
+                                        custName = "",
+                                        custNo = "",
+                                        custAddress = "",
+                                        custGstin = "",
                                         items = billItems,
                                         subtotal = response.order_amt,
                                         deliveryCharge = 0.0, // Assuming no delivery charge

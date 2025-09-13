@@ -21,6 +21,7 @@ import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuCategorySettingsViewModel
+import com.warriortech.resb.util.ReusableBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,26 +60,8 @@ fun MenuCategorySettingsScreen(
                 }
             )
         },
-//        floatingActionButton = {
-//            FloatingActionButton(
-//                onClick = { showAddDialog = true }
-//            ) {
-//                Icon(Icons.Default.Add, contentDescription = "Add MenuCategory")
-//            }
-//        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-
-//            Button(
-//                onClick = { showAddDialog = true },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Icon(Icons.Default.Add, contentDescription = null)
-//                Spacer(modifier = Modifier.width(8.dp))
-//                Text("Add Category")
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
 
             when (val state=uiState) {
                 is MenuCategorySettingsViewModel.UiState.Loading -> {
@@ -199,51 +182,38 @@ fun CategoryDialog(
     var orderBy by remember { mutableStateOf(category?.order_by ?: "1") }
     var isActive by remember { mutableStateOf(category?.is_active != false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (category == null) "Add Category" else "Edit Category") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it.uppercase() },
-                    label = { Text("Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = orderBy,
-                    onValueChange = { orderBy = it },
-                    label = { Text("Order") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isActive,
-                        onCheckedChange = { isActive = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Active")
-                }
-
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { 
-                    onConfirm(name, orderBy, isActive)
-                }
+    ReusableBottomSheet(
+        onDismiss = onDismiss,
+        title = if (category == null) "Add Category" else "Edit Category",
+        onSave = {  onConfirm(name, orderBy, isActive) },
+        isSaveEnabled = name.isNotBlank(),
+        buttonText = if (category == null) "Add" else "Update"
+    ){
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.uppercase() },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = orderBy,
+                onValueChange = { orderBy = it },
+                label = { Text("Order") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (category == null) "Add" else "Update")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Switch(
+                    checked = isActive,
+                    onCheckedChange = { isActive = it }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Active")
             }
         }
-    )
+    }
 }

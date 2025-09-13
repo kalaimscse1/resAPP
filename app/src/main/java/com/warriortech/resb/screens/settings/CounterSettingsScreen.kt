@@ -169,7 +169,8 @@ fun AddEditCounterDialog(
             )
             onSave(newCounter)
         },
-        isSaveEnabled = counterName.isNotBlank() && ipAddress.isNotBlank()
+        isSaveEnabled = counterName.isNotBlank() && ipAddress.isNotBlank(),
+        buttonText = if (counter != null) "Update" else "Add"
     ) {
         Column {
             OutlinedTextField(

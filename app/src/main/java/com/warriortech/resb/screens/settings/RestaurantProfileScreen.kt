@@ -167,6 +167,8 @@ fun CompanySettingDialog(
     val logoUri = remember { mutableStateOf<Uri?>(null) }
     val logoUploadProgress = remember { mutableStateOf(false) }
     val uploadSuccess = remember { mutableStateOf(false) }
+    var upiId by remember { mutableStateOf(setting?.upi_id ?: "") }
+    var upiName by remember { mutableStateOf(setting?.upi_name ?: "") }
 
     val companyNameError = remember { mutableStateOf("") }
     val ownerNameError = remember { mutableStateOf("") }
@@ -360,6 +362,20 @@ fun CompanySettingDialog(
             label = { Text("Decimal Point") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = upiId,
+            onValueChange = { upiId = it },
+            label = { Text("Upi Id") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = upiName,
+            onValueChange = { upiName = it },
+            label = { Text("Upi Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         if (logoUploadProgress.value) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -450,7 +466,9 @@ fun CompanySettingDialog(
                     state = state,
                     currency = currency,
                     tax_no = taxNo,
-                    decimal_point = decimalPoint.toLongOrNull() ?: 2L
+                    decimal_point = decimalPoint.toLongOrNull() ?: 2L,
+                    upi_id = upiId,
+                    upi_name = upiName
                 )
                 onSave(newSetting)
             }

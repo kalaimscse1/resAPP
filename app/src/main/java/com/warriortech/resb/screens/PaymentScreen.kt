@@ -256,7 +256,7 @@ fun PaymentBottomBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Paying: ${CurrencySettings.format(payingAmount)}", style = MaterialTheme.typography.titleMedium)
+            Text(CurrencySettings.format(payingAmount), style = MaterialTheme.typography.titleMedium)
             Button(
                 onClick = onConfirmPayment,
                 enabled = uiState.selectedPaymentMethod != null && payingAmount > 0 &&

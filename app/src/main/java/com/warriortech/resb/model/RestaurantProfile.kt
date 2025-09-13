@@ -14,5 +14,7 @@ data class RestaurantProfile(
     var state:String,
     var currency:String,
     var tax_no:String,
-    var decimal_point:Long
+    var decimal_point:Long,
+    var upi_id:String,
+    var upi_name:String,
 )

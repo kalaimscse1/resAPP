@@ -76,6 +76,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KotModifyScreen(
@@ -144,27 +145,32 @@ fun KotModifyScreen(
                 ) {
                     Text("Reprint", color = SurfaceLight)
                 }
-                Button(
-                    onClick = {
-                        val res = viewModel.modify()
-                        if (res.data == true) {
-                            success = true
-                            msg = res.message
-                        } else {
-                            failed = true
-                            msg = res.message
-                        }
-                        navController.navigate("kot_report")
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = DarkGreen
-                    )
-                ) {
-                    Text("Modify", color = SurfaceLight)
-                }
+                if (viewModel._kot.value?.order_status != "COMPLETED") {
+                    Button(
+                        onClick = {
+                            val res = viewModel.modify()
+                            if (res.data == true) {
+                                success = true
+                                msg = res.message
+                            } else {
+                                failed = true
+                                msg = res.message
+                            }
+                            navController.navigate("kot_report")
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = DarkGreen
+                        )
+                    ) {
+                        Text("Modify", color = SurfaceLight)
+                    }
+
+                } else{
+                    Spacer(modifier = Modifier.weight(1f))
+            }
             }
         }
     ) { paddingValues ->

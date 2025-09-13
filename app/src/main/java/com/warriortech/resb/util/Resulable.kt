@@ -13,6 +13,7 @@ fun ReusableBottomSheet(
     onDismiss: () -> Unit,
     onSave: () -> Unit,
     isSaveEnabled: Boolean = true,
+    buttonText: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
     ModalBottomSheet(
@@ -52,9 +53,10 @@ fun ReusableBottomSheet(
                     onClick = onSave,
                     enabled = isSaveEnabled
                 ) {
-                    Text("Save")
+                    Text(buttonText)
                 }
             }
         }
     }
 }
+

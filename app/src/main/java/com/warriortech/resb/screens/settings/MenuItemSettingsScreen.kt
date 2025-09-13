@@ -37,6 +37,7 @@ import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.KitchenGroupDropdown
 import com.warriortech.resb.util.MenuCategoryDropdown
 import com.warriortech.resb.util.MenuDropdown
+import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.TaxDropdown
 import com.warriortech.resb.util.UnitDropdown
 
@@ -275,179 +276,210 @@ fun MenuItemDialog(
     var unitId by remember { mutableStateOf(menuItem?.unit_id ?: 1) }
     var isActive by remember { mutableStateOf(menuItem?.is_active ?: 1) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (menuItem != null) "Edit Menu Item" else "Add Menu Item") },
-        text = {
-            Column( modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 400.dp) // limit dialog height
-                .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Common Menu Fields
+    ReusableBottomSheet(
+        onDismiss = onDismiss,
+        title = if (menuItem != null) "Edit Menu Item" else "Add Menu Item",
+        onSave = {  val newMenuItem = TblMenuItemRequest(
+            menu_item_id = menuItem?.menu_item_id ?: 0,
+            menu_item_name = name,
+            menu_item_name_tamil = nameTamil,
+            item_cat_id = menuItemCatId,
+            rate = rate.toDoubleOrNull() ?: 0.0,
+            ac_rate = acRate.toDoubleOrNull() ?: 0.0,
+            parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
+            parcel_charge = parcelCharge.toDoubleOrNull() ?: 0.0,
+            tax_id = taxId,
+            cess_specific = 0.0,
+            kitchen_cat_id = kitchenCatId,
+            stock_maintain = stockMaintain,
+            rate_lock = rateLock,
+            unit_id = unitId,
+            min_stock = minStock,
+            hsn_code = hsnCode,
+            order_by = orderBy,
+            is_inventory = isInventory,
+            is_raw = isRaw,
+            is_available = isAvailable,
+            menu_item_code = menuItem?.menu_item_code ?: "",
+            menu_id = menuId,
+            is_favourite = isFavourite,
+            is_active = isActive,
+            image = "",
+            preparation_time = preparationTime
+        )
+            onSave(newMenuItem) },
+        isSaveEnabled = name.isNotBlank() && rate.isNotBlank(),
+        buttonText = if (menuItem != null) "Update" else "Add"
+    ){
+        Column( modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 400.dp) // limit dialog height
+            .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Common Menu Fields
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.uppercase() },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = nameTamil,
+                onValueChange = { nameTamil = it },
+                label = { Text("Name (Tamil)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = rate,
+                onValueChange = { rate = it },
+                label = { Text("Rate") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = acRate,
+                onValueChange = { acRate = it },
+                label = { Text("AC Rate") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = parcelRate,
+                onValueChange = { parcelRate = it },
+                label = { Text("Parcel Rate") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+
+            // Dropdowns
+            StringDropdown(
+                options = rateOptions,
+                selectedOption = rateLock,
+                onOptionSelected = { rateLock = it },
+                label = "Rate Lock",
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TaxDropdown(
+                taxes = taxes,
+                onTaxSelected = { taxId = it.tax_id },
+                label = "Select Tax",
+                modifier = Modifier.fillMaxWidth(),
+                selectedTax = taxes.find { it.tax_id == taxId }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MenuDropdown(
+                menus = menus,
+                onMenuSelected = { menuId = it.menu_id },
+                label = "Select Menu",
+                modifier = Modifier.fillMaxWidth(),
+                selectedMenu = menus.find { it.menu_id == menuId }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MenuCategoryDropdown(
+                menus = menuCategories,
+                onMenuCategorySelected = { menuItemCatId = it.item_cat_id },
+                label = "Select Menu Category",
+                modifier = Modifier.fillMaxWidth(),
+                selectedMenuCategory = menuCategories.find { it.item_cat_id == menuItemCatId }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            KitchenGroupDropdown(
+                menus = kitchenCategories,
+                onKitchenCategorySelected = { kitchenCatId = it.kitchen_cat_id },
+                label = "Select Kitchen Category",
+                modifier = Modifier.fillMaxWidth(),
+                selectedKitchenCategory = kitchenCategories.find { it.kitchen_cat_id == kitchenCatId }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            StringDropdown(
+                options = listOf("YES", "NO"),
+                selectedOption = isAvailable,
+                onOptionSelected = { isAvailable = it },
+                label = "Is Available",
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Switch(
+                    checked = isFavourite,
+                    onCheckedChange = { isFavourite = it }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Is Favourite")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Switch to enable Inventory
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Switch(
+                    checked = isInventory == 1L,
+                    onCheckedChange = { isInventory = if (it) 1L else 0L }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Inventory Enabled")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Inventory-only fields
+            if (isInventory == 1L) {
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it.uppercase() },
-                    label = { Text("Name") },
+                    value = hsnCode,
+                    onValueChange = { hsnCode = it },
+                    label = { Text("HSN Code") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = nameTamil,
-                    onValueChange = { nameTamil = it },
-                    label = { Text("Name (Tamil)") },
+                    value = minStock.toString(),
+                    onValueChange = { minStock = it.toLong() },
+                    label = { Text("Minimum Stock") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextField(
-                    value = rate,
-                    onValueChange = { rate = it },
-                    label = { Text("Rate") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = acRate,
-                    onValueChange = { acRate = it },
-                    label = { Text("AC Rate") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = parcelRate,
-                    onValueChange = { parcelRate = it },
-                    label = { Text("Parcel Rate") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-
-
-                // Dropdowns
-                StringDropdown(
-                    options = rateOptions,
-                    selectedOption = rateLock,
-                    onOptionSelected = { rateLock = it },
-                    label = "Rate Lock",
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TaxDropdown(
-                    taxes = taxes,
-                    onTaxSelected = { taxId = it.tax_id },
-                    label = "Select Tax",
+                UnitDropdown(
+                    menus = units,
+                    onUnitSelected = { unitId = it.unit_id },
+                    label = "Select Unit",
                     modifier = Modifier.fillMaxWidth(),
-                    selectedTax = taxes.find { it.tax_id == taxId }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                MenuDropdown(
-                    menus = menus,
-                    onMenuSelected = { menuId = it.menu_id },
-                    label = "Select Menu",
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedMenu = menus.find { it.menu_id == menuId }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                MenuCategoryDropdown(
-                    menus = menuCategories,
-                    onMenuCategorySelected = { menuItemCatId = it.item_cat_id },
-                    label = "Select Menu Category",
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedMenuCategory = menuCategories.find { it.item_cat_id == menuItemCatId }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                KitchenGroupDropdown(
-                    menus = kitchenCategories,
-                    onKitchenCategorySelected = { kitchenCatId = it.kitchen_cat_id },
-                    label = "Select Kitchen Category",
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedKitchenCategory = kitchenCategories.find { it.kitchen_cat_id == kitchenCatId }
+                    selectedUnit = units.find { it.unit_id == unitId }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 StringDropdown(
                     options = listOf("YES", "NO"),
-                    selectedOption = isAvailable,
-                    onOptionSelected = { isAvailable = it },
-                    label = "Is Available",
+                    selectedOption = isRaw,
+                    onOptionSelected = { isRaw = it },
+                    label = "Is Raw",
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = isFavourite,
-                        onCheckedChange = { isFavourite = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Is Favourite")
-                }
+                StringDropdown(
+                    options = listOf("YES", "NO"),
+                    selectedOption = stockMaintain,
+                    onOptionSelected = { stockMaintain = it },
+                    label = "Stock Maintain",
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-
-                // Switch to enable Inventory
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Switch(
-                        checked = isInventory == 1L,
-                        onCheckedChange = { isInventory = if (it) 1L else 0L }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Inventory Enabled")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Inventory-only fields
-                if (isInventory == 1L) {
-                    OutlinedTextField(
-                        value = hsnCode,
-                        onValueChange = { hsnCode = it },
-                        label = { Text("HSN Code") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = minStock.toString(),
-                        onValueChange = { minStock = it.toLong() },
-                        label = { Text("Minimum Stock") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    UnitDropdown(
-                        menus = units,
-                        onUnitSelected = { unitId = it.unit_id },
-                        label = "Select Unit",
-                        modifier = Modifier.fillMaxWidth(),
-                        selectedUnit = units.find { it.unit_id == unitId }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    StringDropdown(
-                        options = listOf("YES", "NO"),
-                        selectedOption = isRaw,
-                        onOptionSelected = { isRaw = it },
-                        label = "Is Raw",
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    StringDropdown(
-                        options = listOf("YES", "NO"),
-                        selectedOption = stockMaintain,
-                        onOptionSelected = { stockMaintain = it },
-                        label = "Stock Maintain",
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+            }
 
 //                StringDropdown(
 //                    options = listOf("YES", "NO"),
@@ -456,52 +488,58 @@ fun MenuItemDialog(
 //                    label = "Is Active",
 //                    modifier = Modifier.fillMaxWidth()
 //                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val newMenuItem = TblMenuItemRequest(
-                        menu_item_id = menuItem?.menu_item_id ?: 0,
-                        menu_item_name = name,
-                        menu_item_name_tamil = nameTamil,
-                        item_cat_id = menuItemCatId,
-                        rate = rate.toDoubleOrNull() ?: 0.0,
-                        ac_rate = acRate.toDoubleOrNull() ?: 0.0,
-                        parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
-                        parcel_charge = parcelCharge.toDoubleOrNull() ?: 0.0,
-                        tax_id = taxId,
-                        cess_specific = 0.0,
-                        kitchen_cat_id = kitchenCatId,
-                        stock_maintain = stockMaintain,
-                        rate_lock = rateLock,
-                        unit_id = unitId,
-                        min_stock = minStock,
-                        hsn_code = hsnCode,
-                        order_by = orderBy,
-                        is_inventory = isInventory,
-                        is_raw = isRaw,
-                        is_available = isAvailable,
-                        menu_item_code = menuItem?.menu_item_code ?: "",
-                        menu_id = menuId,
-                        is_favourite = isFavourite,
-                        is_active = isActive,
-                        image = "",
-                        preparation_time = preparationTime
-                    )
-                    onSave(newMenuItem)
-                },
-                enabled = name.isNotBlank() && rate.isNotBlank()
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
         }
-    )
+    }
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = { Text(if (menuItem != null) "Edit Menu Item" else "Add Menu Item") },
+//        text = {
+//
+//        },
+//        confirmButton = {
+//            TextButton(
+//                onClick = {
+//                    val newMenuItem = TblMenuItemRequest(
+//                        menu_item_id = menuItem?.menu_item_id ?: 0,
+//                        menu_item_name = name,
+//                        menu_item_name_tamil = nameTamil,
+//                        item_cat_id = menuItemCatId,
+//                        rate = rate.toDoubleOrNull() ?: 0.0,
+//                        ac_rate = acRate.toDoubleOrNull() ?: 0.0,
+//                        parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
+//                        parcel_charge = parcelCharge.toDoubleOrNull() ?: 0.0,
+//                        tax_id = taxId,
+//                        cess_specific = 0.0,
+//                        kitchen_cat_id = kitchenCatId,
+//                        stock_maintain = stockMaintain,
+//                        rate_lock = rateLock,
+//                        unit_id = unitId,
+//                        min_stock = minStock,
+//                        hsn_code = hsnCode,
+//                        order_by = orderBy,
+//                        is_inventory = isInventory,
+//                        is_raw = isRaw,
+//                        is_available = isAvailable,
+//                        menu_item_code = menuItem?.menu_item_code ?: "",
+//                        menu_id = menuId,
+//                        is_favourite = isFavourite,
+//                        is_active = isActive,
+//                        image = "",
+//                        preparation_time = preparationTime
+//                    )
+//                    onSave(newMenuItem)
+//                },
+//                enabled = name.isNotBlank() && rate.isNotBlank()
+//            ) {
+//                Text("Save")
+//            }
+//        },
+//        dismissButton = {
+//            TextButton(onClick = onDismiss) {
+//                Text("Cancel")
+//            }
+//        }
+//    )
 }
 
 

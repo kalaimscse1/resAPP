@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.CustomerRepository
 import com.warriortech.resb.model.Customer
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.util.getCurrentDateModern
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,7 @@ class CustomerSettingsViewModel @Inject constructor(
 
     sealed class UiState {
         object Loading : UiState()
-        data class Success(val customers: List<Customer>) : UiState()
+        data class Success(val customers: List<TblCustomer>) : UiState()
         data class Error(val message: String) : UiState()
     }
 
@@ -40,18 +41,18 @@ class CustomerSettingsViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun addCustomer(name: String, phone: String, email: String, address: String) {
         viewModelScope.launch {
             try {
-                val customer = Customer(
+                val customer = TblCustomer(
                     customer_id = 0,
                     customer_name = name,
-                    customer_phone = phone,
-                    customer_email = email,
-                    customer_address = address,
-                    created_date = getCurrentDateModern(),
-                    is_active = true
+                    contact_no = phone,
+                    address = address,
+                    email_address = email,
+                    gst_no = "",
+                    igst_status = false,
+                    is_active = 1
                 )
                 customerRepository.insertCustomer(customer)
                 loadCustomers()
@@ -65,14 +66,15 @@ class CustomerSettingsViewModel @Inject constructor(
     fun updateCustomer(id: Long, name: String, phone: String, email: String, address: String) {
         viewModelScope.launch {
             try {
-                val customer = Customer(
-                    customer_id = 0,
+                val customer = TblCustomer(
+                    customer_id = id,
                     customer_name = name,
-                    customer_phone = phone,
-                    customer_email = email,
-                    customer_address = address,
-                    created_date = getCurrentDateModern(),
-                    is_active = true
+                    contact_no = phone,
+                    address = address,
+                    email_address = email,
+                    gst_no = "",
+                    igst_status = false,
+                    is_active = 1
                 )
                 customerRepository.updateCustomer(customer)
                 loadCustomers()

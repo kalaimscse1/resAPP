@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens.settings
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
@@ -130,6 +131,7 @@ fun GeneralSettingsScreen(
     }
 }
 
+@SuppressLint("RememberReturnType")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GeneralSettingDialog(
@@ -157,6 +159,10 @@ fun GeneralSettingDialog(
     var isWaiterAllowed by remember { mutableStateOf(setting?.is_waiter_allowed ?: true) }
     var menuShowInTime by remember { mutableStateOf(setting?.menu_show_in_time ?: true) }
     var tamilReceiptPrint by remember { mutableStateOf(setting?.tamil_receipt_print ?: false) }
+    var logoSize by remember { mutableStateOf(setting?.logo_size ?: 0L) }
+    var isSplitGst by remember { mutableStateOf(setting?.is_split_gst ?: false) }
+    var billFooter by remember { mutableStateOf(setting?.bill_footer ?: "") }
+    var isCompanyShow by remember { mutableStateOf(setting?.is_split_gst ?: false) }
 
     Column {
         OutlinedTextField(
@@ -347,7 +353,6 @@ fun GeneralSettingDialog(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Menu Show In Time")
         }
-        Spacer(modifier = Modifier.height(10.dp))
 
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -360,6 +365,44 @@ fun GeneralSettingDialog(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Receipt Print In Tamil")
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Switch(
+                checked = isCompanyShow,
+                onCheckedChange = { isCompanyShow = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Show Company Details in Bill")
+        }
+        OutlinedTextField(
+            value = billFooter,
+            onValueChange = { billFooter = it },
+            label = { Text("Bill Footer") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = logoSize.toString(),
+            onValueChange = { logoSize = it.toLongOrNull() ?: 0L },
+            label = { Text("Logo Size") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isSplitGst,
+                onCheckedChange = { isSplitGst = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Split GST")
+        }
+
+
+        Spacer(modifier = Modifier.height(10.dp))
         Button(
             onClick = {
                 val newSetting = GeneralSettings(
@@ -383,7 +426,11 @@ fun GeneralSettingDialog(
                     is_table_allowed = isTableAllowed,
                     is_waiter_allowed = isWaiterAllowed,
                     menu_show_in_time = menuShowInTime,
-                    tamil_receipt_print = tamilReceiptPrint
+                    tamil_receipt_print = tamilReceiptPrint,
+                    logo_size = logoSize,
+                    is_split_gst = isSplitGst,
+                    bill_footer = billFooter,
+                    is_company_show = isCompanyShow
                 )
                 onSave(newSetting)
             }

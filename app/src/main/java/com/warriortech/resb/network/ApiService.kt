@@ -729,25 +729,25 @@ interface ApiService {
      * Customers Management
      */
 
-    @GET("customer")
-    suspend fun getAllCustomers(@Header("X-Tenant-ID") tenantId: String): Response<List<Customer>>
+    @GET("customer/getCustomerByIsActive")
+    suspend fun getAllCustomers(@Header("X-Tenant-ID") tenantId: String): Response<List<TblCustomer>>
 
-    @POST("customer")
+    @POST("customer/addCustomer")
     suspend fun createCustomer(
-        @Body customer: Customer,
+        @Body customer: TblCustomer,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Customer>
+    ): Response<TblCustomer>
 
-    @PUT("customer/{id}")
+    @PUT("customer/updateCustomer/{customer_id}")
     suspend fun updateCustomer(
-        @Path("id") id: Long,
-        @Body customer: Customer,
+        @Path("customer_id") id: Long,
+        @Body customer: TblCustomer,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Customer>
+    ): Response<TblCustomer>
 
-    @DELETE("customer/{id}")
+    @DELETE("customer/deleteCustomerById/{customer_id}")
     suspend fun deleteCustomer(
-        @Path("id") id: Long,
+        @Path("customer_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Unit>
 

@@ -19,6 +19,7 @@ import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuSettingsViewModel
+import com.warriortech.resb.util.ReusableBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,76 +217,137 @@ fun MenuDialog(
     var startTime by remember { mutableStateOf(menu?.start_time ?: 0f) }
     var endTime by remember { mutableStateOf(menu?.end_time ?: 0f) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (menu == null) "Add Menu" else "Edit Menu") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it.uppercase() },
-                    label = { Text("Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it.uppercase() },
-                    label = { Text("OrderBy") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Menu Time Settings",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = startTime.toString(),
-                    onValueChange = { startTime = it.toFloat() },
-                    label = { Text("Start Time") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = endTime.toString(),
-                    onValueChange = { endTime = it.toFloat()},
-                    label = { Text("End Time") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Switch(
-                        checked = isActive,
-                        onCheckedChange = { isActive = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Active")
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val menu = Menu(
-                        menu_id = menu?.menu_id ?: 0L,
-                        menu_name = name,
-                        order_by = description,
-                        start_time = startTime,
-                        end_time = endTime,
-                        is_active = isActive
-                    )
-                    onConfirm(menu) }
+    ReusableBottomSheet(
+        onDismiss = onDismiss,
+        title = if (menu == null) "Add Menu" else "Edit Menu",
+        onSave = {  val menu = Menu(
+            menu_id = menu?.menu_id ?: 0L,
+            menu_name = name,
+            order_by = description,
+            start_time = startTime,
+            end_time = endTime,
+            is_active = isActive
+        )
+            onConfirm(menu) },
+        isSaveEnabled = name.isNotBlank() && description.isNotBlank(),
+        buttonText = if (menu == null) "Add" else "Update"
+    ){
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it.uppercase() },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it.uppercase() },
+                label = { Text("OrderBy") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Menu Time Settings",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            OutlinedTextField(
+                value = startTime.toString(),
+                onValueChange = { startTime = it.toFloat() },
+                label = { Text("Start Time") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = endTime.toString(),
+                onValueChange = { endTime = it.toFloat()},
+                label = { Text("End Time") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(if (menu == null) "Add" else "Update")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Switch(
+                    checked = isActive,
+                    onCheckedChange = { isActive = it }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Active")
             }
         }
-    )
+    }
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = { Text(if (menu == null) "Add Menu" else "Edit Menu") },
+//        text = {
+//            Column {
+//                OutlinedTextField(
+//                    value = name,
+//                    onValueChange = { name = it.uppercase() },
+//                    label = { Text("Name") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = description,
+//                    onValueChange = { description = it.uppercase() },
+//                    label = { Text("OrderBy") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Text(
+//                    text = "Menu Time Settings",
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant
+//                )
+//                OutlinedTextField(
+//                    value = startTime.toString(),
+//                    onValueChange = { startTime = it.toFloat() },
+//                    label = { Text("Start Time") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = endTime.toString(),
+//                    onValueChange = { endTime = it.toFloat()},
+//                    label = { Text("End Time") },
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Switch(
+//                        checked = isActive,
+//                        onCheckedChange = { isActive = it }
+//                    )
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                    Text("Active")
+//                }
+//            }
+//        },
+//        confirmButton = {
+//            TextButton(
+//                onClick = {
+//                    val menu = Menu(
+//                        menu_id = menu?.menu_id ?: 0L,
+//                        menu_name = name,
+//                        order_by = description,
+//                        start_time = startTime,
+//                        end_time = endTime,
+//                        is_active = isActive
+//                    )
+//                    onConfirm(menu) }
+//            ) {
+//                Text(if (menu == null) "Add" else "Update")
+//            }
+//        },
+//        dismissButton = {
+//            TextButton(onClick = onDismiss) {
+//                Text("Cancel")
+//            }
+//        }
+//    )
 }

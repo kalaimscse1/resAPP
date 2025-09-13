@@ -182,7 +182,9 @@ class RegistrationViewModel @Inject constructor(
                                     state = res.state,
                                     currency = "Rs",
                                     tax_no = "",
-                                    decimal_point = 2L
+                                    decimal_point = 2L,
+                                    upi_id = "",
+                                    upi_name = ""
                                 )
                                 sessionManager.saveRestaurantProfile(profile)
                                 sessionManager.saveCompanyCode(res.company_master_code)
@@ -229,7 +231,9 @@ class RegistrationViewModel @Inject constructor(
                     state = res.state,
                     currency = "Rs.",
                     tax_no = "",
-                    decimal_point = 2L
+                    decimal_point = 2L,
+                    upi_id = "",
+                    upi_name = ""
                 )
                 val result = registrationRepository.addRestaurantProfile(profile)
                 if (result != null) {

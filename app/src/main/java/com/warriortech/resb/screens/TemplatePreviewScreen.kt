@@ -480,8 +480,16 @@ fun createSampleBillData(): Bill {
         billNo = "BILL001",
         date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
         tableNo = "Table 5",
+      // Placeholder to satisfy non-empty list
         items = listOf(
-            BillItem(1, "Margherita Pizza", 2, 350.0, 700.0,sgstPercent = 0.0,
+            BillItem(
+                sn = 1,
+                itemName = "Margherita Pizza",
+                qty = 1,
+                price = 100.0,
+                amount = 100.0,
+                basePrice = 0.0,
+                sgstPercent = 0.0,
                 cgstPercent = 0.0,
                 igstPercent = 0.0,
                 cessPercent = 0.0,
@@ -489,8 +497,18 @@ fun createSampleBillData(): Bill {
                 cgst = 0.0,
                 igst = 0.0,
                 cess = 0.0,
-                cess_specific = 0.0,),
-            BillItem(2, "Caesar Salad", 1, 180.0, 180.0,sgstPercent = 0.0,
+                cess_specific = 0.0,
+                taxPercent = 0.0,
+                taxAmount = 0.0
+            ),
+            BillItem(
+                sn = 1,
+                itemName = "Margherita Pizza",
+                qty = 1,
+                price = 100.0,
+                amount = 100.0,
+                basePrice = 0.0,
+                sgstPercent = 0.0,
                 cgstPercent = 0.0,
                 igstPercent = 0.0,
                 cessPercent = 0.0,
@@ -498,8 +516,18 @@ fun createSampleBillData(): Bill {
                 cgst = 0.0,
                 igst = 0.0,
                 cess = 0.0,
-                cess_specific = 0.0,),
-            BillItem(3, "Coca Cola", 2, 50.0, 100.0,sgstPercent = 0.0,
+                cess_specific = 0.0,
+                taxPercent = 0.0,
+                taxAmount = 0.0
+            ),
+            BillItem(
+                sn = 1,
+                itemName = "Margherita Pizza",
+                qty = 1,
+                price = 100.0,
+                amount = 100.0,
+                basePrice = 0.0,
+                sgstPercent = 0.0,
                 cgstPercent = 0.0,
                 igstPercent = 0.0,
                 cessPercent = 0.0,
@@ -507,7 +535,10 @@ fun createSampleBillData(): Bill {
                 cgst = 0.0,
                 igst = 0.0,
                 cess = 0.0,
-                cess_specific = 0.0,)
+                cess_specific = 0.0,
+                taxPercent = 0.0,
+                taxAmount = 0.0
+            )
         ),
         subtotal = 980.0,
         total = 1156.4,

@@ -319,7 +319,7 @@ fun BilledItemRow(
                     )
                 }
                 Text(
-                    text = CurrencySettings.format(menuItem.rate * quantity),
+                    text = CurrencySettings.format(menuItem.actual_rate * quantity),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

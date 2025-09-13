@@ -1,6 +1,7 @@
 package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.Customer
+import com.warriortech.resb.model.TblCustomer
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.warriortech.resb.network.ApiService
@@ -12,7 +13,7 @@ class CustomerRepository @Inject constructor(
     private val sessionManager: SessionManager
 ) {
 
-    suspend fun getAllCustomers(): List<Customer> {
+    suspend fun getAllCustomers(): List<TblCustomer> {
         val response = apiService.getAllCustomers(sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: emptyList()
@@ -21,7 +22,7 @@ class CustomerRepository @Inject constructor(
         }
     }
 
-    suspend fun insertCustomer(customer: Customer): Customer {
+    suspend fun insertCustomer(customer: TblCustomer): TblCustomer {
         val response = apiService.createCustomer(customer,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to create customer")
@@ -30,7 +31,7 @@ class CustomerRepository @Inject constructor(
         }
     }
 
-    suspend fun updateCustomer(customer: Customer): Customer {
+    suspend fun updateCustomer(customer: TblCustomer): TblCustomer {
         val response = apiService.updateCustomer(customer.customer_id, customer,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update customer")

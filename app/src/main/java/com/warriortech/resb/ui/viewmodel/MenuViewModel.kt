@@ -142,7 +142,6 @@ class MenuViewModel @Inject constructor(
                             preparation_time = it.menuItem.preparation_time,
                             actual_rate = it.actual_rate
                         )
-
                     }
                     Log.d("existingItemsForTable", "initializeScreen: $menuItems")
                     _selectedItems.value = menuItems.associateWith { it.qty }.toMutableMap()
@@ -170,7 +169,6 @@ class MenuViewModel @Inject constructor(
 
                         val itemsToShow = if (showMenu) {
                             val currentTime = getCurrentTimeAsFloat()
-
                             val filteredMenuItems = menuItems.filter { menuItem ->
                                 val menu = menus[menuItem.menu_id]
                                 val startTime = menu?.start_time ?: 0.00f
