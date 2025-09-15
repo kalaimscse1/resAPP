@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.BillRepository
+import com.warriortech.resb.data.repository.CustomerRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.calculateGst
 import com.warriortech.resb.data.repository.calculateGstAndCess
@@ -13,8 +14,10 @@ import com.warriortech.resb.model.BillItem
 import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Order
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
 import com.warriortech.resb.ui.viewmodel.MenuViewModel.OrderUiState
@@ -55,6 +58,7 @@ data class BillingPaymentUiState(
     val billedItems: Map<TblMenuItemResponse, Int> = emptyMap(),
     val tableStatus: String = "TABLE", // Default GST
     val discountFlat: Double = 0.0,
+    val otherChrages: Double = 0.0,
     val cessSpecific: Double=0.0,
     val cessAmount: Double = 0.0, // Cess percentage if applicable
     val subtotal: Double = 0.0,
@@ -85,11 +89,18 @@ class BillingViewModel @Inject constructor(
     private val billRepository: BillRepository,
     private val orderRepository: OrderRepository,
     private val printService: PrintService,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val customerRepository: CustomerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BillingPaymentUiState())
     val uiState: StateFlow<BillingPaymentUiState> = _uiState.asStateFlow()
+
+    private val _customer = MutableStateFlow<TblCustomer?>(null)
+    val customer: StateFlow<TblCustomer?> = _customer.asStateFlow()
+
+    private val _customers = MutableStateFlow<List<TblCustomer>>(emptyList())
+    val customers: StateFlow<List<TblCustomer>> = _customers
 
 
     private val _originalOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
@@ -97,10 +108,24 @@ class BillingViewModel @Inject constructor(
 
     init {
         // Load initial data like available payment methods
-        loadAvailablePaymentMethods()
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
-    }
+     viewModelScope.launch {
+    val customerList = customerRepository.getAllCustomers()
+    _customers.value = customerList
+    loadAvailablePaymentMethods()
+    CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+           }
+       }
 
+    fun loadCustomers() {
+        viewModelScope.launch {
+            try {
+                val customerList = customerRepository.getAllCustomers()
+                _customers.value = customerList
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = e.message ?: "Failed to load customers") }
+            }
+        }
+    }
     /**
      * Central function to recalc totals based on billed items
      */
@@ -204,7 +229,7 @@ class BillingViewModel @Inject constructor(
                 val taxAmount = orderDetailsResponse.sumOf { it.tax_amount }
                 val cessAmount = orderDetailsResponse.sumOf { if (it.cess>0) it.cess else 0.0 }
                 val cessSpecific = orderDetailsResponse.sumOf { if (it.cess_specific>0) it.cess_specific else 0.0 }
-                val totalAmount = subtotal + taxAmount + cessAmount + cessSpecific
+                val totalAmount = subtotal + taxAmount + cessAmount + cessSpecific + _uiState.value.otherChrages
 
                 if (cessAmount>0.0){
                     _uiState.update { currentState ->
@@ -241,6 +266,10 @@ class BillingViewModel @Inject constructor(
             }
         }
 
+    }
+
+    fun setCustomer(customer: TblCustomer?) {
+        _customer.value = customer
     }
 
     fun filterByKotNumber(kotNumber: Int) {
@@ -424,13 +453,14 @@ class BillingViewModel @Inject constructor(
                     orderMasterId = currentState.orderMasterId ?:"",
                     paymentMethod = paymentMethod,
                     receivedAmt = currentState.amountToPay,
-                    customer = null // Assuming no customer details for now
+                    customer = customer.value // Assuming no customer details for now
                 ).collect { result->
                     result.fold(
                         onSuccess = { response ->
                             var sn = 1
                             val orderDetails = orderRepository.getOrdersByOrderId(response.order_master.order_master_id).body()!!
                             val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
+                            val customer = response.customer
                             val billItems = orderDetails.map {detail ->
                                 val menuItem = detail.menuItem
                                 val qty = detail.qty
@@ -462,10 +492,10 @@ class BillingViewModel @Inject constructor(
                                 orderNo = response.order_master.order_master_id,
                                 counter = counter,
                                 tableNo = response.order_master.table_name,
-                                custName = "",
-                                custNo = "",
-                                custAddress = "",
-                                custGstin = "",
+                                custName = customer.customer_name,
+                                custNo = customer.contact_no,
+                                custAddress = customer.address,
+                                custGstin = customer.gst_no,
                                 items = billItems,
                                 subtotal = response.order_amt,
                                 deliveryCharge = 0.0, // Assuming no delivery charge

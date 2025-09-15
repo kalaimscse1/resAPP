@@ -161,9 +161,9 @@ fun CustomerSettingsScreen(
             CustomerDialog(
                 customer = null,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, phone, email, address ->
+                onConfirm = { customer ->
                     scope.launch {
-                        viewModel.addCustomer(name, phone, email, address)
+                        viewModel.addCustomer(customer)
                         showAddDialog = false
                     }
                 }
@@ -174,9 +174,9 @@ fun CustomerSettingsScreen(
             CustomerDialog(
                 customer = customer,
                 onDismiss = { editingCustomer = null },
-                onConfirm = { name, phone, email, address ->
+                onConfirm = {customer ->
                     scope.launch {
-                        viewModel.updateCustomer(customer.customer_id, name, phone, email, address)
+                        viewModel.updateCustomer(customer)
                         editingCustomer = null
                     }
                 }
@@ -237,17 +237,29 @@ fun CustomerCard(
 fun CustomerDialog(
     customer: TblCustomer?,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String, String) -> Unit
+    onConfirm: (TblCustomer) -> Unit
 ) {
     var name by remember { mutableStateOf(customer?.customer_name ?: "") }
     var phone by remember { mutableStateOf(customer?.contact_no ?: "") }
     var email by remember { mutableStateOf(customer?.email_address ?: "") }
     var address by remember { mutableStateOf(customer?.address ?: "") }
+    var gst by remember { mutableStateOf(customer?.gst_no ?: "") }
+    var igstStatus by remember { mutableStateOf(customer?.igst_status ?: false) }
+    var isActive by remember { mutableStateOf(customer?.is_active ?: 1) }
 
     ReusableBottomSheet(
         onDismiss = onDismiss,
         title = if (customer == null) "Add Customer" else "Edit Customer",
-        onSave = { onConfirm(name, phone, email, address) },
+        onSave = { onConfirm(TblCustomer(
+            customer_id = customer?.customer_id ?: 0,
+            customer_name = name,
+            contact_no = phone,
+            address = address,
+            email_address = email,
+            gst_no = customer?.gst_no ?: gst,
+            igst_status = customer?.igst_status ?: igstStatus,
+            is_active = customer?.is_active ?: isActive
+        )) },
         isSaveEnabled = name.isNotBlank() && phone.isNotBlank(),
         buttonText = if (customer == null) "Add" else "Update"
     ){
@@ -277,6 +289,27 @@ fun CustomerDialog(
                 value = address,
                 onValueChange = { address = it },
                 label = { Text("Address") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = gst,
+                onValueChange = { gst = it },
+                label = { Text("GST Number") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = if (igstStatus) "Yes" else "No",
+                onValueChange = { igstStatus = it.equals("yes", true) },
+                label = { Text("IGST Status (Yes/No)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = if (isActive == 1L) "Active" else "Inactive",
+                onValueChange = { isActive = if (it.equals("active", true)) 1 else 0 },
+                label = { Text("Status (Active/Inactive)") },
                 modifier = Modifier.fillMaxWidth()
             )
         }

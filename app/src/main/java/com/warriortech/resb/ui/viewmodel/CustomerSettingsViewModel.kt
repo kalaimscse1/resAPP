@@ -41,19 +41,9 @@ class CustomerSettingsViewModel @Inject constructor(
         }
     }
 
-    fun addCustomer(name: String, phone: String, email: String, address: String) {
+    fun addCustomer(customer: TblCustomer) {
         viewModelScope.launch {
             try {
-                val customer = TblCustomer(
-                    customer_id = 0,
-                    customer_name = name,
-                    contact_no = phone,
-                    address = address,
-                    email_address = email,
-                    gst_no = "",
-                    igst_status = false,
-                    is_active = 1
-                )
                 customerRepository.insertCustomer(customer)
                 loadCustomers()
             } catch (e: Exception) {
@@ -63,19 +53,10 @@ class CustomerSettingsViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun updateCustomer(id: Long, name: String, phone: String, email: String, address: String) {
+    fun updateCustomer(customer: TblCustomer) {
         viewModelScope.launch {
             try {
-                val customer = TblCustomer(
-                    customer_id = id,
-                    customer_name = name,
-                    contact_no = phone,
-                    address = address,
-                    email_address = email,
-                    gst_no = "",
-                    igst_status = false,
-                    is_active = 1
-                )
+
                 customerRepository.updateCustomer(customer)
                 loadCustomers()
             } catch (e: Exception) {

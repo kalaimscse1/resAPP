@@ -15,8 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.warriortech.resb.model.Customer
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.util.CurrencySettings
+import com.warriortech.resb.util.CustomerDropdown
 
 @Composable
 fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
@@ -100,7 +103,9 @@ private fun PaymentSummaryRow(label: String, amount: String) {
 fun PaymentMethodCard(
     uiState: BillingPaymentUiState,
     onPaymentMethodChange: (String) -> Unit,
-    viewModel : BillingViewModel
+    viewModel : BillingViewModel,
+    customers: List<TblCustomer>,
+    onCustomer: (TblCustomer) -> Unit
 ) {
     // Cache the payment methods list to prevent recreation on every recomposition
     val paymentMethods = remember {
@@ -108,9 +113,12 @@ fun PaymentMethodCard(
             "CASH" to Icons.Default.Money,
             "CARD" to Icons.Default.CreditCard,
             "UPI" to Icons.Default.QrCode,
+            "DUE" to Icons.Default.AccountBalanceWallet,
             "OTHERS" to Icons.Default.MoreHoriz
         )
     }
+    viewModel.loadCustomers()
+    val inCustomers = remember { customers.firstOrNull() }
     ModernCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -150,6 +158,15 @@ fun PaymentMethodCard(
                 if (method != paymentMethods.last().first) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+            }
+            if (uiState.selectedPaymentMethod?.name == "DUE") {
+                Spacer(modifier = Modifier.height(16.dp))
+                CustomerDropdown(
+                    customers = customers,
+                    selectedCustomer = inCustomers,
+                    onCustomerSelected = onCustomer,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             if (uiState.selectedPaymentMethod?.name == "OTHERS") {
                 Spacer(modifier = Modifier.height(16.dp))

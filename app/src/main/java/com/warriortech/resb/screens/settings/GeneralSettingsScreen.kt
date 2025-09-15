@@ -163,6 +163,9 @@ fun GeneralSettingDialog(
     var isSplitGst by remember { mutableStateOf(setting?.is_split_gst ?: false) }
     var billFooter by remember { mutableStateOf(setting?.bill_footer ?: "") }
     var isCompanyShow by remember { mutableStateOf(setting?.is_split_gst ?: false) }
+    var isQrShow by remember { mutableStateOf(setting?.is_qr_show ?: false) }
+    var remark1 by remember { mutableStateOf(setting?.remark1 ?: "") }
+    var remark2 by remember { mutableStateOf(setting?.remark2 ?: "") }
 
     Column {
         OutlinedTextField(
@@ -400,6 +403,31 @@ fun GeneralSettingDialog(
             Spacer(modifier = Modifier.width(8.dp))
             Text("Split GST")
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isQrShow,
+                onCheckedChange = { isQrShow = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Show QR Code in Bill")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = remark1,
+            onValueChange = { remark1 = it },
+            label = { Text("Remark 1") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = remark2,
+            onValueChange = { remark2 = it },
+            label = { Text("Remark 2") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -430,7 +458,10 @@ fun GeneralSettingDialog(
                     logo_size = logoSize,
                     is_split_gst = isSplitGst,
                     bill_footer = billFooter,
-                    is_company_show = isCompanyShow
+                    is_company_show = isCompanyShow,
+                    is_qr_show = isQrShow,
+                    remark1 = remark1,
+                    remark2 = remark2,
                 )
                 onSave(newSetting)
             }

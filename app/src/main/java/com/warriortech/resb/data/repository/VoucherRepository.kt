@@ -3,6 +3,7 @@ package com.warriortech.resb.data.repository
 import com.warriortech.resb.model.TblVoucher
 import com.warriortech.resb.model.TblVoucherRequest
 import com.warriortech.resb.model.TblVoucherResponse
+import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.model.Voucher
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -52,6 +53,14 @@ class VoucherRepository @Inject constructor(
             true
         } catch (e: Exception) {
             false
+        }
+    }
+
+    suspend fun getAllVoucherTypes(): List<TblVoucherType> {
+        return try {
+            apiService.getVoucherTypes(sessionManager.getCompanyCode()?:"")
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }

@@ -2,11 +2,13 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.warriortech.resb.data.repository.CounterRepository
 import com.warriortech.resb.data.repository.VoucherRepository
 import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblVoucher
 import com.warriortech.resb.model.TblVoucherRequest
 import com.warriortech.resb.model.TblVoucherResponse
+import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.model.Voucher
 import com.warriortech.resb.ui.viewmodel.CounterSettingsViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,12 +20,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VoucherSettingsViewModel @Inject constructor(
-    private val voucherRepository: VoucherRepository
+    private val voucherRepository: VoucherRepository,
+    private val counterRepository: CounterRepository,
+
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<VoucherSettingsUiState>(
         VoucherSettingsUiState.Loading)
     val uiState: StateFlow<VoucherSettingsUiState> = _uiState.asStateFlow()
+
+    private val _counter = MutableStateFlow<List<TblCounter>>(emptyList())
+    val counters: StateFlow<List<TblCounter>> = _counter
+
+    private val _voucherTypes = MutableStateFlow<List<TblVoucherType>>(emptyList())
+    val voucherTypes: StateFlow<List<TblVoucherType>> = _voucherTypes
+
 
     sealed class VoucherSettingsUiState {
         object Loading : VoucherSettingsUiState()
@@ -35,7 +46,11 @@ class VoucherSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = VoucherSettingsUiState.Loading
             try {
+                val counters = counterRepository.getAllCounters()
+                val voucherTypes = voucherRepository.getAllVoucherTypes()
                 val vouchers = voucherRepository.getAllVouchers()
+                _counter.value = counters
+                _voucherTypes.value = voucherTypes
                 _uiState.value = VoucherSettingsUiState.Success(vouchers.filter { it.voucher_name !="--" })
             } catch (e: Exception) {
                 _uiState.value = VoucherSettingsUiState.Error(e.message ?: "Unknown error")

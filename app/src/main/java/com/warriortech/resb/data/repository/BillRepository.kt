@@ -70,7 +70,7 @@ class BillRepository@Inject constructor(
                 upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total } else 0.0,
                 due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
                 others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total } else 0.0,
-                received_amt =  if (paymentMethod.name == "DUE") receivedAmt else orderMaster.sumOf { it.grand_total },
+                received_amt =  if (paymentMethod.name == "DUE") 0.0 else orderMaster.sumOf { it.grand_total },
                 pending_amt = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
 //                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
                 change = 0.0,

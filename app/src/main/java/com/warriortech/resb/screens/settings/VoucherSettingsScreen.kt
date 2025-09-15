@@ -21,14 +21,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
+import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblVoucher
 import com.warriortech.resb.model.TblVoucherRequest
 import com.warriortech.resb.model.TblVoucherResponse
+import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.VoucherSettingsViewModel
+import com.warriortech.resb.util.CounterDropdown
+import com.warriortech.resb.util.VoucherTypeDropdown
 import com.warriortech.resb.util.stringResource
 import kotlinx.coroutines.launch
 
@@ -41,6 +45,9 @@ fun VoucherSettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddSheet by remember { mutableStateOf(false) }
     var editingVoucher by remember { mutableStateOf<TblVoucherResponse?>(null) }
+    val counters by viewModel.counters.collectAsStateWithLifecycle()
+    val voucherTypes by viewModel.voucherTypes.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
         viewModel.loadVouchers()
     }
@@ -131,7 +138,9 @@ fun VoucherSettingsScreen(
                 onConfirm = { newVoucher ->
                     viewModel.addVoucher(newVoucher)
                     showAddSheet = false
-                }
+                },
+                counters = counters,
+                voucherTypes = voucherTypes
             )
         }
 
@@ -144,7 +153,9 @@ fun VoucherSettingsScreen(
                 onConfirm = { updatedVoucher ->
                     viewModel.updateVoucher(updatedVoucher)
                     editingVoucher = null
-                }
+                },
+                counters = counters,
+                voucherTypes = voucherTypes
             )
         }
     }
@@ -218,6 +229,8 @@ fun VoucherCard(
 fun VoucherBottomSheet(
     title: String,
     initialVoucher: TblVoucherResponse? = null,
+    counters : List<TblCounter>,
+    voucherTypes: List<TblVoucherType>,
     confirmText: String,
     onDismiss: () -> Unit,
     onConfirm: (TblVoucherRequest) -> Unit
@@ -227,6 +240,9 @@ fun VoucherBottomSheet(
     var voucherPrefix by remember { mutableStateOf(initialVoucher?.voucher_prefix ?: "") }
     var voucherSuffix by remember { mutableStateOf(initialVoucher?.voucher_suffix ?: "") }
     var startingNo by remember { mutableStateOf(initialVoucher?.starting_no ?: 1) }
+    var isActive by remember { mutableStateOf(initialVoucher?.is_active ?: true) }
+    var counterId by remember { mutableStateOf(initialVoucher?.counter?.counter_id ?: 0L) }
+    var voucherTypeId by remember { mutableStateOf(initialVoucher?.voucherType?.voucher_Type_id ?: 0L) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -301,6 +317,20 @@ fun VoucherBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
+            CounterDropdown(
+                    modifier = Modifier.fillMaxWidth(),
+            label = "Select Counter",
+            counters = counters,
+            selectedCounter = counters.find { it.counter_id == counterId },
+            onCounterSelected = { counterId = it.counter_id },
+            )
+            VoucherTypeDropdown(
+                modifier = Modifier.fillMaxWidth(),
+                label = "Select Voucher Type",
+                voucherTypes = voucherTypes,
+                selectedVoucherType = voucherTypes.find { it.voucher_Type_id == voucherTypeId },
+                onVoucherTypeSelected = { voucherTypeId = it.voucher_Type_id },
+            )
 
             // Buttons
             Row(
@@ -321,9 +351,9 @@ fun VoucherBottomSheet(
                             voucher_suffix = voucherSuffix,
                             starting_no = startingNo.toString(),
                             voucher_id = initialVoucher?.voucher_id ?: 0L,
-                            counter_id = initialVoucher?.counter?.counter_id ?: 0L,
-                            is_active = TODO(),
-                            voucher_Type_id = TODO()
+                            counter_id = initialVoucher?.counter?.counter_id ?:counterId,
+                            is_active = isActive,
+                            voucher_Type_id = initialVoucher?.voucherType?.voucher_Type_id ?:voucherTypeId
                         )
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             onConfirm(updatedVoucher)

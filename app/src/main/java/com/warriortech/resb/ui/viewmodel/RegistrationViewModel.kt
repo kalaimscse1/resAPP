@@ -256,14 +256,10 @@ class RegistrationViewModel @Inject constructor(
                 state.ownerName.isNotBlank() &&
                 state.address1.isNotBlank() &&
                 state.address2.isNotBlank() &&
-                state.place.isNotBlank() &&
-                state.pincode.isNotBlank() &&
                 state.contactNo.isNotBlank() &&
-                state.mailId.isNotBlank() &&
                 state.country.isNotBlank() &&
                 state.state.isNotBlank() &&
                 state.year.isNotBlank() &&
-                state.databaseName.isNotBlank() &&
                 state.orderPlan.isNotBlank() &&
                 state.expiryDate.isNotBlank() &&
                 state.password.isNotBlank()

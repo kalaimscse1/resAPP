@@ -57,6 +57,15 @@ android {
             )
         }
     }
+    applicationVariants.all {
+        outputs.all {
+            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl &&
+                buildType.name == "release"
+            ) {
+                outputFileName = "Res-B.apk"
+            }
+        }
+    }
     lint {
         // Set to true to check all issues, including those found in libraries
         checkDependencies = true

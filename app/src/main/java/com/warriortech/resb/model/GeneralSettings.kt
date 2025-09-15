@@ -42,5 +42,8 @@ data class GeneralSettings(
     var logo_size:Long,
     var is_split_gst:Boolean,
     var bill_footer:String,
-    var is_company_show:Boolean
+    var is_company_show:Boolean,
+    var is_qr_show:Boolean,
+    var remark1: String,
+    var remark2: String,
 )

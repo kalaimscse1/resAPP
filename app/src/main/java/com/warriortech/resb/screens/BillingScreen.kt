@@ -269,6 +269,14 @@ fun BillingContent(
             )
         }
 
+        item {
+            EditableBillingRow(
+                label = "Other Charges",
+                amount = uiState.otherChrages,
+                currencyFormatter = currencyFormatter
+            )
+        }
+
         // Total
         item {
             ModernDivider(modifier = Modifier.padding(vertical = 8.dp))

@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
+import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.Printer
 import com.warriortech.resb.model.TblPrinterResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
@@ -22,6 +23,7 @@ import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.PrinterSettingsViewModel
+import com.warriortech.resb.util.KitchenGroupDropdown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +33,7 @@ fun PrinterSettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
+    val kitchenCategories by viewModel.kitchenCategories.collectAsStateWithLifecycle()
     var editingPrinter by remember { mutableStateOf<TblPrinterResponse?>(null) }
 
     LaunchedEffect(Unit) {
@@ -143,6 +146,7 @@ fun PrinterSettingsScreen(
     if (showAddDialog) {
         PrinterDialog(
             printer = null,
+            kitchenCategories= kitchenCategories,
             onDismiss = { showAddDialog = false },
             onSave = { printer ->
                 viewModel.addPrinter(printer)
@@ -154,6 +158,7 @@ fun PrinterSettingsScreen(
     editingPrinter?.let { printer ->
         PrinterDialog(
             printer = printer,
+            kitchenCategories= kitchenCategories,
             onDismiss = { editingPrinter = null },
             onSave = { updatedPrinter ->
                 viewModel.updatePrinter(updatedPrinter)
@@ -167,11 +172,13 @@ fun PrinterSettingsScreen(
 @Composable
 fun PrinterDialog(
     printer: TblPrinterResponse?,
+    kitchenCategories: List<KitchenCategory>,
     onDismiss: () -> Unit,
     onSave: (Printer) -> Unit
 ) {
     var name by remember { mutableStateOf(printer?.printer_name ?: "") }
     var ipAddress by remember { mutableStateOf(printer?.ip_address ?: "") }
+    var kitchenCatId by remember { mutableStateOf(printer?.kitchen_cat?.kitchen_cat_id?: 1) }
     var isActive by remember { mutableStateOf(printer?.is_active ?: 1) }
 
     AlertDialog(
@@ -193,6 +200,13 @@ fun PrinterDialog(
                     label = { Text(stringResource(R.string.ip_address)) },
                     modifier = Modifier.fillMaxWidth()
                 )
+                KitchenGroupDropdown(
+                    menus = kitchenCategories,
+                    onKitchenCategorySelected = { kitchenCatId = it.kitchen_cat_id },
+                    label = "Select Kitchen Category",
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedKitchenCategory = kitchenCategories.find { it.kitchen_cat_id == kitchenCatId }
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -211,7 +225,7 @@ fun PrinterDialog(
                     val newPrinter =  Printer(
                        printer_id = printer?.printer_id?:0, // Use 0 for new printers
                         printer_name = name,
-                        kitchen_cat_id = printer?.kitchen_cat?.kitchen_cat_id?.toLong()?:0L, // Default or selected category ID
+                        kitchen_cat_id = printer?.kitchen_cat?.kitchen_cat_id?.toLong()?:kitchenCatId, // Default or selected category ID
                         ip_address = ipAddress,
                         is_active = isActive
                     )

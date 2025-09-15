@@ -244,7 +244,7 @@ fun TaxSplitDialog(
                 OutlinedTextField(
                     value = taxSplitPercentage,
                     onValueChange = { taxSplitPercentage = it },
-                    label = { Text("Capacity") },
+                    label = { Text("Tax Split Percentage") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))

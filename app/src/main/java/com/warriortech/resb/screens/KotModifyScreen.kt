@@ -86,6 +86,7 @@ fun KotModifyScreen(
     kotResponse: KotResponse? = null
 ) {
     val uiState = viewModel.kotActionState.collectAsStateWithLifecycle()
+    val status by viewModel._kot.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var menuItems by remember { mutableStateOf<TblMenuItemResponse?>(null) }
     var success by remember { mutableStateOf(false) }
@@ -145,7 +146,7 @@ fun KotModifyScreen(
                 ) {
                     Text("Reprint", color = SurfaceLight)
                 }
-                if (viewModel._kot.value?.order_status != "COMPLETED") {
+                if (status?.order_status == "RUNNING") {
                     Button(
                         onClick = {
                             val res = viewModel.modify()

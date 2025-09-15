@@ -130,13 +130,13 @@ fun RegistrationScreen(
                         singleLine = true
                     )
 
-                    OutlinedTextField(
-                        value = uiState.databaseName,
-                        onValueChange = viewModel::updateDatabaseName,
-                        label = { Text("Database Name *") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
+//                    OutlinedTextField(
+//                        value = uiState.databaseName,
+//                        onValueChange = viewModel::updateDatabaseName,
+//                        label = { Text("Database Name *") },
+//                        modifier = Modifier.fillMaxWidth(),
+//                        singleLine = true
+//                    )
                 }
             }
 
@@ -176,7 +176,7 @@ fun RegistrationScreen(
                         OutlinedTextField(
                             value = uiState.place,
                             onValueChange = viewModel::updatePlace,
-                            label = { Text("Place *") },
+                            label = { Text("Place ") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -184,7 +184,7 @@ fun RegistrationScreen(
                         OutlinedTextField(
                             value = uiState.pincode,
                             onValueChange = viewModel::updatePincode,
-                            label = { Text("Pincode *") },
+                            label = { Text("PinCode ") },
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true
@@ -198,7 +198,7 @@ fun RegistrationScreen(
                         OutlinedTextField(
                             value = uiState.state,
                             onValueChange = viewModel::updateState,
-                            label = { Text("State *") },
+                            label = { Text("State") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -206,7 +206,7 @@ fun RegistrationScreen(
                         OutlinedTextField(
                             value = uiState.country,
                             onValueChange = viewModel::updateCountry,
-                            label = { Text("Country *") },
+                            label = { Text("Country") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -239,7 +239,7 @@ fun RegistrationScreen(
                     OutlinedTextField(
                         value = uiState.mailId,
                         onValueChange = viewModel::updateMailId,
-                        label = { Text("Email ID *") },
+                        label = { Text("Email ID ") },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true
@@ -326,7 +326,7 @@ fun RegistrationScreen(
                         OutlinedTextField(
                             value = uiState.expiryDate,
                             onValueChange = viewModel::updateExpiryDate,
-                            label = { Text("Expiry Date *") },
+                            label = { Text("Expiry Date ") },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )

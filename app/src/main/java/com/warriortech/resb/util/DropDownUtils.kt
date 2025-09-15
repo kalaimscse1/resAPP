@@ -20,7 +20,10 @@ import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.model.Role
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblCounter
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblUnit
+import com.warriortech.resb.model.TblVoucherType
+import com.warriortech.resb.screens.SettingsModule
 import kotlin.collections.forEach
 
 
@@ -191,6 +194,119 @@ fun CounterDropdown(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VoucherTypeDropdown(
+    voucherTypes: List<TblVoucherType>,
+    selectedVoucherType: TblVoucherType?,
+    onVoucherTypeSelected: (TblVoucherType) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Counter"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedVoucherType?.voucher_type_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (voucherTypes.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Counter available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                voucherTypes.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.voucher_type_name) },
+                        onClick = {
+                            onVoucherTypeSelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomerDropdown(
+    customers: List<TblCustomer>,
+    selectedCustomer: TblCustomer?,
+    onCustomerSelected: (TblCustomer) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Customer"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedCustomer?.customer_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (customers.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No Customer available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no areas
+                )
+            } else {
+                customers.forEach { counter ->
+                    DropdownMenuItem(
+                        text = { Text(counter.customer_name) },
+                        onClick = {
+                            onCustomerSelected(counter)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -49,9 +49,13 @@ fun PaymentScreen(
     sessionManager: SessionManager// If passing amount via route
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val customers by viewModel.customers.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val table = sessionManager.getGeneralSetting()?.is_table_allowed == true
 
+    LaunchedEffect(Unit) {
+        viewModel.loadCustomers()
+    }
     // If amount was passed via route, you might set it in the ViewModel once
      LaunchedEffect(key1 = amountToPayFromRoute, key2 =  orderMasterId) {
          amountToPayFromRoute?.let { viewModel.updateAmountToPay(it.toDouble()) }
@@ -228,7 +232,11 @@ fun PaymentScreen(
                         PaymentMethodCard(
                             uiState = uiState,
                             onPaymentMethodChange = { viewModel.updatePaymentMethod(it) },
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            onCustomer = {
+                                viewModel.setCustomer(it)
+                            },
+                            customers = customers
                         )
                     }
                 }
