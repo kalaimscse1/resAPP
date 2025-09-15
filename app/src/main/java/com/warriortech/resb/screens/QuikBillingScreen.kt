@@ -64,33 +64,45 @@ fun ItemWiseBillScreen(
     navController: NavHostController,
     onProceedToBilling: (orderDetailsResponse: List<TblOrderDetailsResponse>, orderId: String) -> Unit,
 ) {
+    // Collect state efficiently with lifecycle awareness
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
     val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
     val menuState by viewModel.menuState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
     val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
     val orderId by viewModel.orderId.collectAsStateWithLifecycle()
+    
+    // Use remember for stable references
+    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
+    val density = LocalDensity.current
+    
+    // Memoize expensive calculations
+    val totalItems = remember(selectedItems) { selectedItems.values.sum() }
+    val totalAmount = remember(selectedItems) { 
+        selectedItems.entries.sumOf { (item, qty) -> item.rate * qty }
+    }
+    
+    // State for dialogs and animations
     var showDialog by remember { mutableStateOf(false) }
     var showBillDialog by remember { mutableStateOf(false) }
     var cartOffset by remember { mutableStateOf(Offset.Zero) }
-    val density = LocalDensity.current
     var success by remember { mutableStateOf(false) }
     var isProcessingCash by remember { mutableStateOf(false) }
     var isProcessingOthers by remember { mutableStateOf(false) }
-
     var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
 
+    // Load menu items only once
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
     }
 
-    LaunchedEffect(selectedItems.size) {
-        if (selectedItems.isNotEmpty()) {
+    // Optimized scroll behavior - only when items change significantly
+    LaunchedEffect(totalItems) {
+        if (totalItems > 0) {
             scope.launch {
-                listState.animateScrollToItem(selectedItems.size - 1)
+                listState.animateScrollToItem(minOf(totalItems - 1, selectedItems.size - 1))
             }
         }
     }
@@ -116,269 +128,85 @@ fun ItemWiseBillScreen(
             )
         },
         bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(PrimaryGreen)
-                    .padding(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    ActionButton("Clear", Color.Red, enabled = true) { showDialog = true }
-                    ActionButton(
-                        text = if (isProcessingCash) "Processing..." else "Cash", 
-                        color = Color(0xFF4CAF50),
-                        enabled = !isProcessingCash
-                    ) {
-                        if (selectedItems.isNotEmpty()){
-                            isProcessingCash = true
-                            viewModel.cashPrintBill()
-                            // Show immediate feedback without blocking delays
-                            scope.launch {
-                                success = true
-                                delay(2000) // Reduced delay for success message
-                                success = false
-                                isProcessingCash = false
-                            }
+            OptimizedBottomBar(
+                totalItems = totalItems,
+                totalAmount = totalAmount,
+                isProcessingCash = isProcessingCash,
+                isProcessingOthers = isProcessingOthers,
+                onClearClick = { showDialog = true },
+                onCashClick = {
+                    if (selectedItems.isNotEmpty()) {
+                        isProcessingCash = true
+                        viewModel.cashPrintBill()
+                        scope.launch {
+                            success = true
+                            delay(2000)
+                            success = false
+                            isProcessingCash = false
                         }
-                        else{
-                            showBillDialog = true
-                        }
+                    } else {
+                        showBillDialog = true
                     }
-                    ActionButton(
-                        text = if (isProcessingOthers) "Processing..." else "Others", 
-                        color = Color.Gray,
-                        enabled = !isProcessingOthers
-                    ) {
-                        if(selectedItems.isNotEmpty()){
-                            isProcessingOthers = true
-                            viewModel.placeOrder(2, null)
-                            // Navigate immediately after placing order, no artificial delay
-                            scope.launch {
-                                // Small delay to ensure order is placed before navigation
-                                delay(3000)
-                                onProceedToBilling(orderDetailsResponse, orderId ?: "")
-                                navController.navigate("billing_screen/${orderId ?: ""}") {
-                                    launchSingleTop = true
-                                }
-                                isProcessingOthers = false
+                },
+                onOthersClick = {
+                    if (selectedItems.isNotEmpty()) {
+                        isProcessingOthers = true
+                        viewModel.placeOrder(2, null)
+                        scope.launch {
+                            delay(3000)
+                            onProceedToBilling(orderDetailsResponse, orderId ?: "")
+                            navController.navigate("billing_screen/${orderId ?: ""}") {
+                                launchSingleTop = true
                             }
+                            isProcessingOthers = false
                         }
-                        else{
-                            showBillDialog = true
-                        }
+                    } else {
+                        showBillDialog = true
                     }
                 }
-            }
+            )
         }
     ) { padding ->
+        values = padding
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            values = padding
-            // Header Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SecondaryGreen)
-                    .padding(vertical = 8.dp, horizontal = 4.dp)
-            ) {
-                Text("ITEM", modifier = Modifier.weight(3f), color = Color.White, fontWeight = FontWeight.Bold)
-                Text("QTY", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                Text("RATE", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
-                Text("TOTAL", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
-            }
+            // Optimized cart section
+            OptimizedCartSection(
+                selectedItems = selectedItems,
+                listState = listState,
+                onRemoveItem = viewModel::removeItemFromOrder,
+                onAddItem = viewModel::addItemToOrder,
+                onCartOffsetChanged = { cartOffset = it }
+            )
 
-            // Cart Table
-            LazyColumn(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxWidth(),
-                state = listState
-            ) {
-                items(
-                    selectedItems.entries.toList(),
-                    key = { entry -> "${entry.key.menu_item_id}_${entry.key.menu_id}" } // ✅ stable unique key
-                ) { entry ->
-                    val item = entry.key
-                    val qty = entry.value
+            // Total row with memoized calculations
+            TotalRow(
+                totalItems = totalItems,
+                totalAmount = totalAmount
+            )
 
-                    Column {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 2.dp, vertical = 2.dp)
-                                .onGloballyPositioned { coords ->
-                                    val pos = coords.localToWindow(Offset.Zero)
-                                    cartOffset = with(density) { Offset(pos.x, pos.y) }
-                                },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(item.menu_item_name, maxLines = 1, fontSize = 12.sp, modifier = Modifier.weight(3f))
-                            Row(
-                                modifier = Modifier.weight(2f),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Minus
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .border(1.dp, Color.Red, RoundedCornerShape(4.dp))
-                                        .pointerInput(Unit) {
-                                            detectTapGestures { viewModel.removeItemFromOrder(item) }
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("-", color = Color.Red, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                }
-
-                                Text("$qty", fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
-
-                                // Plus
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .border(1.dp, DarkGreen, RoundedCornerShape(4.dp))
-                                        .pointerInput(Unit) {
-                                            detectTapGestures { viewModel.addItemToOrder(item) }
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("+", color = DarkGreen, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                            Text("${item.rate}", textAlign = TextAlign.End, fontSize = 12.sp, modifier = Modifier.weight(2f))
-                            Text("${qty * item.rate}", textAlign = TextAlign.End, fontSize = 12.sp, modifier = Modifier.weight(2f))
-                        }
-                        Divider(color = Color.LightGray, thickness = 0.5.dp)
-                    }
+            // Product grid with optimized rendering
+            OptimizedProductGrid(
+                menuState = menuState,
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { viewModel.selectedCategory.value = it },
+                onProductClick = { product ->
+                    FlyToCartController.current?.invoke(product, Offset.Zero, cartOffset)
+                    viewModel.addItemToOrder(product)
                 }
-            }
-
-            // Total Row
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFF9800))
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Total Items: ${selectedItems.values.sum()}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("Total: ${CurrencySettings.format(selectedItems.entries.sumOf { it.key.rate * it.value })}",
-                        color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                }
-            }
-
-            // Product Grid + Tabs
-            when (val state = menuState) {
-                is CounterViewModel.MenuUiState.Loading -> {
-                    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-
-                is CounterViewModel.MenuUiState.Success -> {
-                    val menuItems = state.menuItems
-                    val filteredMenuItems = when {
-                        selectedCategory == "FAVOURITES" -> menuItems.filter { it.is_favourite == true }
-                        selectedCategory == "ALL" -> menuItems
-                        selectedCategory != null -> menuItems.filter { it.item_cat_name == selectedCategory }
-                        else -> menuItems
-                    }
-
-                    if (menuItems.isEmpty()) {
-                        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                            Text("No menu items available")
-                        }
-                    } else {
-                        if (categories.isNotEmpty()) {
-                            val selectedIndex = categories.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0
-                            ScrollableTabRow(
-                                selectedTabIndex = selectedIndex,
-                                backgroundColor = SecondaryGreen,
-                                contentColor = SurfaceLight
-                            ) {
-                                categories.forEachIndexed { index, category ->
-                                    Tab(
-                                        selected = selectedCategory == category,
-                                        onClick = { viewModel.selectedCategory.value = category },
-                                        text = { Text(category) }
-                                    )
-                                }
-                            }
-                        }
-
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(3),
-                            modifier = Modifier
-                                .fillMaxHeight(0.5f)
-                                .padding(6.dp)
-                        ) {
-                            itemsIndexed(
-                                filteredMenuItems,
-                                key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" } // ✅ unique key
-                            ) { _, product ->
-                                Card(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .fillMaxWidth()
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .pointerInput(Unit) {
-                                            detectTapGestures { tapOffset ->
-                                                val start = tapOffset
-                                                val end = cartOffset
-                                                FlyToCartController.current?.invoke(product, start, end)
-                                                viewModel.addItemToOrder(product)
-                                                // add item to cart in VM here
-                                            }
-                                        },
-//                                        .pointerInput(Unit) {
-//                                            detectTapGestures {  }
-//                                        },
-                                    elevation = CardDefaults.cardElevation(4.dp),
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = CardDefaults.cardColors(containerColor = ghostWhite)
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(10.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Row {
-                                            Text(
-                                                product.menu_item_name,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 2,
-                                                textAlign = TextAlign.Center,
-                                            )
-                                        }
-                                        Row {
-                                            Text(
-                                                CurrencySettings.format(product.rate),
-                                                maxLines = 1,
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                else -> {}
-            }
+            )
         }
     }
+
+    // Dialogs and overlays
     FlyToCartOverlay()
-    if (showDialog){
+    
+    if (showDialog) {
         ClearDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
@@ -387,19 +215,331 @@ fun ItemWiseBillScreen(
             }
         )
     }
-    if (showBillDialog){
+    
+    if (showBillDialog) {
         MessageBox(
             title = "Alert",
             message = "Please select items to proceed billing.",
             onDismiss = { showBillDialog = false }
         )
     }
+    
     if (success) {
         SuccessDialog(
             title = "Payment Successful",
             description = "Payment Done Successfully",
             paddingValues = values
         )
+    }
+}
+
+@Composable
+private fun OptimizedBottomBar(
+    totalItems: Int,
+    totalAmount: Double,
+    isProcessingCash: Boolean,
+    isProcessingOthers: Boolean,
+    onClearClick: () -> Unit,
+    onCashClick: () -> Unit,
+    onOthersClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(PrimaryGreen)
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            ActionButton("Clear", Color.Red, enabled = totalItems > 0, onClick = onClearClick)
+            ActionButton(
+                text = if (isProcessingCash) "Processing..." else "Cash", 
+                color = Color(0xFF4CAF50),
+                enabled = !isProcessingCash,
+                onClick = onCashClick
+            )
+            ActionButton(
+                text = if (isProcessingOthers) "Processing..." else "Others", 
+                color = Color.Gray,
+                enabled = !isProcessingOthers,
+                onClick = onOthersClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun OptimizedCartSection(
+    selectedItems: Map<TblMenuItemResponse, Int>,
+    listState: LazyListState,
+    onRemoveItem: (TblMenuItemResponse) -> Unit,
+    onAddItem: (TblMenuItemResponse) -> Unit,
+    onCartOffsetChanged: (Offset) -> Unit
+) {
+    val density = LocalDensity.current
+    
+    // Header Row
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(SecondaryGreen)
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+    ) {
+        Text("ITEM", modifier = Modifier.weight(3f), color = Color.White, fontWeight = FontWeight.Bold)
+        Text("QTY", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text("RATE", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
+        Text("TOTAL", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
+    }
+
+    // Optimized cart items list
+    LazyColumn(
+        modifier = Modifier
+            .weight(0.5f)
+            .fillMaxWidth(),
+        state = listState
+    ) {
+        items(
+            items = selectedItems.entries.toList(),
+            key = { entry -> "${entry.key.menu_item_id}_${entry.key.menu_id}" }
+        ) { entry ->
+            val item = entry.key
+            val qty = entry.value
+
+            CartItemRow(
+                item = item,
+                qty = qty,
+                onRemoveItem = { onRemoveItem(item) },
+                onAddItem = { onAddItem(item) },
+                onOffsetChanged = onCartOffsetChanged
+            )
+        }
+    }
+}
+
+@Composable
+private fun CartItemRow(
+    item: TblMenuItemResponse,
+    qty: Int,
+    onRemoveItem: () -> Unit,
+    onAddItem: () -> Unit,
+    onOffsetChanged: (Offset) -> Unit
+) {
+    val density = LocalDensity.current
+    
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp, vertical = 2.dp)
+                .onGloballyPositioned { coords ->
+                    val pos = coords.localToWindow(Offset.Zero)
+                    onOffsetChanged(with(density) { Offset(pos.x, pos.y) })
+                },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(item.menu_item_name, maxLines = 1, fontSize = 12.sp, modifier = Modifier.weight(3f))
+            
+            Row(
+                modifier = Modifier.weight(2f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Optimized quantity controls
+                QuantityButton(
+                    text = "-",
+                    color = Color.Red,
+                    onClick = onRemoveItem
+                )
+                
+                Text("$qty", fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
+                
+                QuantityButton(
+                    text = "+",
+                    color = DarkGreen,
+                    onClick = onAddItem
+                )
+            }
+            
+            Text("${item.rate}", textAlign = TextAlign.End, fontSize = 12.sp, modifier = Modifier.weight(2f))
+            Text("${qty * item.rate}", textAlign = TextAlign.End, fontSize = 12.sp, modifier = Modifier.weight(2f))
+        }
+        Divider(color = Color.LightGray, thickness = 0.5.dp)
+    }
+}
+
+@Composable
+private fun QuantityButton(
+    text: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .border(1.dp, color, RoundedCornerShape(4.dp))
+            .pointerInput(Unit) {
+                detectTapGestures { onClick() }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text, color = color, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun TotalRow(
+    totalItems: Int,
+    totalAmount: Double
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFF9800))
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                "Total Items: $totalItems", 
+                color = Color.White, 
+                fontWeight = FontWeight.Bold, 
+                fontSize = 18.sp
+            )
+            Text(
+                "Total: ${CurrencySettings.format(totalAmount)}",
+                color = Color.White, 
+                fontWeight = FontWeight.Bold, 
+                fontSize = 18.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun OptimizedProductGrid(
+    menuState: CounterViewModel.MenuUiState,
+    categories: List<String>,
+    selectedCategory: String?,
+    onCategorySelected: (String) -> Unit,
+    onProductClick: (TblMenuItemResponse) -> Unit
+) {
+    when (val state = menuState) {
+        is CounterViewModel.MenuUiState.Loading -> {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is CounterViewModel.MenuUiState.Success -> {
+            val menuItems = state.menuItems
+            
+            // Memoize filtered items to prevent recalculation
+            val filteredMenuItems = remember(menuItems, selectedCategory) {
+                when {
+                    selectedCategory == "FAVOURITES" -> menuItems.filter { it.is_favourite == true }
+                    selectedCategory == "ALL" -> menuItems
+                    selectedCategory != null -> menuItems.filter { it.item_cat_name == selectedCategory }
+                    else -> menuItems
+                }
+            }
+
+            if (menuItems.isEmpty()) {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No menu items available")
+                }
+            } else {
+                Column {
+                    // Optimized category tabs
+                    if (categories.isNotEmpty()) {
+                        val selectedIndex = remember(categories, selectedCategory) {
+                            categories.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0
+                        }
+                        
+                        ScrollableTabRow(
+                            selectedTabIndex = selectedIndex,
+                            backgroundColor = SecondaryGreen,
+                            contentColor = SurfaceLight
+                        ) {
+                            categories.forEachIndexed { index, category ->
+                                Tab(
+                                    selected = selectedCategory == category,
+                                    onClick = { onCategorySelected(category) },
+                                    text = { Text(category) }
+                                )
+                            }
+                        }
+                    }
+
+                    // Optimized product grid with stable keys
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        modifier = Modifier
+                            .fillMaxHeight(0.5f)
+                            .padding(6.dp)
+                    ) {
+                        itemsIndexed(
+                            items = filteredMenuItems,
+                            key = { _, product -> "${product.menu_item_id}_${product.menu_id}" }
+                        ) { _, product ->
+                            OptimizedProductCard(
+                                product = product,
+                                onClick = { onProductClick(product) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        else -> {
+            // Handle error state
+        }
+    }
+}
+
+@Composable
+private fun OptimizedProductCard(
+    product: TblMenuItemResponse,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .pointerInput(product.menu_item_id) { // Use stable key for pointer input
+                detectTapGestures { onClick() }
+            },
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = RoundedCornerShape(6.dp),
+        colors = CardDefaults.cardColors(containerColor = ghostWhite)
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                product.menu_item_name,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                CurrencySettings.format(product.rate),
+                maxLines = 1,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -426,15 +566,15 @@ fun ActionButton(
 @Composable
 fun ClearDialog(
     onDismiss: () -> Unit,
-    onConfirm:() -> Unit
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { androidx.compose.material3.Text("Clear Items") },
-        text = { androidx.compose.material3.Text("Are you sure you want to Clear Items? ") },
+        text = { androidx.compose.material3.Text("Are you sure you want to Clear Items?") },
         confirmButton = {
             Button(
-                onClick = { onConfirm() },
+                onClick = onConfirm,
                 enabled = true
             ) {
                 androidx.compose.material3.Text("Ok")
@@ -448,11 +588,11 @@ fun ClearDialog(
     )
 }
 
+// Optimized animation controller
 object FlyToCartController {
     var current: ((TblMenuItemResponse, Offset, Offset) -> Unit)? = null
 }
 
-// Overlay composable that draws the flying item
 @Composable
 fun FlyToCartOverlay() {
     val scope = rememberCoroutineScope()
@@ -460,7 +600,7 @@ fun FlyToCartOverlay() {
     val offsetX = remember { Animatable(0f) }
     val offsetY = remember { Animatable(0f) }
 
-    if (animItem != null) {
+    animItem?.let { itemName ->
         Box(
             modifier = Modifier
                 .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
@@ -468,18 +608,18 @@ fun FlyToCartOverlay() {
                 .border(1.dp, Color.Gray, RoundedCornerShape(6.dp))
                 .padding(6.dp)
         ) {
-            Text(animItem ?: "", fontWeight = FontWeight.Bold, color = Color.Black)
+            Text(itemName, fontWeight = FontWeight.Bold, color = Color.Black)
         }
     }
 
-    // expose controller
+    // Optimized animation controller
     FlyToCartController.current = { label, start, end ->
         animItem = label.menu_item_name
         scope.launch {
             offsetX.snapTo(start.x)
             offsetY.snapTo(start.y)
-            offsetX.animateTo(end.x, animationSpec = tween(600))
-            offsetY.animateTo(end.y, animationSpec = tween(600))
+            offsetX.animateTo(end.x, animationSpec = tween(400)) // Reduced animation time
+            offsetY.animateTo(end.y, animationSpec = tween(400))
             animItem = null
         }
     }
