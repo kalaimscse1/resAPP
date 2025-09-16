@@ -39,9 +39,16 @@ else
     # Move to proper location - the zip creates a 'cmdline-tools' directory
     if [ -d "$ANDROID_HOME/cmdline-tools" ]; then
         cd "$ANDROID_HOME"
-        mkdir -p cmdline-tools/latest
-        # Move all files from the extracted cmdline-tools to latest
-        mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+        # Create the proper structure
+        if [ ! -d "cmdline-tools/latest" ]; then
+            mkdir -p cmdline-tools/latest
+            # Move all files from the extracted cmdline-tools to latest, but avoid moving latest into itself
+            for item in cmdline-tools/*; do
+                if [ "$(basename "$item")" != "latest" ]; then
+                    mv "$item" cmdline-tools/latest/ 2>/dev/null || true
+                fi
+            done
+        fi
     fi
     
     # Clean up
