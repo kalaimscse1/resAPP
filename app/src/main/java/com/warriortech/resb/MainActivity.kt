@@ -106,6 +106,7 @@ import com.warriortech.resb.network.RetrofitClient.apiService
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
+import com.warriortech.resb.screens.PaidBillsListScreen
 import com.warriortech.resb.screens.SettingsScreen
 import com.warriortech.resb.screens.SupportScreen
 import com.warriortech.resb.screens.DashboardScreen
@@ -670,6 +671,10 @@ fun AppNavigation(
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable("paid_bills_list") {
+            PaidBillsListScreen(navController = navController)
         }
 
         composable("edit_paid_bill/{billId}") { backStackEntry ->
