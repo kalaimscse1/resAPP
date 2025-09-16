@@ -277,3 +277,341 @@ fun PaymentBottomBar(
 }
 // Helper from BillingScreen (can be moved to a common util file)
 // fun Double.format(digits: Int) = "%.${digits}f".format(this)
+package com.warriortech.resb.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import com.warriortech.resb.model.PaymentMethod
+import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.ui.viewmodel.PaymentViewModel
+import com.warriortech.resb.ui.viewmodel.PaymentUiState
+import com.warriortech.resb.util.CurrencySettings
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PaymentScreen(
+    billNo: String,
+    navController: NavHostController,
+    viewModel: PaymentViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedBill by viewModel.selectedBill.collectAsStateWithLifecycle()
+    
+    var selectedPaymentMethod by remember { mutableStateOf(PaymentMethod.CASH) }
+    var paymentAmount by remember { mutableStateOf("") }
+    var showProcessing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(billNo) {
+        viewModel.loadBillDetails(billNo)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Process Payment") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = PrimaryGreen,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(SurfaceLight)
+                .verticalScroll(rememberScrollState())
+        ) {
+            when (uiState) {
+                is PaymentUiState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = PrimaryGreen)
+                    }
+                }
+                is PaymentUiState.Success -> {
+                    selectedBill?.let { bill ->
+                        // Bill Details Card
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Bill Details",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Bill No:", style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        text = bill.bill_no,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Customer:", style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        text = bill.customer.customer_name ?: "Walk-in Customer",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                ModernDivider()
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Total Amount:", style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        text = CurrencySettings.formatCurrency(bill.grand_total),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Paid Amount:", style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        text = CurrencySettings.formatCurrency(bill.received_amt),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "Pending Amount:",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = CurrencySettings.formatCurrency(bill.pending_amt),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Red
+                                    )
+                                }
+                            }
+                        }
+
+                        // Payment Method Selection
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Payment Method",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                PaymentMethod.values().forEach { method ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .selectable(
+                                                selected = selectedPaymentMethod == method,
+                                                onClick = { selectedPaymentMethod = method }
+                                            )
+                                            .padding(vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
+                                            selected = selectedPaymentMethod == method,
+                                            onClick = { selectedPaymentMethod = method },
+                                            colors = RadioButtonDefaults.colors(selectedColor = PrimaryGreen)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = method.name,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Payment Amount Input
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Payment Amount",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                
+                                OutlinedTextField(
+                                    value = paymentAmount,
+                                    onValueChange = { paymentAmount = it },
+                                    label = { Text("Amount") },
+                                    placeholder = { Text("Enter payment amount") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    singleLine = true
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Button(
+                                        onClick = { paymentAmount = bill.pending_amt.toString() },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                                    ) {
+                                        Text("Full Amount")
+                                    }
+                                    
+                                    OutlinedButton(
+                                        onClick = { paymentAmount = "" },
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text("Clear")
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Process Payment Button
+                        Button(
+                            onClick = {
+                                val amount = paymentAmount.toDoubleOrNull()
+                                if (amount != null && amount > 0) {
+                                    showProcessing = true
+                                    viewModel.processPayment(
+                                        bill = bill,
+                                        paymentMethod = selectedPaymentMethod,
+                                        amount = amount
+                                    )
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen),
+                            enabled = paymentAmount.toDoubleOrNull()?.let { it > 0 } == true && !showProcessing
+                        ) {
+                            if (showProcessing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Processing...")
+                            } else {
+                                Icon(
+                                    Icons.Default.Payment,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Process Payment")
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+                is PaymentUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Error: ${uiState.message}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = { viewModel.loadBillDetails(billNo) },
+                                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                            ) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+                is PaymentUiState.PaymentSuccess -> {
+                    LaunchedEffect(Unit) {
+                        navController.popBackStack()
+                    }
+                }
+            }
+        }
+    }
+}
