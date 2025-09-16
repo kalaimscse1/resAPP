@@ -1,35 +1,22 @@
 modules = ["java", "java-graalvm22.3"]
 [nix]
 channel = "stable-25_05"
-packages = ["android-tools"]
+packages = ["android-tools", "unzip"]
 
 [workflows]
 runButton = "Project"
 
 [[workflows.workflow]]
 name = "Android Build"
-author = 44351760
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "chmod +x gradlew"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./gradlew assembleDebug"
-
-[[workflows.workflow]]
-name = "Android Build"
 mode = "parallel"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./gradlew build"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash ./android_setup.sh && echo \"Building Android APK...\" && export ANDROID_HOME=$HOME/android-sdk && export ANDROID_SDK_ROOT=$ANDROID_HOME && export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools && ./gradlew --no-daemon assembleDebug"
 
 [[workflows.workflow]]
 name = "Project"
@@ -40,13 +27,17 @@ author = "agent"
 task = "workflow.run"
 args = "Android Development"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Android Build"
+
 [[workflows.workflow]]
 name = "Android Development"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./android_setup.sh && echo \"Android development environment ready. To build APK, run: ./gradlew assembleDebug\""
+args = "bash ./android_setup.sh && echo \"Environment validated. Checking Gradle tasks...\" && export ANDROID_HOME=$HOME/android-sdk && export ANDROID_SDK_ROOT=$ANDROID_HOME && export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools && ./gradlew --no-daemon tasks"
 
 [workflows.workflow.metadata]
 outputType = "console"
