@@ -31,5 +31,25 @@ args = "./gradlew build"
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Android Development"
+
+[[workflows.workflow]]
+name = "Android Development"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./android_setup.sh && echo \"Android development environment ready. To build APK, run: ./gradlew assembleDebug\""
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [agent]
 expertMode = true
