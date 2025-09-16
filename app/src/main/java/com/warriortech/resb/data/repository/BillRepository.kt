@@ -42,6 +42,22 @@ class BillRepository@Inject constructor(
 
     // Add more methods as needed for your application
 
+    suspend fun getPaidBills(tenantId: String, fromDate: String, toDate: String): Flow<Result<List<TblBillingResponse>>> = flow {
+        try {
+            val response = apiService.getSalesReport(tenantId, fromDate, toDate)
+            if (response.isSuccessful) {
+                response.body()?.let { bills ->
+                    emit(Result.success(bills))
+                } ?: emit(Result.failure(Exception("No data received")))
+            } else {
+                emit(Result.failure(Exception("API Error: ${response.code()} ${response.message()}")))
+            }
+        } catch (e: Exception) {
+            Log.e("BillRepository", "Error fetching paid bills", e)
+            emit(Result.failure(e))
+        }
+    }
+
     fun bill(orderMasterId: String,paymentMethod: PaymentMethod,receivedAmt: Double,customer: TblCustomer?): Flow<Result<TblBillingResponse>> =flow{
 
             Log.d("BILLTAG", "placeBill: $receivedAmt")
