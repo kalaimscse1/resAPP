@@ -12,6 +12,20 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+package com.warriortech.resb.data.repository
+
+import com.warriortech.resb.data.api.ApiService
+import com.warriortech.resb.data.local.SessionManager
+import com.warriortech.resb.model.PaidBill
+import com.warriortech.resb.model.PaidBillSummary
+import com.warriortech.resb.util.NetworkMonitor
+import com.warriortech.resb.util.Resulable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
 class PaidBillRepository @Inject constructor(
     private val apiService: ApiService,
     networkMonitor: NetworkMonitor,

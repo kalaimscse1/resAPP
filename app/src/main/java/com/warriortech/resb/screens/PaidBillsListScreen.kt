@@ -37,7 +37,7 @@ fun PaidBillsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     // Show error message
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { error ->
@@ -50,65 +50,68 @@ fun PaidBillsListScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Paid Bills") },
+                title = { Text(stringResource(R.string.paid_bills)) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
-                    IconButton(onClick = { viewModel.refreshPaidBills() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                }
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GradientStart
+                )
             )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = { viewModel.refreshPaidBills() },
+            modifier = Modifier.padding(paddingValues)
         ) {
-            // Search Bar
-            SearchBar(
-                searchQuery = uiState.searchQuery,
-                onSearchQueryChange = viewModel::searchPaidBills,
-                onClearSearch = viewModel::clearSearch,
-                isSearching = uiState.isSearching,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            // Content
-            Box(
-                modifier = Modifier.fillMaxSize()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
-                SwipeRefresh(
-                    state = rememberSwipeRefreshState(isRefreshing = uiState.isRefreshing),
-                    onRefresh = { viewModel.refreshPaidBills() }
+                // Search Bar
+                SearchBar(
+                    searchQuery = uiState.searchQuery,
+                    onSearchQueryChange = viewModel::searchPaidBills,
+                    onClearSearch = viewModel::clearSearch,
+                    isSearching = uiState.isSearching,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                // Content
+                Box(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    when {
-                        uiState.isLoading && uiState.bills.isEmpty() -> {
-                            LoadingContent()
-                        }
-                        uiState.bills.isEmpty() && !uiState.isLoading -> {
-                            EmptyContent(
-                                isSearching = uiState.searchQuery.isNotEmpty()
-                            )
-                        }
-                        else -> {
-                            PaidBillsList(
-                                bills = uiState.bills,
-                                onEditClick = { bill ->
-                                    navController.navigate("edit_paid_bill/${bill.id}")
-                                },
-                                onDeleteClick = viewModel::showDeleteDialog,
-                                onViewClick = { bill ->
-                                    navController.navigate("view_paid_bill/${bill.id}")
-                                }
-                            )
+                    SwipeRefresh(
+                        state = rememberSwipeRefreshState(isRefreshing = uiState.isRefreshing),
+                        onRefresh = { viewModel.refreshPaidBills() }
+                    ) {
+                        when {
+                            uiState.isLoading && uiState.bills.isEmpty() -> {
+                                LoadingContent()
+                            }
+                            uiState.bills.isEmpty() && !uiState.isLoading -> {
+                                EmptyContent(
+                                    isSearching = uiState.searchQuery.isNotEmpty()
+                                )
+                            }
+                            else -> {
+                                PaidBillsList(
+                                    bills = uiState.bills,
+                                    onEditClick = { bill ->
+                                        navController.navigate("edit_paid_bill/${bill.id}")
+                                    },
+                                    onDeleteClick = viewModel::showDeleteDialog,
+                                    onViewClick = { bill ->
+                                        navController.navigate("view_paid_bill/${bill.id}")
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -229,7 +232,7 @@ private fun PaidBillCard(
     onViewClick: () -> Unit
 ) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()) }
-    
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -260,7 +263,7 @@ private fun PaidBillCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                
+
                 // Status badge
                 Surface(
                     color = when (bill.status) {
@@ -304,7 +307,7 @@ private fun PaidBillCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 Text(
                     text = dateFormatter.format(bill.paymentDate),
                     style = MaterialTheme.typography.bodySmall,
@@ -331,7 +334,7 @@ private fun PaidBillCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("View")
                 }
-                
+
                 OutlinedButton(
                     onClick = onEditClick,
                     modifier = Modifier.weight(1f)
@@ -344,7 +347,7 @@ private fun PaidBillCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Edit")
                 }
-                
+
                 OutlinedButton(
                     onClick = onDeleteClick,
                     modifier = Modifier.weight(1f),
@@ -395,4 +398,26 @@ private fun DeleteConfirmationDialog(
             }
         }
     )
+}
+
+// Placeholder for GradientStart, assuming it's defined elsewhere or a simple color
+val GradientStart: Color = Color(0xFF007BFF) // Example color
+
+// Placeholder for PullToRefreshBox, assuming it's a custom component or from a library
+@Composable
+fun PullToRefreshBox(
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    // This is a simplified placeholder. In a real app, you might use a library
+    // like Accompanist SwipeRefresh or build a more sophisticated component.
+    Box(modifier = modifier) {
+        content()
+        // A very basic visual indicator for demonstration
+        if (isRefreshing) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.TopCenter).padding(16.dp))
+        }
+    }
 }

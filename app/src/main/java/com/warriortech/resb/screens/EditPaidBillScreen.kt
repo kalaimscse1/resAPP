@@ -18,7 +18,7 @@ import androidx.navigation.NavHostController
 import com.warriortech.resb.R
 import com.warriortech.resb.model.PaidBill
 import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.util.stringResource
+
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -48,8 +48,42 @@ fun EditPaidBillScreen(
             )
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Edit Bill Details",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    // TODO: Add form fields for editing bill
+                    Text(
+                        text = "Bill ID: $billId",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    
+                    // Placeholder for form implementation
+                    Text(
+                        text = "Form fields will be implemented here",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
