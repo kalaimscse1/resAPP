@@ -18,7 +18,6 @@ import androidx.navigation.NavHostController
 import com.warriortech.resb.R
 import com.warriortech.resb.model.PaidBill
 import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
 import com.warriortech.resb.util.stringResource
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,28 +27,10 @@ import java.util.*
 fun EditPaidBillScreen(
     navController: NavHostController,
     billId: Long,
-    viewModel: PaidBillsViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    
-    // Load bill details when screen opens
-    LaunchedEffect(billId) {
-        viewModel.loadBillDetails(billId)
-    }
 
-    // Show snackbar for messages
-    LaunchedEffect(uiState.errorMessage, uiState.successMessage) {
-        uiState.errorMessage?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.clearMessages()
-        }
-        uiState.successMessage?.let {
-            snackbarHostState.showSnackbar(it)
-            viewModel.clearMessages()
-            navController.popBackStack()
-        }
-    }
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -67,35 +48,8 @@ fun EditPaidBillScreen(
             )
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            uiState.selectedBill?.let { bill ->
-                EditBillContent(
-                    bill = bill,
-                    modifier = Modifier.padding(paddingValues),
-                    onSave = { updatedBill ->
-                        // Here you would call viewModel to update the bill
-                        // viewModel.updateBill(updatedBill)
-                    }
-                )
-            } ?: run {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.bill_not_found))
-                }
-            }
+        Column(modifier = Modifier.padding(paddingValues)) {
+
         }
     }
 }

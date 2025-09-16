@@ -138,7 +138,6 @@ import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
-import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.EditPaidBillScreen
 import com.warriortech.resb.screens.ItemWiseBillScreen
 import com.warriortech.resb.screens.ItemWiseReportScreen
@@ -387,7 +386,8 @@ fun AppNavigation(
                     navController.navigate("menu")
                 },
                 drawerState = drawerState,
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                navController = navController
             )
         }
 
@@ -672,10 +672,6 @@ fun AppNavigation(
             )
         }
 
-        composable("paid_bills") {
-            PaidBillsScreen(navController = navController)
-        }
-
         composable("edit_paid_bill/{billId}") { backStackEntry ->
             val billId = backStackEntry.arguments?.getString("billId")?.toLongOrNull() ?: 0L
             EditPaidBillScreen(navController = navController, billId = billId)
@@ -693,12 +689,6 @@ fun AppNavigation(
         composable("counter_setting") {
             CounterSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
-//        composable(
-//            route = "edit_paid_bill/{billId}"
-//        ) { backStackEntry ->
-//            val billId = backStackEntry.arguments?.getLong("billId") ?: 0L
-//            EditPaidBillScreen(navController, billId)
-//        }
 
         composable(
             route = "bill_template/{billId}"

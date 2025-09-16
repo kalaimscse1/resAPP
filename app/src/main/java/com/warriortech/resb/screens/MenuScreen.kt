@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -228,15 +229,42 @@ fun MenuScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        viewModel.clearOrder()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.RemoveShoppingCart,
-                            contentDescription = "Clear Cart",
-                            tint = SurfaceLight
-                        )
+                    if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM != "DELIVERY")
+                    {
+                        IconButton(onClick = {
+                            navController.navigate("selects"){
+                                launchSingleTop = true
+                            }
+                        }, modifier = Modifier.padding(start = 5.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Restaurant,
+                                contentDescription = "Dine In",
+                                tint = SurfaceLight
+                            )
+                        }
+
+                        IconButton(onClick = {
+                            viewModel.clearOrder()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.RemoveShoppingCart,
+                                contentDescription = "Clear Cart",
+                                tint = SurfaceLight
+                            )
+                        }
                     }
+                    else{
+                        IconButton(onClick = {
+                            viewModel.clearOrder()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.RemoveShoppingCart,
+                                contentDescription = "Clear Cart",
+                                tint = SurfaceLight
+                            )
+                        }
+                    }
+
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen

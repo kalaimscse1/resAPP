@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import android.icu.text.NumberFormat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,8 +25,6 @@ import androidx.navigation.NavController
 import com.warriortech.resb.model.*
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.TemplateViewModel
-import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -35,10 +34,8 @@ fun BillTemplateScreen(
     navController: NavController,
     billId: Long,
     templateViewModel: TemplateViewModel = hiltViewModel(),
-    billsViewModel: PaidBillsViewModel = hiltViewModel()
 ) {
     val templateUiState by templateViewModel.uiState.collectAsState()
-    val billsUiState by billsViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -48,7 +45,6 @@ fun BillTemplateScreen(
 
     // Load bill and templates
     LaunchedEffect(billId) {
-        billsViewModel.loadBillDetails(billId)
         templateViewModel.loadTemplates()
     }
 
@@ -75,66 +71,13 @@ fun BillTemplateScreen(
             )
         }
     ) { paddingValues ->
-        if (billsUiState.isLoading || templateUiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            billsUiState.selectedBill?.let { bill ->
-                selectedTemplate?.let { template ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(16.dp)
-                    ) {
-                        // Action Buttons
-                        BillTemplateActions(
-                            template = template,
-                            bill = bill,
-                            onPreview = { showPreview = true },
-                            onEdit = { showEdit = true },
-                            onPrint = {
-                                // Handle print action
-                                // TODO: Implement print functionality
-                            }
-                        )
+       Column(modifier = Modifier.padding(paddingValues)) {
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Template Selection
-                        TemplateSelector(
-                            templates = templateUiState.templates.filter { it.type == ReceiptType.BILL },
-                            selectedTemplate = template,
-                            onTemplateSelected = { selectedTemplate = it }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Bill Preview
-                        BillTemplatePreview(
-                            bill = bill,
-                            template = template
-                        )
-                    }
-                }
-            }
-        }
+       }
     }
 
     // Preview Dialog
-    if (showPreview && selectedTemplate != null && billsUiState.selectedBill != null) {
-        BillPreviewDialog(
-            bill = billsUiState.selectedBill!!,
-            template = selectedTemplate!!,
-            onDismiss = { showPreview = false }
-        )
-    }
+
 
     // Edit Dialog
     if (showEdit && selectedTemplate != null) {

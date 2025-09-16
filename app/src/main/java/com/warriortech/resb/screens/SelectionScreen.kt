@@ -67,6 +67,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -74,6 +75,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.navigation.NavHostController
 import com.warriortech.resb.model.TableStatusResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.DarkGreen
@@ -95,7 +97,8 @@ fun SelectionScreen(
     onTableSelected: (Table) -> Unit,
     viewModel: TableViewModel = hiltViewModel(),
     drawerState: DrawerState,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    navController: NavHostController
 ) {
     val connectionState by viewModel.connectionState.collectAsState()
     val tablesState by viewModel.tablesState.collectAsState()
@@ -140,6 +143,18 @@ fun SelectionScreen(
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
                         androidx.compose.material.Icon(
                             Icons.Default.Menu, contentDescription = "Menu",
+                            tint = SurfaceLight
+                        )
+                    }
+                },actions = {
+                    IconButton(onClick = {
+                        navController.navigate("takeaway_menu"){
+                            launchSingleTop = true
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Fastfood,
+                            contentDescription = "Takeaway Menu",
                             tint = SurfaceLight
                         )
                     }
