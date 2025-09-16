@@ -116,6 +116,7 @@ import com.warriortech.resb.screens.KitchenScreen
 import com.warriortech.resb.screens.ReportScreen
 import com.warriortech.resb.screens.RegistrationScreen
 import com.warriortech.resb.screens.AIAssistantScreen
+import com.warriortech.resb.screens.BillEditScreen
 import com.warriortech.resb.screens.BillTemplateScreen
 import com.warriortech.resb.screens.CategoryWiseReportScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
@@ -144,6 +145,7 @@ import com.warriortech.resb.screens.ItemWiseBillScreen
 import com.warriortech.resb.screens.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
 import com.warriortech.resb.screens.KotReportScreen
+import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
 import com.warriortech.resb.ui.components.ModernDivider
@@ -774,6 +776,16 @@ fun AppNavigation(
         composable("change_password") {
             ChangePasswordScreen(onBackPressed = { navController.popBackStack() })
         }
+        composable("paid_bills") {
+            PaidBillsScreen(
+                navController = navController,
+            )
+        }
+        composable("bill_edit") {
+            BillEditScreen(
+                navController = navController,
+            )
+        }
     }
 }
 
@@ -1025,7 +1037,7 @@ fun DrawerContent(
                         "category_wise",
                         "due_reports",
                         "kot_report",
-                        "paid_bills_list"
+                        "paid_bills"
                     ),
                     onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1065,14 +1077,14 @@ fun DrawerContent(
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = subMenuColors
                         )
-//                        NavigationDrawerItem(
-//                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-//                            icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
-//                            selected = currentDestination?.route == "paid_bills_list",
-//                            onClick = { onDestinationClicked("paid_bills_list") },
-//                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-//                            colors = subMenuColors
-//                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+                            icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
+                            selected = currentDestination?.route == "paid_bills",
+                            onClick = { onDestinationClicked("paid_bills") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
 //                        NavigationDrawerItem(
 //                            label = { if (!isCollapsed) Text("Due") else Text("") },
 //                            icon = {

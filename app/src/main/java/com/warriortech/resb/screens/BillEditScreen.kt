@@ -118,9 +118,9 @@ fun BillEditScreen(
                         BillInfoRow("Date", "${bill.bill_date} ${bill.bill_create_time}")
                         BillInfoRow("Customer", bill.customer.customer_name)
                         BillInfoRow("Staff", bill.staff.staff_name ?: "N/A")
-                        BillInfoRow("Order Amount", CurrencySettings.formatCurrency(bill.order_amt))
-                        BillInfoRow("Tax Amount", CurrencySettings.formatCurrency(bill.tax_amt))
-                        BillInfoRow("Grand Total", CurrencySettings.formatCurrency(bill.grand_total))
+                        BillInfoRow("Order Amount", CurrencySettings.format(bill.order_amt))
+                        BillInfoRow("Tax Amount", CurrencySettings.format(bill.tax_amt))
+                        BillInfoRow("Grand Total", CurrencySettings.format(bill.grand_total))
                     }
                 }
 
@@ -145,11 +145,11 @@ fun BillEditScreen(
                         
                         ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
                         
-                        BillInfoRow("Cash", CurrencySettings.formatCurrency(bill.cash))
-                        BillInfoRow("Card", CurrencySettings.formatCurrency(bill.card))
-                        BillInfoRow("UPI", CurrencySettings.formatCurrency(bill.upi))
-                        BillInfoRow("Received Amount", CurrencySettings.formatCurrency(bill.received_amt))
-                        BillInfoRow("Change", CurrencySettings.formatCurrency(bill.change))
+                        BillInfoRow("Cash", CurrencySettings.format(bill.cash))
+                        BillInfoRow("Card", CurrencySettings.format(bill.card))
+                        BillInfoRow("UPI", CurrencySettings.format(bill.upi))
+                        BillInfoRow("Received Amount", CurrencySettings.format(bill.received_amt))
+                        BillInfoRow("Change", CurrencySettings.format(bill.change))
                     }
                 }
 

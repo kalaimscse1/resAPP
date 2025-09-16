@@ -58,9 +58,12 @@ fun PaidBillsScreen(
 
     // Show error messages
     LaunchedEffect(uiState) {
-        if (uiState is PaidBillsUiState.Error) {
-            snackbarHostState.showSnackbar(uiState.message)
-            viewModel.clearError()
+        when(val state = uiState) {
+            is PaidBillsUiState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+                viewModel.clearError()
+            }
+            else -> {}
         }
     }
 
@@ -126,7 +129,7 @@ fun PaidBillsScreen(
             }
 
             // Content based on UI state
-            when (uiState) {
+            when (val state = uiState) {
                 is PaidBillsUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -137,7 +140,7 @@ fun PaidBillsScreen(
                 }
 
                 is PaidBillsUiState.Success -> {
-                    if (uiState.bills.isEmpty()) {
+                    if (state.bills.isEmpty()) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -154,12 +157,13 @@ fun PaidBillsScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(uiState.bills) { bill ->
+                            items(state.bills) { bill ->
                                 PaidBillItem(
                                     bill = bill,
                                     onEditClick = { 
                                         // Navigate to edit screen or show edit dialog
                                         viewModel.selectBill(bill)
+                                        navController.navigate("bill_edit")
                                     },
                                     onDeleteClick = { 
                                         billToDelete = bill
@@ -177,7 +181,7 @@ fun PaidBillsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Error: ${uiState.message}",
+                            text = "Error: ${state.message}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center
@@ -310,15 +314,15 @@ fun PaidBillItem(
             ) {
                 Column {
                     Text(
-                        text = "Order Amount: ${CurrencySettings.formatCurrency(bill.order_amt)}",
+                        text = "Order Amount: ${CurrencySettings.format(bill.order_amt)}",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "Discount: ${CurrencySettings.formatCurrency(bill.disc_amt)}",
+                        text = "Discount: ${CurrencySettings.format(bill.disc_amt)}",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "Tax: ${CurrencySettings.formatCurrency(bill.tax_amt)}",
+                        text = "Tax: ${CurrencySettings.format(bill.tax_amt)}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -329,7 +333,7 @@ fun PaidBillItem(
                         color = Color.Gray
                     )
                     Text(
-                        text = CurrencySettings.formatCurrency(bill.grand_total),
+                        text = CurrencySettings.format(bill.grand_total),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen

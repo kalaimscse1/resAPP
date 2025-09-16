@@ -675,6 +675,13 @@ interface ApiService {
         @Query("toDate") toDate: String
     ): Response<List<TblBillingResponse>>
 
+    @GET("payment/getUnPaidBills")
+    suspend fun getUnPaidBills(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") date: String,
+        @Query("toDate") toDate: String
+    ): Response<List<TblBillingResponse>>
+
     @GET("report/getOrderDetailsByMenuItemId")
     suspend fun getItemReport(
         @Header("X-Tenant-ID") tenantId: String,

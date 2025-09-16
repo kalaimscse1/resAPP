@@ -37,7 +37,7 @@ class PaidBillsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value = PaidBillsUiState.Loading
-                val tenantId = sessionManager.getTenantId() ?: ""
+                val tenantId = sessionManager.getCompanyCode() ?: ""
                 val response = billRepository.getPaidBills(tenantId, fromDate, toDate)
                 
                 response.collect { result ->
