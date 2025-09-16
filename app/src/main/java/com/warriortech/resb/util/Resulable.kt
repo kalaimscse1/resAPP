@@ -60,3 +60,23 @@ fun ReusableBottomSheet(
     }
 }
 
+
+/**
+ * A generic wrapper for handling different states of operations
+ */
+sealed class Resulable<out T> {
+    /**
+     * Loading state
+     */
+    object Loading : Resulable<Nothing>()
+
+    /**
+     * Success state with data
+     */
+    data class Success<T>(val data: T) : Resulable<T>()
+
+    /**
+     * Error state with message
+     */
+    data class Error(val message: String) : Resulable<Nothing>()
+}

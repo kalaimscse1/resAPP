@@ -30,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import com.warriortech.resb.ui.theme.ResbTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AttachMoney
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Kitchen
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Payment
@@ -106,7 +108,6 @@ import com.warriortech.resb.network.RetrofitClient.apiService
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
 import com.warriortech.resb.screens.OrderScreen
-import com.warriortech.resb.screens.PaidBillsListScreen
 import com.warriortech.resb.screens.SettingsScreen
 import com.warriortech.resb.screens.SupportScreen
 import com.warriortech.resb.screens.DashboardScreen
@@ -139,7 +140,6 @@ import com.warriortech.resb.screens.TemplateScreen
 import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
-import com.warriortech.resb.screens.EditPaidBillScreen
 import com.warriortech.resb.screens.ItemWiseBillScreen
 import com.warriortech.resb.screens.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
@@ -673,20 +673,6 @@ fun AppNavigation(
             )
         }
 
-        composable("paid_bills_list") {
-            PaidBillsListScreen(navController = navController)
-        }
-
-        composable("edit_paid_bill/{billId}") { backStackEntry ->
-            val billId = backStackEntry.arguments?.getString("billId")?.toLongOrNull() ?: 0L
-            EditPaidBillScreen(navController = navController, billId = billId)
-        }
-
-        composable("view_paid_bill/{billId}") { backStackEntry ->
-            val billId = backStackEntry.arguments?.getString("billId")?.toLongOrNull() ?: 0L
-            EditPaidBillScreen(navController = navController, billId = billId)
-        }
-
         composable("voucher_setting") {
             VoucherSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
@@ -1038,7 +1024,8 @@ fun DrawerContent(
                         "item_wise",
                         "category_wise",
                         "due_reports",
-                        "kot_report"
+                        "kot_report",
+                        "paid_bills_list"
                     ),
                     onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1078,6 +1065,14 @@ fun DrawerContent(
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = subMenuColors
                         )
+//                        NavigationDrawerItem(
+//                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+//                            icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
+//                            selected = currentDestination?.route == "paid_bills_list",
+//                            onClick = { onDestinationClicked("paid_bills_list") },
+//                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+//                            colors = subMenuColors
+//                        )
 //                        NavigationDrawerItem(
 //                            label = { if (!isCollapsed) Text("Due") else Text("") },
 //                            icon = {
