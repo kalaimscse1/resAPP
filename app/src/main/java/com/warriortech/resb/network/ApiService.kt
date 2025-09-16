@@ -641,41 +641,6 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblBillingResponse>
 
-    @GET("paid-bills")
-    suspend fun getAllPaidBills(@Header("X-Tenant-ID") tenantId: String): Response<List<PaidBillSummary>>
-
-    @GET("paid-bills/{id}")
-    suspend fun getPaidBillById(
-        @Path("id") id: Long,
-        @Header("X-Tenant-ID") tenantId: String
-    ): Response<PaidBill>
-
-    @PUT("paid-bills/{id}")
-    suspend fun updatePaidBill(
-        @Path("id") id: Long,
-        @Body billData: PaidBill,
-        @Header("X-Tenant-ID") tenantId: String
-    ): Response<PaidBill>
-
-    @DELETE("paid-bills/{id}")
-    suspend fun deletePaidBill(
-        @Path("id") id: Long,
-        @Header("X-Tenant-ID") tenantId: String
-    ): Response<Unit>
-
-    @POST("paid-bills/{id}/refund")
-    suspend fun refundBill(
-        @Path("id") id: Long,
-        @Body refundData: Map<String, Any>,
-        @Header("X-Tenant-ID") tenantId: String
-    ): Response<PaidBill>
-
-    @GET("paid-bills/search")
-    suspend fun searchPaidBills(
-        @Query("q") query: String,
-        @Header("X-Tenant-ID") tenantId: String
-    ): Response<List<PaidBillSummary>>
-
     @GET("payment/checkExistsOrNotByOrderNoForBilling/{order_master_id}")
     suspend fun checkBillExists(
         @Path("order_master_id") orderId: String,
