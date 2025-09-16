@@ -142,60 +142,63 @@ class TableRepository @Inject constructor(
         return data.is_ac
     }
     suspend fun insertTable(table: TblTable) {
-        safeApiCall {
-            // Convert TblTable to TblTableEntity for database storage
-            val entity = TblTableEntity(
-                table_id = table.table_id.toInt(),
-                area_id = table.area_id.toInt(),
-                table_name = table.table_name,
-                seating_capacity = table.seating_capacity,
-                is_ac = table.is_ac,
-                table_status = table.table_status,
-                table_availability = table.table_availability,
-                is_active = table.is_active,
-                is_synced = SyncStatus.PENDING_SYNC,
-                last_synced_at = null
-            )
-            tableDao.insertTable(entity)
-            if (isOnline()) {
-                // Sync with remote if online
-                apiService.createTable(table,sessionManager.getCompanyCode()?:"")
-            }
-        }
+        apiService.createTable(table,sessionManager.getCompanyCode()?:"")
+//        safeApiCall {
+//            // Convert TblTable to TblTableEntity for database storage
+//            val entity = TblTableEntity(
+//                table_id = table.table_id.toInt(),
+//                area_id = table.area_id.toInt(),
+//                table_name = table.table_name,
+//                seating_capacity = table.seating_capacity,
+//                is_ac = table.is_ac,
+//                table_status = table.table_status,
+//                table_availability = table.table_availability,
+//                is_active = table.is_active,
+//                is_synced = SyncStatus.PENDING_SYNC,
+//                last_synced_at = null
+//            )
+//            tableDao.insertTable(entity)
+//            if (isOnline()) {
+//                // Sync with remote if online
+//
+//            }
+//        }
     }
 
     // Get tables that need to be synced
     suspend fun getPendingSyncTables() = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
     suspend fun updateTable(table: TblTable) {
-        safeApiCall {
-            // Convert TblTable to TblTableEntity for database storage
-            val entity = TblTableEntity(
-                table_id = table.table_id.toInt(),
-                area_id = table.area_id.toInt(),
-                table_name = table.table_name,
-                seating_capacity = table.seating_capacity,
-                is_ac = table.is_ac,
-                table_status = table.table_status,
-                table_availability = table.table_availability,
-                is_active = table.is_active,
-                is_synced = SyncStatus.PENDING_SYNC,
-                last_synced_at = null
-            )
-            tableDao.updateTable(entity)
-            if (isOnline()) {
-                // Sync with remote if online
-                apiService.updateTable(table.table_id, table,sessionManager.getCompanyCode()?:"")
-            }
-        }
+        apiService.updateTable(table.table_id, table,sessionManager.getCompanyCode()?:"")
+//        safeApiCall {
+//            // Convert TblTable to TblTableEntity for database storage
+//            val entity = TblTableEntity(
+//                table_id = table.table_id.toInt(),
+//                area_id = table.area_id.toInt(),
+//                table_name = table.table_name,
+//                seating_capacity = table.seating_capacity,
+//                is_ac = table.is_ac,
+//                table_status = table.table_status,
+//                table_availability = table.table_availability,
+//                is_active = table.is_active,
+//                is_synced = SyncStatus.PENDING_SYNC,
+//                last_synced_at = null
+//            )
+//            tableDao.updateTable(entity)
+//            if (isOnline()) {
+//                // Sync with remote if online
+//                apiService.updateTable(table.table_id, table,sessionManager.getCompanyCode()?:"")
+//            }
+//        }
     }
     suspend fun deleteTable(lng: Long) {
-        safeApiCall {
-            tableDao.deleteTable(lng)
-            if (isOnline()) {
-                // Sync with remote if online
-                apiService.deleteTable(lng,sessionManager.getCompanyCode()?:"")
-            }
-        }
+        apiService.deleteTable(lng,sessionManager.getCompanyCode()?:"")
+//        safeApiCall {
+//            tableDao.deleteTable(lng)
+//            if (isOnline()) {
+//                // Sync with remote if online
+//                apiService.deleteTable(lng,sessionManager.getCompanyCode()?:"")
+//            }
+//        }
     }
 
     suspend fun getTableById(tableId: Long): Table? {

@@ -132,22 +132,27 @@ fun TableSettingsScreen(
                     }
                 }
             }
-
-        if (showAddDialog || editingTable != null) {
-            TableDialog(
-                table = editingTable,
-                onDismiss = {
-                    showAddDialog = false
-                    editingTable = null
-                },
+        if (showAddDialog) {
+         TableDialog(
+                table = null,
+                onDismiss = { showAddDialog = false },
                 onSave = { table ->
                     scope.launch {
-                        if (editingTable != null) {
-                            viewModel.updateTable(table)
-                        } else {
-                            viewModel.addTable(table)
-                        }
+                        viewModel.addTable(table)
                         showAddDialog = false
+                    }
+                },
+                areas = areas
+         )
+        }
+
+        editingTable?.let {
+            TableDialog(
+                table = it,
+                onDismiss = { editingTable = null },
+                onSave = { table ->
+                    scope.launch {
+                        viewModel.updateTable(table)
                         editingTable = null
                     }
                 },
@@ -273,7 +278,7 @@ fun TableDialog(
                         is_ac = table?.is_ac ?: isAc.toString(),
                         table_status = table?.table_status ?: tableStatus.toString(),
                         table_availability = table?.table_availability ?: "AVAILABLE",
-                        is_active = table?.is_active ?: true
+                        is_active = table?.is_active ?: isActive
                     )
                     onSave(newTable)
                 },
