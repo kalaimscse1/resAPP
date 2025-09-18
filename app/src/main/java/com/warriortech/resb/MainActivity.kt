@@ -146,6 +146,7 @@ import com.warriortech.resb.screens.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
 import com.warriortech.resb.screens.KotReportScreen
 import com.warriortech.resb.screens.PaidBillsScreen
+import com.warriortech.resb.screens.UnpaidBillsScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
 import com.warriortech.resb.ui.components.ModernDivider
@@ -786,6 +787,11 @@ fun AppNavigation(
                 navController = navController,
             )
         }
+        composable("due") {
+            UnpaidBillsScreen(
+                navController = navController,
+            )
+        }
     }
 }
 
@@ -1035,7 +1041,7 @@ fun DrawerContent(
                         "orders",
                         "item_wise",
                         "category_wise",
-                        "due_reports",
+                        "due",
                         "kot_report",
                         "paid_bills"
                     ),
@@ -1050,6 +1056,28 @@ fun DrawerContent(
                             icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
                             selected = currentDestination?.route == "orders",
                             onClick = { onDestinationClicked("orders") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+                            icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
+                            selected = currentDestination?.route == "paid_bills",
+                            onClick = { onDestinationClicked("paid_bills") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = subMenuColors
+                        )
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Due") else Text("") },
+                            icon = {
+                                Icon(
+                                    Icons.Filled.Payment,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            selected = currentDestination?.route == "due",
+                            onClick = { onDestinationClicked("due") },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = subMenuColors
                         )
@@ -1077,29 +1105,6 @@ fun DrawerContent(
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = subMenuColors
                         )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-                            icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
-                            selected = currentDestination?.route == "paid_bills",
-                            onClick = { onDestinationClicked("paid_bills") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-//                        NavigationDrawerItem(
-//                            label = { if (!isCollapsed) Text("Due") else Text("") },
-//                            icon = {
-//                                Icon(
-//                                    Icons.Filled.Payment,
-//                                    contentDescription = null,
-//                                    tint = MaterialTheme.colorScheme.error
-//                                )
-//                            },
-//                            selected = currentDestination?.route == "due_reports",
-//                            onClick = { onDestinationClicked("due_reports") },
-//                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-//                            colors = subMenuColors
-//                        )
-
                         NavigationDrawerItem(
                             label = { if (!isCollapsed) Text("KOT Report") else Text("") },
                             icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },

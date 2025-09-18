@@ -443,6 +443,7 @@ class BillingViewModel @Inject constructor(
         _uiState.update { it.copy(paymentProcessingState = PaymentProcessingState.Processing, errorMessage = null) }
         viewModelScope.launch {
 
+            val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print == true
                 // --- Simulate Payment Processing ---
                 // In a real app, this would involve:
                 // 1. Calling a payment gateway SDK or your backend API.
@@ -466,7 +467,7 @@ class BillingViewModel @Inject constructor(
                                 val qty = detail.qty
                                BillItem(
                                     sn = sn++,
-                                    itemName = menuItem.menu_item_name,
+                                    itemName =if (tamil) menuItem.menu_item_name_tamil else menuItem.menu_item_name,
                                     qty = qty,
                                     price = menuItem.rate,
                                     basePrice = detail.rate,

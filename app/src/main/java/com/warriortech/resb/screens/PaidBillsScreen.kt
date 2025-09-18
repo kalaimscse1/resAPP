@@ -284,7 +284,7 @@ fun PaidBillItem(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     IconButton(
-                        onClick = onEditClick,
+                        onClick = {onEditClick()},
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(

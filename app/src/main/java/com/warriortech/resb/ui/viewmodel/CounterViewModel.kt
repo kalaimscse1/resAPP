@@ -310,6 +310,7 @@ class CounterViewModel @Inject constructor(
                     menuItem = menuItem,
                 )
             }
+            val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print ?: false
             _menuState.value = MenuUiState.Loading
             orderRepository.placeOrUpdateOrders(
                 2, orderItems,
@@ -331,7 +332,7 @@ class CounterViewModel @Inject constructor(
                                         val qty = detail.qty
                                         BillItem(
                                             sn = sn++,
-                                            itemName = menuItem.menu_item_name,
+                                            itemName = if (tamil) menuItem.menu_item_name_tamil else menuItem.menu_item_name,
                                             qty = qty,
                                             price = menuItem.rate,
                                             basePrice = detail.rate,

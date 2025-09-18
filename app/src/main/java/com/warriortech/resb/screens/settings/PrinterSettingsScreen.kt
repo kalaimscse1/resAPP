@@ -225,7 +225,7 @@ fun PrinterDialog(
                     val newPrinter =  Printer(
                        printer_id = printer?.printer_id?:0, // Use 0 for new printers
                         printer_name = name,
-                        kitchen_cat_id = printer?.kitchen_cat?.kitchen_cat_id?.toLong()?:kitchenCatId, // Default or selected category ID
+                        kitchen_cat_id = kitchenCatId, // Default or selected category ID
                         ip_address = ipAddress,
                         is_active = isActive
                     )

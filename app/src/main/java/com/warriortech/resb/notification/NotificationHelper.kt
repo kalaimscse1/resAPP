@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.notification
 
 import android.app.NotificationChannel
@@ -45,14 +44,15 @@ class NotificationHelper @Inject constructor(
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        
+
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val title = "Subscription Expiring Soon"
-        val message = "Your subscription will expire in $daysRemaining day${if (daysRemaining != 1L) "s" else ""}. Please contact RES-B support team."
+        val message =
+            "Your subscription will expire in $daysRemaining day${if (daysRemaining != 1L) "s" else ""}. Please contact RES-B support team."
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.resb_logo_2)

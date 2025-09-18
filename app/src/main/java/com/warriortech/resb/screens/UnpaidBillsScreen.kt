@@ -171,7 +171,7 @@ fun UnpaidBillsScreen(
             }
 
             // Bills List
-            when (uiState) {
+            when (val state=uiState) {
                 is UnpaidBillsUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -181,7 +181,7 @@ fun UnpaidBillsScreen(
                     }
                 }
                 is UnpaidBillsUiState.Success -> {
-                    if (uiState.bills.isEmpty()) {
+                    if (state.bills.isEmpty()) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -198,11 +198,11 @@ fun UnpaidBillsScreen(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(uiState.bills) { bill ->
+                            items(state.bills) { bill ->
                                 UnpaidBillCard(
                                     bill = bill,
                                     onPayClick = { 
-                                        navController.navigate("payment_screen/${bill.bill_no}")
+                                        navController.navigate("payment_screen/${bill.due}/${bill.order_master.order_master_id}")
                                     }
                                 )
                             }
@@ -216,7 +216,7 @@ fun UnpaidBillsScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Error: ${uiState.message}",
+                                text = "Error: ${state.message}",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.error,
                                 textAlign = TextAlign.Center
@@ -353,7 +353,7 @@ fun UnpaidBillCard(
                         color = Color.Gray
                     )
                     Text(
-                        text = CurrencySettings.formatCurrency(bill.pending_amt),
+                        text = CurrencySettings.format(bill.pending_amt),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Red

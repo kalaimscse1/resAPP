@@ -101,7 +101,7 @@ fun PaymentModeLegendItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "₹${String.format("%.0f", amount)} ($percentage%)",
+                text = "${String.format("%.0f", amount)} ($percentage%)",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -187,7 +187,7 @@ fun BarChartItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "₹${String.format("%.0f", amount)}",
+            text = String.format("%.0f", amount),
             style = MaterialTheme.typography.bodySmall,
             fontSize = 10.sp
         )
