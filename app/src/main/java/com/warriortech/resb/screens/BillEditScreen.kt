@@ -117,7 +117,7 @@ fun BillEditScreen(
                         BillInfoRow("Bill Number", bill.bill_no)
                         BillInfoRow("Date", "${bill.bill_date} ${bill.bill_create_time}")
                         BillInfoRow("Customer", bill.customer.customer_name)
-                        BillInfoRow("Staff", bill.staff.staff_name ?: "N/A")
+                        BillInfoRow("Staff", bill.staff.staff_name)
                         BillInfoRow("Order Amount", CurrencySettings.format(bill.order_amt))
                         BillInfoRow("Tax Amount", CurrencySettings.format(bill.tax_amt))
                         BillInfoRow("Grand Total", CurrencySettings.format(bill.grand_total))

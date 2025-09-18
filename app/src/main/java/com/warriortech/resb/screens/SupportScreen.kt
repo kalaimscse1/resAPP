@@ -55,6 +55,20 @@ fun SupportScreen(
                     containerColor = PrimaryGreen
                 )
             )
+        },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = PrimaryGreen,
+                contentColor = SurfaceLight
+            ) {
+                Text(
+                    text = "For support, contact : +91-7826040873, +91-9788106710, +91-9942014611, +91-8072944941\n" +
+                            "Email: kingtecsolution@gmail.com\n" +
+                            "Website: www.kingtecsolution.com",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     ) { paddingValues ->
         if (selectedCategory == null) {

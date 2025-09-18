@@ -337,25 +337,10 @@ fun BilledItemRow(
             Column(
                 horizontalAlignment = Alignment.End
             ) {
-                // Quantity controls
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-//                    IconButton(
-//                        onClick = {
-//                            if (quantity > 1) {
-//                                onQuantityChange(quantity - 1)
-//                            }
-//                        },
-//                        modifier = Modifier.size(32.dp)
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.Remove,
-//                            contentDescription = "Decrease quantity"
-//                        )
-//                    }
-
                     Text(
                         text = quantity.toString(),
                         style = MaterialTheme.typography.bodyLarge,
@@ -363,29 +348,7 @@ fun BilledItemRow(
                         modifier = Modifier.widthIn(min = 24.dp),
                         textAlign = TextAlign.Center
                     )
-
-//                    IconButton(
-//                        onClick = { onQuantityChange(quantity + 1) },
-//                        modifier = Modifier.size(32.dp)
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.Add,
-//                            contentDescription = "Increase quantity"
-//                        )
-//                    }
                 }
-
-                // Remove item button
-//                IconButton(
-//                    onClick = onRemoveItem,
-//                    modifier = Modifier.size(32.dp)
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Delete,
-//                        contentDescription = "Remove item",
-//                        tint = MaterialTheme.colorScheme.error
-//                    )
-//                }
             }
         }
     }

@@ -62,7 +62,7 @@ fun ItemWiseBillScreen(
     viewModel: CounterViewModel = hiltViewModel(),
     drawerState: DrawerState,
     navController: NavHostController,
-    onProceedToBilling: (orderDetailsResponse: List<TblOrderDetailsResponse>, orderId: String) -> Unit,
+    onProceedToBilling: (orderDetailsResponse: Map<TblMenuItemResponse, Int>) -> Unit,
 ) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
@@ -85,17 +85,6 @@ fun ItemWiseBillScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
-    }
-
-    // Handle navigation after order placement for Others button
-    LaunchedEffect(orderDetailsResponse, orderId, isProcessingOthers) {
-        if (isProcessingOthers && orderDetailsResponse.isNotEmpty() && !orderId.isNullOrEmpty()) {
-            // Navigate to payment screen after order is placed
-            navController.navigate("payment_screen/${viewModel.getOrderTotal()}/$orderId") {
-                launchSingleTop = true
-            }
-            isProcessingOthers = false
-        }
     }
 
     LaunchedEffect(selectedItems.size) {
@@ -165,16 +154,16 @@ fun ItemWiseBillScreen(
                     ) {
                         if(selectedItems.isNotEmpty()){
                             isProcessingOthers = true
-                            viewModel.placeOrder(2, null)
-                        }
-                        else{
-                            showBillDialog = true
-                        }
-                    }
-                                    launchSingleTop = true
-                                }
-                                isProcessingOthers = false
-                            }
+                            onProceedToBilling(selectedItems)
+                            navController.navigate("quick_bill")
+//                            viewModel.placeOrder(2, null)
+//                            scope.launch {
+//                                delay(4000)
+//                                navController.navigate("payment_screen/${viewModel.getOrderTotal()}/${orderId ?: ""}") {
+//                                    launchSingleTop = true
+//                                }
+//                                isProcessingOthers = false
+//                            }
                         }
                         else{
                             showBillDialog = true

@@ -102,6 +102,7 @@ import androidx.core.content.edit
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.warriortech.resb.model.KotResponse
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.RetrofitClient.apiService
@@ -146,6 +147,7 @@ import com.warriortech.resb.screens.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
 import com.warriortech.resb.screens.KotReportScreen
 import com.warriortech.resb.screens.PaidBillsScreen
+import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.UnpaidBillsScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
@@ -352,6 +354,7 @@ fun AppNavigation(
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
     var kotRes by remember { mutableStateOf<KotResponse?>(null) }
+    var selecteItems by remember { mutableStateOf<Map<TblMenuItemResponse, Int>>(mutableMapOf()) }
 
     // Check subscription status
     LaunchedEffect(Unit) {
@@ -707,10 +710,8 @@ fun AppNavigation(
             ItemWiseBillScreen(
                 drawerState = drawerState,
                 navController = navController,
-                onProceedToBilling = { items, orderId ->
-                    selectedItems = items
-                    selectedOrderId = orderId
-                    navController.navigate("billing_screen/${orderId}")
+                onProceedToBilling = {
+                    selecteItems = it
                 }
             )
         }
@@ -790,6 +791,12 @@ fun AppNavigation(
         composable("due") {
             UnpaidBillsScreen(
                 navController = navController,
+            )
+        }
+        composable("quick_bill") {
+            QuickBillScreen(
+                navController = navController,
+                orderDetailsResponse = selecteItems
             )
         }
     }

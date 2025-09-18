@@ -102,9 +102,16 @@ class BillingViewModel @Inject constructor(
     private val _customers = MutableStateFlow<List<TblCustomer>>(emptyList())
     val customers: StateFlow<List<TblCustomer>> = _customers
 
+    private val _selectedItems = MutableStateFlow<Map<TblMenuItemResponse, Int>>(emptyMap())
+    val selectedItems: StateFlow<Map<TblMenuItemResponse, Int>> = _selectedItems.asStateFlow()
 
     private val _originalOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
     private val _filteredOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
+
+    private val _totalAmount = MutableStateFlow(0.0)
+    val totalAmount: StateFlow<Double> = _totalAmount.asStateFlow()
+    private val _orderId = MutableStateFlow("")
+    val orderId: StateFlow<String> = _orderId.asStateFlow()
 
     init {
         // Load initial data like available payment methods
@@ -164,6 +171,9 @@ class BillingViewModel @Inject constructor(
             totalAmount = totalAmount,
             amountToPay = totalAmount
         )
+    }
+    fun setMenuDetails(menu: Map<TblMenuItemResponse, Int>){
+        _selectedItems.value = menu
     }
 
     fun setBillingDetailsFromOrderResponse(
@@ -330,6 +340,9 @@ class BillingViewModel @Inject constructor(
         _uiState.value = recalcTotals(currentItems)
     }
 
+    fun updateTotal() {
+        _totalAmount.value =  selectedItems.value.entries.sumOf { it.key.rate * it.value }
+    }
     fun removeItem(menuItem: TblMenuItemResponse) {
         val currentItems = _uiState.value.billedItems.toMutableMap()
         currentItems.remove(menuItem)
