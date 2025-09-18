@@ -87,6 +87,17 @@ fun ItemWiseBillScreen(
         viewModel.loadMenuItems()
     }
 
+    // Handle navigation after order placement for Others button
+    LaunchedEffect(orderDetailsResponse, orderId, isProcessingOthers) {
+        if (isProcessingOthers && orderDetailsResponse.isNotEmpty() && !orderId.isNullOrEmpty()) {
+            // Navigate to payment screen after order is placed
+            navController.navigate("payment_screen/${viewModel.getOrderTotal()}/$orderId") {
+                launchSingleTop = true
+            }
+            isProcessingOthers = false
+        }
+    }
+
     LaunchedEffect(selectedItems.size) {
         if (selectedItems.isNotEmpty()) {
             scope.launch {
@@ -155,12 +166,11 @@ fun ItemWiseBillScreen(
                         if(selectedItems.isNotEmpty()){
                             isProcessingOthers = true
                             viewModel.placeOrder(2, null)
-                            // Place order first, then proceed to payment
-                            scope.launch {
-                                // Wait for order to be placed successfully
-                                delay(2000) // Reduced delay for better UX
-                                // Navigate to payment screen instead of billing screen
-                                navController.navigate("payment_screen/${viewModel.getOrderTotal()}/${orderId ?: ""}") {
+                        }
+                        else{
+                            showBillDialog = true
+                        }
+                    }
                                     launchSingleTop = true
                                 }
                                 isProcessingOthers = false
