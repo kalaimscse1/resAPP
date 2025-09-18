@@ -155,12 +155,12 @@ fun ItemWiseBillScreen(
                         if(selectedItems.isNotEmpty()){
                             isProcessingOthers = true
                             viewModel.placeOrder(2, null)
-                            // Navigate immediately after placing order, no artificial delay
+                            // Place order first, then proceed to payment
                             scope.launch {
-                                // Small delay to ensure order is placed before navigation
-                                delay(3000)
-                                onProceedToBilling(orderDetailsResponse, orderId ?: "")
-                                navController.navigate("billing_screen/${orderId ?: ""}") {
+                                // Wait for order to be placed successfully
+                                delay(2000) // Reduced delay for better UX
+                                // Navigate to payment screen instead of billing screen
+                                navController.navigate("payment_screen/${viewModel.getOrderTotal()}/${orderId ?: ""}") {
                                     launchSingleTop = true
                                 }
                                 isProcessingOthers = false
