@@ -144,9 +144,14 @@ class TableRepository @Inject constructor(
     }
     suspend fun insertTable(table: TblTable) {
         try {
+            // Validate table data
+            if (table.table_name.isBlank()) {
+                throw IllegalArgumentException("Table name cannot be empty")
+            }
+            
             // First, insert to local database
             val entity = TblTableEntity(
-                table_id = table.table_id.toInt(),
+                table_id = 0, // Let Room auto-generate the ID
                 area_id = table.area_id.toInt(),
                 table_name = table.table_name,
                 seating_capacity = table.seating_capacity,
@@ -155,19 +160,30 @@ class TableRepository @Inject constructor(
                 table_availability = table.table_availability,
                 is_active = table.is_active,
                 is_synced = SyncStatus.PENDING_SYNC,
-                last_synced_at = null
+                last_synced_at = null,
+                created_at = System.currentTimeMillis(),
+                updated_at = System.currentTimeMillis()
             )
-            tableDao.insertTable(entity)
+            
+            val insertedId = tableDao.insertTable(entity)
+            Timber.d("Table inserted with ID: $insertedId")
             
             // Then sync with remote if online
             if (isOnline()) {
-                apiService.createTable(table, sessionManager.getCompanyCode() ?: "")
-                // Update sync status if successful
-                val updatedEntity = entity.copy(
-                    is_synced = SyncStatus.SYNCED,
-                    last_synced_at = System.currentTimeMillis()
-                )
-                tableDao.updateTable(updatedEntity)
+                try {
+                    val response = apiService.createTable(table, sessionManager.getCompanyCode() ?: "")
+                    if (response.isSuccessful) {
+                        // Update sync status if successful
+                        tableDao.updateTableSyncStatus(insertedId, SyncStatus.SYNCED)
+                        Timber.d("Table synced successfully")
+                    } else {
+                        tableDao.updateTableSyncStatus(insertedId, SyncStatus.SYNC_FAILED)
+                        Timber.w("Failed to sync table to server: ${response.message()}")
+                    }
+                } catch (e: Exception) {
+                    tableDao.updateTableSyncStatus(insertedId, SyncStatus.SYNC_FAILED)
+                    Timber.e(e, "Exception while syncing table to server")
+                }
             }
         } catch (e: Exception) {
             Timber.e(e, "Failed to insert table: ${table.table_name}")
@@ -178,37 +194,67 @@ class TableRepository @Inject constructor(
     // Get tables that need to be synced
     suspend fun getPendingSyncTables() = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
     suspend fun updateTable(table: TblTable) {
-        apiService.updateTable(table.table_id, table,sessionManager.getCompanyCode()?:"")
-//        safeApiCall {
-//            // Convert TblTable to TblTableEntity for database storage
-//            val entity = TblTableEntity(
-//                table_id = table.table_id.toInt(),
-//                area_id = table.area_id.toInt(),
-//                table_name = table.table_name,
-//                seating_capacity = table.seating_capacity,
-//                is_ac = table.is_ac,
-//                table_status = table.table_status,
-//                table_availability = table.table_availability,
-//                is_active = table.is_active,
-//                is_synced = SyncStatus.PENDING_SYNC,
-//                last_synced_at = null
-//            )
-//            tableDao.updateTable(entity)
-//            if (isOnline()) {
-//                // Sync with remote if online
-//                apiService.updateTable(table.table_id, table,sessionManager.getCompanyCode()?:"")
-//            }
-//        }
+        try {
+            // Update local database first
+            val entity = TblTableEntity(
+                table_id = table.table_id.toInt(),
+                area_id = table.area_id.toInt(),
+                table_name = table.table_name,
+                seating_capacity = table.seating_capacity,
+                is_ac = table.is_ac,
+                table_status = table.table_status,
+                table_availability = table.table_availability,
+                is_active = table.is_active,
+                is_synced = SyncStatus.PENDING_SYNC,
+                last_synced_at = null,
+                created_at = System.currentTimeMillis(),
+                updated_at = System.currentTimeMillis()
+            )
+            tableDao.updateTable(entity)
+            
+            // Sync with remote if online
+            if (isOnline()) {
+                try {
+                    val response = apiService.updateTable(table.table_id, table, sessionManager.getCompanyCode() ?: "")
+                    if (response.isSuccessful) {
+                        tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNCED)
+                    } else {
+                        tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNC_FAILED)
+                    }
+                } catch (e: Exception) {
+                    tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNC_FAILED)
+                    Timber.e(e, "Failed to sync table update to server")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to update table: ${table.table_name}")
+            throw e
+        }
     }
+    
     suspend fun deleteTable(lng: Long) {
-        apiService.deleteTable(lng,sessionManager.getCompanyCode()?:"")
-//        safeApiCall {
-//            tableDao.deleteTable(lng)
-//            if (isOnline()) {
-//                // Sync with remote if online
-//                apiService.deleteTable(lng,sessionManager.getCompanyCode()?:"")
-//            }
-//        }
+        try {
+            // Mark as pending delete in local database
+            tableDao.updateTableSyncStatus(lng, SyncStatus.PENDING_DELETE)
+            
+            if (isOnline()) {
+                try {
+                    val response = apiService.deleteTable(lng, sessionManager.getCompanyCode() ?: "")
+                    if (response.isSuccessful) {
+                        // Actually delete from local database if server delete was successful
+                        tableDao.deleteTableById(lng)
+                    } else {
+                        tableDao.updateTableSyncStatus(lng, SyncStatus.SYNC_FAILED)
+                    }
+                } catch (e: Exception) {
+                    tableDao.updateTableSyncStatus(lng, SyncStatus.SYNC_FAILED)
+                    Timber.e(e, "Failed to delete table from server")
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to delete table")
+            throw e
+        }
     }
 
     suspend fun getTableById(tableId: Long): Table? {

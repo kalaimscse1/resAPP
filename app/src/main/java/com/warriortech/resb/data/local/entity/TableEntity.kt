@@ -7,9 +7,6 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "tbl_table",
-    foreignKeys = [
-        ForeignKey(entity = TblArea::class, parentColumns = ["area_id"], childColumns = ["area_id"], onDelete = ForeignKey.CASCADE),
-    ],
     indices = [
         Index(value = ["area_id"]),
     ]
@@ -24,7 +21,9 @@ data class TblTableEntity(
     val table_availability: String?,
     val is_active: Boolean?,
     val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
-    val last_synced_at: Long? = null
+    val last_synced_at: Long? = null,
+    val created_at: Long = System.currentTimeMillis(),
+    val updated_at: Long = System.currentTimeMillis()
 )
 
 enum class SyncStatus {

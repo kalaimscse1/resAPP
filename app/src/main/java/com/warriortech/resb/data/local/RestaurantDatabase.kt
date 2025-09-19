@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.warriortech.resb.data.local.dao.*
 import com.warriortech.resb.data.local.entity.*
 
@@ -40,6 +41,7 @@ import com.warriortech.resb.data.local.entity.*
     version = 3,
     exportSchema = true
 )
+@TypeConverters(Converters::class)
 abstract class RestaurantDatabase : RoomDatabase() {
 
     abstract fun tableDao(): TableDao
@@ -78,8 +80,10 @@ abstract class RestaurantDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     RestaurantDatabase::class.java,
-                    "KTS_RESB"
-                ).fallbackToDestructiveMigration()
+                    "KTS-RESB"
+                )
+                .addMigrations(MIGRATION_2_3)
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance

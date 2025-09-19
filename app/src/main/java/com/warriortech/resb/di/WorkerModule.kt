@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.di
 
 import android.content.Context
@@ -23,7 +22,7 @@ abstract class WorkerModule {
     @Binds
     @IntoMap
     @StringKey("com.warriortech.resb.data.sync.SyncWorker")
-    abstract fun bindSyncWorker(factory: SyncWorker.Factory): ChildWorkerFactory
+    abstract fun bindSyncWorker(factory: SyncWorker.AssistedFactory): ChildWorkerFactory
 }
 
 interface ChildWorkerFactory {
@@ -40,7 +39,9 @@ class HiltWorkerFactory @Inject constructor(
         workerClassName: String,
         workerParameters: WorkerParameters
     ): ListenableWorker? {
-        val foundEntry = workerFactories.entries.find { Class.forName(workerClassName).isAssignableFrom(Class.forName(it.key)) }
+        val foundEntry = workerFactories.entries.find { 
+            Class.forName(workerClassName).isAssignableFrom(Class.forName(it.key)) 
+        }
         val factoryProvider = foundEntry?.value
             ?: workerFactories[workerClassName]
             ?: return null

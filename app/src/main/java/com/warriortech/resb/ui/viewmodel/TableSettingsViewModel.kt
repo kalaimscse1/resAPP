@@ -57,6 +57,16 @@ class TableSettingsViewModel @Inject constructor(
     fun addTable(table: TblTable) {
         viewModelScope.launch {
             try {
+                // Validate input
+                if (table.table_name.isBlank()) {
+                    _uiState.value = TableSettingsUiState.Error("Table name cannot be empty")
+                    return@launch
+                }
+                if (table.seating_capacity <= 0) {
+                    _uiState.value = TableSettingsUiState.Error("Seating capacity must be greater than 0")
+                    return@launch
+                }
+                
                 tableRepository.insertTable(table)
                 loadTables()
             } catch (e: Exception) {
@@ -70,6 +80,16 @@ class TableSettingsViewModel @Inject constructor(
     fun updateTable(table: TblTable) {
         viewModelScope.launch {
             try {
+                // Validate input
+                if (table.table_name.isBlank()) {
+                    _uiState.value = TableSettingsUiState.Error("Table name cannot be empty")
+                    return@launch
+                }
+                if (table.seating_capacity <= 0) {
+                    _uiState.value = TableSettingsUiState.Error("Seating capacity must be greater than 0")
+                    return@launch
+                }
+                
                 tableRepository.updateTable(table)
                 loadTables()
             } catch (e: Exception) {

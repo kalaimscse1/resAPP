@@ -27,17 +27,8 @@ class SyncWorker @AssistedInject constructor(
     @Assisted private val workerParams: WorkerParameters,
     private val apiService: ApiService,
     private val sessionManager: SessionManager,
-    private val menuDao: MenuItemDao,
-    private val tableDao: TableDao
+    private val database: RestaurantDatabase
 ) : CoroutineWorker(appContext, workerParams) {
-
-    @dagger.assisted.AssistedFactory
-    interface Factory {
-        fun create(appContext: Context, workerParams: WorkerParameters): SyncWorker
-    }
-
-    val database: RestaurantDatabase = RestaurantDatabase.getDatabase(context = appContext)
-
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
@@ -51,46 +42,54 @@ class SyncWorker @AssistedInject constructor(
     }
 
     private suspend fun syncTables() {
-        // 1️⃣ Sync pending local tables to server
-        val pendingTables = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
-        for (table in pendingTables) {
-            try {
-                val response = apiService.updateTableStatus(
-                    table.table_id.toLong(),
-                    table.table_status.toString(),
-                    sessionManager.getCompanyCode() ?: ""
-                )
-                val newStatus = if (response.isSuccessful) SyncStatus.SYNCED else SyncStatus.SYNC_FAILED
-                tableDao.updateTableSyncStatus(table.table_id.toLong(), newStatus)
-            } catch (e: Exception) {
-                tableDao.updateTableSyncStatus(table.table_id.toLong(), SyncStatus.SYNC_FAILED)
-                Timber.e(e, "Failed to sync table ${table.table_id}")
-            }
-        }
-
-        // 2️⃣ Fetch remote tables and update local database
         try {
-            val remoteTables = apiService.getAllTables(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
-            val localTables = remoteTables.map { remote ->
-                tableDao.getTableById(remote.table_id)?.let { local ->
-                    if (local.is_synced != SyncStatus.SYNCED) local else remote.toEntity()
-                } ?: remote.toEntity()
+            val tableDao = database.tableDao()
+            
+            // 1️⃣ Sync pending local tables to server
+            val pendingTables = tableDao.getTablesBySyncStatus(SyncStatus.PENDING_SYNC)
+            for (table in pendingTables) {
+                try {
+                    val response = apiService.updateTableStatus(
+                        table.table_id.toLong(),
+                        table.table_status.toString(),
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                    val newStatus = if (response.isSuccessful) SyncStatus.SYNCED else SyncStatus.SYNC_FAILED
+                    tableDao.updateTableSyncStatus(table.table_id.toLong(), newStatus)
+                } catch (e: Exception) {
+                    tableDao.updateTableSyncStatus(table.table_id.toLong(), SyncStatus.SYNC_FAILED)
+                    Timber.e(e, "Failed to sync table ${table.table_id}")
+                }
             }
-            tableDao.insertTables(localTables)
+
+            // 2️⃣ Fetch remote tables and update local database
+            try {
+                val remoteTables = apiService.getAllTables(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
+                val localTables = remoteTables.map { remote ->
+                    tableDao.getTableById(remote.table_id)?.let { local ->
+                        if (local.is_synced != SyncStatus.SYNCED) local else remote.toEntity()
+                    } ?: remote.toEntity()
+                }
+                tableDao.insertTables(localTables)
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to fetch tables from server")
+            }
         } catch (e: Exception) {
-            Timber.e(e, "Failed to fetch tables from server")
+            Timber.e(e, "Error in syncTables")
         }
     }
 
     private suspend fun syncMenuItems() {
         try {
+            val menuItemDao = database.menuItemDao()
+            
             val remoteMenuItems = apiService.getAllMenuItems(sessionManager.getCompanyCode() ?: "").body() ?: emptyList()
             val localMenuItems = remoteMenuItems.map { remote ->
-                menuDao.getMenuItemById(remote.menu_item_id)?.let { local ->
+                menuItemDao.getMenuItemById(remote.menu_item_id)?.let { local ->
                     if (local.is_synced != SyncStatus.SYNCED) local else remote.toEntity()
                 } ?: remote.toEntity()
             }
-            menuDao.insertMenuItems(localMenuItems)
+            menuItemDao.insertMenuItems(localMenuItems)
         } catch (e: Exception) {
             Timber.e(e, "Failed to fetch menu items from server")
         }

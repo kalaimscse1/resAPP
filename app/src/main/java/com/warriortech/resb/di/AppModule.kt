@@ -58,7 +58,9 @@ object AppModule {
             context,
             RestaurantDatabase::class.java,
             "KTS-RESB"
-        )   .fallbackToDestructiveMigration()
+        )
+            .addMigrations(MIGRATION_2_3)
+            .fallbackToDestructiveMigration()
             .build()
     }
 

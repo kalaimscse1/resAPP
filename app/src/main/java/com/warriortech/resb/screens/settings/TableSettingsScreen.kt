@@ -271,7 +271,7 @@ fun TableDialog(
             TextButton(
                 onClick = {
                     val newTable = TblTable(
-                        table_id = table?.table_id ?: 0,
+                        table_id = table?.table_id ?: 0L,
                         area_id = table?.area_id ?:areaId,
                         table_name = table?.table_name ?: tableNumber,
                         seating_capacity = table?.seating_capacity?: capacity.toInt(),
@@ -282,7 +282,7 @@ fun TableDialog(
                     )
                     onSave(newTable)
                 },
-                enabled = tableNumber.isNotBlank() && capacity.isNotBlank()
+                enabled = tableNumber.isNotBlank() && capacity.isNotBlank() && capacity.toIntOrNull() != null
             ) {
                 Text(if (table != null) "Update" else "Save")
             }

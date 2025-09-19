@@ -24,9 +24,16 @@ class ResbApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+            .setWorkerFactory(workerFactory)
+            .build()
+
+    @Deprecated("Use workManagerConfiguration property instead")
     override fun getWorkManagerConfiguration(): Configuration {
         return Configuration.Builder()
-            .setMinimumLoggingLevel(Log.INFO)
+            .setMinimumLoggingLevel(android.util.Log.INFO)
             .setWorkerFactory(workerFactory)
             .build()
     }

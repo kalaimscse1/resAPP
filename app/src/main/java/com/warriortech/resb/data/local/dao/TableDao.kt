@@ -28,8 +28,14 @@ interface TableDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTables(tables: List<TblTableEntity>)
     
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTableIfNotExists(table: TblTableEntity): Long
+    
     @Update
     suspend fun updateTable(table: TblTableEntity)
+    
+    @Query("UPDATE tbl_table SET updated_at = :timestamp WHERE table_id = :tableId")
+    suspend fun updateTimestamp(tableId: Long, timestamp: Long = System.currentTimeMillis())
     
     @Query("UPDATE tbl_table SET is_active = false WHERE table_id = :tableId")
     suspend fun deleteTable(tableId: Long)
@@ -43,5 +49,10 @@ interface TableDao {
     @Query("UPDATE tbl_table SET is_synced = :newStatus WHERE table_id = :id")
     suspend fun updateTableSyncStatus(id: Long, newStatus: SyncStatus)
     
+    @Query("DELETE FROM tbl_table WHERE table_id = :tableId")
+    suspend fun deleteTableById(tableId: Long)
+    
+    @Query("SELECT COUNT(*) FROM tbl_table WHERE table_id = :tableId")
+    suspend fun tableExists(tableId: Long): Int
 }
 
