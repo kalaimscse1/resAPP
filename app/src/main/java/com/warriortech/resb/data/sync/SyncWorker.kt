@@ -31,6 +31,11 @@ class SyncWorker @AssistedInject constructor(
     private val tableDao: TableDao
 ) : CoroutineWorker(appContext, workerParams) {
 
+    @dagger.assisted.AssistedFactory
+    interface Factory {
+        fun create(appContext: Context, workerParams: WorkerParameters): SyncWorker
+    }
+
     val database: RestaurantDatabase = RestaurantDatabase.getDatabase(context = appContext)
 
 

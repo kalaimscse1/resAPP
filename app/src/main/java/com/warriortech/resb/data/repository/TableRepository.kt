@@ -3,6 +3,7 @@ package com.warriortech.resb.data.repository
 import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TblTableEntity
+import timber.log.Timber
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TableStatusResponse
@@ -142,27 +143,36 @@ class TableRepository @Inject constructor(
         return data.is_ac
     }
     suspend fun insertTable(table: TblTable) {
-        apiService.createTable(table,sessionManager.getCompanyCode()?:"")
-//        safeApiCall {
-//            // Convert TblTable to TblTableEntity for database storage
-//            val entity = TblTableEntity(
-//                table_id = table.table_id.toInt(),
-//                area_id = table.area_id.toInt(),
-//                table_name = table.table_name,
-//                seating_capacity = table.seating_capacity,
-//                is_ac = table.is_ac,
-//                table_status = table.table_status,
-//                table_availability = table.table_availability,
-//                is_active = table.is_active,
-//                is_synced = SyncStatus.PENDING_SYNC,
-//                last_synced_at = null
-//            )
-//            tableDao.insertTable(entity)
-//            if (isOnline()) {
-//                // Sync with remote if online
-//
-//            }
-//        }
+        try {
+            // First, insert to local database
+            val entity = TblTableEntity(
+                table_id = table.table_id.toInt(),
+                area_id = table.area_id.toInt(),
+                table_name = table.table_name,
+                seating_capacity = table.seating_capacity,
+                is_ac = table.is_ac,
+                table_status = table.table_status,
+                table_availability = table.table_availability,
+                is_active = table.is_active,
+                is_synced = SyncStatus.PENDING_SYNC,
+                last_synced_at = null
+            )
+            tableDao.insertTable(entity)
+            
+            // Then sync with remote if online
+            if (isOnline()) {
+                apiService.createTable(table, sessionManager.getCompanyCode() ?: "")
+                // Update sync status if successful
+                val updatedEntity = entity.copy(
+                    is_synced = SyncStatus.SYNCED,
+                    last_synced_at = System.currentTimeMillis()
+                )
+                tableDao.updateTable(updatedEntity)
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to insert table: ${table.table_name}")
+            throw e
+        }
     }
 
     // Get tables that need to be synced
