@@ -3,6 +3,7 @@ package com.warriortech.resb.data.sync
 import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
@@ -10,25 +11,22 @@ import com.warriortech.resb.data.local.dao.TableDao
 import com.warriortech.resb.data.local.entity.SyncStatus
 import com.warriortech.resb.data.local.entity.TblMenuItem
 import com.warriortech.resb.data.local.entity.TblTableEntity
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-@HiltWorker
-class SyncWorker @AssistedInject constructor(
-    @Assisted private val appContext: Context,
-    @Assisted private val workerParams: WorkerParameters,
+class SyncWorker(
+    appContext: Context,
+    workerParams: WorkerParameters,
     private val apiService: ApiService,
-    private val sessionManager: SessionManager,
-    private val database: RestaurantDatabase
+    private val sessionManager: SessionManager
 ) : CoroutineWorker(appContext, workerParams) {
+
+    private val database = RestaurantDatabase.getDatabase(appContext)
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {

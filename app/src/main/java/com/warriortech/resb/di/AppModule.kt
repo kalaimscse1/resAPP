@@ -59,7 +59,7 @@ object AppModule {
             RestaurantDatabase::class.java,
             "KTS-RESB"
         )
-            .addMigrations(MIGRATION_2_3)
+//            .addMigrations(MIGRATION_2_3)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -211,9 +211,13 @@ object AppModule {
     fun provideSyncManager(
         @ApplicationContext context: Context,
         networkMonitor: NetworkMonitor,
-        workManager: WorkManager
+        workManager: WorkManager,
+        sessionManager: SessionManager,
+        apiService: ApiService
     ): SyncManager {
-        return SyncManager(context, networkMonitor, workManager)
+        return SyncManager(
+            context, networkMonitor, apiService,sessionManager
+        )
     }
 
     @Provides

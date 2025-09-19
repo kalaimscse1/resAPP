@@ -11,10 +11,10 @@ import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.NetworkMonitor
+import com.warriortech.resb.util.getCurrentDateTimeWithAmPm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -30,6 +30,7 @@ class TableRepository @Inject constructor(
 
     // Offline-first approach: Always return local data immediately, sync in background
     suspend fun getAllTables(): Flow<List<Table>> = flow {
+
         try {
             val  response  = apiService.getAllTables(sessionManager.getCompanyCode()?:"")
             if (response.isSuccessful){
@@ -124,6 +125,8 @@ class TableRepository @Inject constructor(
                         area_id = it.area_id.toInt(),
                         table_availability = it.table_availability,
                         is_active = it.is_active,
+                        is_synced = SyncStatus.SYNCED,
+                        last_synced_at = System.currentTimeMillis()
                     ) }
                     tableDao.insertTables(entities)
                 }
@@ -148,7 +151,7 @@ class TableRepository @Inject constructor(
             if (table.table_name.isBlank()) {
                 throw IllegalArgumentException("Table name cannot be empty")
             }
-            
+
             // First, insert to local database
             val entity = TblTableEntity(
                 table_id = 0, // Let Room auto-generate the ID
@@ -160,11 +163,9 @@ class TableRepository @Inject constructor(
                 table_availability = table.table_availability,
                 is_active = table.is_active,
                 is_synced = SyncStatus.PENDING_SYNC,
-                last_synced_at = null,
-                created_at = System.currentTimeMillis(),
-                updated_at = System.currentTimeMillis()
+                last_synced_at = System.currentTimeMillis()
             )
-            
+
             val insertedId = tableDao.insertTable(entity)
             Timber.d("Table inserted with ID: $insertedId")
             
@@ -211,7 +212,7 @@ class TableRepository @Inject constructor(
                 updated_at = System.currentTimeMillis()
             )
             tableDao.updateTable(entity)
-            
+
             // Sync with remote if online
             if (isOnline()) {
                 try {
@@ -231,12 +232,12 @@ class TableRepository @Inject constructor(
             throw e
         }
     }
-    
+
     suspend fun deleteTable(lng: Long) {
         try {
             // Mark as pending delete in local database
             tableDao.updateTableSyncStatus(lng, SyncStatus.PENDING_DELETE)
-            
+
             if (isOnline()) {
                 try {
                     val response = apiService.deleteTable(lng, sessionManager.getCompanyCode() ?: "")

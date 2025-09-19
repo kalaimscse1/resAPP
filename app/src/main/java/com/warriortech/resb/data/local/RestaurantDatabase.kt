@@ -82,7 +82,7 @@ abstract class RestaurantDatabase : RoomDatabase() {
                     RestaurantDatabase::class.java,
                     "KTS-RESB"
                 )
-                .addMigrations(MIGRATION_2_3)
+//                .addMigrations(MIGRATION_2_3)
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance

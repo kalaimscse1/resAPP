@@ -12,15 +12,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SyncManager @Inject constructor(
+class SyncManager(
     private val context: Context,
     private val networkMonitor: NetworkMonitor,
-    private val workManager: WorkManager
+    private val apiService: ApiService,
+    private val sessionManager: SessionManager
 ) {
+    private val workManager = WorkManager.getInstance(context)
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     init {
@@ -34,8 +33,10 @@ class SyncManager @Inject constructor(
                 .distinctUntilChanged()
                 .collect { isOnline ->
                     if (isOnline) {
+                        // We're back online, schedule sync
                         scheduleSyncWork()
                     } else {
+                        // We're offline, cancel any ongoing syncs
                         workManager.cancelUniqueWork(SyncWorker.WORK_NAME)
                     }
                 }
@@ -47,10 +48,38 @@ class SyncManager @Inject constructor(
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
+        val syncWorkerFactory = object : WorkerFactory() {
+            override fun createWorker(
+                appContext: Context,
+                workerClassName: String,
+                workerParameters: WorkerParameters
+            ): ListenableWorker? {
+                return if (workerClassName == SyncWorker::class.java.name) {
+                    SyncWorker(
+                        appContext,
+                        workerParameters,
+                        apiService,
+                        sessionManager
+                    )
+                } else {
+                    null
+                }
+            }
+        }
+
+//        WorkManager.initialize(
+//            context,
+//            Configuration.Builder()
+//                .setWorkerFactory(syncWorkerFactory)
+//                .build()
+//        )
+
+        // One-time sync work request
         val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(constraints)
             .build()
 
+        // Schedule unique work to ensure only one instance runs
         workManager.enqueueUniqueWork(
             SyncWorker.WORK_NAME,
             ExistingWorkPolicy.REPLACE,
@@ -63,12 +92,14 @@ class SyncManager @Inject constructor(
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
+        // Periodic sync work request (minimum 15 minutes)
         val periodicSyncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
             15, TimeUnit.MINUTES
         )
             .setConstraints(constraints)
             .build()
 
+        // Schedule unique periodic work
         workManager.enqueueUniquePeriodicWork(
             "${SyncWorker.WORK_NAME}_PERIODIC",
             ExistingPeriodicWorkPolicy.KEEP,
