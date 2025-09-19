@@ -40,6 +40,7 @@ class MenuItemRepository @Inject constructor(
 
     suspend fun getAllMenuItems(): Flow<List<TblMenuItemResponse>> = flow{
         val response = apiService.getMenuItems(sessionManager.getCompanyCode()?:"")
+        forceSyncAllMenuItems()
         if (response.isSuccessful) {
             val menuItems = response.body()
             if (menuItems != null) {
@@ -101,7 +102,11 @@ class MenuItemRepository @Inject constructor(
         safeApiCall(
             onSuccess = { remoteItems: List<TblMenuItemResponse> ->
                 withContext(Dispatchers.IO) {
-                    val entities = remoteItems.map { it.toEntity() }
+                    val entities = remoteItems.map { it.toEntity()
+                    .copy(
+                            is_synced = SyncStatus.SYNCED,
+                            last_synced_at = System.currentTimeMillis()
+                        ) }
                     menuItemDao.insertMenuItems(entities)
                 }
             },

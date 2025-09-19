@@ -52,7 +52,7 @@ data class TblMenuItem(
     val cess_specific: Double?,
     val is_active: Boolean?,
     val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
-    val last_synced_at: Long? = null
+    val last_synced_at: Long? = System.currentTimeMillis()
 ) {
     fun toModel(): TblMenuItemResponse {
        return TblMenuItemResponse(

@@ -33,6 +33,7 @@ class TableRepository @Inject constructor(
 
         try {
             val  response  = apiService.getAllTables(sessionManager.getCompanyCode()?:"")
+            syncTablesFromRemote()
             if (response.isSuccessful){
                 emit(response.body()!!)
             }else {

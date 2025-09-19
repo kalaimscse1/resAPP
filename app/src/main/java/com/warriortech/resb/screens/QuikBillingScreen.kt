@@ -99,7 +99,7 @@ fun ItemWiseBillScreen(
         snackbarHost = { AnimatedSnackbarDemo(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Item Wise Bill", color = Color.White) },
+                title = { Text("Quick Bill", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
                 ),

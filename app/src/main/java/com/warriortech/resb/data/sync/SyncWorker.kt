@@ -13,6 +13,7 @@ import com.warriortech.resb.data.local.entity.TblTableEntity
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblMenuItemRequest
 import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import dagger.assisted.AssistedFactory
@@ -28,11 +29,6 @@ class SyncWorker @AssistedInject constructor(
     private val apiService: ApiService,
     private val sessionManager: SessionManager
 ) : CoroutineWorker(appContext, workerParams) {
-
-    @AssistedFactory
-    interface Factory {
-        fun create(appContext: Context, workerParams: WorkerParameters): SyncWorker
-    }
 
     private val database: RestaurantDatabase = RestaurantDatabase.getDatabase(appContext)
     private val tableDao = database.tableDao()
@@ -212,15 +208,15 @@ class SyncWorker @AssistedInject constructor(
     )
 
     /** Convert local Table entity to API model */
-    private fun TblTableEntity.toApiModel() = Table(
+    private fun TblTableEntity.toApiModel() = TblTable(
         table_id = table_id.toLong(),
-        area_id = area_id.toLong(),
-        table_name = table_name,
-        seating_capacity = seating_capacity,
-        is_ac = is_ac,
-        table_status = table_status,
-        table_availability = table_availability,
-        is_active = is_active
+        area_id = area_id?.toLong() ?: 0L,
+        table_name = table_name.toString(),
+        seating_capacity = seating_capacity?.toInt() ?: 0,
+        is_ac = is_ac.toString(),
+        table_status = table_status.toString(),
+        table_availability = table_availability.toString(),
+        is_active = is_active == true
     )
 
     /** Convert remote Table model to local entity */
@@ -240,31 +236,31 @@ class SyncWorker @AssistedInject constructor(
     /** Convert local MenuItem entity to API model */
     private fun TblMenuItem.toApiModel() = TblMenuItemRequest(
         menu_item_id = menu_item_id.toLong(),
-        menu_item_code = menu_item_code,
-        menu_item_name = menu_item_name,
-        menu_item_name_tamil = menu_item_name_tamil,
-        menu_id = menu_id.toLong(),
-        rate = rate,
-        image = image,
-        ac_rate = ac_rate,
-        parcel_rate = parcel_rate,
-        is_available = is_available,
-        item_cat_id = item_cat_id.toLong(),
-        parcel_charge = parcel_charge,
-        tax_id = tax_id.toLong(),
-        kitchen_cat_id = kitchen_cat_id.toLong(),
-        stock_maintain = stock_maintain,
-        rate_lock = rate_lock,
-        unit_id = unit_id.toLong(),
-        min_stock = min_stock.toLong(),
-        hsn_code = hsn_code,
-        order_by = order_by.toLong(),
-        is_inventory = is_inventory.toLong(),
-        is_raw = is_raw,
-        cess_specific = cess_specific,
-        is_favourite = is_favourite,
-        is_active = if (is_active) 1L else 0L,
-        preparation_time = preparation_time.toLong()
+        menu_item_code = menu_item_code.toString(),
+        menu_item_name = menu_item_name.toString(),
+        menu_item_name_tamil = menu_item_name_tamil.toString(),
+        menu_id = menu_id?.toLong() ?:0L,
+        rate = rate?.toDouble() ?:0.0,
+        image = image.toString(),
+        ac_rate = ac_rate?.toDouble() ?:0.0,
+        parcel_rate = parcel_rate?.toDouble() ?:0.0,
+        is_available = is_available.toString(),
+        item_cat_id = item_cat_id?.toLong()?:0L,
+        parcel_charge = parcel_charge?.toDouble() ?:0.0,
+        tax_id = tax_id?.toLong() ?:0L,
+        kitchen_cat_id = kitchen_cat_id?.toLong()?:0L,
+        stock_maintain = stock_maintain.toString(),
+        rate_lock = rate_lock.toString(),
+        unit_id = unit_id?.toLong()?:0L,
+        min_stock = min_stock?.toLong()?:0L,
+        hsn_code = hsn_code.toString(),
+        order_by = order_by?.toLong()?:0L,
+        is_inventory = is_inventory?.toLong() ?:0L,
+        is_raw = is_raw.toString(),
+        cess_specific = cess_specific?.toDouble() ?:0.0,
+        is_favourite = is_favourite == true,
+        is_active = if (is_active == true) 1L else 0L,
+    preparation_time = preparation_time?.toLong()?:0L
     )
 
     companion object {
