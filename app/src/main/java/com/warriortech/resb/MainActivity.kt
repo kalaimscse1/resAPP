@@ -148,6 +148,7 @@ import com.warriortech.resb.screens.KotModifyScreen
 import com.warriortech.resb.screens.KotReportScreen
 import com.warriortech.resb.screens.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
+import com.warriortech.resb.screens.SplashScreen
 import com.warriortech.resb.screens.UnpaidBillsScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
@@ -239,6 +240,7 @@ class MainActivity : ComponentActivity() {
                                         "user_prefs",
                                         MODE_PRIVATE
                                     )
+                                    sessionManager.saveUserLogin(false)
                                     sharedPref.edit { clear() }
                                     Toast.makeText(
                                         context,
@@ -369,7 +371,25 @@ fun AppNavigation(
     }
 
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "splash") {
+        composable("splash") {
+            SplashScreen(
+                onSplashFinished = {
+                    val isLoggedInPref = sessionManager.getUserLogin()
+                    if (isLoggedInPref) {
+                        isLoggedIn = true
+                        navController.navigate("dashboard") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate("login") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
+                }
+            )
+
+        }
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
@@ -450,13 +470,15 @@ fun AppNavigation(
             )
         }
 
-        composable("payment_screen/{amountToPayFromRoute}/{orderId}") { it ->
+        composable("payment_screen/{amountToPayFromRoute}/{orderId}/{bill_no}/{customerId}") { it ->
             PaymentScreen(
                 navController = navController,
                 amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")
                     ?.toDoubleOrNull() ?: 0.0,
                 orderMasterId = it.arguments?.getString("orderId") ?: "",
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                billNo = it.arguments?.getString("bill_no") ?: "",
+                customerId = it.arguments?.getString("customerId")?.toLongOrNull() ?: 0L
             )
         }
 

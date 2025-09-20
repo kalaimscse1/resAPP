@@ -8,23 +8,23 @@ import com.warriortech.resb.data.local.entity.*
 interface TblCustomerDao {
     @Query("SELECT * FROM tbl_customer")
 
-    fun getAll(): Flow<List<TblCustomer>>
+    fun getAll(): Flow<List<TblCustomers>>
 
     @Query("SELECT * FROM tbl_customer WHERE customer_id = :id")
-    suspend fun getById(id: Int): TblCustomer?
+    suspend fun getById(id: Int): TblCustomers?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: TblCustomer)
+    suspend fun insert(item: TblCustomers)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(items: List<TblCustomer>)
+    suspend fun insertAll(items: List<TblCustomers>)
 
     @Update
-    suspend fun update(item: TblCustomer)
+    suspend fun update(item: TblCustomers)
 
     @Delete
-    suspend fun delete(item: TblCustomer)
+    suspend fun delete(item: TblCustomers)
 
     @Query("SELECT * FROM tbl_customer WHERE is_synced = 0")
-    suspend fun getUnsynced(): List<TblCustomer>
+    suspend fun getUnsynced(): List<TblCustomers>
 }

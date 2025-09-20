@@ -647,6 +647,18 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ApiResponse<Boolean>>
 
+    @GET("payment/getPayment/{bill_no}")
+    suspend fun getPaymentByBillNo(
+        @Path("bill_no") billNo: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblBillingResponse>
+
+    @DELETE("payment/resetDue/{bill_no}")
+    suspend fun resetDue(
+        @Path("bill_no") billNo: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
     /**
      * Reports Management
      */

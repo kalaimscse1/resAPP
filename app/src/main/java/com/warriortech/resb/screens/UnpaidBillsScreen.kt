@@ -202,7 +202,7 @@ fun UnpaidBillsScreen(
                                 UnpaidBillCard(
                                     bill = bill,
                                     onPayClick = { 
-                                        navController.navigate("payment_screen/${bill.due}/${bill.order_master.order_master_id}")
+                                        navController.navigate("payment_screen/${bill.due}/${bill.order_master.order_master_id}/${bill.bill_no}/${bill.customer.customer_id}")
                                     }
                                 )
                             }

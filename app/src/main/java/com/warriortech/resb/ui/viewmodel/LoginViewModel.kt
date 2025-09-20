@@ -123,6 +123,7 @@ class LoginViewModel @Inject constructor(
                         val authResponse = response.data
                         val general = generalSetting.body()
                         Log.d("LoginViewModel", "General Settings: ${authResponse.user}")
+                        sessionManager.saveUserLogin(true)
                         sessionManager.saveAuthToken(authResponse.token)
                         sessionManager.saveUser(authResponse.user)
                         sessionManager.saveCompanyCode(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))

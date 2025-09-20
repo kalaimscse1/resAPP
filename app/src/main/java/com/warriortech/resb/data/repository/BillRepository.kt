@@ -74,20 +74,24 @@ class BillRepository@Inject constructor(
         }
     }
 
-    fun bill(orderMasterId: String,paymentMethod: PaymentMethod,receivedAmt: Double,customer: TblCustomer?): Flow<Result<TblBillingResponse>> =flow{
+    fun bill(orderMasterId: String,paymentMethod: PaymentMethod,receivedAmt: Double,customerId: Long,billNo:String): Flow<Result<TblBillingResponse>> =flow{
 
             Log.d("BILLTAG", "placeBill: $receivedAmt")
+        if(billNo!="--"){
+            apiService.resetDue(billNo, sessionManager.getCompanyCode()?:"")
+        }
             val billNo = apiService.getBillNoByCounterId(sessionManager.getUser()?.counter_id!!, sessionManager.getCompanyCode()?:"")
             val voucher = apiService.getVoucherByCounterId(sessionManager.getUser()?.counter_id!!, sessionManager.getCompanyCode()?:"", "BILL").body()
             val orderMaster = apiService.getOpenOrderDetailsForTable(orderMasterId, sessionManager.getCompanyCode()?:"").body()!!
-            val request = TblBillingRequest(
+
+        val request = TblBillingRequest(
                 bill_no = billNo["bill_no"] ?: "",
                 bill_date = getCurrentDateModern(),
                 bill_create_time = getCurrentTimeModern(),
                 order_master_id = orderMasterId,
                 voucher_id = voucher?.voucher_id ?: 0L,
                 staff_id = sessionManager.getUser()?.staff_id ?: 0L,
-                customer_id = customer?.customer_id ?: 1L,
+                customer_id = if (customerId==0L) 1L else customerId ,
                 order_amt = orderMaster.sumOf { it.total },
                 disc_amt = 0.0,
                 tax_amt = orderMaster.sumOf { it.tax_amount },
@@ -97,13 +101,13 @@ class BillRepository@Inject constructor(
                 grand_total = orderMaster.sumOf { it.grand_total },
                 round_off = 0.0,
                 rounded_amt = orderMaster.sumOf { it.grand_total },
-                cash = if (paymentMethod.name == "CASH") orderMaster.sumOf { it.grand_total } else 0.0,
-                card = if (paymentMethod.name == "CARD") orderMaster.sumOf { it.grand_total } else 0.0,
-                upi = if (paymentMethod.name == "UPI") orderMaster.sumOf { it.grand_total } else 0.0,
-                due = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
-                others = if (paymentMethod.name == "OTHERS") orderMaster.sumOf { it.grand_total } else 0.0,
-                received_amt =  if (paymentMethod.name == "DUE") 0.0 else orderMaster.sumOf { it.grand_total },
-                pending_amt = if (paymentMethod.name == "DUE") orderMaster.sumOf { it.grand_total } else 0.0,
+                cash = if (paymentMethod.name == "CASH") receivedAmt else 0.0,
+                card = if (paymentMethod.name == "CARD") receivedAmt else 0.0,
+                upi = if (paymentMethod.name == "UPI") receivedAmt else 0.0,
+                due = if (paymentMethod.name == "DUE") receivedAmt else 0.0,
+                others = if (paymentMethod.name == "OTHERS") receivedAmt else 0.0,
+                received_amt =  if (paymentMethod.name == "DUE") 0.0 else receivedAmt,
+                pending_amt = if (paymentMethod.name == "DUE") receivedAmt else 0.0,
 //                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
                 change = 0.0,
                 note = "",
@@ -178,5 +182,6 @@ class BillRepository@Inject constructor(
             emit(Result.failure(e))
         }
     }
+
 
 }

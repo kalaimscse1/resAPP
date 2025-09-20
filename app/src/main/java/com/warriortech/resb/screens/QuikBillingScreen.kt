@@ -264,7 +264,7 @@ fun ItemWiseBillScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFFF9800))
+                    .background(SecondaryGreen)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

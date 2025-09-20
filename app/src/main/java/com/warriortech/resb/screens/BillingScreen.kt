@@ -156,7 +156,7 @@ fun BillingScreen(
         },
         bottomBar = {
             BillingBottomBar(uiState = uiState,orderMasterId = orderMasterId) {
-                navController.navigate("payment_screen/${uiState.totalAmount}/${uiState.orderMasterId}") {
+                navController.navigate("payment_screen/${uiState.totalAmount}/${uiState.orderMasterId}/${"--"}/${0L}") {
                     launchSingleTop = true
                     restoreState = true
                 }

@@ -29,6 +29,7 @@ class SessionManager @Inject constructor(
         private const val KEY_LAST_SYNC = "last_sync_timestamp"
         private const val KEY_GENERAL_SETTING = "general_setting"
         private const val DECIMAL = "decimal_places"
+        private const val KEY_USER_LOGIN = "user_login"
     }
     
     private lateinit var prefs: SharedPreferences
@@ -67,7 +68,19 @@ class SessionManager @Inject constructor(
         checkInitialization()
         prefs.edit { putString(KEY_AUTH_TOKEN, token) }
     }
-    
+
+    fun saveUserLogin(userLogin: Boolean) {
+        checkInitialization()
+        val userLogin = if (userLogin) "true" else "false"
+        prefs.edit { putString(KEY_USER_LOGIN, userLogin) }
+    }
+
+
+    fun getUserLogin(): Boolean {
+        checkInitialization()
+        val userLogin = prefs.getString(KEY_USER_LOGIN, "false")
+        return userLogin == "true"
+    }
     /**
      * Get authentication token
      */

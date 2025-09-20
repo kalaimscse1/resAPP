@@ -321,7 +321,7 @@ class CounterViewModel @Inject constructor(
                         val payment = PaymentMethod("cash", "CASH")
                         val amount = order.sumOf { it.grand_total }
                         billRepository.bill(order.firstOrNull()?.order_master_id?:"",
-                            payment,amount,null).collect{ billResult->
+                            payment,amount,0L,"").collect{ billResult->
                             billResult.fold(
                                 onSuccess = { response ->
                                     var sn = 1

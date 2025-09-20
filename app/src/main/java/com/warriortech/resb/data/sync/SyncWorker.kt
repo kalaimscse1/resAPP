@@ -25,32 +25,32 @@ class SyncWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     private val database: RestaurantDatabase = RestaurantDatabase.getDatabase(appContext)
-    
+
     // Initialize all DAOs for comprehensive sync
     private val tableDao = database.tableDao()
     private val menuItemDao = database.menuItemDao()
-    private val areaDao = database.areaDao()
-    private val customerDao = database.customerDao()
-    private val menuDao = database.menuDao()
-    private val counterDao = database.counterDao()
-    private val staffDao = database.staffDao()
-    private val printerDao = database.printerDao()
-    private val taxDao = database.taxDao()
-    private val taxSplitDao = database.taxSplitDao()
-    private val voucherDao = database.voucherDao()
-    private val voucherTypeDao = database.voucherTypeDao()
-    private val unitDao = database.unitDao()
-    private val roleDao = database.roleDao()
-    private val kitchenCategoryDao = database.kitchenCategoryDao()
-    private val itemCategoryDao = database.itemCategoryDao()
-    private val modifierDao = database.modifierDao()
-    private val generalSettingsDao = database.generalSettingsDao()
+    private val areaDao = database.tblAreaDao()
+    private val customerDao = database.tblCustomerDao()
+    private val menuDao = database.tblMenuDao()
+    private val counterDao = database.tblCounterDao()
+    private val staffDao = database.tblStaffDao()
+    private val printerDao = database.tblPrinterDao()
+    private val taxDao = database.tblTaxDao()
+    private val taxSplitDao = database.tblTaxSplitDao()
+    private val voucherDao = database.tblVoucherDao()
+    private val voucherTypeDao = database.tblVoucherTypeDao()
+    private val unitDao = database.tblUnitDao()
+    private val roleDao = database.tblRoleDao()
+    private val kitchenCategoryDao = database.tblKitchenCategoryDao()
+    private val itemCategoryDao = database.tblItemCategoryDao()
+    private val modifierDao = database.tblAddOnDao()
+    private val generalSettingsDao = database.tblGeneralSettingsDao()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             Timber.d("Starting comprehensive synchronization...")
             val companyCode = sessionManager.getCompanyCode() ?: ""
-            
+
             if (companyCode.isEmpty()) {
                 Timber.w("No company code available, skipping sync")
                 return@withContext Result.failure()
@@ -317,7 +317,7 @@ class SyncWorker @AssistedInject constructor(
     )
 
     // ==================== AREA SYNCHRONIZATION ====================
-    
+
     private suspend fun syncPendingAreasToServer() {
         try {
             val pendingAreas = areaDao.getUnsynced()
@@ -328,9 +328,9 @@ class SyncWorker @AssistedInject constructor(
                     val areaRequest = Area(
                         area_id = area.area_id.toLong(),
                         area_name = area.area_name ?: "",
-                        is_active = area.is_active ?: true
+                        isActvice = area.is_active ?: true,
                     )
-                    
+
                     val response = if (area.is_synced == SyncStatus.PENDING_UPDATE) {
                         apiService.updateArea(area.area_id.toLong(), areaRequest, sessionManager.getCompanyCode() ?: "")
                     } else {
@@ -355,7 +355,7 @@ class SyncWorker @AssistedInject constructor(
             Timber.e(e, "Error in syncPendingAreasToServer")
         }
     }
-    
+
     private suspend fun syncAreasFromServer() {
         try {
             val response = apiService.getAllAreas(sessionManager.getCompanyCode() ?: "")
@@ -365,14 +365,14 @@ class SyncWorker @AssistedInject constructor(
 
                 val localAreas = remoteAreas.map { remote ->
                     val existingArea = areaDao.getById(remote.area_id.toInt())
-                    
+
                     if (existingArea != null && existingArea.is_synced == SyncStatus.PENDING_SYNC) {
                         existingArea
                     } else {
                         TblArea(
                             area_id = remote.area_id.toInt(),
                             area_name = remote.area_name,
-                            is_active = remote.is_active,
+                            is_active = remote.isActvice,
                             is_synced = SyncStatus.SYNCED,
                             last_synced_at = System.currentTimeMillis()
                         )
@@ -390,7 +390,7 @@ class SyncWorker @AssistedInject constructor(
     }
 
     // ==================== CUSTOMER SYNCHRONIZATION ====================
-    
+
     private suspend fun syncPendingCustomersToServer() {
         try {
             val pendingCustomers = customerDao.getUnsynced()
@@ -399,16 +399,18 @@ class SyncWorker @AssistedInject constructor(
             for (customer in pendingCustomers) {
                 try {
                     val customerRequest = TblCustomer(
-                        customer_id = customer.customer_id,
+                        customer_id = customer.customer_id.toLong(),
                         customer_name = customer.customer_name ?: "",
-                        customer_address = customer.customer_address ?: "",
-                        customer_mobile = customer.customer_mobile ?: "",
-                        customer_email = customer.customer_email ?: "",
-                        is_active = customer.is_active ?: true
+                        address = customer.address ?: "",
+                        contact_no = customer.contact_no ?: "",
+                        email_address = customer.email_address ?: "",
+                        is_active = if (customer.is_active == true) 1L else 0L,
+                        gst_no = customer.gst_no ?: "",
+                        igst_status = customer.igst_status ?: false,
                     )
-                    
+
                     val response = if (customer.is_synced == SyncStatus.PENDING_UPDATE) {
-                        apiService.updateCustomer(customer.customer_id, customerRequest, sessionManager.getCompanyCode() ?: "")
+                        apiService.updateCustomer(customer.customer_id.toLong(), customerRequest, sessionManager.getCompanyCode() ?: "")
                     } else {
                         apiService.createCustomer(customerRequest, sessionManager.getCompanyCode() ?: "")
                     }
@@ -431,7 +433,7 @@ class SyncWorker @AssistedInject constructor(
             Timber.e(e, "Error in syncPendingCustomersToServer")
         }
     }
-    
+
     private suspend fun syncCustomersFromServer() {
         try {
             val response = apiService.getAllCustomers(sessionManager.getCompanyCode() ?: "")
@@ -441,19 +443,21 @@ class SyncWorker @AssistedInject constructor(
 
                 val localCustomers = remoteCustomers.map { remote ->
                     val existingCustomer = customerDao.getById(remote.customer_id.toInt())
-                    
+
                     if (existingCustomer != null && existingCustomer.is_synced == SyncStatus.PENDING_SYNC) {
                         existingCustomer
                     } else {
-                        TblCustomer(
-                            customer_id = remote.customer_id,
+                        TblCustomers(
+                            customer_id = remote.customer_id.toInt(),
                             customer_name = remote.customer_name,
-                            customer_address = remote.customer_address,
-                            customer_mobile = remote.customer_mobile,
-                            customer_email = remote.customer_email,
-                            is_active = remote.is_active,
+                            address = remote.address,
+                            contact_no = remote.contact_no,
+                            email_address = remote.email_address,
+                            is_active = if(remote.is_active==1L) true else false,
                             is_synced = SyncStatus.SYNCED,
-                            last_synced_at = System.currentTimeMillis()
+                            last_synced_at = System.currentTimeMillis(),
+                            gst_no = remote.gst_no,
+                            igst_status = remote.igst_status
                         )
                     }
                 }
@@ -469,7 +473,7 @@ class SyncWorker @AssistedInject constructor(
     }
 
     // ==================== MENU SYNCHRONIZATION ====================
-    
+
     private suspend fun syncPendingMenusToServer() {
         try {
             val pendingMenus = menuDao.getUnsynced()
@@ -480,9 +484,12 @@ class SyncWorker @AssistedInject constructor(
                     val menuRequest = Menu(
                         menu_id = menu.menu_id.toLong(),
                         menu_name = menu.menu_name ?: "",
-                        is_active = menu.is_active ?: true
+                        is_active = menu.is_active ?: true,
+                        order_by = (menu.order_by ?: 0).toString(),
+                        start_time = menu.start_time?.toFloat() ?:0.0f,
+                        end_time = menu.end_time?.toFloat() ?:0.0f,
                     )
-                    
+
                     val response = if (menu.is_synced == SyncStatus.PENDING_UPDATE) {
                         apiService.updateMenu(menu.menu_id.toLong(), menuRequest, sessionManager.getCompanyCode() ?: "")
                     } else {
@@ -507,7 +514,7 @@ class SyncWorker @AssistedInject constructor(
             Timber.e(e, "Error in syncPendingMenusToServer")
         }
     }
-    
+
     private suspend fun syncMenusFromServer() {
         try {
             val response = apiService.getAllMenus(sessionManager.getCompanyCode() ?: "")
@@ -517,7 +524,7 @@ class SyncWorker @AssistedInject constructor(
 
                 val localMenus = remoteMenus.map { remote ->
                     val existingMenu = menuDao.getById(remote.menu_id.toInt())
-                    
+
                     if (existingMenu != null && existingMenu.is_synced == SyncStatus.PENDING_SYNC) {
                         existingMenu
                     } else {
@@ -526,7 +533,10 @@ class SyncWorker @AssistedInject constructor(
                             menu_name = remote.menu_name,
                             is_active = remote.is_active,
                             is_synced = SyncStatus.SYNCED,
-                            last_synced_at = System.currentTimeMillis()
+                            last_synced_at = System.currentTimeMillis(),
+                            order_by = remote.order_by.toInt(),
+                            start_time = remote.start_time.toDouble(),
+                            end_time = remote.end_time.toDouble()
                         )
                     }
                 }
@@ -544,43 +554,43 @@ class SyncWorker @AssistedInject constructor(
     // ==================== PLACEHOLDER SYNC METHODS ====================
     // These are placeholder implementations for the remaining entities
     // They follow the same pattern and should be implemented based on specific entity requirements
-    
+
     private suspend fun syncPendingCountersToServer() = handlePendingSync("Counters") { /* TODO: Implement counter sync */ }
     private suspend fun syncCountersFromServer() = handleServerSync("Counters") { /* TODO: Implement counter sync */ }
-    
+
     private suspend fun syncPendingStaffToServer() = handlePendingSync("Staff") { /* TODO: Implement staff sync */ }
     private suspend fun syncStaffFromServer() = handleServerSync("Staff") { /* TODO: Implement staff sync */ }
-    
+
     private suspend fun syncPendingPrintersToServer() = handlePendingSync("Printers") { /* TODO: Implement printer sync */ }
     private suspend fun syncPrintersFromServer() = handleServerSync("Printers") { /* TODO: Implement printer sync */ }
-    
+
     private suspend fun syncPendingTaxesToServer() = handlePendingSync("Taxes") { /* TODO: Implement tax sync */ }
     private suspend fun syncTaxesFromServer() = handleServerSync("Taxes") { /* TODO: Implement tax sync */ }
-    
+
     private suspend fun syncPendingTaxSplitsToServer() = handlePendingSync("TaxSplits") { /* TODO: Implement taxsplit sync */ }
     private suspend fun syncTaxSplitsFromServer() = handleServerSync("TaxSplits") { /* TODO: Implement taxsplit sync */ }
-    
+
     private suspend fun syncPendingVouchersToServer() = handlePendingSync("Vouchers") { /* TODO: Implement voucher sync */ }
     private suspend fun syncVouchersFromServer() = handleServerSync("Vouchers") { /* TODO: Implement voucher sync */ }
-    
+
     private suspend fun syncPendingVoucherTypesToServer() = handlePendingSync("VoucherTypes") { /* TODO: Implement vouchertype sync */ }
     private suspend fun syncVoucherTypesFromServer() = handleServerSync("VoucherTypes") { /* TODO: Implement vouchertype sync */ }
-    
+
     private suspend fun syncPendingUnitsToServer() = handlePendingSync("Units") { /* TODO: Implement unit sync */ }
     private suspend fun syncUnitsFromServer() = handleServerSync("Units") { /* TODO: Implement unit sync */ }
-    
+
     private suspend fun syncPendingRolesToServer() = handlePendingSync("Roles") { /* TODO: Implement role sync */ }
     private suspend fun syncRolesFromServer() = handleServerSync("Roles") { /* TODO: Implement role sync */ }
-    
+
     private suspend fun syncPendingKitchenCategoriesToServer() = handlePendingSync("KitchenCategories") { /* TODO: Implement kitchen category sync */ }
     private suspend fun syncKitchenCategoriesFromServer() = handleServerSync("KitchenCategories") { /* TODO: Implement kitchen category sync */ }
-    
+
     private suspend fun syncPendingItemCategoriesToServer() = handlePendingSync("ItemCategories") { /* TODO: Implement item category sync */ }
     private suspend fun syncItemCategoriesFromServer() = handleServerSync("ItemCategories") { /* TODO: Implement item category sync */ }
-    
+
     private suspend fun syncPendingModifiersToServer() = handlePendingSync("Modifiers") { /* TODO: Implement modifier sync */ }
     private suspend fun syncModifiersFromServer() = handleServerSync("Modifiers") { /* TODO: Implement modifier sync */ }
-    
+
     private suspend fun syncPendingGeneralSettingsToServer() = handlePendingSync("GeneralSettings") { /* TODO: Implement general settings sync */ }
     private suspend fun syncGeneralSettingsFromServer() = handleServerSync("GeneralSettings") { /* TODO: Implement general settings sync */ }
 
@@ -594,7 +604,7 @@ class SyncWorker @AssistedInject constructor(
             Timber.e(e, "Error syncing pending $entityName to server")
         }
     }
-    
+
     private suspend fun handleServerSync(entityName: String, syncAction: suspend () -> Unit) {
         try {
             Timber.d("Syncing $entityName from server...")

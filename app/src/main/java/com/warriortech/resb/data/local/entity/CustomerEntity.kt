@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "tbl_customer")
-data class TblCustomer(
+data class TblCustomers(
     @PrimaryKey(autoGenerate = true) val customer_id: Int = 0,
     val customer_name: String?,
     val contact_no: String?,

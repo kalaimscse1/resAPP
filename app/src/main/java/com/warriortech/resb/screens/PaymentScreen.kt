@@ -35,6 +35,7 @@ import java.util.Locale
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
@@ -46,6 +47,8 @@ fun PaymentScreen(
     viewModel: BillingViewModel = hiltViewModel(), // Shared ViewModel
     amountToPayFromRoute: Double? = null,
     orderMasterId: String? = null,
+    billNo: String?=null,
+    customerId:Long?=null,
     sessionManager: SessionManager// If passing amount via route
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -55,6 +58,12 @@ fun PaymentScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadCustomers()
+    }
+    LaunchedEffect(customerId, billNo) {
+        if (customerId != null && billNo != null) {
+            viewModel.updateCustomerId(customerId)
+            viewModel.updateBillNo(billNo)
+        }
     }
     // If amount was passed via route, you might set it in the ViewModel once
      LaunchedEffect(key1 = amountToPayFromRoute, key2 =  orderMasterId) {
@@ -257,7 +266,7 @@ fun PaymentBottomBar(
     }
 
     BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.primaryContainer
+        containerColor = SecondaryGreen
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),

@@ -113,6 +113,12 @@ class BillingViewModel @Inject constructor(
     private val _orderId = MutableStateFlow("")
     val orderId: StateFlow<String> = _orderId.asStateFlow()
 
+    private val _billNo = MutableStateFlow("")
+    val billNo: StateFlow<String> = _billNo.asStateFlow()
+
+    private val _customerId = MutableStateFlow(0L)
+    val customerId: StateFlow<Long> = _customerId.asStateFlow()
+
     init {
         // Load initial data like available payment methods
      viewModelScope.launch {
@@ -123,6 +129,13 @@ class BillingViewModel @Inject constructor(
            }
        }
 
+    fun updateCustomerId(id: Long) {
+        _customerId.value = id
+    }
+
+    fun updateBillNo(billNo: String) {
+        _billNo.value = billNo
+    }
     fun loadCustomers() {
         viewModelScope.launch {
             try {
@@ -463,11 +476,16 @@ class BillingViewModel @Inject constructor(
                 // 2. Handling success/failure responses.
                 // 3. If successful, creating an Order record and saving it.
 
+            val amount = if (paymentMethod.name=="CASH")
+                currentState.cashAmount
+           else
+                currentState.amountToPay
                 billRepository.bill(
                     orderMasterId = currentState.orderMasterId ?:"",
                     paymentMethod = paymentMethod,
-                    receivedAmt = currentState.amountToPay,
-                    customer = customer.value // Assuming no customer details for now
+                    receivedAmt = amount,
+                    customerId = if (_customerId.value==0L) customer.value?.customer_id ?:0L else _customerId.value ,
+                    billNo = _billNo.value
                 ).collect { result->
                     result.fold(
                         onSuccess = { response ->

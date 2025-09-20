@@ -18,7 +18,7 @@ import com.warriortech.resb.data.local.entity.*
         TblBilling::class,
         TblCompany::class,
         TblCounter::class,
-        TblCustomer::class,
+        TblCustomers::class,
         TblGeneralSettings::class,
         TblItemAddOn::class,
         TblItemCategory::class,
@@ -41,6 +41,7 @@ import com.warriortech.resb.data.local.entity.*
     version = 3,
     exportSchema = true
 )
+
 @TypeConverters(Converters::class)
 abstract class RestaurantDatabase : RoomDatabase() {
 

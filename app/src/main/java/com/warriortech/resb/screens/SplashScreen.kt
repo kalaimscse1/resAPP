@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,19 +13,46 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.warriortech.resb.R
+import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
 
 @Composable
 fun SplashScreen(
     onSplashFinished: () -> Unit
 ) {
     LaunchedEffect(true) {
-        delay(1000) // Reduced delay for faster startup
+        delay(2000) // Splash duration before navigating
         onSplashFinished()
     }
+
+    // 🔹 Infinite pulse animation for logo
+    val infiniteTransition = rememberInfiniteTransition(label = "logoAnim")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scaleAnim"
+    )
+
+    // 🔹 Fade-in animation for text
+    var textVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(500) // Delay before text starts fading in
+        textVisible = true
+    }
+    val textAlpha by animateFloatAsState(
+        targetValue = if (textVisible) 1f else 0f,
+        animationSpec = tween(1200, easing = LinearEasing),
+        label = "textAlpha"
+    )
 
     Box(
         modifier = Modifier
@@ -32,8 +60,8 @@ fun SplashScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primaryContainer
+                        PrimaryGreen,
+                        SecondaryGreen
                     )
                 )
             ),
@@ -58,17 +86,23 @@ fun SplashScreen(
                     Image(
                         painter = painterResource(id = R.drawable.resb_logo1),
                         contentDescription = "App Logo",
-                        modifier = Modifier.size(100.dp)
+                        modifier = Modifier
+                            .size(100.dp)
+                            .graphicsLayer(
+                                scaleX = scale,
+                                scaleY = scale
+                            )
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Text(
                 text = "RESB",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.graphicsLayer(alpha = textAlpha)
             )
         }
     }
