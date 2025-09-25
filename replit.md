@@ -6,7 +6,13 @@ A comprehensive Android restaurant billing system built with Kotlin, Jetpack Com
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (Latest: September 16, 2025)
+## Recent Changes (Latest: September 25, 2025)
+- **UI FIX**: Comprehensive navigation button display fix for Redmi/MIUI devices
+  - Implemented edge-to-edge display with WindowCompat.setDecorFitsSystemWindows
+  - Added proper system bar and navigation bar handling in ResbTheme
+  - Created RedmiSafeScaffold and system bar utility components
+  - Fixed navigation button positioning issues on Redmi devices with custom navigation bars
+  - Enhanced theme with transparent system bars and proper contrast enforcement
 - **NEW FEATURE**: Implemented complete paid bills management system
   - Created PaidBillRepository for API operations (CRUD and search)
   - Developed PaidBillsViewModel with proper state management
