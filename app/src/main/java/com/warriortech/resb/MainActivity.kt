@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -186,6 +188,13 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enable edge-to-edge display for proper system bar handling
+        enableEdgeToEdge()
+        
+        // Configure window for edge-to-edge display (important for Redmi/MIUI devices)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        
         val sessionManager = SessionManager(this)
         // Initialize sync when app starts
         lifecycleScope.launch {

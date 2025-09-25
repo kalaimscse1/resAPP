@@ -3,6 +3,7 @@ package com.warriortech.resb.ui.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -187,16 +188,36 @@ fun ResbTheme(
 ) {
     val systemUiController = rememberSystemUiController()
     val colorScheme = if (darkTheme) {
-        systemUiController.setStatusBarColor(DarkColorScheme.surface, darkIcons = false)
         DarkColorScheme
     } else {
-        systemUiController.setStatusBarColor(LightColorScheme.surface, darkIcons = true)
         LightColorScheme
+    }
+
+    // Configure system bars for edge-to-edge display (crucial for Redmi/MIUI devices)
+    SideEffect {
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = !darkTheme,
+            isNavigationBarContrastEnforced = false
+        )
+        
+        // Specifically handle navigation bar for Redmi devices
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            darkIcons = !darkTheme,
+            navigationBarContrastEnforced = false
+        )
+        
+        // Set status bar with proper contrast for MIUI
+        systemUiController.setStatusBarColor(
+            color = Color.Transparent,
+            darkIcons = !darkTheme
+        )
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = ResbTypography,
         content = content
     )
 }
