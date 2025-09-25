@@ -27,4 +27,10 @@ interface TblVoucherDao {
 
     @Query("SELECT * FROM tbl_voucher WHERE is_synced = 0")
     suspend fun getUnsynced(): List<TblVoucher>
+
+    @Query(
+        """SELECT tv.* FROM tbl_voucher tv INNER JOIN tbl_voucher_type vt ON vt.voucher_type_id = tv.voucher_type
+                    WHERE tv.counter_id=:counterId AND tv.is_active=1 AND vt.voucher_type_name =:type"""
+    )
+    suspend fun getActiveVoucherByType(counterId: Int, type: String): TblVoucher?
 }

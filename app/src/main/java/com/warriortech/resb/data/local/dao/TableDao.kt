@@ -54,5 +54,8 @@ interface TableDao {
     
     @Query("SELECT COUNT(*) FROM tbl_table WHERE table_id = :tableId")
     suspend fun tableExists(tableId: Long): Int
+
+    @Query("UPDATE tbl_table set table_availability=:table_availability WHERE table_id=:tableId AND is_active=1")
+    suspend fun updateTableAvailability(tableId: Long, table_availability: String): Int
 }
 

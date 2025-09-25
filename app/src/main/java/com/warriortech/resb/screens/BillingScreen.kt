@@ -1,15 +1,11 @@
 package com.warriortech.resb.screens
 
-import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
@@ -29,8 +24,8 @@ import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.ModernDivider
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
+import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.CurrencySettings
 
@@ -63,7 +58,7 @@ fun KotSelectionDialog(
                 LazyColumn {
                     item {
                         MobileOptimizedButton(
-                            onClick = { 
+                            onClick = {
                                 onKotSelected(-1) // -1 means show all items
                             },
                             text = "Show All Items",
@@ -99,16 +94,14 @@ fun BillingScreen(
     var selectedKotNumber by remember { mutableStateOf<Int?>(null) }
     var showKotSelectionDialog by remember { mutableStateOf(false) }
 
-    // Load billing details from TblOrderDetailsResponse or initial items
     LaunchedEffect(key1 = orderDetailsResponse, key2 = orderMasterId) {
         when {
             orderDetailsResponse != null && orderMasterId != null -> {
-                viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId,)
+                viewModel.setBillingDetailsFromOrderResponse(orderDetailsResponse, orderMasterId)
             }
         }
     }
 
-    // KOT Selection Dialog
     if (showKotSelectionDialog && orderDetailsResponse != null) {
         KotSelectionDialog(
             orderDetails = orderDetailsResponse,
@@ -126,36 +119,38 @@ fun BillingScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        if (selectedKotNumber != null) "Bill Summary - KOT #$selectedKotNumber" 
+                        if (selectedKotNumber != null) "Bill Summary - KOT #$selectedKotNumber"
                         else "Bill Summary", color = SurfaceLight
-                    ) 
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
-                actions = {
-                    if (orderDetailsResponse != null) {
-                        IconButton(onClick = { showKotSelectionDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = "Select KOT",
-                                tint = SurfaceLight
-                            )
-                        }
-                    }
-                },
+//                actions = {
+//                    if (orderDetailsResponse != null) {
+//                        IconButton(onClick = { showKotSelectionDialog = true }) {
+//                            Icon(
+//                                imageVector = Icons.Default.FilterList,
+//                                contentDescription = "Select KOT",
+//                                tint = SurfaceLight
+//                            )
+//                        }
+//                    }
+//                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
                 )
             )
         },
         bottomBar = {
-            BillingBottomBar(uiState = uiState,orderMasterId = orderMasterId) {
+            BillingBottomBar(uiState = uiState, orderMasterId = orderMasterId) {
                 navController.navigate("payment_screen/${uiState.totalAmount}/${uiState.orderMasterId}/${"--"}/${0L}") {
                     launchSingleTop = true
                     restoreState = true
@@ -166,7 +161,7 @@ fun BillingScreen(
         BillingContent(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
-            onUpdateQuantity = { menuItem, newQuantity -> 
+            onUpdateQuantity = { menuItem, newQuantity ->
                 viewModel.updateItemQuantity(menuItem, newQuantity)
             },
             onRemoveItem = { menuItem ->
@@ -191,7 +186,6 @@ fun BillingContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Display Billed Items
         if (uiState.billedItems.isNotEmpty()) {
             item {
                 Text("Items", style = MaterialTheme.typography.titleMedium)
@@ -224,7 +218,6 @@ fun BillingContent(
             }
         }
 
-        // Subtotal
         item {
             EditableBillingRow(
                 label = "Subtotal",
@@ -233,7 +226,6 @@ fun BillingContent(
             )
         }
 
-        // Tax (Allow editing if needed)
         item {
             EditableBillingRow(
                 label = "Tax Amount",
@@ -241,7 +233,7 @@ fun BillingContent(
                 currencyFormatter = currencyFormatter
             )
         }
-        if (uiState.cessAmount>0) {
+        if (uiState.cessAmount > 0) {
             item {
                 EditableBillingRow(
                     label = "Cess Amount",
@@ -250,7 +242,7 @@ fun BillingContent(
                 )
             }
         }
-        if (uiState.cessSpecific>0) {
+        if (uiState.cessSpecific > 0) {
             item {
                 EditableBillingRow(
                     label = "Cess Specific",
@@ -260,7 +252,6 @@ fun BillingContent(
             }
         }
 
-        // Discount (Allow editing)
         item {
             EditableBillingRow(
                 label = "Discount",
@@ -277,7 +268,6 @@ fun BillingContent(
             )
         }
 
-        // Total
         item {
             ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
             BillingSummaryRow(
@@ -355,7 +345,6 @@ fun BilledItemRow(
 }
 
 
-
 @Composable
 fun BillingSummaryRow(
     label: String,
@@ -414,7 +403,7 @@ fun BillingBottomBar(
     onProceedToPayment: () -> Unit
 ) {
     BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.primaryContainer
+        containerColor = SecondaryGreen
     ) {
         Row(
             modifier = Modifier
@@ -424,11 +413,16 @@ fun BillingBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("Total Due", style = MaterialTheme.typography.labelMedium)
+                Text(
+                    "Total Due",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = SurfaceLight
+                )
                 Text(
                     CurrencySettings.format(uiState.totalAmount),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = SurfaceLight
                 )
             }
             Spacer(modifier = Modifier.padding(horizontal = 25.dp))
@@ -436,7 +430,6 @@ fun BillingBottomBar(
                 MobileOptimizedButton(
                     onClick = {
                         if (orderMasterId != null) {
-                            // Handle payment processing
                             onProceedToPayment()
                         }
                     },
@@ -448,5 +441,4 @@ fun BillingBottomBar(
     }
 }
 
-// Helper to format doubles
 fun Double.format(digits: Int) = "%.${digits}f".format(this)

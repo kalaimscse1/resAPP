@@ -30,7 +30,8 @@ class KitchenCategorySettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val kitchenCategories = kitchenCategoryRepository.getAllKitchenCategories()
-                _uiState.value = UiState.Success(kitchenCategories.filter { it.kitchen_cat_name != "--" })
+                _uiState.value =
+                    UiState.Success(kitchenCategories.filter { it.kitchen_cat_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
@@ -40,7 +41,8 @@ class KitchenCategorySettingsViewModel @Inject constructor(
     fun addKitchenCategory(kitchenCategory: KitchenCategory) {
         viewModelScope.launch {
             try {
-                val newKitchenCategory = kitchenCategoryRepository.createKitchenCategory(kitchenCategory)
+                val newKitchenCategory =
+                    kitchenCategoryRepository.createKitchenCategory(kitchenCategory)
                 if (newKitchenCategory != null) {
                     loadKitchenCategories()
                 }
@@ -53,7 +55,8 @@ class KitchenCategorySettingsViewModel @Inject constructor(
     fun updateKitchenCategory(kitchenCategory: KitchenCategory) {
         viewModelScope.launch {
             try {
-                val updatedKitchenCategory = kitchenCategoryRepository.updateKitchenCategory(kitchenCategory)
+                val updatedKitchenCategory =
+                    kitchenCategoryRepository.updateKitchenCategory(kitchenCategory)
                 if (updatedKitchenCategory != null) {
                     loadKitchenCategories()
                 }

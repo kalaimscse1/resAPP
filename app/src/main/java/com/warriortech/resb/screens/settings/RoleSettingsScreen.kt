@@ -17,7 +17,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Role
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.RoleSettingsViewModel
@@ -42,19 +41,28 @@ fun RoleSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.role_settings),
-                    color = SurfaceLight
-                ) },
+                title = {
+                    Text(
+                        stringResource(R.string.role_settings),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_role),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add_role),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -64,35 +72,35 @@ fun RoleSettingsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.roles) { role ->
-                        RoleCard(
-                            role = role,
-                            onEdit = { editingRole = role },
-                            onDelete = { 
-                                scope.launch {
-                                    viewModel.deleteRole(role.role_id)
-                                    snackbarHostState.showSnackbar("Role deleted")
-                                }
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.roles) { role ->
+                    RoleCard(
+                        role = role,
+                        onEdit = { editingRole = role },
+                        onDelete = {
+                            scope.launch {
+                                viewModel.deleteRole(role.role_id)
+                                snackbarHostState.showSnackbar("Role deleted")
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
+        }
     }
 
     if (showAddDialog) {
@@ -204,11 +212,11 @@ fun RoleDialog(
             TextButton(
                 onClick = {
                     val newRole = role?.copy(
-                        role= name,
+                        role = name,
                         is_active = isActive
                     ) ?: Role(
                         role_id = 0,
-                        role= name,
+                        role = name,
                         is_active = isActive
                     )
                     onSave(newRole)

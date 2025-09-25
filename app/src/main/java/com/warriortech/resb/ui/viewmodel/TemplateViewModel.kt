@@ -31,7 +31,7 @@ class TemplateViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             templateRepository.getAllTemplates().collect { templates ->
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         templates = templates,
                         isLoading = false
@@ -45,7 +45,7 @@ class TemplateViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             templateRepository.getTemplatesByType(type).collect { templates ->
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         templates = templates,
                         selectedType = type,
@@ -79,13 +79,13 @@ class TemplateViewModel @Inject constructor(
 
     fun saveTemplate(updatedTemplate: ReceiptTemplate) {
         val template = _editingTemplate.value ?: return
-        
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             templateRepository.saveTemplate(template).collect { result ->
                 result.fold(
                     onSuccess = {
-                        _uiState.update { 
+                        _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 message = "Template saved successfully"
@@ -95,7 +95,7 @@ class TemplateViewModel @Inject constructor(
                         loadTemplates()
                     },
                     onFailure = { error ->
-                        _uiState.update { 
+                        _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 errorMessage = error.message
@@ -113,7 +113,7 @@ class TemplateViewModel @Inject constructor(
             templateRepository.deleteTemplate(templateId).collect { result ->
                 result.fold(
                     onSuccess = {
-                        _uiState.update { 
+                        _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 message = "Template deleted successfully"
@@ -122,7 +122,7 @@ class TemplateViewModel @Inject constructor(
                         loadTemplates()
                     },
                     onFailure = { error ->
-                        _uiState.update { 
+                        _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 errorMessage = error.message
@@ -140,7 +140,7 @@ class TemplateViewModel @Inject constructor(
             templateRepository.setDefaultTemplate(templateId, type).collect { result ->
                 result.fold(
                     onSuccess = {
-                        _uiState.update { 
+                        _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 message = "Default template updated"
@@ -149,7 +149,7 @@ class TemplateViewModel @Inject constructor(
                         loadTemplates()
                     },
                     onFailure = { error ->
-                        _uiState.update { 
+                        _uiState.update {
                             it.copy(
                                 isLoading = false,
                                 errorMessage = error.message
@@ -162,7 +162,7 @@ class TemplateViewModel @Inject constructor(
     }
 
     fun clearMessages() {
-        _uiState.update { 
+        _uiState.update {
             it.copy(
                 message = null,
                 errorMessage = null

@@ -5,12 +5,21 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.warriortech.resb.data.local.RestaurantDatabase
-import com.warriortech.resb.data.local.dao.*
-import com.warriortech.resb.data.local.entity.*
-import com.warriortech.resb.model.*
+import com.warriortech.resb.data.local.entity.SyncStatus
+import com.warriortech.resb.data.local.entity.TblArea
+import com.warriortech.resb.data.local.entity.TblCustomers
+import com.warriortech.resb.data.local.entity.TblMenu
+import com.warriortech.resb.data.local.entity.TblMenuItem
+import com.warriortech.resb.data.local.entity.TblTableEntity
+import com.warriortech.resb.model.Area
+import com.warriortech.resb.model.Menu
+import com.warriortech.resb.model.Table
+import com.warriortech.resb.model.TblCustomer
+import com.warriortech.resb.model.TblMenuItemRequest
+import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
-import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -112,7 +121,8 @@ class SyncWorker @AssistedInject constructor(
             for (table in pendingTables) {
                 try {
                     val tableRequest = table.toApiModel()
-                    val response = apiService.createTable(tableRequest, sessionManager.getCompanyCode() ?: "")
+                    val response =
+                        apiService.createTable(tableRequest, sessionManager.getCompanyCode() ?: "")
 
                     if (response.isSuccessful) {
                         val updatedTable = table.copy(
@@ -141,7 +151,10 @@ class SyncWorker @AssistedInject constructor(
             for (menuItem in pendingMenuItems) {
                 try {
                     val menuItemRequest = menuItem.toApiModel()
-                    val response = apiService.createMenuItem(menuItemRequest, sessionManager.getCompanyCode() ?: "")
+                    val response = apiService.createMenuItem(
+                        menuItemRequest,
+                        sessionManager.getCompanyCode() ?: ""
+                    )
 
                     if (response.isSuccessful) {
                         val updatedMenuItem = menuItem.copy(
@@ -292,28 +305,28 @@ class SyncWorker @AssistedInject constructor(
         menu_item_code = menu_item_code.toString(),
         menu_item_name = menu_item_name.toString(),
         menu_item_name_tamil = menu_item_name_tamil.toString(),
-        menu_id = menu_id?.toLong() ?:0L,
-        rate = rate?.toDouble() ?:0.0,
+        menu_id = menu_id?.toLong() ?: 0L,
+        rate = rate?.toDouble() ?: 0.0,
         image = image.toString(),
-        ac_rate = ac_rate?.toDouble() ?:0.0,
-        parcel_rate = parcel_rate?.toDouble() ?:0.0,
+        ac_rate = ac_rate?.toDouble() ?: 0.0,
+        parcel_rate = parcel_rate?.toDouble() ?: 0.0,
         is_available = is_available.toString(),
-        item_cat_id = item_cat_id?.toLong()?:0L,
-        parcel_charge = parcel_charge?.toDouble() ?:0.0,
-        tax_id = tax_id?.toLong() ?:0L,
-        kitchen_cat_id = kitchen_cat_id?.toLong()?:0L,
+        item_cat_id = item_cat_id?.toLong() ?: 0L,
+        parcel_charge = parcel_charge?.toDouble() ?: 0.0,
+        tax_id = tax_id?.toLong() ?: 0L,
+        kitchen_cat_id = kitchen_cat_id?.toLong() ?: 0L,
         stock_maintain = stock_maintain.toString(),
         rate_lock = rate_lock.toString(),
-        unit_id = unit_id?.toLong()?:0L,
-        min_stock = min_stock?.toLong()?:0L,
+        unit_id = unit_id?.toLong() ?: 0L,
+        min_stock = min_stock?.toLong() ?: 0L,
         hsn_code = hsn_code.toString(),
-        order_by = order_by?.toLong()?:0L,
-        is_inventory = is_inventory?.toLong() ?:0L,
+        order_by = order_by?.toLong() ?: 0L,
+        is_inventory = is_inventory?.toLong() ?: 0L,
         is_raw = is_raw.toString(),
-        cess_specific = cess_specific?.toDouble() ?:0.0,
+        cess_specific = cess_specific?.toDouble() ?: 0.0,
         is_favourite = is_favourite == true,
         is_active = if (is_active == true) 1L else 0L,
-    preparation_time = preparation_time?.toLong()?:0L
+        preparation_time = preparation_time?.toLong() ?: 0L
     )
 
     // ==================== AREA SYNCHRONIZATION ====================
@@ -332,7 +345,11 @@ class SyncWorker @AssistedInject constructor(
                     )
 
                     val response = if (area.is_synced == SyncStatus.PENDING_UPDATE) {
-                        apiService.updateArea(area.area_id.toLong(), areaRequest, sessionManager.getCompanyCode() ?: "")
+                        apiService.updateArea(
+                            area.area_id.toLong(),
+                            areaRequest,
+                            sessionManager.getCompanyCode() ?: ""
+                        )
                     } else {
                         apiService.createArea(areaRequest, sessionManager.getCompanyCode() ?: "")
                     }
@@ -410,9 +427,16 @@ class SyncWorker @AssistedInject constructor(
                     )
 
                     val response = if (customer.is_synced == SyncStatus.PENDING_UPDATE) {
-                        apiService.updateCustomer(customer.customer_id.toLong(), customerRequest, sessionManager.getCompanyCode() ?: "")
+                        apiService.updateCustomer(
+                            customer.customer_id.toLong(),
+                            customerRequest,
+                            sessionManager.getCompanyCode() ?: ""
+                        )
                     } else {
-                        apiService.createCustomer(customerRequest, sessionManager.getCompanyCode() ?: "")
+                        apiService.createCustomer(
+                            customerRequest,
+                            sessionManager.getCompanyCode() ?: ""
+                        )
                     }
 
                     if (response.isSuccessful) {
@@ -453,7 +477,7 @@ class SyncWorker @AssistedInject constructor(
                             address = remote.address,
                             contact_no = remote.contact_no,
                             email_address = remote.email_address,
-                            is_active = if(remote.is_active==1L) true else false,
+                            is_active = if (remote.is_active == 1L) true else false,
                             is_synced = SyncStatus.SYNCED,
                             last_synced_at = System.currentTimeMillis(),
                             gst_no = remote.gst_no,
@@ -486,12 +510,16 @@ class SyncWorker @AssistedInject constructor(
                         menu_name = menu.menu_name ?: "",
                         is_active = menu.is_active ?: true,
                         order_by = (menu.order_by ?: 0).toString(),
-                        start_time = menu.start_time?.toFloat() ?:0.0f,
-                        end_time = menu.end_time?.toFloat() ?:0.0f,
+                        start_time = menu.start_time?.toFloat() ?: 0.0f,
+                        end_time = menu.end_time?.toFloat() ?: 0.0f,
                     )
 
                     val response = if (menu.is_synced == SyncStatus.PENDING_UPDATE) {
-                        apiService.updateMenu(menu.menu_id.toLong(), menuRequest, sessionManager.getCompanyCode() ?: "")
+                        apiService.updateMenu(
+                            menu.menu_id.toLong(),
+                            menuRequest,
+                            sessionManager.getCompanyCode() ?: ""
+                        )
                     } else {
                         apiService.createMenu(menuRequest, sessionManager.getCompanyCode() ?: "")
                     }
@@ -555,44 +583,83 @@ class SyncWorker @AssistedInject constructor(
     // These are placeholder implementations for the remaining entities
     // They follow the same pattern and should be implemented based on specific entity requirements
 
-    private suspend fun syncPendingCountersToServer() = handlePendingSync("Counters") { /* TODO: Implement counter sync */ }
-    private suspend fun syncCountersFromServer() = handleServerSync("Counters") { /* TODO: Implement counter sync */ }
+    private suspend fun syncPendingCountersToServer() =
+        handlePendingSync("Counters") { /* TODO: Implement counter sync */ }
 
-    private suspend fun syncPendingStaffToServer() = handlePendingSync("Staff") { /* TODO: Implement staff sync */ }
-    private suspend fun syncStaffFromServer() = handleServerSync("Staff") { /* TODO: Implement staff sync */ }
+    private suspend fun syncCountersFromServer() =
+        handleServerSync("Counters") { /* TODO: Implement counter sync */ }
 
-    private suspend fun syncPendingPrintersToServer() = handlePendingSync("Printers") { /* TODO: Implement printer sync */ }
-    private suspend fun syncPrintersFromServer() = handleServerSync("Printers") { /* TODO: Implement printer sync */ }
+    private suspend fun syncPendingStaffToServer() =
+        handlePendingSync("Staff") { /* TODO: Implement staff sync */ }
 
-    private suspend fun syncPendingTaxesToServer() = handlePendingSync("Taxes") { /* TODO: Implement tax sync */ }
-    private suspend fun syncTaxesFromServer() = handleServerSync("Taxes") { /* TODO: Implement tax sync */ }
+    private suspend fun syncStaffFromServer() =
+        handleServerSync("Staff") { /* TODO: Implement staff sync */ }
 
-    private suspend fun syncPendingTaxSplitsToServer() = handlePendingSync("TaxSplits") { /* TODO: Implement taxsplit sync */ }
-    private suspend fun syncTaxSplitsFromServer() = handleServerSync("TaxSplits") { /* TODO: Implement taxsplit sync */ }
+    private suspend fun syncPendingPrintersToServer() =
+        handlePendingSync("Printers") { /* TODO: Implement printer sync */ }
 
-    private suspend fun syncPendingVouchersToServer() = handlePendingSync("Vouchers") { /* TODO: Implement voucher sync */ }
-    private suspend fun syncVouchersFromServer() = handleServerSync("Vouchers") { /* TODO: Implement voucher sync */ }
+    private suspend fun syncPrintersFromServer() =
+        handleServerSync("Printers") { /* TODO: Implement printer sync */ }
 
-    private suspend fun syncPendingVoucherTypesToServer() = handlePendingSync("VoucherTypes") { /* TODO: Implement vouchertype sync */ }
-    private suspend fun syncVoucherTypesFromServer() = handleServerSync("VoucherTypes") { /* TODO: Implement vouchertype sync */ }
+    private suspend fun syncPendingTaxesToServer() =
+        handlePendingSync("Taxes") { /* TODO: Implement tax sync */ }
 
-    private suspend fun syncPendingUnitsToServer() = handlePendingSync("Units") { /* TODO: Implement unit sync */ }
-    private suspend fun syncUnitsFromServer() = handleServerSync("Units") { /* TODO: Implement unit sync */ }
+    private suspend fun syncTaxesFromServer() =
+        handleServerSync("Taxes") { /* TODO: Implement tax sync */ }
 
-    private suspend fun syncPendingRolesToServer() = handlePendingSync("Roles") { /* TODO: Implement role sync */ }
-    private suspend fun syncRolesFromServer() = handleServerSync("Roles") { /* TODO: Implement role sync */ }
+    private suspend fun syncPendingTaxSplitsToServer() =
+        handlePendingSync("TaxSplits") { /* TODO: Implement taxsplit sync */ }
 
-    private suspend fun syncPendingKitchenCategoriesToServer() = handlePendingSync("KitchenCategories") { /* TODO: Implement kitchen category sync */ }
-    private suspend fun syncKitchenCategoriesFromServer() = handleServerSync("KitchenCategories") { /* TODO: Implement kitchen category sync */ }
+    private suspend fun syncTaxSplitsFromServer() =
+        handleServerSync("TaxSplits") { /* TODO: Implement taxsplit sync */ }
 
-    private suspend fun syncPendingItemCategoriesToServer() = handlePendingSync("ItemCategories") { /* TODO: Implement item category sync */ }
-    private suspend fun syncItemCategoriesFromServer() = handleServerSync("ItemCategories") { /* TODO: Implement item category sync */ }
+    private suspend fun syncPendingVouchersToServer() =
+        handlePendingSync("Vouchers") { /* TODO: Implement voucher sync */ }
 
-    private suspend fun syncPendingModifiersToServer() = handlePendingSync("Modifiers") { /* TODO: Implement modifier sync */ }
-    private suspend fun syncModifiersFromServer() = handleServerSync("Modifiers") { /* TODO: Implement modifier sync */ }
+    private suspend fun syncVouchersFromServer() =
+        handleServerSync("Vouchers") { /* TODO: Implement voucher sync */ }
 
-    private suspend fun syncPendingGeneralSettingsToServer() = handlePendingSync("GeneralSettings") { /* TODO: Implement general settings sync */ }
-    private suspend fun syncGeneralSettingsFromServer() = handleServerSync("GeneralSettings") { /* TODO: Implement general settings sync */ }
+    private suspend fun syncPendingVoucherTypesToServer() =
+        handlePendingSync("VoucherTypes") { /* TODO: Implement vouchertype sync */ }
+
+    private suspend fun syncVoucherTypesFromServer() =
+        handleServerSync("VoucherTypes") { /* TODO: Implement vouchertype sync */ }
+
+    private suspend fun syncPendingUnitsToServer() =
+        handlePendingSync("Units") { /* TODO: Implement unit sync */ }
+
+    private suspend fun syncUnitsFromServer() =
+        handleServerSync("Units") { /* TODO: Implement unit sync */ }
+
+    private suspend fun syncPendingRolesToServer() =
+        handlePendingSync("Roles") { /* TODO: Implement role sync */ }
+
+    private suspend fun syncRolesFromServer() =
+        handleServerSync("Roles") { /* TODO: Implement role sync */ }
+
+    private suspend fun syncPendingKitchenCategoriesToServer() =
+        handlePendingSync("KitchenCategories") { /* TODO: Implement kitchen category sync */ }
+
+    private suspend fun syncKitchenCategoriesFromServer() =
+        handleServerSync("KitchenCategories") { /* TODO: Implement kitchen category sync */ }
+
+    private suspend fun syncPendingItemCategoriesToServer() =
+        handlePendingSync("ItemCategories") { /* TODO: Implement item category sync */ }
+
+    private suspend fun syncItemCategoriesFromServer() =
+        handleServerSync("ItemCategories") { /* TODO: Implement item category sync */ }
+
+    private suspend fun syncPendingModifiersToServer() =
+        handlePendingSync("Modifiers") { /* TODO: Implement modifier sync */ }
+
+    private suspend fun syncModifiersFromServer() =
+        handleServerSync("Modifiers") { /* TODO: Implement modifier sync */ }
+
+    private suspend fun syncPendingGeneralSettingsToServer() =
+        handlePendingSync("GeneralSettings") { /* TODO: Implement general settings sync */ }
+
+    private suspend fun syncGeneralSettingsFromServer() =
+        handleServerSync("GeneralSettings") { /* TODO: Implement general settings sync */ }
 
     // Helper methods for placeholder implementations
     private suspend fun handlePendingSync(entityName: String, syncAction: suspend () -> Unit) {

@@ -55,6 +55,7 @@ class ResbApplication : Application(), Configuration.Provider {
             LocaleHelper.applyLocale(this@ResbApplication)
         }
     }
+
     override fun getWorkManagerConfiguration(): Configuration {
         val syncWorkerFactory = object : WorkerFactory() {
             override fun createWorker(
@@ -79,6 +80,7 @@ class ResbApplication : Application(), Configuration.Provider {
             .setWorkerFactory(syncWorkerFactory)
             .build()
     }
+
     private fun isDebugBuild(): Boolean {
         return applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0
     }

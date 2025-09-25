@@ -23,7 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -35,9 +35,7 @@ import com.warriortech.resb.model.RestaurantProfile
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
-import com.warriortech.resb.ui.theme.Shapes
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.RestaurantProfileViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -66,13 +64,19 @@ fun RestaurantProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.restaurant_profile),
-                    color = SurfaceLight
-                ) },
+                title = {
+                    Text(
+                        stringResource(R.string.restaurant_profile),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -81,11 +85,12 @@ fun RestaurantProfileScreen(
             )
         }
     ) { paddingValues ->
-        Column( modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            when (val state=uiState){
+            when (val state = uiState) {
                 is RestaurantProfileViewModel.UiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -94,6 +99,7 @@ fun RestaurantProfileScreen(
                         CircularProgressIndicator()
                     }
                 }
+
                 is RestaurantProfileViewModel.UiState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -116,6 +122,7 @@ fun RestaurantProfileScreen(
 
                     }
                 }
+
                 is RestaurantProfileViewModel.UiState.Error -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -424,9 +431,10 @@ fun CompanySettingDialog(
         }
         Spacer(modifier = Modifier.height(8.dp))
         if (uploadSuccess.value) {
-            val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
+            val imageUrl =
+                "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
             Row(
-                modifier =  Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
@@ -472,7 +480,7 @@ fun CompanySettingDialog(
                 )
                 onSave(newSetting)
             }
-        ){
+        ) {
             Text(
                 text = if (setting == null) "Add" else "Update",
                 fontWeight = FontWeight.Bold
@@ -501,7 +509,7 @@ fun uploadLogo(
     val cleanedCompanyCode = token
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val response = apiService.uploadLogo(cleanedCompanyCode, filePart,cleanedCompanyCode)
+            val response = apiService.uploadLogo(cleanedCompanyCode, filePart, cleanedCompanyCode)
             withContext(Dispatchers.Main) {
                 if (response.isSuccessful) onSuccess() else onFailure()
             }

@@ -18,7 +18,8 @@ enum class ConnectionState {
 class NetworkMonitor(private val context: Context) {
 
     val isOnline: Flow<ConnectionState> = callbackFlow {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {

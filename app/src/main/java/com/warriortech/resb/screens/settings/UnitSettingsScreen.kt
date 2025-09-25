@@ -45,8 +45,10 @@ fun UnitSettingsScreen(
                 title = { Text("Unit Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -54,8 +56,10 @@ fun UnitSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Unit",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Unit",
+                            tint = SurfaceLight
+                        )
                     }
                 }
             )
@@ -71,6 +75,7 @@ fun UnitSettingsScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is UnitSettingsViewModel.UiState.Success -> {
                 if (state.units.isEmpty()) {
                     Box(
@@ -105,6 +110,7 @@ fun UnitSettingsScreen(
                     }
                 }
             }
+
             is UnitSettingsViewModel.UiState.Error -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),

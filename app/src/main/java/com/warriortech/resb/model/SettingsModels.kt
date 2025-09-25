@@ -9,16 +9,6 @@ data class Menu(
     val is_active: Boolean,
 )
 
-//data class Customer(
-//    val id: Long,
-//    val name: String,
-//    val phone: String,
-//    val email: String,
-//    val address: String
-//)
-
-
-
 data class Printer(
     val printer_id: Long,
     val printer_name: String,
@@ -26,17 +16,19 @@ data class Printer(
     val ip_address: String,
     val is_active: Long
 )
+
 data class TblPrinterResponse(
     var printer_id: Long,
-    var kitchen_cat:TblKitchenCategory,
-    var printer_name:String,
-    var ip_address:String,
-    var is_active:Long
+    var kitchen_cat: TblKitchenCategory,
+    var printer_name: String,
+    var ip_address: String,
+    var is_active: Long
 )
+
 data class TblKitchenCategory(
     var kitchen_cat_id: Long,
-    var kitchen_cat_name:String,
-    var is_active:Long
+    var kitchen_cat_name: String,
+    var is_active: Long
 )
 
 

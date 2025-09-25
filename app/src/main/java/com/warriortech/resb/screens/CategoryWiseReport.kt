@@ -1,6 +1,5 @@
 package com.warriortech.resb.screens
 
-
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,12 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.model.CategoryReport
-import com.warriortech.resb.model.ItemReport
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.CategoryWiseViewModel
-import com.warriortech.resb.ui.viewmodel.ItemWiseViewModel
 import com.warriortech.resb.util.ReportExport
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -86,7 +83,12 @@ fun CategoryWiseReportScreen(
                         IconButton(onClick = { ReportExport.categoryExportToPdf(context, bills) }) {
                             Icon(Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
                         }
-                        IconButton(onClick = { ReportExport.categoryExportToExcel(context, bills) }) {
+                        IconButton(onClick = {
+                            ReportExport.categoryExportToExcel(
+                                context,
+                                bills
+                            )
+                        }) {
                             Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
                         }
                         IconButton(onClick = {
@@ -173,7 +175,10 @@ fun CategoryWiseReportScreen(
                                 elevation = CardDefaults.cardElevation(4.dp)
                             ) {
                                 Column(Modifier.padding(12.dp)) {
-                                    Text("Category Name: ${bill.item_cat_name}", fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "Category Name: ${bill.item_cat_name}",
+                                        fontWeight = FontWeight.Bold
+                                    )
                                     Text("Qty: ${bill.qty}")
                                     Text("Total: ₹${bill.grand_total}")
                                 }

@@ -22,7 +22,6 @@ import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.TableSettingsViewModel
@@ -53,87 +52,92 @@ fun TableSettingsScreen(
                 title = { Text("Table Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
-                ), actions = {
+                ),
+                actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Table",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Table",
+                            tint = SurfaceLight
+                        )
                     }
                 },
 
-            )
+                )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-            when (val state=uiState) {
-                is TableSettingsUiState.Loading -> {
+        when (val state = uiState) {
+            is TableSettingsUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is TableSettingsUiState.Success -> {
+                if (state.tables.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text("No tables available", style = MaterialTheme.typography.bodyMedium)
                     }
-                }
-
-                is TableSettingsUiState.Success -> {
-                    if (state.tables.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No tables available", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    } else{
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.tables) { table ->
-                                TableItem(
-                                    table = table,
-                                    onEdit = { editingTable = table },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.deleteTable(table.table_id)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                }
-            }
-
-                is TableSettingsUiState.Error -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-
-                        Text(
-                            text = "Error: ${state.message}",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Button(
-                            onClick = { viewModel.loadTables() },
-                            modifier = Modifier.padding(top = 16.dp)
-                        ) {
-                            Text("Retry")
+                        items(state.tables) { table ->
+                            TableItem(
+                                table = table,
+                                onEdit = { editingTable = table },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteTable(table.table_id)
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             }
+
+            is TableSettingsUiState.Error -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+
+                ) {
+
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(
+                        onClick = { viewModel.loadTables() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
         if (showAddDialog) {
-         TableDialog(
+            TableDialog(
                 table = null,
                 onDismiss = { showAddDialog = false },
                 onSave = { table ->
@@ -143,7 +147,7 @@ fun TableSettingsScreen(
                     }
                 },
                 areas = areas
-         )
+            )
         }
 
         editingTable?.let {
@@ -161,6 +165,7 @@ fun TableSettingsScreen(
         }
     }
 }
+
 @Composable
 fun TableItem(
     table: Table,
@@ -189,7 +194,7 @@ fun TableItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             Row {
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit")
@@ -212,10 +217,14 @@ fun TableDialog(
     val acOptions = listOf("AC", "NON-AC")
     val tableStatusOptions = listOf("ACTIVE", "INACTIVE")
     var tableNumber by remember { mutableStateOf(table?.table_name ?: "") }
-    var capacity by remember { mutableStateOf(table?.seating_capacity?.toString()?:"1") }
+    var capacity by remember { mutableStateOf(table?.seating_capacity?.toString() ?: "1") }
     var areaId by remember { mutableStateOf(table?.area_id ?: 1) }
     var isAc by remember { mutableStateOf(table?.is_ac ?: acOptions.firstOrNull()) }
-    var tableStatus by remember { mutableStateOf(table?.table_status ?: tableStatusOptions.firstOrNull()) }
+    var tableStatus by remember {
+        mutableStateOf(
+            table?.table_status ?: tableStatusOptions.firstOrNull()
+        )
+    }
     var isActive by remember { mutableStateOf(table?.is_active ?: true) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -232,7 +241,7 @@ fun TableDialog(
                 AreaDropdown(
                     areas = areas,
                     modifier = Modifier.fillMaxWidth(),
-                    label ="Select Area",
+                    label = "Select Area",
                     selectedArea = areas.find { it.area_id == areaId },
                     onAreaSelected = { area ->
                         areaId = area.area_id
@@ -272,9 +281,9 @@ fun TableDialog(
                 onClick = {
                     val newTable = TblTable(
                         table_id = table?.table_id ?: 0L,
-                        area_id = table?.area_id ?:areaId,
+                        area_id = table?.area_id ?: areaId,
                         table_name = table?.table_name ?: tableNumber,
-                        seating_capacity = table?.seating_capacity?: capacity.toInt(),
+                        seating_capacity = table?.seating_capacity ?: capacity.toInt(),
                         is_ac = table?.is_ac ?: isAc.toString(),
                         table_status = table?.table_status ?: tableStatus.toString(),
                         table_availability = table?.table_availability ?: "AVAILABLE",

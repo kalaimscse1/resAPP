@@ -1,5 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.ai.AIRepository
@@ -34,7 +35,7 @@ class AIAssistantViewModel @Inject constructor(
     fun enhanceMenuDescriptions() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            
+
             try {
                 val menuItems = menuItemDao.getAllMenuItems()
                 val results = mutableListOf<String>()
@@ -50,20 +51,20 @@ class AIAssistantViewModel @Inject constructor(
                     }
 
                 }
-                
-                _uiState.update { 
+
+                _uiState.update {
                     it.copy(
-                        isLoading = false, 
+                        isLoading = false,
                         results = results,
                         errorMessage = null
-                    ) 
+                    )
                 }
             } catch (e: Exception) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
-                        isLoading = false, 
+                        isLoading = false,
                         errorMessage = "Failed to enhance menu: ${e.message}"
-                    ) 
+                    )
                 }
             }
         }
@@ -72,34 +73,35 @@ class AIAssistantViewModel @Inject constructor(
     fun generateUpsellSuggestions() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            
+
             try {
                 // Sample order items for demonstration
-                val sampleOrderItems = apiService.getAllOrderDetails(sessionManager.getCompanyCode()?:"").body()!!
-                
+                val sampleOrderItems =
+                    apiService.getAllOrderDetails(sessionManager.getCompanyCode() ?: "").body()!!
+
                 val result = aiRepository.suggestUpsells(sampleOrderItems)
                 result.onSuccess { suggestions ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             results = suggestions,
                             errorMessage = null
-                        ) 
+                        )
                     }
                 }.onFailure { error ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             errorMessage = "Failed to generate suggestions: ${error.message}"
-                        ) 
+                        )
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
-                        isLoading = false, 
+                        isLoading = false,
                         errorMessage = "Failed to generate suggestions: ${e.message}"
-                    ) 
+                    )
                 }
             }
         }
@@ -108,34 +110,36 @@ class AIAssistantViewModel @Inject constructor(
     fun analyzeSalesData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            
+
             try {
                 // Sample sales data for demonstration
-                 val sampleSalesData = apiService.getAllOrderDetails(sessionManager.getCompanyCode()?:"").body()!!
-                
+                val sampleSalesData =
+                    apiService.getAllOrderDetails(sessionManager.getCompanyCode() ?: "").body()!!
+
                 val result = aiRepository.analyzeSalesData(sampleSalesData)
+                Log.d("AIAnalysis", "Analysis result: $result")
                 result.onSuccess { analysis ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             results = listOf(analysis),
                             errorMessage = null
-                        ) 
+                        )
                     }
                 }.onFailure { error ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             errorMessage = "Failed to analyze sales: ${error.message}"
-                        ) 
+                        )
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
-                        isLoading = false, 
+                        isLoading = false,
                         errorMessage = "Failed to analyze sales: ${e.message}"
-                    ) 
+                    )
                 }
             }
         }
@@ -144,34 +148,35 @@ class AIAssistantViewModel @Inject constructor(
     fun generateCustomerRecommendations() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            
+
             try {
                 // Sample customer order history
-                val customerHistory =apiService.getAllOrderDetails(sessionManager.getCompanyCode()?:"").body()!!
-                
+                val customerHistory =
+                    apiService.getAllOrderDetails(sessionManager.getCompanyCode() ?: "").body()!!
+
                 val result = aiRepository.generateCustomerRecommendations(customerHistory)
                 result.onSuccess { recommendations ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             results = recommendations,
                             errorMessage = null
-                        ) 
+                        )
                     }
                 }.onFailure { error ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             errorMessage = "Failed to generate recommendations: ${error.message}"
-                        ) 
+                        )
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
-                        isLoading = false, 
+                        isLoading = false,
                         errorMessage = "Failed to generate recommendations: ${e.message}"
-                    ) 
+                    )
                 }
             }
         }

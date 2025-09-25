@@ -26,11 +26,9 @@ fun SplashScreen(
     onSplashFinished: () -> Unit
 ) {
     LaunchedEffect(true) {
-        delay(2000) // Splash duration before navigating
         onSplashFinished()
     }
 
-    // 🔹 Infinite pulse animation for logo
     val infiniteTransition = rememberInfiniteTransition(label = "logoAnim")
     val scale by infiniteTransition.animateFloat(
         initialValue = 0.8f,
@@ -42,10 +40,9 @@ fun SplashScreen(
         label = "scaleAnim"
     )
 
-    // 🔹 Fade-in animation for text
     var textVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        delay(500) // Delay before text starts fading in
+        delay(500)
         textVisible = true
     }
     val textAlpha by animateFloatAsState(

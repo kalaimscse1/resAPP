@@ -17,18 +17,24 @@ class ItemWiseViewModel @Inject constructor(
     private val repository: ReportRepository
 ) : ViewModel() {
 
-    private val _reportState = MutableStateFlow<ItemWiseReportReportUiState>(ItemWiseReportReportUiState.Idle)
+    private val _reportState =
+        MutableStateFlow<ItemWiseReportReportUiState>(ItemWiseReportReportUiState.Idle)
     val reportState: StateFlow<ItemWiseReportReportUiState> = _reportState.asStateFlow()
+
     init {
-        loadReports(getCurrentDateModern(),getCurrentDateModern())
+        loadReports(getCurrentDateModern(), getCurrentDateModern())
     }
+
     fun loadReports(fromDate: String, toDate: String) {
         viewModelScope.launch {
             _reportState.value = ItemWiseReportReportUiState.Loading
             repository.getItemReport(fromDate, toDate).collect { res ->
                 res.fold(
                     onSuccess = { _reportState.value = ItemWiseReportReportUiState.Success(it) },
-                    onFailure = { _reportState.value = ItemWiseReportReportUiState.Error(it.message ?: "Unknown Error") }
+                    onFailure = {
+                        _reportState.value =
+                            ItemWiseReportReportUiState.Error(it.message ?: "Unknown Error")
+                    }
                 )
             }
         }

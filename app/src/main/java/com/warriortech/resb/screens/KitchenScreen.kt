@@ -59,7 +59,7 @@ fun KitchenScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Button(
                 onClick = { viewModel.loadKOTs() },
                 colors = ButtonDefaults.buttonColors(
@@ -81,7 +81,7 @@ fun KitchenScreen(
             items(KOTStatus.values()) { status ->
                 FilterChip(
                     onClick = { viewModel.setFilter(status) },
-                    label = { 
+                    label = {
                         Text(
                             text = "${status.name} (${uiState.kots.count { it.status == status }})",
                             color = if (selectedFilter == status) Color.White else MaterialTheme.colorScheme.onSurface
@@ -133,7 +133,7 @@ fun KitchenScreen(
         } else {
             // KOT List
             val filteredKOTs = viewModel.getFilteredKOTs()
-            
+
             if (filteredKOTs.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -216,7 +216,7 @@ fun KOTCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 StatusBadge(status = kot.status)
             }
 
@@ -243,7 +243,7 @@ fun KOTCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 kot.waiterName?.let { waiter ->
                     Text(
                         text = "Waiter: $waiter",
@@ -286,7 +286,7 @@ fun KOTCard(
                                 )
                             }
                         }
-                        
+
                         Text(
                             text = "×${item.quantity}",
                             style = MaterialTheme.typography.bodyLarge,
@@ -316,6 +316,7 @@ fun KOTCard(
                             Text("Start Cooking")
                         }
                     }
+
                     KOTStatus.IN_PROGRESS -> {
                         Button(
                             onClick = { onStatusUpdate(KOTStatus.READY) },
@@ -333,6 +334,7 @@ fun KOTCard(
                             Text("Mark Ready")
                         }
                     }
+
                     KOTStatus.READY -> {
                         Button(
                             onClick = { onStatusUpdate(KOTStatus.SERVED) },
@@ -350,6 +352,7 @@ fun KOTCard(
                             Text("Mark Served")
                         }
                     }
+
                     KOTStatus.SERVED -> {
                         // No actions for served items
                     }

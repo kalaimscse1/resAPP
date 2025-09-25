@@ -1,7 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.MenuItem
@@ -90,8 +89,10 @@ class MenuViewModel @Inject constructor(
     val selectedModifiers: StateFlow<Map<Long, List<Modifiers>>> = _selectedModifiers.asStateFlow()
 
     init {
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
-
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
     }
 
     fun initializeScreen(isTableOrder: Boolean, currentTableId: Long) {
@@ -99,10 +100,9 @@ class MenuViewModel @Inject constructor(
             loadMenuItems()
             if (isTableOrder) {
                 val existingItemsForTable =
-                    orderRepository.getOpenOrderItemsForTable(currentTableId) // Or from local cache
+                    orderRepository.getOpenOrderItemsForTable(currentTableId)
                 if (existingItemsForTable.isNotEmpty()) {
                     orderDetailsResponse.value = existingItemsForTable
-                    Log.d("existingItemsForTable", "initializeScreen: $existingItemsForTable")
                     val menuItems = existingItemsForTable.map {
 
                         TblMenuItemResponse(
@@ -143,7 +143,6 @@ class MenuViewModel @Inject constructor(
                             actual_rate = it.actual_rate
                         )
                     }
-                    Log.d("existingItemsForTable", "initializeScreen: $menuItems")
                     _selectedItems.value = menuItems.associateWith { it.qty }.toMutableMap()
                     _isExistingOrderLoaded.value = true
                     existingOrderId.value =
@@ -165,7 +164,8 @@ class MenuViewModel @Inject constructor(
             menuRepository.getMenuItems(category).collect { result ->
                 result.fold(
                     onSuccess = { menuItems ->
-                        val showMenu = sessionManager.getGeneralSetting()?.menu_show_in_time ?: false
+                        val showMenu =
+                            sessionManager.getGeneralSetting()?.menu_show_in_time ?: false
 
                         val itemsToShow = if (showMenu) {
                             val currentTime = getCurrentTimeAsFloat()
@@ -388,7 +388,7 @@ class MenuViewModel @Inject constructor(
                         )
                     }
                 }
-            }else{
+            } else {
                 val order = Order(
                     id = 1,
                     tableId = 0,
@@ -405,7 +405,12 @@ class MenuViewModel @Inject constructor(
     }
 
     fun getOrderTotal(tableStatus: String): Double {
-            return _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
+        return if (isExistingOrderLoaded.value) {
+            _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
+                menuItem.actual_rate * quantity
+            }
+        } else {
+            _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
                 if (tableStatus == "AC")
                     menuItem.ac_rate * quantity
                 else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY")
@@ -413,7 +418,7 @@ class MenuViewModel @Inject constructor(
                 else
                     menuItem.rate * quantity
             }
-
+        }
     }
 
     fun getOrderNewTotal(tableStatus: String): Double {
@@ -426,6 +431,7 @@ class MenuViewModel @Inject constructor(
                 menuItem.rate * quantity
         }
     }
+
     fun showModifierDialog(menuItem: TblMenuItemResponse) {
         _selectedMenuItemForModifier.value = menuItem
         _showModifierDialog.value = true

@@ -14,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,7 +46,7 @@ fun RegistrationScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val configuration = LocalContext.current
     val isTablet = MobileUtils.isTablet(configuration)
-    
+
     var showInstallDatePicker by remember { mutableStateOf(false) }
     val installDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis()
@@ -296,7 +295,10 @@ fun RegistrationScreen(
                         readOnly = true,
                         trailingIcon = {
                             IconButton(onClick = { showInstallDatePicker = true }) {
-                                Icon(Icons.Default.CalendarToday, contentDescription = "Select Date")
+                                Icon(
+                                    Icons.Default.CalendarToday,
+                                    contentDescription = "Select Date"
+                                )
                             }
                         }
                     )
@@ -314,8 +316,10 @@ fun RegistrationScreen(
                                 val endDate = LocalDate.now().plusDays(subscriptionDays)
                                 val subscriptionManager = SubscriptionManager(sessionManager)
                                 subscriptionManager.saveSubscriptionEndDate(endDate)
-                                viewModel.updateExpiryDate(LocalDate.now().plusDays(subscriptionDays)
-                                    .toString())
+                                viewModel.updateExpiryDate(
+                                    LocalDate.now().plusDays(subscriptionDays)
+                                        .toString()
+                                )
                             },
                             label = { Text("Subscription Days *") },
                             modifier = Modifier.weight(1f),
@@ -350,7 +354,7 @@ fun RegistrationScreen(
                     ) {
                         MobilePasswordOptimizedTextField(
                             value = uiState.password,
-                            onValueChange = {viewModel.updatePassword(it)},
+                            onValueChange = { viewModel.updatePassword(it) },
                             label = "Password",
                             leadingIcon = {
                                 Icon(
@@ -361,8 +365,10 @@ fun RegistrationScreen(
                             },
                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             trailingIcon = {
-                                val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                                val description = if (passwordVisible) "Hide password" else "Show password"
+                                val image =
+                                    if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                                val description =
+                                    if (passwordVisible) "Hide password" else "Show password"
 
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                     Icon(imageVector = image, contentDescription = description)

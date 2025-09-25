@@ -1,6 +1,7 @@
 package com.warriortech.resb.ai
 
 import android.content.Context
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.warriortech.resb.model.MenuItem
@@ -137,6 +138,7 @@ class AIRepository @Inject constructor(
                 )
 
                 val request = ChatCompletionRequest(messages = messages, max_tokens = 200)
+                Log.d("AIRepository", "Sending request: $request")
                 val response = aiService.getChatCompletion("Bearer $apiKey", request)
 
                 if (response.isSuccessful && response.body() != null) {

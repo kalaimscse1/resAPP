@@ -30,14 +30,14 @@ class MenuCategorySettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val categories = categoryRepository.getAllCategories()
-                _uiState.value = UiState.Success(categories.filter { it.item_cat_name !="--" })
+                _uiState.value = UiState.Success(categories.filter { it.item_cat_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    fun addCategory(name: String, sortOrder: String,is_active: Boolean) {
+    fun addCategory(name: String, sortOrder: String, is_active: Boolean) {
         viewModelScope.launch {
             try {
                 val category = MenuCategory(
@@ -54,7 +54,7 @@ class MenuCategorySettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateCategory(id: Long, name: String,sortOrder: String,is_active: Boolean) {
+    fun updateCategory(id: Long, name: String, sortOrder: String, is_active: Boolean) {
         viewModelScope.launch {
             try {
                 val category = MenuCategory(

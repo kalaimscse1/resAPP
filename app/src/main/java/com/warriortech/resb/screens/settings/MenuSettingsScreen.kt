@@ -15,7 +15,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Menu
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuSettingsViewModel
@@ -45,15 +44,21 @@ fun MenuSettingsScreen(
                 title = { Text("Menu Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showAddDialog = true
-                        viewModel.getOrderBy() }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Menu",
-                            tint = SurfaceLight)
+                    IconButton(onClick = {
+                        showAddDialog = true
+                        viewModel.getOrderBy()
+                    }) {
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Menu",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -64,99 +69,101 @@ fun MenuSettingsScreen(
 
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-            when (val state = uiState) {
-                is MenuSettingsViewModel.UiState.Loading -> {
+        when (val state = uiState) {
+            is MenuSettingsViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is MenuSettingsViewModel.UiState.Success -> {
+                if (state.menus.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text("No menus available. Please add a menu.")
                     }
-                }
-
-                is MenuSettingsViewModel.UiState.Success -> {
-                    if (state.menus.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No menus available. Please add a menu.")
-                        }
-                    } else {
-                        FlowColumn(modifier = Modifier
+                } else {
+                    FlowColumn(
+                        modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            state.menus.forEach { menu ->
-                                MenuCard(
-                                    menu = menu,
-                                    onEdit = { editingMenu = it },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.deleteMenu(it.menu_id)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                is MenuSettingsViewModel.UiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Show error message
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        state.menus.forEach { menu ->
+                            MenuCard(
+                                menu = menu,
+                                onEdit = { editingMenu = it },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteMenu(it.menu_id)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
 
-            if (showAddDialog) {
-                viewModel.getOrderBy()
-                MenuDialog(
-                    menu = null,
-                    onDismiss = { showAddDialog = false },
-                    onConfirm = { menu ->
-                        scope.launch {
-                            viewModel.addMenu(
-                                menu.menu_name,
-                                menu.order_by,
-                                menu.is_active,
-                                menu.start_time,
-                                menu.end_time
-                            )
-                            showAddDialog = false
-                        }
-                    },
-                    order = order
-                )
+            is MenuSettingsViewModel.UiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Show error message
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
+        }
 
-            editingMenu?.let { menu ->
-                MenuDialog(
-                    menu = menu,
-                    onDismiss = { editingMenu = null },
-                    onConfirm = { menu ->
-                        scope.launch {
-                            viewModel.updateMenu(
-                                menu.menu_id,
-                                menu.menu_name,
-                                menu.order_by,
-                                menu.is_active,
-                                menu.start_time,
-                                menu.end_time
-                            )
-                            editingMenu = null
-                        }
-                    },
-                    order = order
-                )
-            }
+        if (showAddDialog) {
+            viewModel.getOrderBy()
+            MenuDialog(
+                menu = null,
+                onDismiss = { showAddDialog = false },
+                onConfirm = { menu ->
+                    scope.launch {
+                        viewModel.addMenu(
+                            menu.menu_name,
+                            menu.order_by,
+                            menu.is_active,
+                            menu.start_time,
+                            menu.end_time
+                        )
+                        showAddDialog = false
+                    }
+                },
+                order = order
+            )
+        }
+
+        editingMenu?.let { menu ->
+            MenuDialog(
+                menu = menu,
+                onDismiss = { editingMenu = null },
+                onConfirm = { menu ->
+                    scope.launch {
+                        viewModel.updateMenu(
+                            menu.menu_id,
+                            menu.menu_name,
+                            menu.order_by,
+                            menu.is_active,
+                            menu.start_time,
+                            menu.end_time
+                        )
+                        editingMenu = null
+                    }
+                },
+                order = order
+            )
+        }
     }
 }
 
@@ -208,7 +215,7 @@ fun MenuDialog(
     menu: Menu?,
     onDismiss: () -> Unit,
     onConfirm: (Menu) -> Unit,
-    order : String
+    order: String
 ) {
 
     var name by remember { mutableStateOf(menu?.menu_name ?: "") }
@@ -220,18 +227,20 @@ fun MenuDialog(
     ReusableBottomSheet(
         onDismiss = onDismiss,
         title = if (menu == null) "Add Menu" else "Edit Menu",
-        onSave = {  val menu = Menu(
-            menu_id = menu?.menu_id ?: 0L,
-            menu_name = name,
-            order_by = description,
-            start_time = startTime,
-            end_time = endTime,
-            is_active = isActive
-        )
-            onConfirm(menu) },
+        onSave = {
+            val menu = Menu(
+                menu_id = menu?.menu_id ?: 0L,
+                menu_name = name,
+                order_by = description,
+                start_time = startTime,
+                end_time = endTime,
+                is_active = isActive
+            )
+            onConfirm(menu)
+        },
         isSaveEnabled = name.isNotBlank() && description.isNotBlank(),
         buttonText = if (menu == null) "Add" else "Update"
-    ){
+    ) {
         Column {
             OutlinedTextField(
                 value = name,
@@ -261,7 +270,7 @@ fun MenuDialog(
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = endTime.toString(),
-                onValueChange = { endTime = it.toFloat()},
+                onValueChange = { endTime = it.toFloat() },
                 label = { Text("End Time") },
                 modifier = Modifier.fillMaxWidth()
             )

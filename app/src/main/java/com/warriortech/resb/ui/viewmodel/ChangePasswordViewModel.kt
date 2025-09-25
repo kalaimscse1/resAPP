@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -43,7 +42,9 @@ class ChangePasswordViewModel @Inject constructor(
                 if (result.isSuccess) {
                     _uiState.value = UiState.Success
                 } else {
-                    _uiState.value = UiState.Error(result.exceptionOrNull()?.message ?: "Failed to change password")
+                    _uiState.value = UiState.Error(
+                        result.exceptionOrNull()?.message ?: "Failed to change password"
+                    )
                 }
 
             } catch (e: Exception) {

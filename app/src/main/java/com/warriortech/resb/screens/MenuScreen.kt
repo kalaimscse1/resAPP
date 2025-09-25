@@ -152,7 +152,7 @@ fun MenuScreen(
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
                     if (sessionManager.getGeneralSetting()?.is_kot!!) {
-                       sucess = true
+                        sucess = true
                         delay(2000)
                         onOrderPlaced()
                     } else {
@@ -178,7 +178,9 @@ fun MenuScreen(
     if (showConfirmDialog) {
         OrderConfirmationDialog(
             selectedItems = if (viewModel.isExistingOrderLoaded.value && newselectedItems.isNotEmpty()) newselectedItems else selectedItems,
-            totalAmount = if (viewModel.isExistingOrderLoaded.value && newselectedItems.isNotEmpty()) viewModel.getOrderNewTotal(effectiveStatus.toString()) else viewModel.getOrderTotal(effectiveStatus.toString()), // Use effectiveStatus
+            totalAmount = if (viewModel.isExistingOrderLoaded.value && newselectedItems.isNotEmpty()) viewModel.getOrderNewTotal(
+                effectiveStatus.toString()
+            ) else viewModel.getOrderTotal(effectiveStatus.toString()), // Use effectiveStatus
             onConfirm = {
                 // The tableId passed here is the one this screen was launched with.
                 // For takeaway/delivery, it might be a specific ID like 0, 1, or 2 as per your existing logic.
@@ -229,10 +231,9 @@ fun MenuScreen(
                     }
                 },
                 actions = {
-                    if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM != "DELIVERY")
-                    {
+                    if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM != "DELIVERY") {
                         IconButton(onClick = {
-                            navController.navigate("selects"){
+                            navController.navigate("selects") {
                                 launchSingleTop = true
                             }
                         }, modifier = Modifier.padding(start = 5.dp)) {
@@ -252,8 +253,7 @@ fun MenuScreen(
                                 tint = SurfaceLight
                             )
                         }
-                    }
-                    else{
+                    } else {
                         IconButton(onClick = {
                             viewModel.clearOrder()
                         }) {
@@ -325,7 +325,11 @@ fun MenuScreen(
                                 )
                             }
                             Text(
-                                text = if (viewModel.isExistingOrderLoaded.value) "New Total: ${CurrencySettings.format(newTotalAmount)}" else
+                                text = if (viewModel.isExistingOrderLoaded.value) "New Total: ${
+                                    CurrencySettings.format(
+                                        newTotalAmount
+                                    )
+                                }" else
                                     "Total: ${CurrencySettings.format(totalAmount)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
@@ -415,10 +419,9 @@ fun MenuScreen(
                         menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
                     } else if (selectedCategory != null && selectedCategory == "ALL") {
                         menuItems
-                    }else if (selectedCategory != null) {
+                    } else if (selectedCategory != null) {
                         menuItems.filter { it.item_cat_name == selectedCategory } // Show all items if "ALL" is selected
-                    }
-                    else {
+                    } else {
                         menuItems // No filtering if no category is selected
                     }
 
@@ -481,9 +484,11 @@ fun MenuScreen(
                             ) { index, menuItem ->
                                 MenuItemCard(
                                     menuItem = menuItem,
-                                    quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem] ?: 0
+                                    quantity = if (viewModel.isExistingOrderLoaded.value) newselectedItems[menuItem]
+                                        ?: 0
                                     else selectedItems[menuItem] ?: 0,
-                                    existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem] ?: 0 else 0,
+                                    existingQuantity = if (viewModel.isExistingOrderLoaded.value) selectedItems[menuItem]
+                                        ?: 0 else 0,
                                     onAddItem = {
                                         viewModel.addItemToOrder(menuItem)
                                         scope.launch {
@@ -499,9 +504,13 @@ fun MenuScreen(
                                     tableStatus = effectiveStatus.toString(),
                                     isExistingOrder = viewModel.isExistingOrderLoaded.value,
                                     onModifierClick = { viewModel.showModifierDialog(menuItem) },
-                                    backgroundColor = if ((selectedItems[menuItem] ?: 0) > 0 || (newselectedItems[menuItem] ?: 0) > 0)
+                                    backgroundColor = if ((selectedItems[menuItem]
+                                            ?: 0) > 0 || (newselectedItems[menuItem] ?: 0) > 0
+                                    )
                                         LightGreen else SecondaryGreen,
-                                    contentColor = if ((selectedItems[menuItem] ?: 0) > 0 || (newselectedItems[menuItem] ?: 0) > 0)
+                                    contentColor = if ((selectedItems[menuItem]
+                                            ?: 0) > 0 || (newselectedItems[menuItem] ?: 0) > 0
+                                    )
                                         LightGreen else ghostWhite,
                                     textColor = Black
                                 )
@@ -593,7 +602,7 @@ fun MenuItemCard(
     onModifierClick: () -> Unit,
     tableStatus: String,
     isExistingOrder: Boolean = false,
-    backgroundColor: Color ,
+    backgroundColor: Color,
     contentColor: Color,
     textColor: Color
 ) {
@@ -655,7 +664,7 @@ fun MenuItemCard(
                                 menuItem.ac_rate
                             ) else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") CurrencySettings.format(
                                 menuItem.parcel_rate
-                            ) else CurrencySettings.format( menuItem.rate),
+                            ) else CurrencySettings.format(menuItem.rate),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = textColor
@@ -682,21 +691,21 @@ fun MenuItemCard(
                         Spacer(modifier = Modifier.padding(horizontal = 2.dp))
                         // ---- QUANTITY ----
 //                        if (quantity > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                                        RoundedCornerShape(4.dp)
-                                    ), contentAlignment = Alignment.Center
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                    RoundedCornerShape(4.dp)
+                                ), contentAlignment = Alignment.Center
+                        )
+                        {
+                            Text(
+                                text = quantity.toString(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
-                            {
-                                Text(
-                                    text = quantity.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        }
 //                        } else {
 //                            Spacer(modifier = Modifier.width(36.dp))
 //                        }
@@ -707,8 +716,8 @@ fun MenuItemCard(
                                 .size(36.dp)
                                 .border(1.dp, DarkGreen, RoundedCornerShape(4.dp))
                                 .pointerInput(Unit) {
-                                detectTapGestures(onTap = { onAddItem() })
-                            },
+                                    detectTapGestures(onTap = { onAddItem() })
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -807,7 +816,7 @@ fun MenuItemCard(
                                         menuItem.ac_rate
                                     ) else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") CurrencySettings.format(
                                         menuItem.parcel_rate
-                                    ) else CurrencySettings.format( menuItem.rate)
+                                    ) else CurrencySettings.format(menuItem.rate)
                                 }",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = if (isExistingOrder) FontWeight.Bold else FontWeight.Normal,
@@ -819,7 +828,7 @@ fun MenuItemCard(
                                     quantity * menuItem.ac_rate
                                 ) else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY") CurrencySettings.format(
                                     quantity * menuItem.parcel_rate
-                                ) else CurrencySettings.format( quantity * menuItem.rate),
+                                ) else CurrencySettings.format(quantity * menuItem.rate),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = textColor
@@ -871,7 +880,7 @@ fun OrderConfirmationDialog(
                     modifier = Modifier
                         .heightIn(max = 250.dp) // restrict height so dialog doesn’t grow infinitely
                         .verticalScroll(rememberScrollState())
-                ){
+                ) {
                     selectedItems.forEach { (item, qty) ->
                         Row(
                             modifier = Modifier
@@ -890,7 +899,10 @@ fun OrderConfirmationDialog(
                                 else -> item.rate
                             }
 
-                            Text(CurrencySettings.format((rate * qty)), style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                CurrencySettings.format((rate * qty)),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
@@ -969,13 +981,12 @@ fun OrderDetailsDialog(
                                 style = MaterialTheme.typography.bodySmall
                             )
 
-                            val rate = when (tableStatus.uppercase()) {
-                                "AC" -> item.ac_rate
-                                "TAKEAWAY", "DELIVERY" -> item.parcel_rate
-                                else -> item.rate
-                            }
 
-                            Text(CurrencySettings.format((rate * qty)), style = MaterialTheme.typography.bodySmall)
+
+                            Text(
+                                CurrencySettings.format((item.actual_rate * qty)),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }

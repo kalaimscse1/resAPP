@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import android.util.Log
@@ -39,7 +38,7 @@ class UnpaidBillsViewModel @Inject constructor(
                 _uiState.value = UnpaidBillsUiState.Loading
                 val tenantId = sessionManager.getCompanyCode() ?: ""
                 val response = billRepository.getUnpaidBills(tenantId, fromDate, toDate)
-                
+
                 response.collect { result ->
                     result.onSuccess { bills ->
                         _uiState.value = UnpaidBillsUiState.Success(bills)

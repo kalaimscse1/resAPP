@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Divider
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Icon
@@ -38,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.theme.*
 import com.warriortech.resb.ui.viewmodel.CounterViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
@@ -69,8 +69,6 @@ fun ItemWiseBillScreen(
     val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
     val menuState by viewModel.menuState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
-    val orderId by viewModel.orderId.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
     var showDialog by remember { mutableStateOf(false) }
@@ -135,10 +133,9 @@ fun ItemWiseBillScreen(
                         if (selectedItems.isNotEmpty()){
                             isProcessingCash = true
                             viewModel.cashPrintBill()
-                            // Show immediate feedback without blocking delays
                             scope.launch {
                                 success = true
-                                delay(2000) // Reduced delay for success message
+                                delay(2000)
                                 success = false
                                 isProcessingCash = false
                             }
@@ -179,7 +176,6 @@ fun ItemWiseBillScreen(
                 .padding(padding)
         ) {
             values = padding
-            // Header Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +188,6 @@ fun ItemWiseBillScreen(
                 Text("TOTAL", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
             }
 
-            // Cart Table
             LazyColumn(
                 modifier = Modifier
                     .weight(0.5f)
@@ -201,7 +196,7 @@ fun ItemWiseBillScreen(
             ) {
                 items(
                     selectedItems.entries.toList(),
-                    key = { entry -> "${entry.key.menu_item_id}_${entry.key.menu_id}" } // ✅ stable unique key
+                    key = { entry -> "${entry.key.menu_item_id}_${entry.key.menu_id}" }
                 ) { entry ->
                     val item = entry.key
                     val qty = entry.value
@@ -224,7 +219,6 @@ fun ItemWiseBillScreen(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Minus
                                 Box(
                                     modifier = Modifier
                                         .size(32.dp)
@@ -239,7 +233,6 @@ fun ItemWiseBillScreen(
 
                                 Text("$qty", fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
 
-                                // Plus
                                 Box(
                                     modifier = Modifier
                                         .size(32.dp)
@@ -260,7 +253,6 @@ fun ItemWiseBillScreen(
                 }
             }
 
-            // Total Row
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -276,7 +268,6 @@ fun ItemWiseBillScreen(
                 }
             }
 
-            // Product Grid + Tabs
             when (val state = menuState) {
                 is CounterViewModel.MenuUiState.Loading -> {
                     Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -323,7 +314,7 @@ fun ItemWiseBillScreen(
                         ) {
                             itemsIndexed(
                                 filteredMenuItems,
-                                key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" } // ✅ unique key
+                                key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" }
                             ) { _, product ->
                                 Card(
                                     modifier = Modifier
@@ -336,12 +327,8 @@ fun ItemWiseBillScreen(
                                                 val end = cartOffset
                                                 FlyToCartController.current?.invoke(product, start, end)
                                                 viewModel.addItemToOrder(product)
-                                                // add item to cart in VM here
                                             }
                                         },
-//                                        .pointerInput(Unit) {
-//                                            detectTapGestures {  }
-//                                        },
                                     elevation = CardDefaults.cardElevation(4.dp),
                                     shape = RoundedCornerShape(6.dp),
                                     colors = CardDefaults.cardColors(containerColor = ghostWhite)
@@ -371,7 +358,6 @@ fun ItemWiseBillScreen(
                         }
                     }
                 }
-
                 else -> {}
             }
         }
@@ -451,7 +437,6 @@ object FlyToCartController {
     var current: ((TblMenuItemResponse, Offset, Offset) -> Unit)? = null
 }
 
-// Overlay composable that draws the flying item
 @Composable
 fun FlyToCartOverlay() {
     val scope = rememberCoroutineScope()
@@ -471,7 +456,6 @@ fun FlyToCartOverlay() {
         }
     }
 
-    // expose controller
     FlyToCartController.current = { label, start, end ->
         animItem = label.menu_item_name
         scope.launch {

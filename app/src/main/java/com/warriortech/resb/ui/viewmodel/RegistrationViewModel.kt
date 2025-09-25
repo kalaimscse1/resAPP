@@ -1,8 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
-
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.RegistrationRepository
@@ -11,11 +9,9 @@ import com.warriortech.resb.model.RegistrationRequest
 import com.warriortech.resb.model.RestaurantProfile
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -115,32 +111,33 @@ class RegistrationViewModel @Inject constructor(
     }
 
     @SuppressLint("SuspiciousIndentation")
-    fun loadCompanyCode(){
+    fun loadCompanyCode() {
         viewModelScope.launch {
-            try{
+            try {
                 val companyCode = registrationRepository.getCompanyCode()
-                    companyCode.let {
-                       val code = it["company_master_code"] ?: ""
-                       _uiState.value = _uiState.value.copy(
-                           companyMasterCode = code,
-                           databaseName = code
-                       )
-                    }
+                companyCode.let {
+                    val code = it["company_master_code"] ?: ""
+                    _uiState.value = _uiState.value.copy(
+                        companyMasterCode = code,
+                        databaseName = code
+                    )
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
     fun registerCompany() {
         val state = _uiState.value
-        
+
         if (!validateForm(state)) {
             _registrationResult.value = "Please fill all required fields"
             return
         }
 
         _uiState.value = _uiState.value.copy(isLoading = true)
-        if (state.password=="kingtec2025#") {
+        if (state.password == "kingtec2025#") {
             viewModelScope.launch {
                 try {
                     val request = RegistrationRequest(
@@ -202,17 +199,17 @@ class RegistrationViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
-        }
-        else{
+        } else {
             _registrationResult.value = "Invalid Admin Password!"
             _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
+
     /**
      * Creates a restaurant profile after successful registration.
      * @param response The registration response containing company details.
      */
-    private fun createCompany(response: Registration){
+    private fun createCompany(response: Registration) {
         viewModelScope.launch {
             try {
                 val res = response
@@ -237,11 +234,11 @@ class RegistrationViewModel @Inject constructor(
                 )
                 val result = registrationRepository.addRestaurantProfile(profile)
                 if (result != null) {
-                   sessionManager.saveRestaurantProfile(profile)
+                    sessionManager.saveRestaurantProfile(profile)
                 } else {
                     _registrationResult.value = "Registration UnSuccessful!"
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 _registrationResult.value = "Registration failed: ${e.message}"
             } finally {
                 _uiState.value = _uiState.value.copy(isLoading = false)
@@ -249,8 +246,7 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
-    private fun validateForm(state: RegistrationUiState): Boolean
-    {
+    private fun validateForm(state: RegistrationUiState): Boolean {
         return state.companyMasterCode.isNotBlank() &&
                 state.companyName.isNotBlank() &&
                 state.ownerName.isNotBlank() &&
@@ -286,6 +282,6 @@ data class RegistrationUiState(
     val expiryDate: String = "",
     val isBlock: Boolean = false,
     val isLoading: Boolean = false,
-    val password : String="",
+    val password: String = "",
     val emailError: String? = null,
 )

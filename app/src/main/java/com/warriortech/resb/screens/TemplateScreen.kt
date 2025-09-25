@@ -32,7 +32,7 @@ fun TemplateScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTabIndex by remember { mutableStateOf(0) }
-    
+
     val tabTitles = listOf("KOT Templates", "Bill Templates")
     val receiptTypes = listOf(ReceiptType.KOT, ReceiptType.BILL)
 
@@ -179,7 +179,7 @@ fun TemplateCard(
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
-                
+
                 if (template.isDefault) {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -226,7 +226,7 @@ fun TemplateCard(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Preview")
                     }
-                    
+
                     TextButton(onClick = onEdit) {
                         Icon(Icons.Default.Edit, contentDescription = null)
                         Spacer(modifier = Modifier.width(4.dp))
@@ -244,7 +244,7 @@ fun TemplateCard(
                             Text("Set Default")
                         }
                     }
-                    
+
                     TextButton(
                         onClick = onDelete,
                         colors = ButtonDefaults.textButtonColors(

@@ -23,9 +23,7 @@ import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.model.TblVoucherType
-import com.warriortech.resb.screens.SettingsModule
 import kotlin.collections.forEach
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -212,7 +210,8 @@ fun VoucherTypeDropdown(
         modifier = modifier
     ) {
         OutlinedTextField( // Or TextField if you prefer a different style
-            value = selectedVoucherType?.voucher_type_name ?: "", // Display selected area name or empty
+            value = selectedVoucherType?.voucher_type_name
+                ?: "", // Display selected area name or empty
             onValueChange = {}, // Not directly editable, selection happens via dropdown
             readOnly = true,
             label = { Text(label) },
@@ -437,7 +436,8 @@ fun MenuCategoryDropdown(
         modifier = modifier
     ) {
         OutlinedTextField( // Or TextField if you prefer a different style
-            value = selectedMenuCategory?.item_cat_name ?: "", // Display selected area name or empty
+            value = selectedMenuCategory?.item_cat_name
+                ?: "", // Display selected area name or empty
             onValueChange = {}, // Not directly editable, selection happens via dropdown
             readOnly = true,
             label = { Text(label) },
@@ -494,7 +494,8 @@ fun KitchenGroupDropdown(
         modifier = modifier
     ) {
         OutlinedTextField( // Or TextField if you prefer a different style
-            value = selectedKitchenCategory?.kitchen_cat_name ?: "", // Display selected area name or empty
+            value = selectedKitchenCategory?.kitchen_cat_name
+                ?: "", // Display selected area name or empty
             onValueChange = {}, // Not directly editable, selection happens via dropdown
             readOnly = true,
             label = { Text(label) },

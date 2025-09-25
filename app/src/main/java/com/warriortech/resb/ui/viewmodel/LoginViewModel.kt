@@ -1,11 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
 import android.util.Log
-import androidx.compose.animation.core.copy
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.LoginRequest
@@ -31,6 +26,7 @@ data class LoginUiState(
     val loginError: String? = null,
     val loginSuccess: Boolean = false
 )
+
 /**
  * ViewModel for handling user login functionality.
  */
@@ -54,33 +50,33 @@ class LoginViewModel @Inject constructor(
         val savedCompanyCode = sessionManager.getCompanyCode() ?: ""
         _uiState.update { it.copy(companyCode = savedCompanyCode) }
 
-        val savedUserName = sessionManager.getUser()?.user_name?:""
+        val savedUserName = sessionManager.getUser()?.user_name ?: ""
         _uiState.update { it.copy(username = savedUserName) }
     }
 
     fun onCompanyCodeChange(companyCode: String) {
-        _uiState.update {it.copy(companyCode = companyCode.uppercase(), loginError = null)}
+        _uiState.update { it.copy(companyCode = companyCode.uppercase(), loginError = null) }
     }
 
     /**
      * Handles changes to the username input field.
      */
     fun onUsernameChange(username: String) {
-        _uiState.update{it.copy(username = username, loginError = null)}
+        _uiState.update { it.copy(username = username, loginError = null) }
     }
 
     /**
      * Handles changes to the password input field.
      */
     fun onPasswordChange(password: String) {
-        _uiState.update{it.copy(password = password, loginError = null)}
+        _uiState.update { it.copy(password = password, loginError = null) }
     }
 
     /**
      * Toggles the visibility of the password input field.
      */
     fun togglePasswordVisibility() {
-        _uiState.update{it.copy(isPasswordVisible = !uiState.value.isPasswordVisible)}
+        _uiState.update { it.copy(isPasswordVisible = !uiState.value.isPasswordVisible) }
     }
 
     /**
@@ -91,27 +87,35 @@ class LoginViewModel @Inject constructor(
                 uiState.value.password.isNotBlank() &&
                 uiState.value.companyCode.isNotBlank()
     }
+
     /**
      * Login function that attempts to log in the user with the provided credentials.
      */
 
     fun attemptLogin() {
         if (!validateInput()) {
-            _uiState.update{it.copy(loginError = "Please fill all fields")}
+            _uiState.update { it.copy(loginError = "Please fill all fields") }
             return
         }
 
-        _uiState.update{it.copy(isLoading = true, loginError = null)}
+        _uiState.update { it.copy(isLoading = true, loginError = null) }
         viewModelScope.launch {
             try {
-                val check = RetrofitClient.apiService.checkIsBlock(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
-                val generalSetting = RetrofitClient.apiService.getGeneralSettings(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
-                val profile = RetrofitClient.apiService.getRestaurantProfile(
-                    tenantId = uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""), companyCode = uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                val check = RetrofitClient.apiService.checkIsBlock(
+                    uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
                 )
-                if (check.data!!){
+                val generalSetting = RetrofitClient.apiService.getGeneralSettings(
+                    uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                )
+                val profile = RetrofitClient.apiService.getRestaurantProfile(
+                    tenantId = uiState.value.companyCode.trim()
+                        .replace(Regex("[^a-zA-Z0-9_-]"), ""),
+                    companyCode = uiState.value.companyCode.trim()
+                        .replace(Regex("[^a-zA-Z0-9_-]"), "")
+                )
+                if (check.data!!) {
                     val response = RetrofitClient.apiService.login(
-                        request=LoginRequest(
+                        request = LoginRequest(
                             companyCode = uiState.value.companyCode,
                             user_name = uiState.value.username,
                             password = uiState.value.password
@@ -126,23 +130,36 @@ class LoginViewModel @Inject constructor(
                         sessionManager.saveUserLogin(true)
                         sessionManager.saveAuthToken(authResponse.token)
                         sessionManager.saveUser(authResponse.user)
-                        sessionManager.saveCompanyCode(uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), ""))
-                        sessionManager.saveGeneralSetting(general?.get(0) ?: error("general setting failed"))
+                        sessionManager.saveCompanyCode(
+                            uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                        )
+                        sessionManager.saveGeneralSetting(
+                            general?.get(0) ?: error("general setting failed")
+                        )
                         sessionManager.saveDecimalPlaces(profile.decimal_point)
                         sessionManager.saveRestaurantProfile(profile)
 
-                        _uiState.update{it.copy(isLoading = false, loginSuccess = true)}
+                        _uiState.update { it.copy(isLoading = false, loginSuccess = true) }
                     } else {
-                        _uiState.update{it.copy(isLoading = false, loginError = "Login failed: ${response.message}")}
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                loginError = "Login failed: ${response.message}"
+                            )
+                        }
                     }
 
-                }
-                else{
-                    _uiState.update{it.copy(isLoading = false, loginError = check.message)}
+                } else {
+                    _uiState.update { it.copy(isLoading = false, loginError = check.message) }
                 }
 
             } catch (e: Exception) {
-                _uiState.update{it.copy(isLoading = false, loginError = "Error: ${e.message ?: "Unknown error"}")}
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        loginError = "Error: ${e.message ?: "Unknown error"}"
+                    )
+                }
             }
         }
     }
@@ -151,6 +168,6 @@ class LoginViewModel @Inject constructor(
      * Resets the login success state after handling the login result.
      */
     fun onLoginHandled() {
-        _uiState.update{it.copy(loginSuccess = false, loginError = null)}
+        _uiState.update { it.copy(loginSuccess = false, loginError = null) }
     }
 }

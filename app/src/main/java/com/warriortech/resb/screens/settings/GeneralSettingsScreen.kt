@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.R
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.GeneralSettingsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.GeneralSettings
@@ -43,12 +42,19 @@ fun GeneralSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.general_settings),
-                    color = SurfaceLight) },
+                title = {
+                    Text(
+                        stringResource(R.string.general_settings),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -58,76 +64,82 @@ fun GeneralSettingsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-     Column( modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                ) {
-          when (val state=uiState){
-            is GeneralSettingsViewModel.UiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is GeneralSettingsViewModel.UiState.Success -> {
-                if (state.generalSettings.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (val state = uiState) {
+                is GeneralSettingsViewModel.UiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No General Setting found", style = MaterialTheme.typography.bodyLarge)
+                        CircularProgressIndicator()
                     }
-                    return@Column
-                } else{
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp)
-                    ) {
-                        items(state.generalSettings) { setting ->
+                }
 
-                            GeneralSettingDialog(
-                                setting = setting,
-                                onDismiss = {
-                                    showAddDialog = false
-                                    editingTable = null
-                                },
-                                onSave = { newSetting ->
-                                    scope.launch {
-                                        viewModel.updateSettings(newSetting)
-                                        snackbarHostState.showSnackbar("General Settings updated successfully")
-                                    }
-                                    showAddDialog = false
-                                    editingTable = null
-                                }
+                is GeneralSettingsViewModel.UiState.Success -> {
+                    if (state.generalSettings.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No General Setting found",
+                                style = MaterialTheme.typography.bodyLarge
                             )
+                        }
+                        return@Column
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp)
+                        ) {
+                            items(state.generalSettings) { setting ->
+
+                                GeneralSettingDialog(
+                                    setting = setting,
+                                    onDismiss = {
+                                        showAddDialog = false
+                                        editingTable = null
+                                    },
+                                    onSave = { newSetting ->
+                                        scope.launch {
+                                            viewModel.updateSettings(newSetting)
+                                            snackbarHostState.showSnackbar("General Settings updated successfully")
+                                        }
+                                        showAddDialog = false
+                                        editingTable = null
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                is GeneralSettingsViewModel.UiState.Error -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+
+                    ) {
+
+                        Text(
+                            text = "Error: ${state.message}",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(
+                            onClick = { viewModel.loadSettings() },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text("Retry")
                         }
                     }
                 }
             }
-            is GeneralSettingsViewModel.UiState.Error -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-
-                ) {
-
-                    Text(
-                        text = "Error: ${state.message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Button(
-                        onClick = { viewModel.loadSettings() },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text("Retry")
-                    }
-                }
-            }
-          }
-       }
+        }
     }
 }
 
@@ -371,7 +383,7 @@ fun GeneralSettingDialog(
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Switch(
                 checked = isCompanyShow,
                 onCheckedChange = { isCompanyShow = it }
@@ -465,7 +477,7 @@ fun GeneralSettingDialog(
                 )
                 onSave(newSetting)
             }
-        ){
+        ) {
             Text(
                 text = if (setting == null) "Add Setting" else "Update ",
                 fontWeight = FontWeight.Bold

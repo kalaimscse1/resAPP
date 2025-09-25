@@ -40,7 +40,13 @@ class MenuSettingsViewModel @Inject constructor(
         }
     }
 
-    fun addMenu(name: String, description: String, isActive: Boolean,startTime:Float,endTime:Float) {
+    fun addMenu(
+        name: String,
+        description: String,
+        isActive: Boolean,
+        startTime: Float,
+        endTime: Float
+    ) {
         viewModelScope.launch {
             try {
                 val menu = Menu(
@@ -59,7 +65,14 @@ class MenuSettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateMenu(id: Long, name: String, description: String, isActive: Boolean,startTime:Float,endTime:Float) {
+    fun updateMenu(
+        id: Long,
+        name: String,
+        description: String,
+        isActive: Boolean,
+        startTime: Float,
+        endTime: Float
+    ) {
         viewModelScope.launch {
             try {
                 val menu = Menu(
@@ -88,13 +101,13 @@ class MenuSettingsViewModel @Inject constructor(
             }
         }
     }
-    fun getOrderBy(){
+
+    fun getOrderBy() {
         viewModelScope.launch {
             try {
-               val response= menuRepository.getOrderBy()
-                _orderBy.value= response["order_by"].toString()
-            }
-            catch (e: Exception){
+                val response = menuRepository.getOrderBy()
+                _orderBy.value = response["order_by"].toString()
+            } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to getOrderBy")
             }
         }

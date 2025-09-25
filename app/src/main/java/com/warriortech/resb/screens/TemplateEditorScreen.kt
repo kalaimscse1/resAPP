@@ -26,7 +26,7 @@ fun TemplateEditorScreen(
 ) {
     val editingTemplate by viewModel.editingTemplate.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
-    
+
     val template = editingTemplate ?: return
     LaunchedEffect(templateId) {
         val template = uiState.templates.find { it.id == templateId }
@@ -38,9 +38,9 @@ fun TemplateEditorScreen(
             TopAppBar(
                 title = { Text("Edit Template") },
                 navigationIcon = {
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         viewModel.cancelEditing()
-                        navController.popBackStack() 
+                        navController.popBackStack()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
@@ -72,7 +72,7 @@ fun TemplateEditorScreen(
             // Template Name
             OutlinedTextField(
                 value = template.name,
-                onValueChange = { 
+                onValueChange = {
                     viewModel.updateEditingTemplate(template.copy(name = it))
                 },
                 label = { Text("Template Name") },
@@ -89,7 +89,7 @@ fun TemplateEditorScreen(
             // Header Settings
             HeaderSettingsSection(
                 headerSettings = template.headerSettings,
-                onHeaderSettingsChange = { 
+                onHeaderSettingsChange = {
                     viewModel.updateEditingTemplate(template.copy(headerSettings = it))
                 }
             )
@@ -97,7 +97,7 @@ fun TemplateEditorScreen(
             // Body Settings
             BodySettingsSection(
                 bodySettings = template.bodySettings,
-                onBodySettingsChange = { 
+                onBodySettingsChange = {
                     viewModel.updateEditingTemplate(template.copy(bodySettings = it))
                 }
             )
@@ -105,7 +105,7 @@ fun TemplateEditorScreen(
             // Footer Settings
             FooterSettingsSection(
                 footerSettings = template.footerSettings,
-                onFooterSettingsChange = { 
+                onFooterSettingsChange = {
                     viewModel.updateEditingTemplate(template.copy(footerSettings = it))
                 }
             )
@@ -113,7 +113,7 @@ fun TemplateEditorScreen(
             // Paper Settings
             PaperSettingsSection(
                 paperSettings = template.paperSettings,
-                onPaperSettingsChange = { 
+                onPaperSettingsChange = {
                     viewModel.updateEditingTemplate(template.copy(paperSettings = it))
                 }
             )
@@ -146,7 +146,7 @@ fun HeaderSettingsSection(
             ) {
                 Checkbox(
                     checked = headerSettings.showLogo,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onHeaderSettingsChange(headerSettings.copy(showLogo = it))
                     }
                 )
@@ -155,7 +155,7 @@ fun HeaderSettingsSection(
 
             OutlinedTextField(
                 value = headerSettings.businessName,
-                onValueChange = { 
+                onValueChange = {
                     onHeaderSettingsChange(headerSettings.copy(businessName = it))
                 },
                 label = { Text("Business Name") },
@@ -164,7 +164,7 @@ fun HeaderSettingsSection(
 
             OutlinedTextField(
                 value = headerSettings.businessAddress,
-                onValueChange = { 
+                onValueChange = {
                     onHeaderSettingsChange(headerSettings.copy(businessAddress = it))
                 },
                 label = { Text("Business Address") },
@@ -173,7 +173,7 @@ fun HeaderSettingsSection(
 
             OutlinedTextField(
                 value = headerSettings.businessPhone,
-                onValueChange = { 
+                onValueChange = {
                     onHeaderSettingsChange(headerSettings.copy(businessPhone = it))
                 },
                 label = { Text("Business Phone") },
@@ -183,7 +183,7 @@ fun HeaderSettingsSection(
             Text("Font Size: ${headerSettings.fontSize}sp")
             Slider(
                 value = headerSettings.fontSize.toFloat(),
-                onValueChange = { 
+                onValueChange = {
                     onHeaderSettingsChange(headerSettings.copy(fontSize = it.toInt()))
                 },
                 valueRange = 8f..24f,
@@ -192,14 +192,14 @@ fun HeaderSettingsSection(
 
             FontWeightDropdown(
                 selectedWeight = headerSettings.fontWeight,
-                onWeightChange = { 
+                onWeightChange = {
                     onHeaderSettingsChange(headerSettings.copy(fontWeight = it))
                 }
             )
 
             TextAlignDropdown(
                 selectedAlign = headerSettings.textAlign,
-                onAlignChange = { 
+                onAlignChange = {
                     onHeaderSettingsChange(headerSettings.copy(textAlign = it))
                 }
             )
@@ -232,7 +232,7 @@ fun BodySettingsSection(
             ) {
                 Checkbox(
                     checked = bodySettings.showItemDetails,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onBodySettingsChange(bodySettings.copy(showItemDetails = it))
                     }
                 )
@@ -245,7 +245,7 @@ fun BodySettingsSection(
             ) {
                 Checkbox(
                     checked = bodySettings.showQuantity,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onBodySettingsChange(bodySettings.copy(showQuantity = it))
                     }
                 )
@@ -258,7 +258,7 @@ fun BodySettingsSection(
             ) {
                 Checkbox(
                     checked = bodySettings.showPrice,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onBodySettingsChange(bodySettings.copy(showPrice = it))
                     }
                 )
@@ -271,7 +271,7 @@ fun BodySettingsSection(
             ) {
                 Checkbox(
                     checked = bodySettings.showBorders,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onBodySettingsChange(bodySettings.copy(showBorders = it))
                     }
                 )
@@ -281,7 +281,7 @@ fun BodySettingsSection(
             Text("Font Size: ${bodySettings.fontSize}sp")
             Slider(
                 value = bodySettings.fontSize.toFloat(),
-                onValueChange = { 
+                onValueChange = {
                     onBodySettingsChange(bodySettings.copy(fontSize = it.toInt()))
                 },
                 valueRange = 8f..20f,
@@ -290,7 +290,7 @@ fun BodySettingsSection(
 
             FontWeightDropdown(
                 selectedWeight = bodySettings.fontWeight,
-                onWeightChange = { 
+                onWeightChange = {
                     onBodySettingsChange(bodySettings.copy(fontWeight = it))
                 }
             )
@@ -298,7 +298,7 @@ fun BodySettingsSection(
             Text("Line Spacing: ${bodySettings.lineSpacing}dp")
             Slider(
                 value = bodySettings.lineSpacing.toFloat(),
-                onValueChange = { 
+                onValueChange = {
                     onBodySettingsChange(bodySettings.copy(lineSpacing = it.toInt()))
                 },
                 valueRange = 1f..8f,
@@ -333,7 +333,7 @@ fun FooterSettingsSection(
             ) {
                 Checkbox(
                     checked = footerSettings.showThankYou,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onFooterSettingsChange(footerSettings.copy(showThankYou = it))
                     }
                 )
@@ -346,7 +346,7 @@ fun FooterSettingsSection(
             ) {
                 Checkbox(
                     checked = footerSettings.showDateTime,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         onFooterSettingsChange(footerSettings.copy(showDateTime = it))
                     }
                 )
@@ -355,7 +355,7 @@ fun FooterSettingsSection(
 
             OutlinedTextField(
                 value = footerSettings.customMessage,
-                onValueChange = { 
+                onValueChange = {
                     onFooterSettingsChange(footerSettings.copy(customMessage = it))
                 },
                 label = { Text("Custom Message") },
@@ -365,7 +365,7 @@ fun FooterSettingsSection(
             Text("Font Size: ${footerSettings.fontSize}sp")
             Slider(
                 value = footerSettings.fontSize.toFloat(),
-                onValueChange = { 
+                onValueChange = {
                     onFooterSettingsChange(footerSettings.copy(fontSize = it.toInt()))
                 },
                 valueRange = 8f..16f,
@@ -374,14 +374,14 @@ fun FooterSettingsSection(
 
             FontWeightDropdown(
                 selectedWeight = footerSettings.fontWeight,
-                onWeightChange = { 
+                onWeightChange = {
                     onFooterSettingsChange(footerSettings.copy(fontWeight = it))
                 }
             )
 
             TextAlignDropdown(
                 selectedAlign = footerSettings.textAlign,
-                onAlignChange = { 
+                onAlignChange = {
                     onFooterSettingsChange(footerSettings.copy(textAlign = it))
                 }
             )
@@ -410,7 +410,7 @@ fun PaperSettingsSection(
 
             PaperSizeDropdown(
                 selectedSize = paperSettings.paperSize,
-                onSizeChange = { 
+                onSizeChange = {
                     onPaperSettingsChange(paperSettings.copy(paperSize = it))
                 }
             )
@@ -418,7 +418,7 @@ fun PaperSettingsSection(
             Text("Character Width: ${paperSettings.characterWidth}")
             Slider(
                 value = paperSettings.characterWidth.toFloat(),
-                onValueChange = { 
+                onValueChange = {
                     onPaperSettingsChange(paperSettings.copy(characterWidth = it.toInt()))
                 },
                 valueRange = 24f..80f,
@@ -434,10 +434,12 @@ fun PaperSettingsSection(
                     Text("Top: ${paperSettings.margins.top}dp")
                     Slider(
                         value = paperSettings.margins.top.toFloat(),
-                        onValueChange = { 
-                            onPaperSettingsChange(paperSettings.copy(
-                                margins = paperSettings.margins.copy(top = it.toInt())
-                            ))
+                        onValueChange = {
+                            onPaperSettingsChange(
+                                paperSettings.copy(
+                                    margins = paperSettings.margins.copy(top = it.toInt())
+                                )
+                            )
                         },
                         valueRange = 0f..20f,
                         steps = 19,
@@ -448,10 +450,12 @@ fun PaperSettingsSection(
                     Text("Bottom: ${paperSettings.margins.bottom}dp")
                     Slider(
                         value = paperSettings.margins.bottom.toFloat(),
-                        onValueChange = { 
-                            onPaperSettingsChange(paperSettings.copy(
-                                margins = paperSettings.margins.copy(bottom = it.toInt())
-                            ))
+                        onValueChange = {
+                            onPaperSettingsChange(
+                                paperSettings.copy(
+                                    margins = paperSettings.margins.copy(bottom = it.toInt())
+                                )
+                            )
                         },
                         valueRange = 0f..20f,
                         steps = 19,

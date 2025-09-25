@@ -8,19 +8,15 @@ import com.warriortech.resb.data.repository.BillRepository
 import com.warriortech.resb.data.repository.CustomerRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.data.repository.calculateGst
-import com.warriortech.resb.data.repository.calculateGstAndCess
 import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.BillItem
-import com.warriortech.resb.model.KOTRequest
-import com.warriortech.resb.model.MenuItem
-import com.warriortech.resb.model.Order
+import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
-import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
-import com.warriortech.resb.ui.viewmodel.MenuViewModel.OrderUiState
+import com.warriortech.resb.ui.viewmodel.CounterViewModel.MenuUiState
 import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -33,49 +29,40 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.iterator
-
-// --- Data Models (Place in your 'model' package) ---
-// These are illustrative. Define them based on your actual needs.
 
 data class PaymentMethod(
     val id: String,
-    val name: String, // e.g., "Cash", "Credit Card", "UPI"
-    val iconResId: Int? = null // Optional: for displaying an icon
+    val name: String,
+    val iconResId: Int? = null
 )
 
-// Represents the state of a payment attempt
 sealed interface PaymentProcessingState {
     object Idle : PaymentProcessingState
     object Processing : PaymentProcessingState
-    data class Success(val order:PaidOrder, val transactionId: String) : PaymentProcessingState
+    data class Success(val order: PaidOrder, val transactionId: String) : PaymentProcessingState
     data class Error(val message: String) : PaymentProcessingState
 }
 
-// Represents the overall UI state for Billing and Payment
 data class BillingPaymentUiState(
-    // Billing Details (from your existing ViewModel)
     val billedItems: Map<TblMenuItemResponse, Int> = emptyMap(),
-    val tableStatus: String = "TABLE", // Default GST
+    val tableStatus: String = "TABLE",
     val discountFlat: Double = 0.0,
     val otherChrages: Double = 0.0,
-    val cessSpecific: Double=0.0,
-    val cessAmount: Double = 0.0, // Cess percentage if applicable
+    val cessSpecific: Double = 0.0,
+    val cessAmount: Double = 0.0,
     val subtotal: Double = 0.0,
     val taxAmount: Double = 0.0,
     val totalAmount: Double = 0.0,
     val orderDetails: List<TblOrderDetailsResponse> = emptyList(),
     val orderMasterId: String? = null,
-    val discount: Double = 0.0, // Flat discount amount
+    val discount: Double = 0.0,
     val selectedKotNumber: Int? = null,
-    // Payment Details
     val availablePaymentMethods: List<PaymentMethod> = emptyList(),
     val selectedPaymentMethod: PaymentMethod? = null,
-    val amountToPay: Double = 0.0, // Could be same as totalAmount or partial
+    val amountToPay: Double = 0.0,
     val paymentProcessingState: PaymentProcessingState = PaymentProcessingState.Idle,
     val amountReceived: Double = 0.0,
     val changeAmount: Double = 0.0,
-    // General
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val cashAmount: Double = 0.0,
@@ -120,14 +107,16 @@ class BillingViewModel @Inject constructor(
     val customerId: StateFlow<Long> = _customerId.asStateFlow()
 
     init {
-        // Load initial data like available payment methods
-     viewModelScope.launch {
-    val customerList = customerRepository.getAllCustomers()
-    _customers.value = customerList
-    loadAvailablePaymentMethods()
-    CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
-           }
-       }
+        viewModelScope.launch {
+            val customerList = customerRepository.getAllCustomers()
+            _customers.value = customerList
+            loadAvailablePaymentMethods()
+            CurrencySettings.update(
+                symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+                decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+            )
+        }
+    }
 
     fun updateCustomerId(id: Long) {
         _customerId.value = id
@@ -136,6 +125,7 @@ class BillingViewModel @Inject constructor(
     fun updateBillNo(billNo: String) {
         _billNo.value = billNo
     }
+
     fun loadCustomers() {
         viewModelScope.launch {
             try {
@@ -146,28 +136,34 @@ class BillingViewModel @Inject constructor(
             }
         }
     }
+
     /**
      * Central function to recalc totals based on billed items
      */
+
     private fun recalcTotals(items: Map<TblMenuItemResponse, Int>): BillingPaymentUiState {
+
         val subtotal = items.entries.sumOf { (menuItem, qty) -> menuItem.rate * qty }
         val taxAmount = items.entries.sumOf { (menuItem, qty) ->
-            val gst = calculateGst(menuItem.actual_rate, menuItem.tax_percentage.toDouble(), true,menuItem.tax_percentage.toDouble()/2,menuItem.tax_percentage.toDouble()/2)
+            val gst = calculateGst(
+                menuItem.actual_rate,
+                menuItem.tax_percentage.toDouble(),
+                true,
+                menuItem.tax_percentage.toDouble() / 2,
+                menuItem.tax_percentage.toDouble() / 2
+            )
             Log.d("GSTCALC", "recalcTotals: $gst ${menuItem.actual_rate}")
             gst.gstAmount * qty
-//            uiState.value.taxAmount * qty
         }
 
-        Log.d("GSTCALC", "recalcTotals: $taxAmount")
         val cessAmount = items.entries.sumOf { (menuItem, qty) ->
-            if (menuItem.is_inventory ==1L && menuItem.cess_specific!=0.00)
-            {
+            if (menuItem.is_inventory == 1L && menuItem.cess_specific != 0.00) {
                 menuItem.cess_specific * qty
-            }
-            else 0.0
+            } else 0.0
         }
+
         val cessSpecific = items.entries.sumOf { (menuItem, qty) ->
-            if (menuItem.is_inventory ==1L) {
+            if (menuItem.is_inventory == 1L) {
                 (menuItem.actual_rate * qty) * (menuItem.cess_per.toDoubleOrNull() ?: 0.0) / 100.0
             } else 0.0
         }
@@ -185,8 +181,13 @@ class BillingViewModel @Inject constructor(
             amountToPay = totalAmount
         )
     }
-    fun setMenuDetails(menu: Map<TblMenuItemResponse, Int>){
+
+    fun setMenuDetails(menu: Map<TblMenuItemResponse, Int>) {
         _selectedItems.value = menu
+    }
+
+    fun setOrderId(orderId: String) {
+        _orderId.value = orderId
     }
 
     fun setBillingDetailsFromOrderResponse(
@@ -201,9 +202,10 @@ class BillingViewModel @Inject constructor(
                 // This function sets billing details from an existing order response
                 // Set billing details from TblOrderDetailsResponse
 
+                _orderId.value = orderMasterId
                 _originalOrderDetails.value = orderDetailsResponse
                 _filteredOrderDetails.value = orderDetailsResponse
-                val menuItems=orderDetailsResponse.map{
+                val menuItems = orderDetailsResponse.map {
 
                     TblMenuItemResponse(
                         menu_item_id = it.menuItem.menu_item_id,
@@ -240,21 +242,22 @@ class BillingViewModel @Inject constructor(
                         menu_name = it.menuItem.menu_name,
                         is_active = it.menuItem.is_active,
                         preparation_time = it.menuItem.preparation_time,
-                        actual_rate = it.rate
+                        actual_rate = it.actual_rate
                     )
                 }
-                // Convert TblOrderDetailsResponse to Map<MenuItem, Int> for existing billing logic
+
                 val itemsMap = menuItems.associateWith { it.qty }.toMutableMap()
                 var tableStatus = "TABLE" // Default
 
-                // Calculate totals from order details
                 val subtotal = orderDetailsResponse.sumOf { it.total }
                 val taxAmount = orderDetailsResponse.sumOf { it.tax_amount }
-                val cessAmount = orderDetailsResponse.sumOf { if (it.cess>0) it.cess else 0.0 }
-                val cessSpecific = orderDetailsResponse.sumOf { if (it.cess_specific>0) it.cess_specific else 0.0 }
-                val totalAmount = subtotal + taxAmount + cessAmount + cessSpecific + _uiState.value.otherChrages
+                val cessAmount = orderDetailsResponse.sumOf { if (it.cess > 0) it.cess else 0.0 }
+                val cessSpecific =
+                    orderDetailsResponse.sumOf { if (it.cess_specific > 0) it.cess_specific else 0.0 }
+                val totalAmount =
+                    subtotal + taxAmount + cessAmount + cessSpecific + _uiState.value.otherChrages
 
-                if (cessAmount>0.0){
+                if (cessAmount > 0.0) {
                     _uiState.update { currentState ->
                         currentState.copy(
                             billedItems = itemsMap,
@@ -269,7 +272,7 @@ class BillingViewModel @Inject constructor(
                             cessSpecific = cessSpecific
                         )
                     }
-                }else {
+                } else {
                     _uiState.update { currentState ->
                         currentState.copy(
                             billedItems = itemsMap,
@@ -291,25 +294,47 @@ class BillingViewModel @Inject constructor(
 
     }
 
+    fun placeOrder(item: Map<TblMenuItemResponse, Int>) {
+        // Implementation for placing order if needed
+        viewModelScope.launch {
+
+            val orderItems = item.map { (menuItem, quantity) ->
+                OrderItem(
+                    quantity = quantity,
+                    menuItem = menuItem,
+                )
+            }
+            orderRepository.placeOrUpdateOrders(
+                2, orderItems,
+                ""
+            ).collect { result ->
+                result.fold(
+                    onSuccess = { order ->
+                        _orderId.value = order.firstOrNull()?.order_master_id ?: ""
+                        _selectedItems.value =
+                            emptyMap() // Clear selected items after placing order
+                    },
+                    onFailure = { error ->
+
+                    }
+                )
+            }
+        }
+    }
+
     fun setCustomer(customer: TblCustomer?) {
         _customer.value = customer
     }
 
     fun filterByKotNumber(kotNumber: Int) {
-        val filtered = if (kotNumber == -1) {
+        val filtered =
             _originalOrderDetails.value
-        } else {
-            _originalOrderDetails.value.filter { it.kot_number == kotNumber }
-        }
-
         _filteredOrderDetails.value = filtered
-
         val itemsMap = mutableMapOf<TblMenuItemResponse, Int>()
         filtered.forEach { detail ->
             val existingQty = itemsMap[detail.menuItem] ?: 0
             itemsMap[detail.menuItem] = existingQty + detail.qty
         }
-
         _uiState.value = recalcTotals(itemsMap).copy(
             selectedKotNumber = if (kotNumber == -1) null else kotNumber
         )
@@ -320,7 +345,6 @@ class BillingViewModel @Inject constructor(
         newQuantity: Int,
         newRate: Double
     ) {
-        // Update order detail
         val updatedDetails = _originalOrderDetails.value.map { detail ->
             if (detail.order_details_id == orderDetailId) {
                 detail.copy(
@@ -331,15 +355,11 @@ class BillingViewModel @Inject constructor(
             } else detail
         }
         _originalOrderDetails.value = updatedDetails
-
-        // Build billed items map again
         val itemsMap = mutableMapOf<TblMenuItemResponse, Int>()
         updatedDetails.forEach { detail ->
             val menuItem = detail.menuItem.copy(rate = detail.rate, qty = detail.qty)
             itemsMap[menuItem] = detail.qty
         }
-
-        // Recalculate totals
         _uiState.value = recalcTotals(itemsMap)
     }
 
@@ -354,8 +374,9 @@ class BillingViewModel @Inject constructor(
     }
 
     fun updateTotal() {
-        _totalAmount.value =  selectedItems.value.entries.sumOf { it.key.rate * it.value }
+        _totalAmount.value = selectedItems.value.entries.sumOf { it.key.rate * it.value }
     }
+
     fun removeItem(menuItem: TblMenuItemResponse) {
         val currentItems = _uiState.value.billedItems.toMutableMap()
         currentItems.remove(menuItem)
@@ -365,7 +386,8 @@ class BillingViewModel @Inject constructor(
     fun updateTaxPercentage(tax: Double) {
         _uiState.update { currentState ->
             val newTaxAmount = calculateTaxAmount(currentState.subtotal, tax)
-            val newTotalAmount = calculateTotal(currentState.subtotal, newTaxAmount, currentState.discountFlat)
+            val newTotalAmount =
+                calculateTotal(currentState.subtotal, newTaxAmount, currentState.discountFlat)
             currentState.copy(
                 taxAmount = newTaxAmount,
                 totalAmount = newTotalAmount,
@@ -376,7 +398,8 @@ class BillingViewModel @Inject constructor(
 
     fun updateDiscountFlat(discount: Double) {
         _uiState.update { currentState ->
-            val newTotalAmount = calculateTotal(currentState.subtotal, currentState.taxAmount, discount)
+            val newTotalAmount =
+                calculateTotal(currentState.subtotal, currentState.taxAmount, discount)
             currentState.copy(
                 discountFlat = discount,
                 totalAmount = newTotalAmount,
@@ -393,10 +416,7 @@ class BillingViewModel @Inject constructor(
         return subtotal + taxAmount - discountFlat
     }
 
-    // --- Payment Functions ---
-
     private fun loadAvailablePaymentMethods() {
-        // In a real app, fetch this from a repository or remote source
         _uiState.update {
             it.copy(
                 availablePaymentMethods = listOf(
@@ -415,16 +435,15 @@ class BillingViewModel @Inject constructor(
     }
 
     fun updateAmountToPay(amount: Double) {
-        // Add validation if needed (e.g., amount <= total due)
         _uiState.update { it.copy(amountToPay = amount) }
     }
+
     fun updateOrderMasterId(orderId: String) {
-        // Add validation if needed (e.g., amount <= total due)
         _uiState.update { it.copy(orderMasterId = orderId) }
     }
+
     fun updateCashAmount(amount: Double) {
         val currentState = _uiState.value
-        // Only update if the amount actually changed
         if (currentState.cashAmount != amount) {
             _uiState.update { it.copy(cashAmount = amount) }
         }
@@ -432,7 +451,6 @@ class BillingViewModel @Inject constructor(
 
     fun updateCardAmount(amount: Double) {
         val currentState = _uiState.value
-        // Only update if the amount actually changed
         if (currentState.cardAmount != amount) {
             _uiState.update { it.copy(cardAmount = amount) }
         }
@@ -440,12 +458,10 @@ class BillingViewModel @Inject constructor(
 
     fun updateUpiAmount(amount: Double) {
         val currentState = _uiState.value
-        // Only update if the amount actually changed
         if (currentState.upiAmount != amount) {
             _uiState.update { it.copy(upiAmount = amount) }
         }
     }
-
 
 
     fun processPayment() {
@@ -456,7 +472,6 @@ class BillingViewModel @Inject constructor(
         } else {
             currentState.amountToPay
         }
-
         if (paymentMethod == null) {
             _uiState.update { it.copy(errorMessage = "Please select a payment method.") }
             return
@@ -466,208 +481,211 @@ class BillingViewModel @Inject constructor(
             return
         }
 
-        _uiState.update { it.copy(paymentProcessingState = PaymentProcessingState.Processing, errorMessage = null) }
+        _uiState.update {
+            it.copy(
+                paymentProcessingState = PaymentProcessingState.Processing,
+                errorMessage = null
+            )
+        }
         viewModelScope.launch {
 
             val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print == true
-                // --- Simulate Payment Processing ---
-                // In a real app, this would involve:
-                // 1. Calling a payment gateway SDK or your backend API.
-                // 2. Handling success/failure responses.
-                // 3. If successful, creating an Order record and saving it.
-
-            val amount = if (paymentMethod.name=="CASH")
+            val amount = if (paymentMethod.name == "CASH")
                 currentState.cashAmount
-           else
+            else
                 currentState.amountToPay
-                billRepository.bill(
-                    orderMasterId = currentState.orderMasterId ?:"",
-                    paymentMethod = paymentMethod,
-                    receivedAmt = amount,
-                    customerId = if (_customerId.value==0L) customer.value?.customer_id ?:0L else _customerId.value ,
-                    billNo = _billNo.value
-                ).collect { result->
-                    result.fold(
-                        onSuccess = { response ->
-                            var sn = 1
-                            val orderDetails = orderRepository.getOrdersByOrderId(response.order_master.order_master_id).body()!!
-                            val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
-                            val customer = response.customer
-                            val billItems = orderDetails.map {detail ->
-                                val menuItem = detail.menuItem
-                                val qty = detail.qty
-                               BillItem(
-                                    sn = sn++,
-                                    itemName =if (tamil) menuItem.menu_item_name_tamil else menuItem.menu_item_name,
-                                    qty = qty,
-                                    price = menuItem.rate,
-                                    basePrice = detail.rate,
-                                    amount = qty * menuItem.rate,
-                                    sgstPercent = menuItem.tax_percentage.toDouble()/ 2,
-                                    cgstPercent = menuItem.tax_percentage.toDouble()/ 2,
-                                    igstPercent = if (detail.igst > 0) menuItem.tax_percentage.toDouble() else 0.0,
-                                    cessPercent = if (detail.cess > 0) menuItem.cess_per.toDouble() else 0.0,
-                                    sgst = detail.sgst,
-                                    cgst = detail.cgst,
-                                    igst = if (detail.igst> 0) detail.igst else 0.0,
-                                    cess = if (detail.cess > 0) detail.cess else 0.0,
-                                    cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0,
-                                   taxPercent = menuItem.tax_percentage.toDouble(),
-                                   taxAmount = detail.tax_amount
-                               )
-                            }
-                            val billDetails = Bill(
-                                company_code = sessionManager.getCompanyCode() ?: "",
-                                billNo = response.bill_no,
-                                date = response.bill_date.toString(),
-                                time = response.bill_create_time.toString(),
-                                orderNo = response.order_master.order_master_id,
-                                counter = counter,
-                                tableNo = response.order_master.table_name,
-                                custName = customer.customer_name,
-                                custNo = customer.contact_no,
-                                custAddress = customer.address,
-                                custGstin = customer.gst_no,
-                                items = billItems,
-                                subtotal = response.order_amt,
-                                deliveryCharge = 0.0, // Assuming no delivery charge
-                                discount = response.disc_amt,
-                                roundOff = response.round_off,
-                                total = response.grand_total,
+            billRepository.bill(
+                orderMasterId = currentState.orderMasterId ?: "",
+                paymentMethod = paymentMethod,
+                receivedAmt = amount,
+                customerId = if (_customerId.value == 0L) customer.value?.customer_id
+                    ?: 0L else _customerId.value,
+                billNo = _billNo.value,
+                cash = currentState.cashAmount,
+                card = currentState.cardAmount,
+                upi = currentState.upiAmount
+            ).collect { result ->
+                result.fold(
+                    onSuccess = { response ->
+                        var sn = 1
+                        val orderDetails =
+                            orderRepository.getOrdersByOrderId(response.order_master.order_master_id)
+                                .body()!!
+                        val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
+                        val customer = response.customer
+                        val billItems = orderDetails.map { detail ->
+                            val menuItem = detail.menuItem
+                            val qty = detail.qty
+                            BillItem(
+                                sn = sn++,
+                                itemName = if (tamil) menuItem.menu_item_name_tamil else menuItem.menu_item_name,
+                                qty = qty,
+                                price = menuItem.rate,
+                                basePrice = detail.rate,
+                                amount = qty * menuItem.rate,
+                                sgstPercent = menuItem.tax_percentage.toDouble() / 2,
+                                cgstPercent = menuItem.tax_percentage.toDouble() / 2,
+                                igstPercent = if (detail.igst > 0) menuItem.tax_percentage.toDouble() else 0.0,
+                                cessPercent = if (detail.cess > 0) menuItem.cess_per.toDouble() else 0.0,
+                                sgst = detail.sgst,
+                                cgst = detail.cgst,
+                                igst = if (detail.igst > 0) detail.igst else 0.0,
+                                cess = if (detail.cess > 0) detail.cess else 0.0,
+                                cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0,
+                                taxPercent = menuItem.tax_percentage.toDouble(),
+                                taxAmount = detail.tax_amount
                             )
-//                            billRepository.updateTablAndOrderStatus(
-//                                orderMasterId = response.order_master.order_master_id,
-//                                tableId = response.order_master.table_id
-//                            )
-                            val data = currentState
-                            val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
+                        }
+                        val billDetails = Bill(
+                            company_code = sessionManager.getCompanyCode() ?: "",
+                            billNo = response.bill_no,
+                            date = response.bill_date.toString(),
+                            time = response.bill_create_time.toString(),
+                            orderNo = response.order_master.order_master_id,
+                            counter = counter,
+                            tableNo = response.order_master.table_name,
+                            custName = customer.customer_name,
+                            custNo = customer.contact_no,
+                            custAddress = customer.address,
+                            custGstin = customer.gst_no,
+                            items = billItems,
+                            subtotal = response.order_amt,
+                            deliveryCharge = 0.0, // Assuming no delivery charge
+                            discount = response.disc_amt,
+                            roundOff = response.round_off,
+                            total = response.grand_total,
+                        )
+                        val data = currentState
+                        val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
 
-                            if (isReceipt) {
-                                printBill(billDetails, data, amount, paymentMethod)
-                            }
-                            else{
-                                delay(2000) // Simulate network delay
-
-                                // Example: If payment is successful
-                                val transactionId = UUID.randomUUID().toString()
-                                val paidOrder = PaidOrder(
-                                    // orderId = generateNewOrderId(), // From repository
-                                    items = currentState.billedItems,
-                                    tableStatus = currentState.tableStatus,
-                                    subtotal = currentState.subtotal,
-                                    taxAmount = currentState.taxAmount,
-                                    discount = currentState.discountFlat,
-                                    totalAmount = currentState.totalAmount,
-                                    paidAmount = amount,
-                                    paymentMethod = paymentMethod.name,
-                                    transactionId = transactionId,
-                                    timestamp = System.currentTimeMillis()
+                        if (isReceipt) {
+                            printBill(billDetails, data, amount, paymentMethod)
+                        } else {
+                            delay(2000) // Simulate network delay
+                            val transactionId = UUID.randomUUID().toString()
+                            val paidOrder = PaidOrder(
+                                items = currentState.billedItems,
+                                tableStatus = currentState.tableStatus,
+                                subtotal = currentState.subtotal,
+                                taxAmount = currentState.taxAmount,
+                                discount = currentState.discountFlat,
+                                totalAmount = currentState.totalAmount,
+                                paidAmount = amount,
+                                paymentMethod = paymentMethod.name,
+                                transactionId = transactionId,
+                                timestamp = System.currentTimeMillis()
+                            )
+                            Log.d("Payment", "Payment successful$paidOrder")
+                            _uiState.update {
+                                it.copy(
+                                    paymentProcessingState = PaymentProcessingState.Success(
+                                        paidOrder,
+                                        transactionId
+                                    )
                                 )
-                                Log.d("Payment", "Payment successful$paidOrder")
-
-                                _uiState.update {
-                                    it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
-                                }
-
                             }
-                            // Handle successful payment response
-                            // For example, you might want to update the UI or save the order
-                            Log.d("Payment", "Payment successful")
+
+                        }
+                        Log.d("Payment", "Payment successful")
+                    },
+                    onFailure = { error ->
+                        Log.e("Payment", "Payment failed: ${error.message}")
+                        _uiState.update {
+                            it.copy(paymentProcessingState = PaymentProcessingState.Error("Payment failed: ${error.message}"))
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    fun printBill(
+        bill: Bill,
+        currentState: BillingPaymentUiState,
+        amount: Double,
+        paymentMethod: PaymentMethod
+    ) {
+        viewModelScope.launch {
+            val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
+            if (isReceipt) {
+                val ip = orderRepository.getIpAddress("COUNTER")
+                val printResponse = billRepository.printBill(bill, ip)
+                printResponse.collect { result ->
+                    result.fold(
+                        onSuccess = { message ->
+                            delay(2000)
+                            val transactionId = UUID.randomUUID().toString()
+                            val paidOrder = PaidOrder(
+                                items = currentState.billedItems,
+                                tableStatus = currentState.tableStatus,
+                                subtotal = currentState.subtotal,
+                                taxAmount = currentState.taxAmount,
+                                discount = currentState.discountFlat,
+                                totalAmount = currentState.totalAmount,
+                                paidAmount = amount,
+                                paymentMethod = paymentMethod.name,
+                                transactionId = transactionId,
+                                timestamp = System.currentTimeMillis()
+                            )
+                            _uiState.update {
+                                it.copy(
+                                    paymentProcessingState = PaymentProcessingState.Success(
+                                        paidOrder,
+                                        transactionId
+                                    )
+                                )
+                            }
                         },
                         onFailure = { error ->
-                            // Handle payment failure
-                            Log.e("Payment", "Payment failed: ${error.message}")
-                            _uiState.update {
-                                it.copy(paymentProcessingState = PaymentProcessingState.Error("Payment failed: ${error.message}"))
-                            }
+                            _uiState.update { it.copy(errorMessage = "Failed to print bill: ${error.message}") }
                         }
                     )
                 }
-                // orderRepository.saveOrder(paidOrder) // Save the order
-        }
-    }
-     fun printBill(bill : Bill, currentState: BillingPaymentUiState, amount: Double, paymentMethod: PaymentMethod) {
-        viewModelScope.launch {
-
-                val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
-
-                if (isReceipt) {
-                    val ip = orderRepository.getIpAddress("COUNTER")
-                    val printResponse = billRepository.printBill(bill, ip)
-                    // Optionally, you can reset the payment state after printing
-                    printResponse.collect { result->
-                        result.fold(
-                            onSuccess = { message ->
-                                delay(2000) // Simulate network delay
-                                // Example: If payment is successful
-                                val transactionId = UUID.randomUUID().toString()
-                                val paidOrder = PaidOrder(
-                                    // orderId = generateNewOrderId(), // From repository
-                                    items = currentState.billedItems,
-                                    tableStatus = currentState.tableStatus,
-                                    subtotal = currentState.subtotal,
-                                    taxAmount = currentState.taxAmount,
-                                    discount = currentState.discountFlat,
-                                    totalAmount = currentState.totalAmount,
-                                    paidAmount = amount,
-                                    paymentMethod = paymentMethod.name,
-                                    transactionId = transactionId,
-                                    timestamp = System.currentTimeMillis()
-                                )
-                                _uiState.update {
-                                    it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
-                                }
-                            },
-                            onFailure = { error ->
-                                _uiState.update { it.copy(errorMessage = "Failed to print bill: ${error.message}") }
-                            }
+            } else {
+                val transactionId = UUID.randomUUID().toString()
+                val paidOrder = PaidOrder(
+                    items = currentState.billedItems,
+                    tableStatus = currentState.tableStatus,
+                    subtotal = currentState.subtotal,
+                    taxAmount = currentState.taxAmount,
+                    discount = currentState.discountFlat,
+                    totalAmount = currentState.totalAmount,
+                    paidAmount = amount,
+                    paymentMethod = paymentMethod.name,
+                    transactionId = transactionId,
+                    timestamp = System.currentTimeMillis()
+                )
+                _uiState.update {
+                    it.copy(
+                        paymentProcessingState = PaymentProcessingState.Success(
+                            paidOrder,
+                            transactionId
                         )
-
-                    }
-                }
-                else
-                {
-                    Log.d("Payment", "Payment successful")
-//                    delay(2000) // Simulate network delay
-
-                    // Example: If payment is successful
-                    val transactionId = UUID.randomUUID().toString()
-                    val paidOrder = PaidOrder(
-                        // orderId = generateNewOrderId(), // From repository
-                        items = currentState.billedItems,
-                        tableStatus = currentState.tableStatus,
-                        subtotal = currentState.subtotal,
-                        taxAmount = currentState.taxAmount,
-                        discount = currentState.discountFlat,
-                        totalAmount = currentState.totalAmount,
-                        paidAmount = amount,
-                        paymentMethod = paymentMethod.name,
-                        transactionId = transactionId,
-                        timestamp = System.currentTimeMillis()
                     )
-                    Log.d("Payment", "Payment successful$paidOrder")
-                    _uiState.update {
-                        it.copy(paymentProcessingState = PaymentProcessingState.Success(paidOrder, transactionId))
-                    }
                 }
-
+            }
         }
     }
 
 
     fun updatePaymentMethod(paymentMethodName: String) {
         val currentState = _uiState.value
-        // Only update if the payment method actually changed to prevent unnecessary recomposition
         if (currentState.selectedPaymentMethod?.name != paymentMethodName) {
-            val paymentMethod = currentState.availablePaymentMethods.find { it.name == paymentMethodName }
-            _uiState.update { 
-                currentState.copy(selectedPaymentMethod = paymentMethod) 
+            val paymentMethod =
+                currentState.availablePaymentMethods.find { it.name == paymentMethodName }
+            _uiState.update {
+                currentState.copy(selectedPaymentMethod = paymentMethod)
             }
         }
     }
 
     fun resetPaymentState() {
-        _uiState.update { it.copy(paymentProcessingState = PaymentProcessingState.Idle, errorMessage = null) }
+        _uiState.update {
+            it.copy(
+                paymentProcessingState = PaymentProcessingState.Idle,
+                errorMessage = null
+            )
+        }
     }
 
     fun clearErrorMessage() {
@@ -687,27 +705,9 @@ class BillingViewModel @Inject constructor(
     fun updateDiscount(discount: Double) {
         _uiState.value = _uiState.value.copy(discount = discount)
     }
-
-//    fun updateItemQuantity(menuItem: TblMenuItemResponse, newQuantity: Int) {
-//        val currentItems = _uiState.value.billedItems.toMutableMap()
-//        if (newQuantity > 0) {
-//            currentItems[menuItem] = newQuantity
-//        } else {
-//            currentItems.remove(menuItem)
-//        }
-//        _uiState.value = _uiState.value.copy(billedItems = currentItems)
-//    }
-//
-//    fun removeItem(menuItem: TblMenuItemResponse) {
-//        val currentItems = _uiState.value.billedItems.toMutableMap()
-//        currentItems.remove(menuItem)
-//        _uiState.value = _uiState.value.copy(billedItems = currentItems)
-//    }
 }
 
-// Assume Order model exists (simplified)
 data class PaidOrder(
-    // val orderId: String,
     val items: Map<TblMenuItemResponse, Int>,
     val tableStatus: String,
     val subtotal: Double,

@@ -32,7 +32,7 @@ fun StatusChip(
         animationSpec = tween(300),
         label = "chipColor"
     )
-    
+
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
@@ -141,9 +141,9 @@ fun SectionHeader(
             }
             action?.invoke()
         }
-        
+
         Spacer(modifier = Modifier.height(Dimensions.SpaceMedium))
-        
+
         // Decorative line
         Box(
             modifier = Modifier

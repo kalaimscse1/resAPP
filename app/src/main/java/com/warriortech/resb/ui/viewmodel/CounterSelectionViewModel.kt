@@ -15,19 +15,19 @@ import javax.inject.Inject
 class CounterSelectionViewModel @Inject constructor(
     private val counterRepository: CounterRepository
 ) : ViewModel() {
-    
+
     private val _uiState = MutableStateFlow<CounterUiState>(CounterUiState.Loading)
     val uiState: StateFlow<CounterUiState> = _uiState.asStateFlow()
-    
+
     private val _selectedCounter = MutableStateFlow<Counters?>(null)
     val selectedCounter: StateFlow<Counters?> = _selectedCounter.asStateFlow()
-    
+
     sealed class CounterUiState {
         object Loading : CounterUiState()
         data class Success(val counters: List<Counters>) : CounterUiState()
         data class Error(val message: String) : CounterUiState()
     }
-    
+
     fun loadCounters() {
         viewModelScope.launch {
             _uiState.value = CounterUiState.Loading
@@ -51,7 +51,7 @@ class CounterSelectionViewModel @Inject constructor(
             }
         }
     }
-    
+
     fun selectCounter(counter: Counters) {
         _selectedCounter.value = counter
         viewModelScope.launch {
@@ -63,6 +63,6 @@ class CounterSelectionViewModel @Inject constructor(
             }
         }
     }
-    
+
     fun getCurrentCounter(): Counters? = _selectedCounter.value
 }

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.data.sync
 
 import android.content.Context

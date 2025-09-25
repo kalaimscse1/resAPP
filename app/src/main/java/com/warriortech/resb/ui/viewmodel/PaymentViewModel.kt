@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import android.util.Log
@@ -37,13 +36,15 @@ class PaymentViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value = PaymentUiState.Loading
-                
+
                 // This is a placeholder - you'll need to implement getBillByNumber in your repository
                 // For now, we'll simulate loading the bill from the unpaid bills list
                 val tenantId = sessionManager.getCompanyCode() ?: ""
-                val currentDate = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                val fromDate = java.time.LocalDate.now().minusDays(365).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                
+                val currentDate = java.time.LocalDate.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                val fromDate = java.time.LocalDate.now().minusDays(365)
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
                 billRepository.getUnpaidBills(tenantId, fromDate, currentDate).collect { result ->
                     result.onSuccess { bills ->
                         val bill = bills.find { it.bill_no == billNo }
@@ -54,7 +55,8 @@ class PaymentViewModel @Inject constructor(
                             _uiState.value = PaymentUiState.Error("Bill not found")
                         }
                     }.onFailure { error ->
-                        _uiState.value = PaymentUiState.Error(error.message ?: "Error loading bill details")
+                        _uiState.value =
+                            PaymentUiState.Error(error.message ?: "Error loading bill details")
                         Log.e("PaymentViewModel", "Error loading bill details", error)
                     }
                 }
@@ -70,15 +72,18 @@ class PaymentViewModel @Inject constructor(
             try {
                 // Here you would implement the payment processing logic
                 // This might involve calling an API endpoint to update the bill payment status
-                
-                Log.d("PaymentViewModel", "Processing payment: Bill=${bill.bill_no}, Method=${paymentMethod.name}, Amount=$amount")
-                
+
+                Log.d(
+                    "PaymentViewModel",
+                    "Processing payment: Bill=${bill.bill_no}, Method=${paymentMethod.name}, Amount=$amount"
+                )
+
                 // Simulate payment processing
                 kotlinx.coroutines.delay(2000)
-                
+
                 // For now, we'll just show success
                 _uiState.value = PaymentUiState.PaymentSuccess
-                
+
             } catch (e: Exception) {
                 _uiState.value = PaymentUiState.Error(e.message ?: "Payment processing failed")
                 Log.e("PaymentViewModel", "Error processing payment", e)

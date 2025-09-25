@@ -170,7 +170,10 @@ fun ItemWiseReportScreen(
                                 elevation = CardDefaults.cardElevation(4.dp)
                             ) {
                                 Column(Modifier.padding(12.dp)) {
-                                    Text("Item Name: ${bill.menu_item_name}", fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "Item Name: ${bill.menu_item_name}",
+                                        fontWeight = FontWeight.Bold
+                                    )
                                     Text("Qty: ${bill.qty}")
                                     Text("Rate: ${bill.rate}")
                                     Text("Total: ₹${bill.total}")

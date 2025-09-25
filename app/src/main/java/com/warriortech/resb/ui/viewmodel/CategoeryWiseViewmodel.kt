@@ -18,18 +18,26 @@ class CategoryWiseViewModel @Inject constructor(
     private val repository: ReportRepository
 ) : ViewModel() {
 
-    private val _reportState = MutableStateFlow<CategoryWiseReportReportUiState>(CategoryWiseReportReportUiState.Idle)
+    private val _reportState =
+        MutableStateFlow<CategoryWiseReportReportUiState>(CategoryWiseReportReportUiState.Idle)
     val reportState: StateFlow<CategoryWiseReportReportUiState> = _reportState.asStateFlow()
+
     init {
-        loadReports(getCurrentDateModern(),getCurrentDateModern())
+        loadReports(getCurrentDateModern(), getCurrentDateModern())
     }
+
     fun loadReports(fromDate: String, toDate: String) {
         viewModelScope.launch {
             _reportState.value = CategoryWiseReportReportUiState.Loading
             repository.getCategoryReport(fromDate, toDate).collect { res ->
                 res.fold(
-                    onSuccess = { _reportState.value = CategoryWiseReportReportUiState.Success(it) },
-                    onFailure = { _reportState.value = CategoryWiseReportReportUiState.Error(it.message ?: "Unknown Error") }
+                    onSuccess = {
+                        _reportState.value = CategoryWiseReportReportUiState.Success(it)
+                    },
+                    onFailure = {
+                        _reportState.value =
+                            CategoryWiseReportReportUiState.Error(it.message ?: "Unknown Error")
+                    }
                 )
             }
         }

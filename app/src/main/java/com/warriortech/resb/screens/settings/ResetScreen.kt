@@ -31,17 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.ui.theme.GradientStart
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.AreaViewModel
 import com.warriortech.resb.ui.viewmodel.ResetViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -50,7 +47,7 @@ fun ResetScreen(
     navController: NavController,
     sessionManager: SessionManager,
     viewModel: ResetViewModel = hiltViewModel()
-){
+) {
     val scope = rememberCoroutineScope()
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -75,13 +72,18 @@ fun ResetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("RESET SCREEN",
-                    color = SurfaceLight
-                ) },
+                title = {
+                    Text(
+                        "RESET SCREEN",
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -92,25 +94,29 @@ fun ResetScreen(
         snackbarHost = {
             AnimatedSnackbarDemo(snackbarHostState)
         }
-    ){ paddingValues ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp)){
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp)
             ) {
 
-                item{
+                item {
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("") },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
-                            val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                            val description = if (passwordVisible) "Hide password" else "Show password"
+                            val image =
+                                if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                            val description =
+                                if (passwordVisible) "Hide password" else "Show password"
 
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(imageVector = image, contentDescription = description)
@@ -120,14 +126,14 @@ fun ResetScreen(
                         singleLine = true
                     )
                 }
-                item{
+                item {
                     Button(
                         onClick = {
                             showDialog = true
                         },
                         enabled = password == "kingtec2025#",
                         modifier = Modifier.fillMaxWidth()
-                    ){
+                    ) {
                         Text("Reset App Data")
                     }
                 }
@@ -148,7 +154,7 @@ fun ResetScreen(
 @Composable
 fun ResetDialog(
     onDismiss: () -> Unit,
-    onConfirm:() -> Unit
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

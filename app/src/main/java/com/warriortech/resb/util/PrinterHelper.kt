@@ -141,12 +141,17 @@ class PrinterHelper(private val context: Context) {
             stringBuilder.append(centerText("RESTAURANT", template.paperSettings.characterWidth))
             stringBuilder.append("\n")
         }
-        
-        stringBuilder.append(centerText("KITCHEN ORDER TICKET", template.paperSettings.characterWidth))
+
+        stringBuilder.append(
+            centerText(
+                "KITCHEN ORDER TICKET",
+                template.paperSettings.characterWidth
+            )
+        )
         stringBuilder.append("\n")
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
-        
+
         // Order details
         stringBuilder.append("KOT #: ${kotData.kotNumber}\n")
         stringBuilder.append("Table: ${kotData.tableNumber}\n")
@@ -178,14 +183,19 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append("\n")
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
-        
+
         if (template.footerSettings.showThankYou) {
             stringBuilder.append(centerText("THANK YOU", template.paperSettings.characterWidth))
             stringBuilder.append("\n")
         }
-        
+
         if (template.footerSettings.showDateTime) {
-            stringBuilder.append(centerText(dateFormat.format(Date()), template.paperSettings.characterWidth))
+            stringBuilder.append(
+                centerText(
+                    dateFormat.format(Date()),
+                    template.paperSettings.characterWidth
+                )
+            )
             stringBuilder.append("\n")
         }
 
@@ -205,12 +215,12 @@ class PrinterHelper(private val context: Context) {
             stringBuilder.append(centerText("RESTAURANT", template.paperSettings.characterWidth))
             stringBuilder.append("\n")
         }
-        
+
         stringBuilder.append(centerText("BILL", template.paperSettings.characterWidth))
         stringBuilder.append("\n")
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
-        
+
         // Bill details
         stringBuilder.append("Bill #: ${billData.billNo}\n")
         stringBuilder.append("Table: ${billData.tableNo}\n")
@@ -237,7 +247,7 @@ class PrinterHelper(private val context: Context) {
             billData.items.forEach { item ->
                 val itemName = item.itemName.take(12)
                 stringBuilder.append(itemName.padEnd(12))
-                
+
                 if (template.bodySettings.showQuantity) {
                     stringBuilder.append(" ${item.qty.toString().padStart(3)}")
                 }
@@ -262,15 +272,21 @@ class PrinterHelper(private val context: Context) {
         stringBuilder.append("\n")
         stringBuilder.append(repeatChar('-', template.paperSettings.characterWidth))
         stringBuilder.append("\n")
-        
+
         if (template.footerSettings.showThankYou) {
-            val message = if (template.footerSettings.customMessage.isNotEmpty())template.footerSettings.customMessage else "THANK YOU"
+            val message =
+                if (template.footerSettings.customMessage.isNotEmpty()) template.footerSettings.customMessage else "THANK YOU"
             stringBuilder.append(centerText(message, template.paperSettings.characterWidth))
             stringBuilder.append("\n")
         }
-        
+
         if (template.footerSettings.showDateTime) {
-            stringBuilder.append(centerText(dateFormat.format(Date()), template.paperSettings.characterWidth))
+            stringBuilder.append(
+                centerText(
+                    dateFormat.format(Date()),
+                    template.paperSettings.characterWidth
+                )
+            )
             stringBuilder.append("\n")
         }
 
@@ -305,7 +321,7 @@ class PrinterHelper(private val context: Context) {
         kotData.items.forEach { item ->
             val itemName = item.name.take(15).padEnd(15)
             stringBuilder.append("$itemName ${item.quantity}\n")
-            
+
             // Add modifiers if any
             if (item.addOn?.isNotEmpty() == true) {
                 item.addOn.forEach { modifier ->
@@ -345,7 +361,7 @@ class PrinterHelper(private val context: Context) {
 
     @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun printViaBluetooth(device: BluetoothDevice, data: ByteArray) {
-        Thread  {
+        Thread {
             try {
                 val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
                 val socket = device.createRfcommSocketToServiceRecord(uuid)

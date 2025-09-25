@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -22,9 +21,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.PrimaryGreen
-import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.getScreenSizeInfo
 
@@ -99,14 +96,14 @@ fun MobileOptimizedTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { 
+        label = {
             Text(
-                label, 
+                label,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium,
                     fontSize = fontSize
                 )
-            ) 
+            )
         },
         modifier = modifier
             .fillMaxWidth()
@@ -130,7 +127,6 @@ fun MobileOptimizedTextField(
         )
     )
 }
-
 
 
 @Composable
@@ -187,6 +183,7 @@ fun MobilePasswordOptimizedTextField(
         )
     )
 }
+
 @Composable
 fun MobileOptimizedButton(
     onClick: () -> Unit,
@@ -374,6 +371,7 @@ fun ResponsiveText(
         overflow = overflow
     )
 }
+
 @Composable
 fun MobileOptimizedButton(
     text: String,

@@ -27,4 +27,7 @@ interface TblOrderDetailsDao {
 
     @Query("SELECT * FROM tbl_order_details WHERE is_synced = 0")
     suspend fun getUnsynced(): List<TblOrderDetails>
+
+    @Query(" SELECT IFNULL(MAX(DISTINCT kot_number),0) FROM tbl_order_details od INNER JOIN tbl_order_master om ON od.order_master_id = om.order_master_id WHERE om.order_date =:orderDate")
+    suspend fun getMaxKOTNumber(orderDate: String): Int
 }

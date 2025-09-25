@@ -67,8 +67,8 @@ fun KotReportScreen(
                 )
             )
         }
-    ){paddingValues ->
-       Column(modifier = Modifier.padding(paddingValues)) {
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
             when (val state = kotReports.value) {
                 is KotViewModel.KotUiState.Loading -> {
                     // Show loading indicator
@@ -81,7 +81,9 @@ fun KotReportScreen(
                 }
 
                 is KotViewModel.KotUiState.Success -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+                    LazyColumn(modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)) {
 
                         // Sticky Header
                         stickyHeader {
@@ -92,14 +94,54 @@ fun KotReportScreen(
                                     .background(SecondaryGreen) // keeps header visible
                                     .padding(8.dp)
                             ) {
-                                Text("KOT", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(80.dp))
-                                Text("Area", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(100.dp))
-                                Text("Table", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(100.dp))
-                                Text("Type", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(100.dp))
-                                Text("Order No", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(140.dp))
-                                Text("Total", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(100.dp))
-                                Text("Status", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(100.dp))
-                                Text("Action", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.width(100.dp))
+                                Text(
+                                    "KOT",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(80.dp)
+                                )
+                                Text(
+                                    "Area",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(100.dp)
+                                )
+                                Text(
+                                    "Table",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(100.dp)
+                                )
+                                Text(
+                                    "Type",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(100.dp)
+                                )
+                                Text(
+                                    "Order No",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(140.dp)
+                                )
+                                Text(
+                                    "Total",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(100.dp)
+                                )
+                                Text(
+                                    "Status",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(100.dp)
+                                )
+                                Text(
+                                    "Action",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.width(100.dp)
+                                )
                             }
                         }
 
@@ -116,7 +158,10 @@ fun KotReportScreen(
                                 Text(kot.table_name, modifier = Modifier.width(100.dp))
                                 Text(kot.order_type, modifier = Modifier.width(100.dp))
                                 Text(kot.order_master_id, modifier = Modifier.width(140.dp))
-                                Text(CurrencySettings.formatPlain(kot.grand_total), modifier = Modifier.width(100.dp))
+                                Text(
+                                    CurrencySettings.formatPlain(kot.grand_total),
+                                    modifier = Modifier.width(100.dp)
+                                )
                                 Text(kot.order_status, modifier = Modifier.width(100.dp))
 
                                 Button(

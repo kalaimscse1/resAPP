@@ -47,7 +47,7 @@ fun DashboardScreen(
     onTakeawaySelected: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
     sessionManager: SessionManager,
-    onQuickBill:()->Unit
+    onQuickBill: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -168,20 +168,20 @@ fun DashboardScreen(
                      * Payment Mode Chart Section
                      */
                     item {
-                            PaymentModePieChart(
-                                data =  state.piechart,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        PaymentModePieChart(
+                            data = state.piechart,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
 
                     /**
                      * Weekly Sales Chart Section
                      */
                     item {
-                            WeeklySalesBarChart(
-                                data =  state.barchart,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        WeeklySalesBarChart(
+                            data = state.barchart,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -242,37 +242,37 @@ fun MetricsSection(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ){
-                MetricCard(
-                    title = "Running Orders",
-                    value = metrics.runningOrders.toString(),
-                    color = MaterialTheme.colorScheme.primary,
-                    onClick = onNavigateToOrders,
-                )
+        ) {
+            MetricCard(
+                title = "Running Orders",
+                value = metrics.runningOrders.toString(),
+                color = MaterialTheme.colorScheme.primary,
+                onClick = onNavigateToOrders,
+            )
 
-                MetricCard(
-                    title = "Pending Bills",
-                    value = metrics.pendingBills.toString(),
-                    color = MaterialTheme.colorScheme.secondary,
-                    onClick = onNavigateToBilling
-                )
+            MetricCard(
+                title = "Pending Bills",
+                value = metrics.pendingBills.toString(),
+                color = MaterialTheme.colorScheme.secondary,
+                onClick = onNavigateToBilling
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-                MetricCard(
-                    title = "Total Sales",
-                    value = CurrencySettings.format( metrics.totalSales),
-                    color = Color(0xFF4CAF50)
-                )
+            MetricCard(
+                title = "Total Sales",
+                value = CurrencySettings.format(metrics.totalSales),
+                color = Color(0xFF4CAF50)
+            )
 
-                MetricCard(
-                    title = "Pending Due",
-                    value = CurrencySettings.format(metrics.pendingDue),
-                    color = Color(0xFFF44336)
-                )
+            MetricCard(
+                title = "Pending Due",
+                value = CurrencySettings.format(metrics.pendingDue),
+                color = Color(0xFFF44336)
+            )
         }
     }
 }
@@ -313,12 +313,12 @@ fun MetricCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                    Text(
-                        value,
-                        fontWeight = FontWeight.Bold,
-                        color = color,
-                        fontSize = 18.sp
-                    )
+                Text(
+                    value,
+                    fontWeight = FontWeight.Bold,
+                    color = color,
+                    fontSize = 18.sp
+                )
             }
         }
     }
@@ -333,9 +333,9 @@ fun QuickActionsSection(
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
     sessionManager: SessionManager,
-    onQuickBill:()->Unit
+    onQuickBill: () -> Unit
 ) {
-    val role = sessionManager.getUser()?.role?:""
+    val role = sessionManager.getUser()?.role ?: ""
     var showOrderTypeDialog by remember { mutableStateOf(false) }
 
     Column {
@@ -364,8 +364,7 @@ fun QuickActionsSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (role == "RESBADMIN" || role == "ADMIN")
-        {
+        if (role == "RESBADMIN" || role == "ADMIN") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)

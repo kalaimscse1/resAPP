@@ -24,6 +24,7 @@ data class Registration(
     val is_block: Boolean,
     val is_active: Boolean
 )
+
 data class RegistrationRequest(
     val company_master_code: String,
     val company_name: String,

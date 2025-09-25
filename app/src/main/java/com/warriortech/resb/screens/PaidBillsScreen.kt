@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.background
@@ -32,7 +31,6 @@ import com.warriortech.resb.ui.viewmodel.PaidBillsUiState
 import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
 import com.warriortech.resb.util.CurrencySettings
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +42,7 @@ fun PaidBillsScreen(
     val selectedBill by viewModel.selectedBill.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     var fromDate by remember { mutableStateOf(LocalDate.now().toString()) }
     var toDate by remember { mutableStateOf(LocalDate.now().toString()) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -58,11 +56,12 @@ fun PaidBillsScreen(
 
     // Show error messages
     LaunchedEffect(uiState) {
-        when(val state = uiState) {
+        when (val state = uiState) {
             is PaidBillsUiState.Error -> {
                 snackbarHostState.showSnackbar(state.message)
                 viewModel.clearError()
             }
+
             else -> {}
         }
     }
@@ -160,12 +159,12 @@ fun PaidBillsScreen(
                             items(state.bills) { bill ->
                                 PaidBillItem(
                                     bill = bill,
-                                    onEditClick = { 
+                                    onEditClick = {
                                         // Navigate to edit screen or show edit dialog
                                         viewModel.selectBill(bill)
                                         navController.navigate("bill_edit")
                                     },
-                                    onDeleteClick = { 
+                                    onDeleteClick = {
                                         billToDelete = bill
                                         showDeleteDialog = true
                                     }
@@ -207,7 +206,7 @@ fun PaidBillsScreen(
         // Delete confirmation dialog
         if (showDeleteDialog && billToDelete != null) {
             AlertDialog(
-                onDismissRequest = { 
+                onDismissRequest = {
                     showDeleteDialog = false
                     billToDelete = null
                 },
@@ -227,7 +226,7 @@ fun PaidBillsScreen(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { 
+                    TextButton(onClick = {
                         showDeleteDialog = false
                         billToDelete = null
                     }) {
@@ -279,16 +278,16 @@ fun PaidBillItem(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-                
+
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     IconButton(
-                        onClick = {onEditClick()},
+                        onClick = { onEditClick() },
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            Icons.Default.Edit, 
+                            Icons.Default.Edit,
                             contentDescription = "Edit",
                             tint = PrimaryGreen
                         )
@@ -298,16 +297,16 @@ fun PaidBillItem(
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            Icons.Default.Delete, 
+                            Icons.Default.Delete,
                             contentDescription = "Delete",
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
             }
-            
+
             ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -340,7 +339,7 @@ fun PaidBillItem(
                     )
                 }
             }
-            
+
             if (bill.note.isNotEmpty()) {
                 Text(
                     text = "Note: ${bill.note}",

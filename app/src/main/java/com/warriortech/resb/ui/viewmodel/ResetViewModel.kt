@@ -2,7 +2,6 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.model.Area
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 @HiltViewModel
 class ResetViewModel @Inject constructor(
@@ -26,17 +24,21 @@ class ResetViewModel @Inject constructor(
             // You can perform any additional actions here if needed
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                val response = apiService.resetData(sessionManager.getCompanyCode()?:"")
+                val response = apiService.resetData(sessionManager.getCompanyCode() ?: "")
                 if (response.isSuccessful) {
-                    _uiState.value = _uiState.value.copy(successMessage = response.body()?.message ?: "Database reset successfully" )
+                    _uiState.value = _uiState.value.copy(
+                        successMessage = response.body()?.message ?: "Database reset successfully"
+                    )
                 } else {
-                    _uiState.value = _uiState.value.copy(errorMessage = "Failed to reset database: ${response.message()}")
+                    _uiState.value =
+                        _uiState.value.copy(errorMessage = "Failed to reset database: ${response.message()}")
                 }
             } catch (e: Exception) {
                 throw Exception("Error during database reset: ${e.message}")
             }
         }
     }
+
     fun clearMessages() {
         _uiState.value = _uiState.value.copy(
             errorMessage = null,

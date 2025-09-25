@@ -44,7 +44,7 @@ class OrderScreenViewModel @Inject constructor(
                     OrderDisplayItem(
                         orderId = order.order_master_id,
                         areaName = order.area_name,
-                        tableName =  order.table_name,
+                        tableName = order.table_name,
                         totalAmount = totalAmount["grand_total"] ?: 0.0,
                         status = order.order_status,
                         timestamp = formatTimestamp(order.order_date),
@@ -83,9 +83,9 @@ class OrderScreenViewModel @Inject constructor(
     fun getOrdersByOrderId(lng: String): List<TblOrderDetailsResponse> {
         viewModelScope.launch {
             val order = orderRepository.getOrdersByOrderId(lng)
-            if (order.body()!=null)
+            if (order.body() != null)
                 tblOrderDetailsResponse.value = order.body()!!
-                return@launch
+            return@launch
         }
         return emptyList()
     }

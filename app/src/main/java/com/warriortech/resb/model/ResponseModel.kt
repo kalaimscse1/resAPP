@@ -9,6 +9,7 @@ data class AuthResponse(
     @SerializedName("staff")
     val user: TblStaff
 )
+
 data class ApiResponse<T>(
     val success: Boolean,
     val message: String,

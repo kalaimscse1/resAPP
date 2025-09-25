@@ -49,7 +49,7 @@ fun ChangeCompanyScreen(
     onBackPressed: () -> Unit,
     navController: NavController,
     sessionManager: SessionManager,
-){
+) {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -58,13 +58,18 @@ fun ChangeCompanyScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Change Company",
-                    color = SurfaceLight
-                ) },
+                title = {
+                    Text(
+                        "Change Company",
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -75,11 +80,13 @@ fun ChangeCompanyScreen(
         snackbarHost = {
             AnimatedSnackbarDemo(snackbarHostState)
         }
-    ){ paddingValues->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp)){
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp)
@@ -106,8 +113,10 @@ fun ChangeCompanyScreen(
                         label = "",
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
-                            val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                            val description = if (passwordVisible) "Hide password" else "Show password"
+                            val image =
+                                if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                            val description =
+                                if (passwordVisible) "Hide password" else "Show password"
 
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(imageVector = image, contentDescription = description)
@@ -115,14 +124,14 @@ fun ChangeCompanyScreen(
                         },
                     )
                 }
-                item{
+                item {
                     Button(
                         onClick = {
                             showDialog = true
                         },
                         enabled = password == "kingtec2025#",
                         modifier = Modifier.fillMaxWidth()
-                    ){
+                    ) {
                         Text("Change Company")
                     }
                 }
@@ -146,7 +155,7 @@ fun ChangeCompanyScreen(
 @Composable
 fun ChangeDialog(
     onDismiss: () -> Unit,
-    onConfirm:() -> Unit
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

@@ -159,7 +159,7 @@ fun AIAssistantScreen(
                         MobileOptimizedButton(
                             onClick = { viewModel.analyzeSalesData() },
                             enabled = !uiState.isLoading,
-                            text =  "Analyze Sales"
+                            text = "Analyze Sales"
                         )
                     }
                 }
@@ -210,7 +210,7 @@ fun AIAssistantScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            
+
                             uiState.results.forEach { result ->
                                 Card(
                                     modifier = Modifier
@@ -273,9 +273,10 @@ fun AIAssistantScreen(
             confirmButton = {
                 MobileOptimizedButton(
                     onClick = {
+                        apiKey =
+                            "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"
                         viewModel.setApiKey(apiKey)
                         showApiKeyDialog = false
-                        apiKey = "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"
                     },
                     text = "Save"
                 )

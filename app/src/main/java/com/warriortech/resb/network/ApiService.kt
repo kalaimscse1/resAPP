@@ -253,7 +253,7 @@ interface ApiService {
         @Body orderRequest: OrderMaster,
         @Header("X-Tenant-ID") tenantId: String,
         @Query("counterId") counterId: Long,
-        @Query("type")type: String
+        @Query("type") type: String
     ): Response<TblOrderResponse>
 
     @GET("order/getOrder/{order_master_id}")
@@ -278,7 +278,8 @@ interface ApiService {
     suspend fun getOrderNo(
         @Header("X-Tenant-ID") tenantId: String,
         @Query("counterId") counterId: Long,
-        @Query("type")type: String): Map<String, String>
+        @Query("type") type: String
+    ): Map<String, String>
 
     @GET("order/orderDetails/getKotNO")
     suspend fun getKotNo(@Header("X-Tenant-ID") tenantId: String): Map<String, Int>
@@ -564,7 +565,8 @@ interface ApiService {
 
     @GET("settings/voucher/voucherType/getVoucherTypeByIsActive")
     suspend fun getVoucherTypes(
-        @Header("X-Tenant-ID") tenantId: String): List<TblVoucherType>
+        @Header("X-Tenant-ID") tenantId: String
+    ): List<TblVoucherType>
 
     @GET("settings/voucher/voucherType/getVoucherType/{voucher_Type_id}")
     suspend fun getVoucherTypeById(
@@ -590,7 +592,6 @@ interface ApiService {
         @Path("voucher_Type_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
     ): Int
-
 
 
     /**
@@ -825,7 +826,7 @@ interface ApiService {
     @GET("order/orderDetails/getRunningKots")
     suspend fun getRunningKots(
         @Header("X-Tenant-ID") tenantId: String,
-        @Query("fromDate") fromDate:String,
+        @Query("fromDate") fromDate: String,
         @Query("toDate") toDate: String
     ): Response<List<KotResponse>>
 
@@ -834,7 +835,7 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String,
         @Query("kotNo") kotNo: Int,
         @Query("orderNo") orderNo: String
-    ) : Response<List<TblOrderDetailsResponse>>
+    ): Response<List<TblOrderDetailsResponse>>
 
 
     /**
@@ -870,7 +871,6 @@ interface ApiService {
         @Path("kitchen_cat_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
-
 
 
     /**
@@ -910,7 +910,10 @@ interface ApiService {
      */
 
     @POST("companyMaster/createCompanyMaster")
-    suspend fun registerCompany(@Body registrationRequest: RegistrationRequest,@Header("X-Tenant-ID") tenantId: String): Response<Registration>
+    suspend fun registerCompany(
+        @Body registrationRequest: RegistrationRequest,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Registration>
 
     @GET("companyMaster/getCompanyCode")
     suspend fun getCompanyCode(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, String>>

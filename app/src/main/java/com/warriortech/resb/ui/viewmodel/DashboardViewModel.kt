@@ -7,7 +7,6 @@ import com.warriortech.resb.data.repository.DashboardRepository
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.PaymentModeData
-import com.warriortech.resb.model.RunningOrder
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.model.WeeklySalesData
 import com.warriortech.resb.network.SessionManager
@@ -30,7 +29,6 @@ class DashboardViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
     val tblOrderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
-
     sealed class UiState {
         object Loading : UiState()
         data class Success(
@@ -38,13 +36,18 @@ class DashboardViewModel @Inject constructor(
             val piechart: List<PaymentModeData>,
             val barchart: List<WeeklySalesData>
         ) : UiState()
+
         data class Error(val message: String) : UiState()
     }
 
     init {
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
 
     }
+
     fun loadDashboardData() {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
@@ -73,7 +76,7 @@ class DashboardViewModel @Inject constructor(
     fun getOrdersByOrderId(lng: String): List<TblOrderDetailsResponse> {
         viewModelScope.launch {
             val order = orderRepository.getOrdersByOrderId(lng)
-            if (order.body()!=null)
+            if (order.body() != null)
                 tblOrderDetailsResponse.value = order.body()!!
             return@launch
         }

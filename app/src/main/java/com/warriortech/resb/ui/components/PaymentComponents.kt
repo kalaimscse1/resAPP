@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.warriortech.resb.model.Customer
 import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.util.CurrencySettings
@@ -49,14 +48,6 @@ fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-//            PaymentSummaryRow(label = "Subtotal", amount = "₹${uiState.subtotal}")
-//            PaymentSummaryRow(label = "Tax", amount = "₹${uiState.taxAmount}")
-//
-//            Divider(
-//                modifier = Modifier.padding(vertical = 12.dp),
-//                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-//            )
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -79,31 +70,10 @@ fun PaymentSummaryCard(uiState: BillingPaymentUiState) {
 }
 
 @Composable
-private fun PaymentSummaryRow(label: String, amount: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-        )
-        Text(
-            amount,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
 fun PaymentMethodCard(
     uiState: BillingPaymentUiState,
     onPaymentMethodChange: (String) -> Unit,
-    viewModel : BillingViewModel,
+    viewModel: BillingViewModel,
     customers: List<TblCustomer>,
     onCustomer: (TblCustomer) -> Unit
 ) {
@@ -159,7 +129,7 @@ fun PaymentMethodCard(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
-            if (uiState.selectedPaymentMethod?.name=="CASH") {
+            if (uiState.selectedPaymentMethod?.name == "CASH") {
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = if (uiState.cashAmount == 0.0) uiState.amountToPay.toString() else uiState.cashAmount.toString(),
@@ -202,13 +172,13 @@ fun PaymentMethodCard(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Memoize the text field values to prevent unnecessary string conversions
-                val cashValue = remember(uiState.cashAmount) { 
+                val cashValue = remember(uiState.cashAmount) {
                     if (uiState.cashAmount == 0.0) "" else uiState.cashAmount.toString()
                 }
-                val cardValue = remember(uiState.cardAmount) { 
+                val cardValue = remember(uiState.cardAmount) {
                     if (uiState.cardAmount == 0.0) "" else uiState.cardAmount.toString()
                 }
-                val upiValue = remember(uiState.upiAmount) { 
+                val upiValue = remember(uiState.upiAmount) {
                     if (uiState.upiAmount == 0.0) "" else uiState.upiAmount.toString()
                 }
 
@@ -255,14 +225,14 @@ private fun PaymentMethodOption(
             .clickable { onSelect() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) 
+            containerColor = if (isSelected)
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            else 
+            else
                 MaterialTheme.colorScheme.surface
         ),
-        border = if (isSelected) 
+        border = if (isSelected)
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-        else 
+        else
             BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         Row(
@@ -274,8 +244,8 @@ private fun PaymentMethodOption(
             Icon(
                 icon,
                 contentDescription = method,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary 
-                      else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                tint = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -283,8 +253,8 @@ private fun PaymentMethodOption(
                 method,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) MaterialTheme.colorScheme.primary 
-                       else MaterialTheme.colorScheme.onSurface
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.weight(1f))
             if (isSelected) {

@@ -32,11 +32,11 @@ data class CreateCustomerResponse(
 
 data class TblCustomer(
     var customer_id: Long,
-    var customer_name:String,
-    var contact_no:String,
-    var address:String,
-    var email_address:String,
-    var gst_no:String,
-    var igst_status:Boolean,
-    var is_active:Long
+    var customer_name: String,
+    var contact_no: String,
+    var address: String,
+    var email_address: String,
+    var gst_no: String,
+    var igst_status: Boolean,
+    var is_active: Long
 )

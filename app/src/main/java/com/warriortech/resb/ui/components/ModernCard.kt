@@ -55,7 +55,7 @@ fun GradientCard(
     val cardModifier = modifier
         .clip(RoundedCornerShape(Dimensions.cornerRadiusL))
         .background(gradient)
-    
+
     if (onClick != null) {
         Card(
             onClick = onClick,

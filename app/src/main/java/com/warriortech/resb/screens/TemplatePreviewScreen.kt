@@ -34,16 +34,16 @@ fun TemplatePreviewScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    
+
     // Find the template by ID
     val template = uiState.templates.find { it.id == templateId }
-    
+
     LaunchedEffect(templateId) {
         if (template == null) {
             viewModel.loadTemplates()
         }
     }
-    
+
     if (template == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -53,7 +53,7 @@ fun TemplatePreviewScreen(
         }
         return
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -96,7 +96,7 @@ fun TemplatePreviewScreen(
                     ReceiptType.BILL -> BillPreview(template)
                 }
             }
-            
+
             // Template info card
             Card(
                 modifier = Modifier
@@ -112,7 +112,7 @@ fun TemplatePreviewScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -120,7 +120,7 @@ fun TemplatePreviewScreen(
                         Text("Type:", fontWeight = FontWeight.Medium)
                         Text(template.type.name)
                     }
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -128,7 +128,7 @@ fun TemplatePreviewScreen(
                         Text("Paper Size:", fontWeight = FontWeight.Medium)
                         Text(template.paperSettings.paperSize.displayName)
                     }
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -145,7 +145,7 @@ fun TemplatePreviewScreen(
 @Composable
 fun KotPreview(template: ReceiptTemplate) {
     val sampleKotData = createSampleKotData()
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -173,9 +173,9 @@ fun KotPreview(template: ReceiptTemplate) {
             },
             modifier = Modifier.fillMaxWidth()
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // KOT Details
         Text(
             text = "KOT #: ${sampleKotData.kotNumber}",
@@ -186,7 +186,7 @@ fun KotPreview(template: ReceiptTemplate) {
                 FontWeights.LIGHT -> FontWeight.Light
             }
         )
-        
+
         Text(
             text = "Table: ${sampleKotData.tableNumber}",
             fontSize = template.bodySettings.fontSize.sp,
@@ -196,7 +196,7 @@ fun KotPreview(template: ReceiptTemplate) {
                 FontWeights.LIGHT -> FontWeight.Light
             }
         )
-        
+
         Text(
             text = "Time: ${sampleKotData.timestamp}",
             fontSize = template.bodySettings.fontSize.sp,
@@ -206,9 +206,9 @@ fun KotPreview(template: ReceiptTemplate) {
                 FontWeights.LIGHT -> FontWeight.Light
             }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Items
         sampleKotData.items.forEach { item ->
             Row(
@@ -237,9 +237,9 @@ fun KotPreview(template: ReceiptTemplate) {
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Footer
         if (template.footerSettings.customMessage.isNotEmpty()) {
             Text(
@@ -264,7 +264,7 @@ fun KotPreview(template: ReceiptTemplate) {
 @Composable
 fun BillPreview(template: ReceiptTemplate) {
     val sampleBillData = createSampleBillData()
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -292,9 +292,9 @@ fun BillPreview(template: ReceiptTemplate) {
             },
             modifier = Modifier.fillMaxWidth()
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Bill Details
         Text(
             text = "Bill #: ${sampleBillData.billNo}",
@@ -305,7 +305,7 @@ fun BillPreview(template: ReceiptTemplate) {
                 FontWeights.LIGHT -> FontWeight.Light
             }
         )
-        
+
         Text(
             text = "Date: ${sampleBillData.date}",
             fontSize = template.bodySettings.fontSize.sp,
@@ -315,7 +315,7 @@ fun BillPreview(template: ReceiptTemplate) {
                 FontWeights.LIGHT -> FontWeight.Light
             }
         )
-        
+
         Text(
             text = "Table: ${sampleBillData.tableNo}",
             fontSize = template.bodySettings.fontSize.sp,
@@ -325,9 +325,9 @@ fun BillPreview(template: ReceiptTemplate) {
                 FontWeights.LIGHT -> FontWeight.Light
             }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Items header
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -354,9 +354,9 @@ fun BillPreview(template: ReceiptTemplate) {
                 fontWeight = FontWeight.Bold
             )
         }
-        
+
         Divider(modifier = Modifier.padding(vertical = 4.dp))
-        
+
         // Items
         sampleBillData.items.forEach { item ->
             Row(
@@ -388,9 +388,9 @@ fun BillPreview(template: ReceiptTemplate) {
                 )
             }
         }
-        
+
         Divider(modifier = Modifier.padding(vertical = 8.dp))
-        
+
         // Totals
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -407,7 +407,7 @@ fun BillPreview(template: ReceiptTemplate) {
                 fontWeight = FontWeight.Bold
             )
         }
-        
+
 //        Row(
 //            modifier = Modifier.fillMaxWidth(),
 //            horizontalArrangement = Arrangement.SpaceBetween
@@ -421,7 +421,7 @@ fun BillPreview(template: ReceiptTemplate) {
 //                fontSize = template.bodySettings.fontSize.sp
 //            )
 //        }
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -437,9 +437,9 @@ fun BillPreview(template: ReceiptTemplate) {
                 fontWeight = FontWeight.Bold
             )
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Footer
         if (template.footerSettings.customMessage.isNotEmpty()) {
             Text(
@@ -480,7 +480,7 @@ fun createSampleBillData(): Bill {
         billNo = "BILL001",
         date = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
         tableNo = "Table 5",
-      // Placeholder to satisfy non-empty list
+        // Placeholder to satisfy non-empty list
         items = listOf(
             BillItem(
                 sn = 1,

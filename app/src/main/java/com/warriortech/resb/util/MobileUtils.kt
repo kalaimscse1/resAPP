@@ -12,42 +12,42 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object MobileUtils {
-    
+
     fun isTablet(context: Context): Boolean {
         val displayMetrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.defaultDisplay.getMetrics(displayMetrics)
-        
+
         val density = displayMetrics.density
         val dpHeight = displayMetrics.heightPixels / density
         val dpWidth = displayMetrics.widthPixels / density
-        
+
         // Enhanced tablet detection
         val smallestWidth = minOf(dpWidth, dpHeight)
         return smallestWidth >= 600
     }
-    
+
     fun isLargeTablet(context: Context): Boolean {
         val displayMetrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.defaultDisplay.getMetrics(displayMetrics)
-        
+
         val density = displayMetrics.density
         val dpHeight = displayMetrics.heightPixels / density
         val dpWidth = displayMetrics.widthPixels / density
-        
+
         val smallestWidth = minOf(dpWidth, dpHeight)
         return smallestWidth >= 840
     }
-    
+
     fun isLandscape(context: Context): Boolean {
         return context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
-    
+
     fun getScreenDensity(context: Context): Float {
         return context.resources.displayMetrics.density
     }
-    
+
     fun getOptimalColumnCount(context: Context): Int {
         return when {
             isLargeTablet(context) -> if (isLandscape(context)) 4 else 3
@@ -55,7 +55,7 @@ object MobileUtils {
             else -> if (isLandscape(context)) 2 else 1
         }
     }
-    
+
     fun getOptimalGridSpacing(context: Context): Dp {
         return when {
             isLargeTablet(context) -> 16.dp

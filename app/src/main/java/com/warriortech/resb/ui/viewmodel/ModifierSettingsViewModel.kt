@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -24,14 +23,18 @@ class ModifierSettingsViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ModifierSettingsUiState>(ModifierSettingsUiState.Loading)
+    private val _uiState =
+        MutableStateFlow<ModifierSettingsUiState>(ModifierSettingsUiState.Loading)
     val uiState: StateFlow<ModifierSettingsUiState> = _uiState.asStateFlow()
 
     private val _categories = MutableStateFlow<List<MenuCategory>>(emptyList())
     val categories: StateFlow<List<MenuCategory>> = _categories.asStateFlow()
 
     init {
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
 
     }
 
@@ -64,7 +67,8 @@ class ModifierSettingsViewModel @Inject constructor(
                 modifierRepository.createModifier(modifier)
                 loadModifiers()
             } catch (e: Exception) {
-                _uiState.value = ModifierSettingsUiState.Error(e.message ?: "Failed to add modifier")
+                _uiState.value =
+                    ModifierSettingsUiState.Error(e.message ?: "Failed to add modifier")
             }
         }
     }
@@ -75,7 +79,8 @@ class ModifierSettingsViewModel @Inject constructor(
                 modifierRepository.updateModifier(modifier)
                 loadModifiers()
             } catch (e: Exception) {
-                _uiState.value = ModifierSettingsUiState.Error(e.message ?: "Failed to update modifier")
+                _uiState.value =
+                    ModifierSettingsUiState.Error(e.message ?: "Failed to update modifier")
             }
         }
     }
@@ -86,7 +91,8 @@ class ModifierSettingsViewModel @Inject constructor(
                 modifierRepository.deleteModifier(modifierId)
                 loadModifiers()
             } catch (e: Exception) {
-                _uiState.value = ModifierSettingsUiState.Error(e.message ?: "Failed to delete modifier")
+                _uiState.value =
+                    ModifierSettingsUiState.Error(e.message ?: "Failed to delete modifier")
             }
         }
     }

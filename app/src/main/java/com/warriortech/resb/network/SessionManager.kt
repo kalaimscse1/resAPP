@@ -1,6 +1,5 @@
 package com.warriortech.resb.network
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -31,10 +30,10 @@ class SessionManager @Inject constructor(
         private const val DECIMAL = "decimal_places"
         private const val KEY_USER_LOGIN = "user_login"
     }
-    
+
     private lateinit var prefs: SharedPreferences
     private val gson = Gson()
-    
+
     /**
      * Initialize the session manager with application context
      * Must be called from Application onCreate or a splash activity
@@ -45,7 +44,7 @@ class SessionManager @Inject constructor(
             val masterKey = MasterKey.Builder(context)
                 .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
                 .build()
-            
+
             // Create encrypted shared preferences
             prefs = EncryptedSharedPreferences.create(
                 context,
@@ -60,7 +59,7 @@ class SessionManager @Inject constructor(
         }
     }
 
-    
+
     /**
      * Save authentication token
      */
@@ -81,6 +80,7 @@ class SessionManager @Inject constructor(
         val userLogin = prefs.getString(KEY_USER_LOGIN, "false")
         return userLogin == "true"
     }
+
     /**
      * Get authentication token
      */
@@ -88,7 +88,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         return prefs.getString(KEY_AUTH_TOKEN, null)
     }
-    
+
     /**
      * Save user data
      */
@@ -97,7 +97,7 @@ class SessionManager @Inject constructor(
         val userJson = gson.toJson(user)
         prefs.edit() { putString(KEY_USER, userJson) }
     }
-    
+
     /**
      * Get user data
      */
@@ -125,23 +125,22 @@ class SessionManager @Inject constructor(
         return prefs.getLong(DECIMAL, 2)
     }
 
-    fun saveGeneralSetting(setting: GeneralSettings){
+    fun saveGeneralSetting(setting: GeneralSettings) {
         checkInitialization()
         val settingJson = gson.toJson(setting)
-        prefs.edit { putString(KEY_GENERAL_SETTING,settingJson) }
+        prefs.edit { putString(KEY_GENERAL_SETTING, settingJson) }
     }
 
-    fun getGeneralSetting(): GeneralSettings?{
+    fun getGeneralSetting(): GeneralSettings? {
         checkInitialization()
-        val settingJson = prefs.getString(KEY_GENERAL_SETTING,null)
+        val settingJson = prefs.getString(KEY_GENERAL_SETTING, null)
         return if (settingJson != null) {
             try {
                 gson.fromJson(settingJson, GeneralSettings::class.java)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 null
             }
-        }
-        else
+        } else
             null
     }
 
@@ -164,6 +163,7 @@ class SessionManager @Inject constructor(
             null
         }
     }
+
     /**
      * Save company code
      */
@@ -171,7 +171,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         prefs.edit { putString(KEY_COMPANY_CODE, companyCode) }
     }
-    
+
     /**
      * Get company code
      */
@@ -179,7 +179,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         return prefs.getString(KEY_COMPANY_CODE, null)
     }
-    
+
     /**
      * Save subscription end date
      */
@@ -187,7 +187,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         prefs.edit { putString("subscription_end_date", endDate) }
     }
-    
+
     /**
      * Get subscription end date
      */
@@ -195,7 +195,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         return prefs.getString("subscription_end_date", null)
     }
-    
+
     /**
      * Save last notification date
      */
@@ -203,7 +203,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         prefs.edit { putString("last_notification_date", date) }
     }
-    
+
     /**
      * Get last notification date
      */
@@ -211,7 +211,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         return prefs.getString("last_notification_date", null)
     }
-    
+
     /**
      * Clear all session data (for logout)
      */
@@ -219,7 +219,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         prefs.edit { clear() }
     }
-    
+
     /**
      * Update last sync timestamp
      */
@@ -227,7 +227,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         prefs.edit { putLong(KEY_LAST_SYNC, System.currentTimeMillis()) }
     }
-    
+
     /**
      * Get last sync timestamp
      */
@@ -235,7 +235,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         return prefs.getLong(KEY_LAST_SYNC, 0)
     }
-    
+
     /**
      * Check if user is logged in
      */
@@ -243,7 +243,7 @@ class SessionManager @Inject constructor(
         checkInitialization()
         return getAuthToken() != null && getUser() != null
     }
-    
+
     /**
      * Check if session manager is initialized
      */

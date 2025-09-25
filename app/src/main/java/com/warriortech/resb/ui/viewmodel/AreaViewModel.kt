@@ -37,7 +37,7 @@ class AreaViewModel @Inject constructor(
                 val areas = areaRepository.getAllAreas()
                 areas.collect {
                     _uiState.value = _uiState.value.copy(
-                        areas = it.filter { it.area_name !="--" },
+                        areas = it.filter { it.area_name != "--" },
                         isLoading = false
                     )
                 }

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.util
 
 import com.warriortech.resb.network.SessionManager
@@ -51,10 +50,10 @@ class SubscriptionManager @Inject constructor(
 
     fun shouldShowNotificationToday(): Boolean {
         if (!shouldShowExpirationWarning()) return false
-        
+
         val today = LocalDate.now()
         val lastNotificationDate = getLastNotificationDate()
-        
+
         return lastNotificationDate == null || lastNotificationDate.isBefore(today)
     }
 

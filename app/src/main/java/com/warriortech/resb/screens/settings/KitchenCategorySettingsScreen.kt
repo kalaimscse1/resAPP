@@ -45,8 +45,10 @@ fun KitchenCategorySettingsScreen(
                 title = { Text("Kitchen Category Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -54,8 +56,10 @@ fun KitchenCategorySettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Kitchen Category",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Kitchen Category",
+                            tint = SurfaceLight
+                        )
                     }
                 }
             )
@@ -71,13 +75,17 @@ fun KitchenCategorySettingsScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is KitchenCategorySettingsViewModel.UiState.Success -> {
                 if (state.kitchenCategories.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No kitchen categories available", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "No kitchen categories available",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 } else {
                     LazyColumn(
@@ -105,6 +113,7 @@ fun KitchenCategorySettingsScreen(
                     }
                 }
             }
+
             is KitchenCategorySettingsViewModel.UiState.Error -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),

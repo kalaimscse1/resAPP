@@ -1,6 +1,5 @@
 package com.warriortech.resb.screens
 
-import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,25 +13,22 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.IconButton
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -42,27 +38,20 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
-import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.ModernDivider
-import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.ErrorRed
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.theme.TextPrimary
 import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
-import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
 import com.warriortech.resb.util.scrollToBottomSmooth
-import kotlinx.coroutines.delay
 
 @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,7 +107,7 @@ fun CounterScreen(
                 isOrderPlaced = true
                 viewModel.placeOrder(2, "")
             },
-            onDismiss = { 
+            onDismiss = {
                 showConfirmDialog = false
                 // Reset loading state if it was set
                 viewModel.resetToSuccessState()
@@ -224,10 +213,9 @@ fun CounterScreen(
                         menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
                     } else if (selectedCategory != null && selectedCategory == "ALL") {
                         menuItems
-                    }else if (selectedCategory != null) {
+                    } else if (selectedCategory != null) {
                         menuItems.filter { it.item_cat_name == selectedCategory } // Show all items if "ALL" is selected
-                    }
-                    else {
+                    } else {
                         menuItems // No filtering if no category is selected
                     }
 
@@ -442,7 +430,7 @@ fun CounterMenuItemCard(
                                 .size(36.dp)
                                 .border(1.dp, ErrorRed, RoundedCornerShape(4.dp))
                                 .pointerInput(Unit) {
-                                    detectTapGestures { onRemoveItem()}
+                                    detectTapGestures { onRemoveItem() }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -543,7 +531,7 @@ fun CounterMenuItemCard(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "$quantity × ${CurrencySettings.format( menuItem.rate)}",
+                            text = "$quantity × ${CurrencySettings.format(menuItem.rate)}",
                             style = MaterialTheme.typography.bodyMedium
                         )
 

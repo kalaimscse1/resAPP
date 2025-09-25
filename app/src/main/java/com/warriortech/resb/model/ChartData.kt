@@ -7,6 +7,7 @@ data class PaymentModeData(
     val amount: Double,
     val color: Color
 )
+
 data class PaymentModeDataResponse(
     val paymentMode: String,
     val amount: Double,

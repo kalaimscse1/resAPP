@@ -22,7 +22,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.TaxSettingsViewModel
@@ -45,12 +44,19 @@ fun TaxSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.tax_settings),
-                    color = SurfaceLight) },
+                title = {
+                    Text(
+                        stringResource(R.string.tax_settings),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -58,79 +64,81 @@ fun TaxSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Tax",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Tax",
+                            tint = SurfaceLight
+                        )
                     }
                 }
             )
         }
     ) { paddingValues ->
-            when (val state=uiState) {
-                is TaxSettingsViewModel.UiState.Loading -> {
+        when (val state = uiState) {
+            is TaxSettingsViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is TaxSettingsViewModel.UiState.Success -> {
+                if (state.taxes.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text("No Taxes available", style = MaterialTheme.typography.bodyMedium)
                     }
-                }
-
-                is TaxSettingsViewModel.UiState.Success -> {
-                    if (state.taxes.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No Taxes available", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    } else{
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.taxes) { tax ->
-                                TaxItem(
-                                    tax = tax,
-                                    onEdit = {
-                                        editingTax = tax
-                                        showAddDialog = true
-                                    },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.deleteTax(tax.tax_id)
-                                            snackbarHostState.showSnackbar("Tax deleted")
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                is TaxSettingsViewModel.UiState.Error -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-
-                        Text(
-                            text = "Error: ${state.message}",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Button(
-                            onClick = { viewModel.loadTaxes() },
-                            modifier = Modifier.padding(top = 16.dp)
-                        ) {
-                            Text("Retry")
+                        items(state.taxes) { tax ->
+                            TaxItem(
+                                tax = tax,
+                                onEdit = {
+                                    editingTax = tax
+                                    showAddDialog = true
+                                },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteTax(tax.tax_id)
+                                        snackbarHostState.showSnackbar("Tax deleted")
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             }
+
+            is TaxSettingsViewModel.UiState.Error -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+
+                ) {
+
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(
+                        onClick = { viewModel.loadTaxes() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
 
         if (showAddDialog || editingTax != null) {
             TaxDialog(
@@ -248,14 +256,16 @@ fun TaxDialog(
                     val newTable = Tax(
                         tax_id = tax?.tax_id ?: 0,
                         tax_name = tax?.tax_name ?: taxName,
-                        tax_percentage = tax?.tax_percentage ?: taxPercentage.toDoubleOrNull() ?: 0.0,
-                        cess_percentage = tax?.cess_percentage ?: cessPercentage.toDoubleOrNull() ?: 0.0,
+                        tax_percentage = tax?.tax_percentage ?: taxPercentage.toDoubleOrNull()
+                        ?: 0.0,
+                        cess_percentage = tax?.cess_percentage ?: cessPercentage.toDoubleOrNull()
+                        ?: 0.0,
                         is_active = tax?.is_active ?: isActive
                     )
                     onSave(newTable)
                 },
                 enabled = taxName.isNotBlank() && taxPercentage.isNotBlank() && cessPercentage.isNotBlank() &&
-                          taxPercentage.toDoubleOrNull() != null && cessPercentage.toDoubleOrNull() != null
+                        taxPercentage.toDoubleOrNull() != null && cessPercentage.toDoubleOrNull() != null
             ) {
                 Text(if (tax != null) "Update" else "Save")
             }

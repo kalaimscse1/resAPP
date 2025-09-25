@@ -10,20 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,19 +38,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.warriortech.resb.R
-import com.warriortech.resb.model.Customer
 import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
 import com.warriortech.resb.util.ReusableBottomSheet
 import kotlinx.coroutines.launch
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,8 +69,10 @@ fun CustomerSettingsScreen(
                 title = { Text("Customer Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -88,8 +80,11 @@ fun CustomerSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Add Customer",
-                            tint = SurfaceLight)}
+                        Icon(
+                            Icons.Default.Edit, contentDescription = "Add Customer",
+                            tint = SurfaceLight
+                        )
+                    }
                 }
             )
         },
@@ -102,7 +97,7 @@ fun CustomerSettingsScreen(
 //            }
 //        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ){ paddingValues ->
+    ) { paddingValues ->
         when (val state = uiState) {
             is CustomerSettingsViewModel.UiState.Loading -> {
                 Box(
@@ -112,6 +107,7 @@ fun CustomerSettingsScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is CustomerSettingsViewModel.UiState.Success -> {
                 if (state.customers.isEmpty()) {
                     Box(
@@ -124,29 +120,29 @@ fun CustomerSettingsScreen(
                         )
                     }
                     return@Scaffold
-                }
-                else{
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(state.customers) { customer ->
-                        CustomerCard(
-                            customer = customer,
-                            onEdit = { editingCustomer = it },
-                            onDelete = {
-                                scope.launch {
-                                    viewModel.deleteCustomer(it.customer_id)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.customers) { customer ->
+                            CustomerCard(
+                                customer = customer,
+                                onEdit = { editingCustomer = it },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteCustomer(it.customer_id)
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
-            }
+
             is CustomerSettingsViewModel.UiState.Error -> {
 
                 Text(
@@ -174,7 +170,7 @@ fun CustomerSettingsScreen(
             CustomerDialog(
                 customer = customer,
                 onDismiss = { editingCustomer = null },
-                onConfirm = {customer ->
+                onConfirm = { customer ->
                     scope.launch {
                         viewModel.updateCustomer(customer)
                         editingCustomer = null
@@ -184,6 +180,7 @@ fun CustomerSettingsScreen(
         }
     }
 }
+
 @Composable
 fun CustomerCard(
     customer: TblCustomer,
@@ -250,19 +247,23 @@ fun CustomerDialog(
     ReusableBottomSheet(
         onDismiss = onDismiss,
         title = if (customer == null) "Add Customer" else "Edit Customer",
-        onSave = { onConfirm(TblCustomer(
-            customer_id = customer?.customer_id ?: 0,
-            customer_name = name,
-            contact_no = phone,
-            address = address,
-            email_address = email,
-            gst_no = customer?.gst_no ?: gst,
-            igst_status = customer?.igst_status ?: igstStatus,
-            is_active = customer?.is_active ?: isActive
-        )) },
+        onSave = {
+            onConfirm(
+                TblCustomer(
+                    customer_id = customer?.customer_id ?: 0,
+                    customer_name = name,
+                    contact_no = phone,
+                    address = address,
+                    email_address = email,
+                    gst_no = customer?.gst_no ?: gst,
+                    igst_status = customer?.igst_status ?: igstStatus,
+                    is_active = customer?.is_active ?: isActive
+                )
+            )
+        },
         isSaveEnabled = name.isNotBlank() && phone.isNotBlank(),
         buttonText = if (customer == null) "Add" else "Update"
-    ){
+    ) {
         Column {
             OutlinedTextField(
                 value = name,

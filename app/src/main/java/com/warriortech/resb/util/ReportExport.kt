@@ -123,17 +123,20 @@ object ReportExport {
             summaryCell.backgroundColor = BaseColor.YELLOW
             table.addCell(summaryCell)
 
-            val totalBillCell = PdfPCell(Phrase("₹${String.format("%.2f", totalBillAmount)}", boldFont))
+            val totalBillCell =
+                PdfPCell(Phrase("₹${String.format("%.2f", totalBillAmount)}", boldFont))
             totalBillCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalBillCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalBillCell)
 
-            val totalDiscCell = PdfPCell(Phrase("₹${String.format("%.2f", totalDiscount)}", boldFont))
+            val totalDiscCell =
+                PdfPCell(Phrase("₹${String.format("%.2f", totalDiscount)}", boldFont))
             totalDiscCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalDiscCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalDiscCell)
 
-            val totalReceivedCell = PdfPCell(Phrase("₹${String.format("%.2f", totalReceived)}", boldFont))
+            val totalReceivedCell =
+                PdfPCell(Phrase("₹${String.format("%.2f", totalReceived)}", boldFont))
             totalReceivedCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalReceivedCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalReceivedCell)
@@ -151,7 +154,7 @@ object ReportExport {
 
     fun exportToExcel(context: Context, bills: List<TblBillingResponse>) {
         try {
-            
+
             val excelDir = File(context.getExternalFilesDir(null), "reports")
             if (!excelDir.exists()) excelDir.mkdirs()
 
@@ -353,7 +356,8 @@ object ReportExport {
             totalQtyCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalQtyCell)
 
-            val totalAmountCell = PdfPCell(Phrase("₹${String.format("%.2f", totalAmount)}", boldFont))
+            val totalAmountCell =
+                PdfPCell(Phrase("₹${String.format("%.2f", totalAmount)}", boldFont))
             totalAmountCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalAmountCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalAmountCell)
@@ -368,7 +372,8 @@ object ReportExport {
             totalCessCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalCessCell)
 
-            val totalCessSpecCell = PdfPCell(Phrase("₹${String.format("%.2f", totalCessSpecific)}", boldFont))
+            val totalCessSpecCell =
+                PdfPCell(Phrase("₹${String.format("%.2f", totalCessSpecific)}", boldFont))
             totalCessSpecCell.horizontalAlignment = Element.ALIGN_RIGHT
             totalCessSpecCell.backgroundColor = BaseColor.YELLOW
             table.addCell(totalCessSpecCell)
@@ -383,12 +388,14 @@ object ReportExport {
             document.close()
 
             shareFile(context, file, "application/pdf")
-            Toast.makeText(context, "Item Sales PDF Exported Successfully!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Item Sales PDF Exported Successfully!", Toast.LENGTH_LONG)
+                .show()
 
         } catch (e: Exception) {
             Toast.makeText(context, "PDF Export Failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
     fun categoryExportToPdf(context: Context, bills: List<CategoryReport>) {
         try {
             val pdfDir = File(context.getExternalFilesDir(null), "reports")
@@ -466,7 +473,8 @@ object ReportExport {
             document.close()
 
             shareFile(context, file, "application/pdf")
-            Toast.makeText(context, "Category Sales PDF Exported Successfully!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Category Sales PDF Exported Successfully!", Toast.LENGTH_LONG)
+                .show()
 
         } catch (e: Exception) {
             Toast.makeText(context, "PDF Export Failed: ${e.message}", Toast.LENGTH_LONG).show()

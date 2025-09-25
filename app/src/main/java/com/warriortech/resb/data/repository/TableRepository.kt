@@ -11,7 +11,6 @@ import com.warriortech.resb.model.TblTable
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.NetworkMonitor
-import com.warriortech.resb.util.getCurrentDateTimeWithAmPm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
@@ -32,11 +31,11 @@ class TableRepository @Inject constructor(
     suspend fun getAllTables(): Flow<List<Table>> = flow {
 
         try {
-            val  response  = apiService.getAllTables(sessionManager.getCompanyCode()?:"")
+            val response = apiService.getAllTables(sessionManager.getCompanyCode() ?: "")
             syncTablesFromRemote()
-            if (response.isSuccessful){
+            if (response.isSuccessful) {
                 emit(response.body()!!)
-            }else {
+            } else {
                 throw Exception("Failed to fetch table: ${response.message()}")
             }
         } catch (e: Exception) {
@@ -46,26 +45,28 @@ class TableRepository @Inject constructor(
 
     suspend fun getActiveTables(): Flow<List<TableStatusResponse>> = flow {
         try {
-            val  response  = apiService.getActiveTables(sessionManager.getCompanyCode()?:"")
-            if (response.isSuccessful){
+            val response = apiService.getActiveTables(sessionManager.getCompanyCode() ?: "")
+            if (response.isSuccessful) {
                 emit(response.body()!!)
-            }else {
+            } else {
                 throw Exception("Failed to fetch table: ${response.message()}")
             }
         } catch (e: Exception) {
             throw e
         }
     }
+
     suspend fun deleteTable(tableId: Int) {
-        val response = apiService.deleteTable(tableId,sessionManager.getCompanyCode()?:"")
+        val response = apiService.deleteTable(tableId, sessionManager.getCompanyCode() ?: "")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete table: ${response.message()}")
         }
     }
+
     suspend fun getAllAreas(): List<Area> {
         return if (isOnline()) {
             safeApiCall(
-                apiCall = { apiService.getAllAreas(sessionManager.getCompanyCode()?:"").body()!! }
+                apiCall = { apiService.getAllAreas(sessionManager.getCompanyCode() ?: "").body()!! }
             ) ?: emptyList()
         } else {
             // Return cached areas or empty list if offline
@@ -73,12 +74,13 @@ class TableRepository @Inject constructor(
         }
     }
 
-    fun getTablesBySection(section: Long): Flow<List<TableStatusResponse>> =flow {
+    fun getTablesBySection(section: Long): Flow<List<TableStatusResponse>> = flow {
         try {
-            val response = apiService.getTablesBySection(section,sessionManager.getCompanyCode()?:"")
+            val response =
+                apiService.getTablesBySection(section, sessionManager.getCompanyCode() ?: "")
             if (response.isSuccessful) {
 
-            emit(response.body()!!)
+                emit(response.body()!!)
             } else {
                 throw Exception("Failed to fetch tables: ${response.message()}")
             }
@@ -95,7 +97,13 @@ class TableRepository @Inject constructor(
             // Try to sync with remote if online
             if (isOnline()) {
                 val success = safeApiCall(
-                    apiCall = { apiService.updateTableStatus(tableId, status,sessionManager.getCompanyCode()?:"") }
+                    apiCall = {
+                        apiService.updateTableStatus(
+                            tableId,
+                            status,
+                            sessionManager.getCompanyCode() ?: ""
+                        )
+                    }
                 ) != null
 
                 if (success) {
@@ -117,22 +125,24 @@ class TableRepository @Inject constructor(
         safeApiCall(
             onSuccess = { remoteTables: List<Table> ->
                 withContext(Dispatchers.IO) {
-                    val entities = remoteTables.map { TblTableEntity(
-                        table_id = it.table_id.toInt(),
-                        table_name = it.table_name,
-                        seating_capacity = it.seating_capacity,
-                        is_ac = it.is_ac,
-                        table_status = it.table_status,
-                        area_id = it.area_id.toInt(),
-                        table_availability = it.table_availability,
-                        is_active = it.is_active,
-                        is_synced = SyncStatus.SYNCED,
-                        last_synced_at = System.currentTimeMillis()
-                    ) }
+                    val entities = remoteTables.map {
+                        TblTableEntity(
+                            table_id = it.table_id.toInt(),
+                            table_name = it.table_name,
+                            seating_capacity = it.seating_capacity,
+                            is_ac = it.is_ac,
+                            table_status = it.table_status,
+                            area_id = it.area_id.toInt(),
+                            table_availability = it.table_availability,
+                            is_active = it.is_active,
+                            is_synced = SyncStatus.SYNCED,
+                            last_synced_at = System.currentTimeMillis()
+                        )
+                    }
                     tableDao.insertTables(entities)
                 }
             },
-            apiCall = { apiService.getAllTables(sessionManager.getCompanyCode()?:"").body()!! }
+            apiCall = { apiService.getAllTables(sessionManager.getCompanyCode() ?: "").body()!! }
         )
     }
 
@@ -142,10 +152,11 @@ class TableRepository @Inject constructor(
         }
     }
 
-    suspend fun getstatus(tableId: Long):String{
-        val data =apiService.getTablesByStatus(tableId,sessionManager.getCompanyCode()?:"")
+    suspend fun getstatus(tableId: Long): String {
+        val data = apiService.getTablesByStatus(tableId, sessionManager.getCompanyCode() ?: "")
         return data.is_ac
     }
+
     suspend fun insertTable(table: TblTable) {
         try {
             // Validate table data
@@ -169,11 +180,12 @@ class TableRepository @Inject constructor(
 
             val insertedId = tableDao.insertTable(entity)
             Timber.d("Table inserted with ID: $insertedId")
-            
+
             // Then sync with remote if online
             if (isOnline()) {
                 try {
-                    val response = apiService.createTable(table, sessionManager.getCompanyCode() ?: "")
+                    val response =
+                        apiService.createTable(table, sessionManager.getCompanyCode() ?: "")
                     if (response.isSuccessful) {
                         // Update sync status if successful
                         tableDao.updateTableSyncStatus(insertedId, SyncStatus.SYNCED)
@@ -217,7 +229,11 @@ class TableRepository @Inject constructor(
             // Sync with remote if online
             if (isOnline()) {
                 try {
-                    val response = apiService.updateTable(table.table_id, table, sessionManager.getCompanyCode() ?: "")
+                    val response = apiService.updateTable(
+                        table.table_id,
+                        table,
+                        sessionManager.getCompanyCode() ?: ""
+                    )
                     if (response.isSuccessful) {
                         tableDao.updateTableSyncStatus(table.table_id, SyncStatus.SYNCED)
                     } else {
@@ -241,7 +257,8 @@ class TableRepository @Inject constructor(
 
             if (isOnline()) {
                 try {
-                    val response = apiService.deleteTable(lng, sessionManager.getCompanyCode() ?: "")
+                    val response =
+                        apiService.deleteTable(lng, sessionManager.getCompanyCode() ?: "")
                     if (response.isSuccessful) {
                         // Actually delete from local database if server delete was successful
                         tableDao.deleteTableById(lng)

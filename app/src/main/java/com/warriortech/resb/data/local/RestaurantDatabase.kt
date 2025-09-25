@@ -75,7 +75,7 @@ abstract class RestaurantDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: RestaurantDatabase? = null
-        
+
         fun getDatabase(context: Context): RestaurantDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -84,8 +84,8 @@ abstract class RestaurantDatabase : RoomDatabase() {
                     "KTS-RESB"
                 )
 //                .addMigrations(MIGRATION_2_3)
-                .fallbackToDestructiveMigration()
-                .build()
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TableRepository
 import com.warriortech.resb.model.Area
-import com.warriortech.resb.model.Table
 import com.warriortech.resb.model.TableStatusResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.ConnectionState
@@ -46,14 +45,17 @@ class TableViewModel @Inject constructor(
     private val _selectedSection = MutableStateFlow<Long?>(null)
 
     init {
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
 
     }
 
-    fun loadTables(){
+    fun loadTables() {
         // Load tables when section changes or just all tables if no section selected
         viewModelScope.launch {
-            _area.value=tableRepository.getAllAreas().filter { it.area_name !="--" }
+            _area.value = tableRepository.getAllAreas().filter { it.area_name != "--" }
             _selectedSection
                 .flatMapLatest { section ->
                     if (section != null) {

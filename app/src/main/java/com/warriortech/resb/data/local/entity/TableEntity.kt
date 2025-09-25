@@ -22,6 +22,7 @@ data class TblTableEntity(
     val is_active: Boolean?,
     val is_synced: SyncStatus = SyncStatus.PENDING_SYNC,
     val last_synced_at: Long? = null,
+
     val created_at: Long = System.currentTimeMillis(),
     val updated_at: Long = System.currentTimeMillis()
 )

@@ -52,8 +52,8 @@ data class KitchenCategory(
 )
 
 data class KotResponse(
-    val area_name : String,
-    val table_name : String,
+    val area_name: String,
+    val table_name: String,
     val kot_number: Long,
     val order_master_id: String,
     val grand_total: Double,

@@ -57,11 +57,11 @@ fun CounterSelectionScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    
+
     LaunchedEffect(Unit) {
         viewModel.loadCounters()
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,7 +90,7 @@ fun CounterSelectionScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-                
+
                 is CounterSelectionViewModel.CounterUiState.Success -> {
                     CounterSelectionContent(
                         counters = (uiState as CounterSelectionViewModel.CounterUiState.Success).counters,
@@ -100,7 +100,7 @@ fun CounterSelectionScreen(
                         }
                     )
                 }
-                
+
                 is CounterSelectionViewModel.CounterUiState.Error -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
@@ -140,7 +140,7 @@ private fun CounterSelectionContent(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
-        
+
         items(counters) { counter ->
             CounterCard(
                 counter = counter,
@@ -173,9 +173,9 @@ private fun CounterCard(
                 modifier = Modifier
                     .size(60.dp)
                     .background(
-                        color = if (counter.isActive) 
+                        color = if (counter.isActive)
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                        else 
+                        else
                             MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(8.dp)
                     ),
@@ -184,16 +184,16 @@ private fun CounterCard(
                 Icon(
                     imageVector = Icons.Default.Store,
                     contentDescription = null,
-                    tint = if (counter.isActive) 
-                        MaterialTheme.colorScheme.primary 
-                    else 
+                    tint = if (counter.isActive)
+                        MaterialTheme.colorScheme.primary
+                    else
                         MaterialTheme.colorScheme.outline,
                     modifier = Modifier.size(32.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             // Counter Details
             Column(
                 modifier = Modifier.weight(1f)
@@ -205,14 +205,14 @@ private fun CounterCard(
                         text = counter.code,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = if (counter.isActive) 
-                            MaterialTheme.colorScheme.primary 
-                        else 
+                        color = if (counter.isActive)
+                            MaterialTheme.colorScheme.primary
+                        else
                             MaterialTheme.colorScheme.outline
                     )
-                    
+
                     Spacer(modifier = Modifier.width(8.dp))
-                    
+
                     if (counter.isActive) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
@@ -222,13 +222,13 @@ private fun CounterCard(
                         )
                     }
                 }
-                
+
                 Text(
                     text = counter.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 if (counter.description.isNotEmpty()) {
                     Text(
                         text = counter.description,
@@ -236,7 +236,7 @@ private fun CounterCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 if (counter.location.isNotEmpty()) {
                     Text(
                         text = "Location: ${counter.location}",
@@ -245,12 +245,12 @@ private fun CounterCard(
                     )
                 }
             }
-            
+
             // Status Badge
             Surface(
-                color = if (counter.isActive) 
-                    Color(0xFF4CAF50).copy(alpha = 0.1f) 
-                else 
+                color = if (counter.isActive)
+                    Color(0xFF4CAF50).copy(alpha = 0.1f)
+                else
                     MaterialTheme.colorScheme.outline.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(16.dp)
             ) {

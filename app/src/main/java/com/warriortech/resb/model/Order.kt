@@ -1,7 +1,5 @@
 package com.warriortech.resb.model
 
-import java.time.LocalDate
-
 data class OrderItem(
     val id: Long? = null,
     val menuItem: TblMenuItemResponse,
@@ -14,42 +12,27 @@ data class OrderItem(
  * Order model that matches the server response format
  * Updated to use Int for ids and Long for timestamp to match backend
  */
+
 data class Order(
     val id: Long? = null,
     val tableId: Int,
     val items: List<OrderItem>,
     val totalAmount: Double,
-    val status: String,  // Use string since we receive string from backend
+    val status: String,
     val createdAt: Long? = null,
     val isPrinted: Boolean = false
-) {
-    fun getOrderStatus(): OrderStatus {
-        return try {
-            OrderStatus.valueOf(status)
-        } catch (e: Exception) {
-            OrderStatus.PENDING // Default
-        }
-    }
-}
+)
+
 enum class OrderStatus {
-    PENDING,   // Just created
-    PREPARING, // In the kitchen
-    READY,     // Ready to serve
-    DELIVERED, // Delivered to the table
-    COMPLETED, // Payment received
-    CANCELLED , // Order cancelled
+    PENDING,
+    PREPARING,
+    READY,
+    DELIVERED,
+    COMPLETED,
+    CANCELLED ,
     RUNNING,
     HOLD
 }
-
-/**
- * CreateOrderRequest model for sending to the backend
- * Updated to use Int for tableId to match backend
- */
-data class CreateOrderRequest(
-    val tableId: Long,
-    val items: List<OrderItem>
-)
 
 /**
  * PrintResponse model for KOT print response
@@ -105,6 +88,7 @@ data class OrderDetails(
     var merge_pax:Int,
     var is_active:Long
 )
+
 data class TblOrderResponse(
     var order_master_id: String,
     var order_date: String,
@@ -128,6 +112,7 @@ data class TblOrderResponse(
     var is_active:Long,
     var kot_number:Int?=null
 )
+
 data class TblOrderDetailsResponse(
     var order_details_id:Long,
     var order_master_id: String,

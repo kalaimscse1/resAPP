@@ -3,8 +3,6 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.TaxSplitRepository
-import com.warriortech.resb.model.Area
-import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TaxSplit
 import com.warriortech.resb.model.TblTaxSplit
@@ -30,6 +28,7 @@ class TaxSplitSettingsViewModel @Inject constructor(
         data class Success(val taxSplits: List<TblTaxSplit>) : UiState()
         data class Error(val message: String) : UiState()
     }
+
     fun loadTaxSplits() {
         viewModelScope.launch {
 

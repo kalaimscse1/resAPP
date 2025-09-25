@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.background
@@ -10,7 +9,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -18,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -33,12 +30,11 @@ fun BillEditScreen(
 ) {
     val selectedBill by viewModel.selectedBill.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     var editedNote by remember { mutableStateOf("") }
     var editedDiscountAmt by remember { mutableStateOf("") }
     var editedOthersAmt by remember { mutableStateOf("") }
 
-    // Initialize form with selected bill data
     LaunchedEffect(selectedBill) {
         selectedBill?.let { bill ->
             editedNote = bill.note
@@ -59,17 +55,15 @@ fun BillEditScreen(
             TopAppBar(
                 title = { Text("Edit Bill #${selectedBill!!.bill_no}") },
                 navigationIcon = {
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         viewModel.clearSelection()
-                        navController.navigateUp() 
+                        navController.navigateUp()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { 
-                        // Save changes logic here
-                        // You would implement the save functionality
+                    IconButton(onClick = {
                         navController.navigateUp()
                     }) {
                         Icon(Icons.Default.Save, contentDescription = "Save")
@@ -93,7 +87,6 @@ fun BillEditScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             selectedBill?.let { bill ->
-                // Bill Information Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -111,9 +104,9 @@ fun BillEditScreen(
                             fontWeight = FontWeight.Bold,
                             color = PrimaryGreen
                         )
-                        
+
                         ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        
+
                         BillInfoRow("Bill Number", bill.bill_no)
                         BillInfoRow("Date", "${bill.bill_date} ${bill.bill_create_time}")
                         BillInfoRow("Customer", bill.customer.customer_name)
@@ -124,7 +117,6 @@ fun BillEditScreen(
                     }
                 }
 
-                // Payment Information Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -142,9 +134,9 @@ fun BillEditScreen(
                             fontWeight = FontWeight.Bold,
                             color = PrimaryGreen
                         )
-                        
+
                         ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        
+
                         BillInfoRow("Cash", CurrencySettings.format(bill.cash))
                         BillInfoRow("Card", CurrencySettings.format(bill.card))
                         BillInfoRow("UPI", CurrencySettings.format(bill.upi))
@@ -153,7 +145,6 @@ fun BillEditScreen(
                     }
                 }
 
-                // Editable Fields Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -171,10 +162,9 @@ fun BillEditScreen(
                             fontWeight = FontWeight.Bold,
                             color = PrimaryGreen
                         )
-                        
+
                         ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        
-                        // Discount Amount
+
                         OutlinedTextField(
                             value = editedDiscountAmt,
                             onValueChange = { editedDiscountAmt = it },
@@ -182,10 +172,9 @@ fun BillEditScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
-                        // Others Amount
+
                         OutlinedTextField(
                             value = editedOthersAmt,
                             onValueChange = { editedOthersAmt = it },
@@ -193,10 +182,9 @@ fun BillEditScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
-                        // Note
+
                         OutlinedTextField(
                             value = editedNote,
                             onValueChange = { editedNote = it },
@@ -207,11 +195,8 @@ fun BillEditScreen(
                     }
                 }
 
-                // Save Button
                 Button(
                     onClick = {
-                        // Implement save functionality here
-                        // You would update the bill with new values
                         navController.navigateUp()
                     },
                     modifier = Modifier

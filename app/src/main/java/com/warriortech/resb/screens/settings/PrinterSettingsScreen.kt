@@ -19,7 +19,6 @@ import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.Printer
 import com.warriortech.resb.model.TblPrinterResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.PrinterSettingsViewModel
@@ -43,19 +42,28 @@ fun PrinterSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.printer_settings),
-                    color = SurfaceLight
-                ) },
+                title = {
+                    Text(
+                        stringResource(R.string.printer_settings),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_printer),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add_printer),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -64,32 +72,34 @@ fun PrinterSettingsScreen(
             )
         }
     ) { paddingValues ->
-            when(val state= uiState) {
-                is PrinterSettingsViewModel.PrinterSettingsUiState.Loading -> {
+        when (val state = uiState) {
+            is PrinterSettingsViewModel.PrinterSettingsUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is PrinterSettingsViewModel.PrinterSettingsUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Error: ${state.message}")
+                }
+            }
+
+            is PrinterSettingsViewModel.PrinterSettingsUiState.Success -> {
+                if (state.printers.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text("No Printer available", style = MaterialTheme.typography.bodyMedium)
                     }
-                }
-                is PrinterSettingsViewModel.PrinterSettingsUiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Error: ${state.message}")
-                    }
-                }
-                is PrinterSettingsViewModel.PrinterSettingsUiState.Success -> {
-                    if (state.printers.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No Printer available", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    } else{
+                } else {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -139,14 +149,14 @@ fun PrinterSettingsScreen(
                         }
                     }
                 }
-                }
             }
+        }
     }
 
     if (showAddDialog) {
         PrinterDialog(
             printer = null,
-            kitchenCategories= kitchenCategories,
+            kitchenCategories = kitchenCategories,
             onDismiss = { showAddDialog = false },
             onSave = { printer ->
                 viewModel.addPrinter(printer)
@@ -158,7 +168,7 @@ fun PrinterSettingsScreen(
     editingPrinter?.let { printer ->
         PrinterDialog(
             printer = printer,
-            kitchenCategories= kitchenCategories,
+            kitchenCategories = kitchenCategories,
             onDismiss = { editingPrinter = null },
             onSave = { updatedPrinter ->
                 viewModel.updatePrinter(updatedPrinter)
@@ -178,12 +188,18 @@ fun PrinterDialog(
 ) {
     var name by remember { mutableStateOf(printer?.printer_name ?: "") }
     var ipAddress by remember { mutableStateOf(printer?.ip_address ?: "") }
-    var kitchenCatId by remember { mutableStateOf(printer?.kitchen_cat?.kitchen_cat_id?: 1) }
+    var kitchenCatId by remember { mutableStateOf(printer?.kitchen_cat?.kitchen_cat_id ?: 1) }
     var isActive by remember { mutableStateOf(printer?.is_active ?: 1) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (printer == null) stringResource(R.string.add_printer) else stringResource(R.string.edit_printer)) },
+        title = {
+            Text(
+                if (printer == null) stringResource(R.string.add_printer) else stringResource(
+                    R.string.edit_printer
+                )
+            )
+        },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -211,8 +227,8 @@ fun PrinterDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Switch(
-                        checked = isActive.toInt() ==1,
-                        onCheckedChange = { isActive = if(it) 1 else 0 }
+                        checked = isActive.toInt() == 1,
+                        onCheckedChange = { isActive = if (it) 1 else 0 }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Active")
@@ -222,8 +238,8 @@ fun PrinterDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val newPrinter =  Printer(
-                       printer_id = printer?.printer_id?:0, // Use 0 for new printers
+                    val newPrinter = Printer(
+                        printer_id = printer?.printer_id ?: 0, // Use 0 for new printers
                         printer_name = name,
                         kitchen_cat_id = kitchenCatId, // Default or selected category ID
                         ip_address = ipAddress,

@@ -24,13 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun SuccessDialog(
-    paddingValues:PaddingValues,
+    paddingValues: PaddingValues,
     title: String,
     description: String
-){
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()

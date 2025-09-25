@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Surface
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -33,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Category
@@ -737,16 +740,16 @@ fun AppNavigation(
                 }
             )
         }
-        composable("modifier_setting"){
+        composable("modifier_setting") {
             ModifierSettingsScreen(onBackPressed = { navController.popBackStack() })
         }
-        composable("item_wise"){
+        composable("item_wise") {
             ItemWiseReportScreen(
                 sessionManager = sessionManager,
                 drawerState = drawerState
             )
         }
-        composable("category_wise"){
+        composable("category_wise") {
             CategoryWiseReportScreen(
                 sessionManager = sessionManager,
                 drawerState = drawerState
@@ -870,322 +873,372 @@ fun DrawerContent(
     ) {
         Column(modifier = Modifier.fillMaxHeight()) {
 
-            // 🔹 Profile Section
-            Surface(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = MaterialTheme.shapes.medium,
-                elevation = 1.dp
+                    .weight(1f) // fills available space
+                    .verticalScroll(rememberScrollState())
             ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = "Company Logo",
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface),
-                        contentScale = ContentScale.Crop
-                    )
-                    if (!isCollapsed) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column {
 
-                            Text(
-                                companyName,
-                                fontWeight = FontWeight.Bold
+                // 🔹 Profile Section
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    elevation = 1.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = "Company Logo",
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface),
+                            contentScale = ContentScale.Crop
+                        )
+                        if (!isCollapsed) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+
+                                Text(
+                                    companyName,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "${sessionManager.getUser()?.staff_name ?: ""}-${sessionManager.getUser()?.role ?: ""}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                }
+
+                ModernDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 🔹 Dashboard
+                if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Dashboard") else Text("") },
+                        icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                        selected = currentDestination?.route == "dashboard",
+                        onClick = { onDestinationClicked("dashboard") },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                }
+
+                // 🔹 Masters
+                if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Masters") else Text("") },
+                        icon = { Icon(Icons.Filled.Inventory, contentDescription = null) },
+                        selected = currentDestination?.route in listOf(
+                            "menu_item_setting",
+                            "menu_setting",
+                            "menu_Category_setting",
+                            "table_setting",
+                            "area_setting"
+                        ),
+                        onClick = {
+                            setExpandedMenu(if (expandedMenu == ExpandedMenu.MASTERS) ExpandedMenu.NONE else ExpandedMenu.MASTERS)
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.MASTERS) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Menu Items") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Restaurant,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "menu_item_setting",
+                                onClick = { onDestinationClicked("menu_item_setting") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
                             )
-                            Text(
-                                "${sessionManager.getUser()?.staff_name ?: ""}-${sessionManager.getUser()?.role ?: ""}",
-                                style = MaterialTheme.typography.bodySmall
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Menu") else Text("") },
+                                icon = { Icon(Icons.Default.MenuBook, contentDescription = null) },
+                                selected = currentDestination?.route == "menu_setting",
+                                onClick = { onDestinationClicked("menu_setting") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Menu Categories") else Text("") },
+                                icon = { Icon(Icons.Default.Category, contentDescription = null) },
+                                selected = currentDestination?.route == "menu_Category_setting",
+                                onClick = { onDestinationClicked("menu_Category_setting") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Tables") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.TableRestaurant,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "table_setting",
+                                onClick = { onDestinationClicked("table_setting") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Areas") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.LocationOn,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "area_setting",
+                                onClick = { onDestinationClicked("area_setting") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
                             )
                         }
                     }
                 }
-            }
 
-            ModernDivider()
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 🔹 Dashboard
-            if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Dashboard") else Text("") },
-                    icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
-                    selected = currentDestination?.route == "dashboard",
-                    onClick = { onDestinationClicked("dashboard") },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-            }
-
-            // 🔹 Masters
-            if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Masters") else Text("") },
-                    icon = { Icon(Icons.Filled.Inventory, contentDescription = null) },
-                    selected = currentDestination?.route in listOf(
-                        "menu_item_setting",
-                        "menu_setting",
-                        "menu_Category_setting",
-                        "table_setting",
-                        "area_setting"
-                    ),
-                    onClick = {
-                        setExpandedMenu(if (expandedMenu == ExpandedMenu.MASTERS) ExpandedMenu.NONE else ExpandedMenu.MASTERS)
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-                AnimatedVisibility(expandedMenu == ExpandedMenu.MASTERS) {
-                    Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Menu Items") else Text("") },
-                            icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
-                            selected = currentDestination?.route == "menu_item_setting",
-                            onClick = { onDestinationClicked("menu_item_setting") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Menu") else Text("") },
-                            icon = { Icon(Icons.Default.MenuBook, contentDescription = null) },
-                            selected = currentDestination?.route == "menu_setting",
-                            onClick = { onDestinationClicked("menu_setting") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Menu Categories") else Text("") },
-                            icon = { Icon(Icons.Default.Category, contentDescription = null) },
-                            selected = currentDestination?.route == "menu_Category_setting",
-                            onClick = { onDestinationClicked("menu_Category_setting") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Tables") else Text("") },
-                            icon = {
-                                Icon(
-                                    Icons.Default.TableRestaurant,
-                                    contentDescription = null
-                                )
-                            },
-                            selected = currentDestination?.route == "table_setting",
-                            onClick = { onDestinationClicked("table_setting") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Areas") else Text("") },
-                            icon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
-                            selected = currentDestination?.route == "area_setting",
-                            onClick = { onDestinationClicked("area_setting") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                    }
-                }
-            }
-
-            // 🔹 Orders
-            if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Orders") else Text("") },
-                    icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                    selected = currentDestination?.route in listOf("selects", "takeaway_menu"),
-                    onClick = {
-                        setExpandedMenu(if (expandedMenu == ExpandedMenu.ORDERS) ExpandedMenu.NONE else ExpandedMenu.ORDERS)
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-                AnimatedVisibility(expandedMenu == ExpandedMenu.ORDERS) {
-                    Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Dine In") else Text("") },
-                            icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
-                            selected = currentDestination?.route == "selects",
-                            onClick = { onDestinationClicked("selects") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Takeaway") else Text("") },
-                            icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
-                            selected = currentDestination?.route == "takeaway_menu",
-                            onClick = { onDestinationClicked("takeaway_menu") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-
-                    }
-                }
-            }
-
-            // 🔹 Billing
-            if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Bills") else Text("") },
-                    icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
-                    selected = currentDestination?.route in listOf("counter", "quick_bills"),
-                    onClick = {
-                        setExpandedMenu(if (expandedMenu == ExpandedMenu.BILLING) ExpandedMenu.NONE else ExpandedMenu.BILLING)
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-                AnimatedVisibility(expandedMenu == ExpandedMenu.BILLING) {
-                    Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
-                            icon = { Icon(Icons.Default.PointOfSale, contentDescription = null) },
-                            selected = currentDestination?.route == "counter",
-                            onClick = { onDestinationClicked("counter") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Quick Bills") else Text("") },
-                            icon = { Icon(Icons.Default.Bolt, contentDescription = "Quick Bills") },
-                            selected = currentDestination?.route == "quick_bills",
-                            onClick = { onDestinationClicked("quick_bills") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = drawerItemColors
-                        )
-
-                    }
-                }
-            }
-            if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Reports") else Text("") },
-                    icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
-                    selected = currentDestination?.route in listOf(
-                        "report_screen",
-                        "orders",
-                        "item_wise",
-                        "category_wise",
-                        "due",
-                        "kot_report",
-                        "paid_bills"
-                    ),
-                    onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS) },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-                AnimatedVisibility(expandedMenu == ExpandedMenu.REPORTS) {
-                    Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Orders") else Text("") },
-                            icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
-                            selected = currentDestination?.route == "orders",
-                            onClick = { onDestinationClicked("orders") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-                            icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
-                            selected = currentDestination?.route == "paid_bills",
-                            onClick = { onDestinationClicked("paid_bills") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Due") else Text("") },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Payment,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            },
-                            selected = currentDestination?.route == "due",
-                            onClick = { onDestinationClicked("due") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Sales") else Text("") },
-                            icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
-                            selected = currentDestination?.route == "report_screen",
-                            onClick = { onDestinationClicked("report_screen") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Item Wise") else Text("") },
-                            icon = { Icon(Icons.Default.Restaurant, contentDescription = null) },
-                            selected = currentDestination?.route == "item_wise",
-                            onClick = { onDestinationClicked("item_wise") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("Category Wise") else Text("") },
-                            icon = { Icon(Icons.Default.Category, contentDescription = null) },
-                            selected = currentDestination?.route == "category_wise",
-                            onClick = { onDestinationClicked("category_wise") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                        NavigationDrawerItem(
-                            label = { if (!isCollapsed) Text("KOT Report") else Text("") },
-                            icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
-                            selected = currentDestination?.route == "kot_report",
-                            onClick = { onDestinationClicked("kot_report") },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = subMenuColors
-                        )
-                    }
-                }
-            }
-
-            // 🔹 Settings (admin only)
-            if (role in listOf("RESBADMIN", "ADMIN")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Settings") else Text("") },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    selected = currentDestination?.route == "settings",
-                    onClick = { onDestinationClicked("settings") },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-            }
-
-            if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER", "CHEF")) {
-                NavigationDrawerItem(
-                    label = { if (!isCollapsed) Text("Support") else Text("") },
-                    icon = { Icon(Icons.Default.SupportAgent, contentDescription = null) },
-                    selected = currentDestination?.route == "support_screen",
-                    onClick = { onDestinationClicked("support_screen") },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = drawerItemColors
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 🔹 Collapse Toggle
-            NavigationDrawerItem(
-                label = { if (!isCollapsed) Text("Collapse Drawer") else Text("") },
-                icon = {
-                    Icon(
-                        imageVector = if (isCollapsed) Icons.Default.KeyboardArrowRight else Icons.Default.KeyboardArrowLeft,
-                        contentDescription = "Toggle Collapse"
+                // 🔹 Orders
+                if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Orders") else Text("") },
+                        icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                        selected = currentDestination?.route in listOf("selects", "takeaway_menu"),
+                        onClick = {
+                            setExpandedMenu(if (expandedMenu == ExpandedMenu.ORDERS) ExpandedMenu.NONE else ExpandedMenu.ORDERS)
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
                     )
-                },
-                selected = false,
-                onClick = onCollapseToggle,
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                colors = drawerItemColors
-            )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.ORDERS) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Dine In") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Restaurant,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "selects",
+                                onClick = { onDestinationClicked("selects") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Takeaway") else Text("") },
+                                icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
+                                selected = currentDestination?.route == "takeaway_menu",
+                                onClick = { onDestinationClicked("takeaway_menu") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
 
-            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+
+                // 🔹 Billing
+                if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Bills") else Text("") },
+                        icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                        selected = currentDestination?.route in listOf("counter", "quick_bills"),
+                        onClick = {
+                            setExpandedMenu(if (expandedMenu == ExpandedMenu.BILLING) ExpandedMenu.NONE else ExpandedMenu.BILLING)
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.BILLING) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.PointOfSale,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "counter",
+                                onClick = { onDestinationClicked("counter") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Quick Bills") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Bolt,
+                                        contentDescription = "Quick Bills"
+                                    )
+                                },
+                                selected = currentDestination?.route == "quick_bills",
+                                onClick = { onDestinationClicked("quick_bills") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = drawerItemColors
+                            )
+
+                        }
+                    }
+                }
+                if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Reports") else Text("") },
+                        icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
+                        selected = currentDestination?.route in listOf(
+                            "report_screen",
+                            "orders",
+                            "item_wise",
+                            "category_wise",
+                            "due",
+                            "kot_report",
+                            "paid_bills"
+                        ),
+                        onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.REPORTS) ExpandedMenu.NONE else ExpandedMenu.REPORTS) },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.REPORTS) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Orders") else Text("") },
+                                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                                selected = currentDestination?.route == "orders",
+                                onClick = { onDestinationClicked("orders") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
+                                icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
+                                selected = currentDestination?.route == "paid_bills",
+                                onClick = { onDestinationClicked("paid_bills") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Due") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Filled.Payment,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                },
+                                selected = currentDestination?.route == "due",
+                                onClick = { onDestinationClicked("due") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Sales") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Assessment,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "report_screen",
+                                onClick = { onDestinationClicked("report_screen") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Item Wise") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Restaurant,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "item_wise",
+                                onClick = { onDestinationClicked("item_wise") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Category Wise") else Text("") },
+                                icon = { Icon(Icons.Default.Category, contentDescription = null) },
+                                selected = currentDestination?.route == "category_wise",
+                                onClick = { onDestinationClicked("category_wise") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("KOT Report") else Text("") },
+                                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                                selected = currentDestination?.route == "kot_report",
+                                onClick = { onDestinationClicked("kot_report") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                        }
+                    }
+                }
+
+                // 🔹 Settings (admin only)
+                if (role in listOf("RESBADMIN", "ADMIN")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Settings") else Text("") },
+                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                        selected = currentDestination?.route == "settings",
+                        onClick = { onDestinationClicked("settings") },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+//                NavigationDrawerItem(
+//                    label = { if (!isCollapsed) Text("AI Assistant") else Text("") },
+//                    icon = { Icon(Icons.Default.Assistant, contentDescription = null) },
+//                    selected = currentDestination?.route == "ai_assistant",
+//                    onClick = { onDestinationClicked("ai_assistant") },
+//                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+//                    colors = drawerItemColors
+//                )
+                }
+
+                if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER", "CHEF")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Support") else Text("") },
+                        icon = { Icon(Icons.Default.SupportAgent, contentDescription = null) },
+                        selected = currentDestination?.route == "support_screen",
+                        onClick = { onDestinationClicked("support_screen") },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 🔹 Collapse Toggle
+                NavigationDrawerItem(
+                    label = { if (!isCollapsed) Text("Collapse Drawer") else Text("") },
+                    icon = {
+                        Icon(
+                            imageVector = if (isCollapsed) Icons.Default.KeyboardArrowRight else Icons.Default.KeyboardArrowLeft,
+                            contentDescription = "Toggle Collapse"
+                        )
+                    },
+                    selected = false,
+                    onClick = onCollapseToggle,
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = drawerItemColors
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+            }
             ModernDivider()
 
             // 🔹 Logout

@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.warriortech.resb.ui.theme.DarkGreen
 
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AnimatedSnackbarDemo(snackbarHostState: SnackbarHostState) {

@@ -1,6 +1,5 @@
 package com.warriortech.resb.screens.settings
 
-
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.foundation.layout.*
@@ -9,9 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,7 +18,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.TblCounter
-import com.warriortech.resb.model.TblVoucher
 import com.warriortech.resb.model.TblVoucherRequest
 import com.warriortech.resb.model.TblVoucherResponse
 import com.warriortech.resb.model.TblVoucherType
@@ -66,10 +61,12 @@ fun VoucherSettingsScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
-                ),actions = {
+                ), actions = {
                     IconButton(onClick = { showAddSheet = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Voucher",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Voucher",
+                            tint = SurfaceLight
+                        )
                     }
                 }
 
@@ -77,59 +74,59 @@ fun VoucherSettingsScreen(
         }
     ) { paddingValues ->
 
-            when (val state = uiState) {
-                is VoucherSettingsViewModel.VoucherSettingsUiState.Loading -> {
+        when (val state = uiState) {
+            is VoucherSettingsViewModel.VoucherSettingsUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = GradientStart)
+                }
+            }
+
+            is VoucherSettingsViewModel.VoucherSettingsUiState.Success -> {
+                if (state.vouchers.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = GradientStart)
+                        Text(stringResource(R.string.no_vouchers_found))
                     }
-                }
-
-                is VoucherSettingsViewModel.VoucherSettingsUiState.Success -> {
-                    if (state.vouchers.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(stringResource(R.string.no_vouchers_found))
-                        }
-                    } else {
-                        // Display list of vouchers
-                        // You can implement a LazyColumn here to show the vouchers
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.vouchers) { counter ->
-                                VoucherCard(
-                                    voucher = counter,
-                                    onEdit = {
-                                        // Handle edit action
-                                        editingVoucher = counter
-                                    },
-                                    onDelete = {
-                                        viewModel.deleteVoucher(counter.voucher_id)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                is VoucherSettingsViewModel.VoucherSettingsUiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                } else {
+                    // Display list of vouchers
+                    // You can implement a LazyColumn here to show the vouchers
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(state.message)
+                        items(state.vouchers) { counter ->
+                            VoucherCard(
+                                voucher = counter,
+                                onEdit = {
+                                    // Handle edit action
+                                    editingVoucher = counter
+                                },
+                                onDelete = {
+                                    viewModel.deleteVoucher(counter.voucher_id)
+                                }
+                            )
+                        }
                     }
                 }
             }
+
+            is VoucherSettingsViewModel.VoucherSettingsUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(state.message)
+                }
+            }
+        }
         if (showAddSheet) {
             VoucherBottomSheet(
                 title = "Add Voucher",
@@ -177,48 +174,48 @@ fun VoucherCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "VoucherName:${voucher.voucher_name}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text ="VoucherType:" + voucher.voucherType.voucher_type_name,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = "VoucherPrefix:"+voucher.voucher_prefix,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = "VoucherSuffix:"+voucher.voucher_suffix,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = "StartingNo:"+voucher.starting_no,
-                style = MaterialTheme.typography.bodySmall
-            )
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Column(
+                modifier = Modifier.padding(16.dp)
             ) {
-                TextButton(onClick = onEdit) {
-                    Text("Edit")
-                }
-                TextButton(
-                    onClick = onDelete,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
+                Text(
+                    text = "VoucherName:${voucher.voucher_name}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "VoucherType:" + voucher.voucherType.voucher_type_name,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = "VoucherPrefix:" + voucher.voucher_prefix,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "VoucherSuffix:" + voucher.voucher_suffix,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "StartingNo:" + voucher.starting_no,
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Text("Delete")
+                    TextButton(onClick = onEdit) {
+                        Text("Edit")
+                    }
+                    TextButton(
+                        onClick = onDelete,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Delete")
+                    }
                 }
-            }
             }
         }
     }
@@ -229,7 +226,7 @@ fun VoucherCard(
 fun VoucherBottomSheet(
     title: String,
     initialVoucher: TblVoucherResponse? = null,
-    counters : List<TblCounter>,
+    counters: List<TblCounter>,
     voucherTypes: List<TblVoucherType>,
     confirmText: String,
     onDismiss: () -> Unit,
@@ -242,7 +239,11 @@ fun VoucherBottomSheet(
     var startingNo by remember { mutableStateOf(initialVoucher?.starting_no ?: 1) }
     var isActive by remember { mutableStateOf(initialVoucher?.is_active ?: true) }
     var counterId by remember { mutableStateOf(initialVoucher?.counter?.counter_id ?: 0L) }
-    var voucherTypeId by remember { mutableStateOf(initialVoucher?.voucherType?.voucher_Type_id ?: 0L) }
+    var voucherTypeId by remember {
+        mutableStateOf(
+            initialVoucher?.voucherType?.voucher_Type_id ?: 0L
+        )
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -318,11 +319,11 @@ fun VoucherBottomSheet(
                 shape = RoundedCornerShape(12.dp)
             )
             CounterDropdown(
-                    modifier = Modifier.fillMaxWidth(),
-            label = "Select Counter",
-            counters = counters,
-            selectedCounter = counters.find { it.counter_id == counterId },
-            onCounterSelected = { counterId = it.counter_id },
+                modifier = Modifier.fillMaxWidth(),
+                label = "Select Counter",
+                counters = counters,
+                selectedCounter = counters.find { it.counter_id == counterId },
+                onCounterSelected = { counterId = it.counter_id },
             )
             VoucherTypeDropdown(
                 modifier = Modifier.fillMaxWidth(),
@@ -351,9 +352,10 @@ fun VoucherBottomSheet(
                             voucher_suffix = voucherSuffix,
                             starting_no = startingNo.toString(),
                             voucher_id = initialVoucher?.voucher_id ?: 0L,
-                            counter_id = initialVoucher?.counter?.counter_id ?:counterId,
+                            counter_id = initialVoucher?.counter?.counter_id ?: counterId,
                             is_active = isActive,
-                            voucher_Type_id = initialVoucher?.voucherType?.voucher_Type_id ?:voucherTypeId
+                            voucher_Type_id = initialVoucher?.voucherType?.voucher_Type_id
+                                ?: voucherTypeId
                         )
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             onConfirm(updatedVoucher)

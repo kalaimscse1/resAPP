@@ -24,7 +24,6 @@ import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TaxSplit
 import com.warriortech.resb.model.TblTaxSplit
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.TaxSplitSettingsViewModel
@@ -51,12 +50,19 @@ fun TaxSplitSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.tax_split_settings),
-                    color = SurfaceLight) },
+                title = {
+                    Text(
+                        stringResource(R.string.tax_split_settings),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -65,82 +71,85 @@ fun TaxSplitSettingsScreen(
 
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_tax_split),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(R.string.add_tax_split),
+                            tint = SurfaceLight
+                        )
                     }
                 }
             )
         }
     ) { paddingValues ->
-            when (val state=uiState) {
-                is TaxSplitSettingsViewModel.UiState.Loading -> {
+        when (val state = uiState) {
+            is TaxSplitSettingsViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is TaxSplitSettingsViewModel.UiState.Success -> {
+                if (state.taxSplits.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text("No Tax Splits available", style = MaterialTheme.typography.bodyMedium)
                     }
-                }
-
-                is TaxSplitSettingsViewModel.UiState.Success -> {
-                    if (state.taxSplits.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No Tax Splits available", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    } else{
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.taxSplits) { table ->
-                                TaxSplitItem(
-                                    taxSplit = table,
-                                    onEdit = {
-
-                                        showAddDialog = true
-                                    },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.deleteTaxSplit(table.tax_split_id)
-                                            snackbarHostState.showSnackbar("Tax Split deleted")
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                is TaxSplitSettingsViewModel.UiState.Error -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        items(state.taxSplits) { table ->
+                            TaxSplitItem(
+                                taxSplit = table,
+                                onEdit = {
 
-                        Text(
-                            text = "Error: ${state.message}",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Button(
-                            onClick = { viewModel.loadTaxSplits() },
-                            modifier = Modifier.padding(top = 16.dp)
-                        ) {
-                            Text("Retry")
+                                    showAddDialog = true
+                                },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteTaxSplit(table.tax_split_id)
+                                        snackbarHostState.showSnackbar("Tax Split deleted")
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             }
 
+            is TaxSplitSettingsViewModel.UiState.Error -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+
+                ) {
+
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(
+                        onClick = { viewModel.loadTaxSplits() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
+
         if (showAddDialog || editingTaxSplit != null) {
-           TaxSplitDialog(
+            TaxSplitDialog(
                 taxSplit = editingTaxSplit,
                 onDismiss = {
                     showAddDialog = false
@@ -162,7 +171,7 @@ fun TaxSplitSettingsScreen(
                     editingTaxSplit = null
                 },
                 taxes = tax
-           )
+            )
         }
     }
 }
@@ -217,7 +226,7 @@ fun TaxSplitDialog(
 ) {
     var taxId by remember { mutableLongStateOf(taxSplit?.tax_id ?: 1) }
     var taxSplitName by remember { mutableStateOf(taxSplit?.tax_split_name ?: "") }
-    var taxSplitPercentage by remember { mutableStateOf(taxSplit?.tax_split_percentage?: "") }
+    var taxSplitPercentage by remember { mutableStateOf(taxSplit?.tax_split_percentage ?: "") }
     var isActive by remember { mutableStateOf(taxSplit?.is_active ?: true) }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -265,7 +274,7 @@ fun TaxSplitDialog(
                 onClick = {
                     val newTable = TaxSplit(
                         tax_split_id = taxSplit?.tax_split_id ?: 0,
-                        tax_id = taxSplit?.tax_id?:taxId,
+                        tax_id = taxSplit?.tax_id ?: taxId,
                         tax_split_name = taxSplit?.tax_split_name ?: taxSplitName,
                         tax_split_percentage = taxSplit?.tax_split_percentage ?: taxSplitPercentage,
                         is_active = taxSplit?.is_active ?: isActive

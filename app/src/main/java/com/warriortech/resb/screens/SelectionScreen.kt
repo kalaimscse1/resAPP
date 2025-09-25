@@ -1,17 +1,8 @@
 package com.warriortech.resb.screens
 
-import android.util.Log
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.CircularProgressIndicator
@@ -57,9 +47,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material.ScrollableTabRow
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Tab
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.SuccessGreen
-import com.warriortech.resb.ui.theme.TextPrimary
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -79,7 +67,6 @@ import androidx.navigation.NavHostController
 import com.warriortech.resb.model.TableStatusResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.DarkGreen
-import com.warriortech.resb.ui.theme.DarkRed
 import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
@@ -89,8 +76,6 @@ import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.util.CurrencySettings
 import kotlinx.coroutines.delay
 
-
-//
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionScreen(
@@ -118,7 +103,7 @@ fun SelectionScreen(
     LaunchedEffect(Unit) {
         while (true) {
             viewModel.loadTables()
-            delay( 5*1000) // 1 minutes
+            delay(5 * 1000) // 1 minutes
         }
     }
 
@@ -146,9 +131,9 @@ fun SelectionScreen(
                             tint = SurfaceLight
                         )
                     }
-                },actions = {
+                }, actions = {
                     IconButton(onClick = {
-                        navController.navigate("takeaway_menu"){
+                        navController.navigate("takeaway_menu") {
                             launchSingleTop = true
                         }
                     }) {
@@ -281,7 +266,7 @@ fun SelectionScreen(
 //                    val calculatedIndex =
 //                        displayablAreas.indexOfFirst { it.area_name == areaId }
                     Tab(
-                        selected =  true,
+                        selected = true,
                         onClick = {
                             selectedArea = sessionManager.getUser()?.area_name
                             viewModel.setSection(sessionManager.getUser()?.area_id)

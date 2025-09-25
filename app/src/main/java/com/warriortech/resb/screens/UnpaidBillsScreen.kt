@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens
 
 import androidx.compose.foundation.background
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -88,7 +86,7 @@ fun UnpaidBillsScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -129,7 +127,7 @@ fun UnpaidBillsScreen(
                                 }
                             }
                         }
-                        
+
                         OutlinedCard(
                             modifier = Modifier
                                 .weight(1f)
@@ -171,7 +169,7 @@ fun UnpaidBillsScreen(
             }
 
             // Bills List
-            when (val state=uiState) {
+            when (val state = uiState) {
                 is UnpaidBillsUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -180,6 +178,7 @@ fun UnpaidBillsScreen(
                         CircularProgressIndicator(color = PrimaryGreen)
                     }
                 }
+
                 is UnpaidBillsUiState.Success -> {
                     if (state.bills.isEmpty()) {
                         Box(
@@ -201,7 +200,7 @@ fun UnpaidBillsScreen(
                             items(state.bills) { bill ->
                                 UnpaidBillCard(
                                     bill = bill,
-                                    onPayClick = { 
+                                    onPayClick = {
                                         navController.navigate("payment_screen/${bill.due}/${bill.order_master.order_master_id}/${bill.bill_no}/${bill.customer.customer_id}")
                                     }
                                 )
@@ -209,6 +208,7 @@ fun UnpaidBillsScreen(
                         }
                     }
                 }
+
                 is UnpaidBillsUiState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -225,7 +225,10 @@ fun UnpaidBillsScreen(
                             Button(
                                 onClick = {
                                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                    viewModel.loadUnpaidBills(fromDate.format(formatter), toDate.format(formatter))
+                                    viewModel.loadUnpaidBills(
+                                        fromDate.format(formatter),
+                                        toDate.format(formatter)
+                                    )
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
                             ) {
@@ -234,6 +237,7 @@ fun UnpaidBillsScreen(
                         }
                     }
                 }
+
                 is UnpaidBillsUiState.Idle -> {
                     // Initial state, show loading
                     Box(
@@ -310,7 +314,7 @@ fun UnpaidBillCard(
                         color = Color.Gray
                     )
                 }
-                
+
                 Surface(
                     color = Color.Red.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(8.dp)
@@ -345,7 +349,7 @@ fun UnpaidBillCard(
                         fontWeight = FontWeight.Medium
                     )
                 }
-                
+
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "Amount Due",

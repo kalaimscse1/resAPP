@@ -30,11 +30,11 @@ fun SupportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         selectedCategory?.title ?: "Help & Support",
                         color = SurfaceLight
-                    ) 
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -45,7 +45,7 @@ fun SupportScreen(
                         }
                     }) {
                         Icon(
-                            Icons.Default.ArrowBack, 
+                            Icons.Default.ArrowBack,
                             contentDescription = "Back",
                             tint = SurfaceLight
                         )
@@ -101,7 +101,7 @@ fun SupportMainScreen(
         item {
             AppOverviewCard(onVideoClick = onVideoClick)
         }
-        
+
         item {
             Text(
                 text = "Browse Help Topics",
@@ -154,30 +154,30 @@ fun AppOverviewCard(onVideoClick: (String) -> Unit) {
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "A comprehensive restaurant billing and management system built with modern Android technologies. " +
-                       "Res-B provides complete solution for restaurant operations including order management, " +
-                       "billing, inventory tracking, payment processing, and detailed reporting.",
+                        "Res-B provides complete solution for restaurant operations including order management, " +
+                        "billing, inventory tracking, payment processing, and detailed reporting.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Justify
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "Key Features:",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             val features = listOf(
                 "• Counter billing with real-time calculations",
-                "• Table and takeaway order management", 
+                "• Table and takeaway order management",
                 "• Inventory and menu management",
                 "• Multiple payment methods support",
                 "• Comprehensive sales and tax reporting",
@@ -185,7 +185,7 @@ fun AppOverviewCard(onVideoClick: (String) -> Unit) {
                 "• Receipt template customization",
                 "• Background data synchronization"
             )
-            
+
             features.forEach { feature ->
                 Text(
                     text = feature,
@@ -193,9 +193,9 @@ fun AppOverviewCard(onVideoClick: (String) -> Unit) {
                     modifier = Modifier.padding(vertical = 2.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Button(
                 onClick = { onVideoClick("https://www.youtube.com/watch?v=demo-app-overview") },
                 modifier = Modifier.fillMaxWidth()
@@ -311,18 +311,18 @@ fun SupportItemCard(
                     fontWeight = FontWeight.Medium
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = item.description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             if (item.videoUrl.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 OutlinedButton(
                     onClick = { onVideoClick(item.videoUrl) },
                     modifier = Modifier.fillMaxWidth()
@@ -422,7 +422,7 @@ val supportCategories = listOf(
     ),
     SupportCategory(
         id = "reports",
-        title = "Reports & Analytics", 
+        title = "Reports & Analytics",
         description = "Understand your restaurant's performance with detailed reports",
         icon = Icons.Default.Assessment,
         items = listOf(

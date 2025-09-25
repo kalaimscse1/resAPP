@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-
 @HiltViewModel
 class GeneralSettingsViewModel @Inject constructor(
     private val generalSettingsRepository: GeneralSettingsRepository,
@@ -35,7 +33,7 @@ class GeneralSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val settings = generalSettingsRepository.getGeneralSettings()
-               _uiState.value = UiState.Success(settings)
+                _uiState.value = UiState.Success(settings)
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }
@@ -48,7 +46,7 @@ class GeneralSettingsViewModel @Inject constructor(
                 val updatedSettings = generalSettingsRepository.updateGeneralSettings(settings)
 
                 if (updatedSettings != null) {
-                   loadSettings()
+                    loadSettings()
                     Log.d("GeneralSettingsViewModel", "Settings updated successfully$settings")
                     sessionManager.saveGeneralSetting(settings)
                 }

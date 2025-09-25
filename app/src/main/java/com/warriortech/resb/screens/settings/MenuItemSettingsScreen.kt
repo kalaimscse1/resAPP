@@ -21,12 +21,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.Menu
 import com.warriortech.resb.model.MenuCategory
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblMenuItemRequest
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.MenuItemSettingsViewModel
 import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
@@ -68,7 +66,8 @@ fun MenuItemSettingsScreen(
                 title = { Text("MenuItem Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
                             tint = SurfaceLight
                         )
                     }
@@ -78,8 +77,10 @@ fun MenuItemSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add MenuItem",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add MenuItem",
+                            tint = SurfaceLight
+                        )
                     }
                 },
             )
@@ -95,70 +96,70 @@ fun MenuItemSettingsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-            when (val state = uiState) {
-                is MenuItemSettingsUiState.Loading -> {
+        when (val state = uiState) {
+            is MenuItemSettingsUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is MenuItemSettingsUiState.Success -> {
+                if (state.menuItems.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
-                    }
-                }
-
-                is MenuItemSettingsUiState.Success -> {
-                    if (state.menuItems.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "No menu items available",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                    } else{
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.menuItems) { menuItem ->
-                                MenuItemCard(
-                                    menuItem = menuItem,
-                                    onEdit = { editingMenuItem = menuItem },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                is MenuItemSettingsUiState.Error -> {
-
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
                         Text(
-                            text = "Error: ${state.message}",
-                            color = MaterialTheme.colorScheme.error
+                            "No menu items available",
+                            style = MaterialTheme.typography.bodyLarge
                         )
-                        Button(
-                            onClick = { viewModel.loadMenuItems() },
-                            modifier = Modifier.padding(top = 16.dp)
-                        ) {
-                            Text("Retry")
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.menuItems) { menuItem ->
+                            MenuItemCard(
+                                menuItem = menuItem,
+                                onEdit = { editingMenuItem = menuItem },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteMenuItem(menuItem.menu_item_id.toInt())
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             }
+
+            is MenuItemSettingsUiState.Error -> {
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(
+                        onClick = { viewModel.loadMenuItems() },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
 
 
         if (showAddDialog || editingMenuItem != null) {
@@ -224,7 +225,7 @@ fun MenuItemCard(
                     )
                 }
             }
-            
+
             Row {
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit")
@@ -279,43 +280,47 @@ fun MenuItemDialog(
     ReusableBottomSheet(
         onDismiss = onDismiss,
         title = if (menuItem != null) "Edit Menu Item" else "Add Menu Item",
-        onSave = {  val newMenuItem = TblMenuItemRequest(
-            menu_item_id = menuItem?.menu_item_id ?: 0,
-            menu_item_name = name,
-            menu_item_name_tamil = nameTamil,
-            item_cat_id = menuItemCatId,
-            rate = rate.toDoubleOrNull() ?: 0.0,
-            ac_rate = acRate.toDoubleOrNull() ?: 0.0,
-            parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
-            parcel_charge = parcelCharge.toDoubleOrNull() ?: 0.0,
-            tax_id = taxId,
-            cess_specific = 0.0,
-            kitchen_cat_id = kitchenCatId,
-            stock_maintain = stockMaintain,
-            rate_lock = rateLock,
-            unit_id = unitId,
-            min_stock = minStock,
-            hsn_code = hsnCode,
-            order_by = orderBy,
-            is_inventory = isInventory,
-            is_raw = isRaw,
-            is_available = isAvailable,
-            menu_item_code = menuItem?.menu_item_code ?: "",
-            menu_id = menuId,
-            is_favourite = isFavourite,
-            is_active = isActive,
-            image = "",
-            preparation_time = preparationTime
-        )
-            onSave(newMenuItem) },
+        onSave = {
+            val newMenuItem = TblMenuItemRequest(
+                menu_item_id = menuItem?.menu_item_id ?: 0,
+                menu_item_name = name,
+                menu_item_name_tamil = nameTamil,
+                item_cat_id = menuItemCatId,
+                rate = rate.toDoubleOrNull() ?: 0.0,
+                ac_rate = acRate.toDoubleOrNull() ?: 0.0,
+                parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
+                parcel_charge = parcelCharge.toDoubleOrNull() ?: 0.0,
+                tax_id = taxId,
+                cess_specific = 0.0,
+                kitchen_cat_id = kitchenCatId,
+                stock_maintain = stockMaintain,
+                rate_lock = rateLock,
+                unit_id = unitId,
+                min_stock = minStock,
+                hsn_code = hsnCode,
+                order_by = orderBy,
+                is_inventory = isInventory,
+                is_raw = isRaw,
+                is_available = isAvailable,
+                menu_item_code = menuItem?.menu_item_code ?: "",
+                menu_id = menuId,
+                is_favourite = isFavourite,
+                is_active = isActive,
+                image = "",
+                preparation_time = preparationTime
+            )
+            onSave(newMenuItem)
+        },
         isSaveEnabled = name.isNotBlank() && rate.isNotBlank(),
         buttonText = if (menuItem != null) "Update" else "Add"
-    ){
-        Column( modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 400.dp) // limit dialog height
-            .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 400.dp) // limit dialog height
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             // Common Menu Fields
             OutlinedTextField(
                 value = name,
@@ -356,7 +361,6 @@ fun MenuItemDialog(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
-
 
 
             // Dropdowns

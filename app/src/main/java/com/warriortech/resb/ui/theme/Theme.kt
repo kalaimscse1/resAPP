@@ -1,11 +1,9 @@
 package com.warriortech.resb.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -180,6 +178,7 @@ val ResbTypography = Typography(
         letterSpacing = 0.sp
     )
 )
+
 @Composable
 fun ResbTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

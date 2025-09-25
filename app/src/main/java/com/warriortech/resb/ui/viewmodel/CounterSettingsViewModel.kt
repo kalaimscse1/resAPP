@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class CounterSettingsViewModel @Inject constructor(
     private val counterRepository: CounterRepository
@@ -31,7 +30,7 @@ class CounterSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val counters = counterRepository.getAllCounters()
-                _uiState.value = UiState.Success(counters.filter { it.counter_name !="--" })
+                _uiState.value = UiState.Success(counters.filter { it.counter_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

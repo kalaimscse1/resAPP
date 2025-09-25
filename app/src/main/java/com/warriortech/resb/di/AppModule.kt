@@ -9,6 +9,9 @@ import com.warriortech.resb.data.local.MIGRATION_2_3
 import com.warriortech.resb.data.local.RestaurantDatabase
 import com.warriortech.resb.data.local.dao.MenuItemDao
 import com.warriortech.resb.data.local.dao.TableDao
+import com.warriortech.resb.data.local.dao.TblOrderDetailsDao
+import com.warriortech.resb.data.local.dao.TblOrderMasterDao
+import com.warriortech.resb.data.local.dao.TblVoucherDao
 import com.warriortech.resb.data.repository.AreaRepository
 import com.warriortech.resb.data.repository.DashboardRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
@@ -84,6 +87,20 @@ object AppModule {
         return database.menuItemDao()
     }
 
+    @Provides
+    fun provideOrderMasterDao(db: RestaurantDatabase): TblOrderMasterDao {
+        return db.tblOrderMasterDao()
+    }
+
+    @Provides
+    fun provideOrderDetailsDao(db: RestaurantDatabase): TblOrderDetailsDao {
+        return db.tblOrderDetailsDao()
+    }
+
+    @Provides
+    fun provideVoucherDao(db: RestaurantDatabase): TblVoucherDao {
+        return db.tblVoucherDao()
+    }
 
     @Provides
     @Singleton
@@ -137,7 +154,7 @@ object AppModule {
     @Singleton
     fun provideApiService(okHttpClient: OkHttpClient): ApiService {
         return Retrofit.Builder()
-            .baseUrl("http://110.172.164.71:5050/api/") // Replace with your actual API base URL
+            .baseUrl("http://154.210.206.184:5050/api/") // Replace with your actual API base URL
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -158,8 +175,10 @@ object AppModule {
         networkMonitor: NetworkMonitor,
         sessionManager: SessionManager
     ): TableRepository {
-        return TableRepository(tableDao, apiService, networkMonitor,
-            sessionManager)
+        return TableRepository(
+            tableDao, apiService, networkMonitor,
+            sessionManager
+        )
     }
 
     @Provides
@@ -181,10 +200,22 @@ object AppModule {
     @Singleton
     fun provideOrderRepository(
         apiService: ApiService,
+        orderDao: TblOrderMasterDao,
+        orderDetailsDao: TblOrderDetailsDao,
+        voucherDao: TblVoucherDao,
+        tableDao: TableDao,
         sessionManager: SessionManager,
         printerHelper: PrinterHelper
     ): OrderRepository {
-        return OrderRepository(apiService,sessionManager,printerHelper)
+        return OrderRepository(
+            apiService,
+            orderDao,
+            orderDetailsDao,
+            voucherDao,
+            tableDao,
+            sessionManager,
+            printerHelper
+        )
     }
 
 
@@ -216,7 +247,7 @@ object AppModule {
         apiService: ApiService
     ): SyncManager {
         return SyncManager(
-            context, networkMonitor, apiService,sessionManager
+            context, networkMonitor, apiService, sessionManager
         )
     }
 
@@ -366,7 +397,7 @@ object AppModule {
     fun provideMenuRepository(
         apiService: ApiService,
         sessionManager: SessionManager
-    ): MenuRepository = MenuRepository(apiService,sessionManager)
+    ): MenuRepository = MenuRepository(apiService, sessionManager)
 
     @Provides
     @Singleton
@@ -374,7 +405,7 @@ object AppModule {
         apiService: ApiService,
         networkMonitor: NetworkMonitor,
         sessionManager: SessionManager
-    ): ModifierRepository = ModifierRepository(apiService,networkMonitor,sessionManager)
+    ): ModifierRepository = ModifierRepository(apiService, networkMonitor, sessionManager)
 
     @Provides
     @Singleton

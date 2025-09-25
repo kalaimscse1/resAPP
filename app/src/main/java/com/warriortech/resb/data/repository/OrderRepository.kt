@@ -1,6 +1,14 @@
 package com.warriortech.resb.data.repository
 
 import android.annotation.SuppressLint
+import com.warriortech.resb.data.local.dao.OrderDao
+import com.warriortech.resb.data.local.dao.TableDao
+import com.warriortech.resb.data.local.dao.TblOrderDetailsDao
+import com.warriortech.resb.data.local.dao.TblOrderMasterDao
+import com.warriortech.resb.data.local.dao.TblVoucherDao
+import com.warriortech.resb.data.local.entity.SyncStatus
+import com.warriortech.resb.data.local.entity.TblOrderDetails
+import com.warriortech.resb.data.local.entity.TblOrderMaster
 import com.warriortech.resb.model.KOTRequest
 import com.warriortech.resb.model.OrderDetails
 import com.warriortech.resb.model.OrderItem
@@ -11,6 +19,7 @@ import com.warriortech.resb.model.TblOrderResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.util.PrinterHelper
+import com.warriortech.resb.util.generateNextBillNo
 import com.warriortech.resb.util.getCurrentDateModern
 import com.warriortech.resb.util.getCurrentTimeModern
 import kotlinx.coroutines.flow.*
@@ -28,6 +37,10 @@ import kotlin.collections.map
 @Singleton
 class OrderRepository @Inject constructor(
     private val apiService: ApiService,
+    private val orderDao: TblOrderMasterDao,
+    private val orderDetailsDao: TblOrderDetailsDao,
+    private val voucherDao : TblVoucherDao,
+    private val tableDao: TableDao,
     private val sessionManager: SessionManager,
     private val printerHelper: PrinterHelper
 ) {
@@ -365,6 +378,96 @@ class OrderRepository @Inject constructor(
         }
     }
 
+    suspend fun placeOrderLocalDb(
+        tableId: Long,
+        itemsToPlace: List<OrderItem>,
+        tableStatus: String,
+        existingOpenOrderMasterId: String? = null
+    ){
+        var currentOrderMasterId = existingOpenOrderMasterId
+        var orderMasterResponse: TblOrderResponse? = null
+        if (existingOpenOrderMasterId==null){
+            val voucher = voucherDao.getActiveVoucherByType(sessionManager.getUser()?.counter_id?.toInt() ?:0,"ORDER")
+            val newOrderMasterId = generateNextBillNo(voucher?.starting_no ?: "ORD0001",voucher?.starting_no ?: "ORD0001")
+            val orderMaster = TblOrderMaster(
+                order_master_id = newOrderMasterId,
+                order_date = getCurrentDateModern(),
+                order_create_time = getCurrentTimeModern(),
+                order_completed_time = "", // Will be empty for new/running orders
+                staff_id = sessionManager.getUser()?.staff_id?.toInt() ?: 1,
+                is_dine_in = tableStatus != "TAKEAWAY" && tableStatus != "DELIVERY",
+                is_take_away = tableStatus == "TAKEAWAY",
+                is_delivery = tableStatus == "DELIVERY",
+                table_id = tableId.toInt(),
+                no_of_person = 0,
+                waiter_request_status = true,
+                kitchen_response_status = true, // Assuming KOT is being sent
+                order_status = "RUNNING",
+                is_merge = false,
+                is_active = true,// Use ID from getOrderNo
+                is_delivered = false,
+                is_online=false,
+                online_order_id = 1,
+                online_ref_no="",
+                is_online_paid=false,
+                is_synced = SyncStatus.PENDING_SYNC
+            )
+            orderDao.insert(orderMaster)
+            tableDao.updateTableAvailability(tableId,"OCCUPIED")
+        }else{
+            val orderMaster= orderDao.getById(existingOpenOrderMasterId)
+            if (orderMaster!=null){
+                currentOrderMasterId = orderMaster.order_master_id
+            }
+        }
+        // Get a KOT number for this batch of items
+        val newKotNumber = orderDetailsDao.getMaxKOTNumber(getCurrentDateModern())
+        val orderDetailsList = itemsToPlace.map { item ->
+            val pricePerUnit = when (tableStatus) {
+                "AC" -> item.menuItem.ac_rate
+                "PARCEL", "DELIVERY" -> item.menuItem.parcel_rate
+                else -> item.menuItem.rate
+            }
+            val tax = apiService.getTaxSplit(item.menuItem.tax_id,sessionManager.getCompanyCode()?:"")
+            val cgst = tax[0].tax_split_percentage
+            val sgst= tax[1].tax_split_percentage
+            val totalAmountForTaxCalc = pricePerUnit
+            val taxAmount = calculateGst(totalAmountForTaxCalc, item.menuItem.tax_percentage.toDouble(), true,sgst.toDouble(),cgst.toDouble())
+            val cess =  calculateGstAndCess(totalAmountForTaxCalc , item.menuItem.tax_percentage.toDouble(), item.menuItem.cess_per.toDouble(), true,item.menuItem.cess_specific,sgst.toDouble(),cgst.toDouble())
+            TblOrderDetails(
+                order_master_id = currentOrderMasterId.toString(), // Link to existing or new OrderMaster
+                order_details_id = 0, // Backend should generate this or handle it
+                kot_number = newKotNumber, // KOT number for this specific batch
+                menu_item_id = item.menuItem.menu_item_id.toInt(),
+                rate = if (item.menuItem.is_inventory !=1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
+                actual_rate = pricePerUnit,// Rate per unit (base price)
+                qty = item.quantity,
+                total = if (item.menuItem.is_inventory !=1L) (taxAmount.basePrice * item.quantity).roundTo2() else (cess.basePrice * item.quantity).roundTo2(), // Total base price for this item line
+                tax_id = item.menuItem.tax_id.toInt(),
+                tax_amount = if (item.menuItem.is_inventory !=1L) (taxAmount.gstAmount * item.quantity).roundTo2()  else (cess.gstAmount* item.quantity).roundTo2(),
+                sgst_per = if (tableStatus!="DELIVERY")sgst.toDouble() else 0.0,
+                sgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.sgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.sgst * item.quantity).roundTo2() else 0.0},
+                cgst_per = if (tableStatus!="DELIVERY") cgst.toDouble() else 0.0,// Assuming SGST/CGST are half of total GST
+                cgst = if (item.menuItem.is_inventory !=1L) {if (tableStatus!="DELIVERY") (taxAmount.cgst * item.quantity).roundTo2() else 0.0} else{if (tableStatus!="DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0}, // Adjust if your backend calculates differently
+                igst_per = if (tableStatus=="DELIVERY")item.menuItem.tax_percentage.toDouble() else 0.0,
+                igst =  if (tableStatus=="DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0 ,
+                cess_per = if (item.menuItem.is_inventory ==1L)item.menuItem.cess_per.toDouble() else 0.0,
+                cess = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
+                cess_specific = if (item.menuItem.is_inventory ==1L&& item.menuItem.cess_specific!=0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0 ,
+                grand_total = if (item.menuItem.is_inventory ==1L && item.menuItem.cess_specific!=0.00) (cess.totalPrice * item.quantity).roundTo2() else (taxAmount.totalPrice* item.quantity).roundTo2(),
+                prepare_status = true, // Item needs preparation
+                item_add_mode = existingOpenOrderMasterId != null, // True if adding to an existing order
+                is_flag = false,
+                merge_order_nos = "",
+                merge_order_tables = "", // Name of the current table
+                merge_pax = 0, // Pax of the current table
+                is_active = true
+            )
+
+        }
+        orderDetailsDao.insertAll(orderDetailsList)
+    }
+
     suspend fun updateOrderDetails(
         orderId: String?,
         items: List<OrderItem>,
@@ -377,14 +480,14 @@ class OrderRepository @Inject constructor(
                 val cgst = tax[0].tax_split_percentage
                 val sgst= tax[1].tax_split_percentage
                 val totalAmountForTaxCalc = item.menuItem.actual_rate
-                val taxAmount = com.warriortech.resb.data.repository.calculateGst(
+                val taxAmount = calculateGst(
                     totalAmountForTaxCalc,
                     item.menuItem.tax_percentage.toDouble(),
                     true,
                     sgst.toDouble(),
                     cgst.toDouble()
                 )
-                val cess = com.warriortech.resb.data.repository.calculateGstAndCess(
+                val cess = calculateGstAndCess(
                     totalAmountForTaxCalc,
                     item.menuItem.tax_percentage.toDouble(),
                     item.menuItem.cess_per.toDouble(),
@@ -513,69 +616,7 @@ class OrderRepository @Inject constructor(
         }
         return emptyMap()
     }
-    /**
-     * Get orders for a specific table
-     * Filters orders client-side
-     */
-//    suspend fun getOrdersByTable(tableId: Long): List<TblOrderDetailsResponse> {
-//
-//            val response = apiService.getOpenOrderItemsForTable(tableId,sessionManager.getCompanyCode()?:"")
-//            var order=0
-//
-//            if (response.isSuccessful) {
-//                val allOrders = response.body()
-//                val orderno = allOrders?.get("order_master_id")
-//                if (allOrders != null && orderno != null) {
-//                    order=orderno
-//// Filter orders for this table
-////                    val tableOrders = allOrders.filter { it.tableId == tableId }
-//                }
-//            }
-//            val orderDetails = apiService.getOpenOrderDetailsForTable(order,sessionManager.getCompanyCode()?:"")
-//            if(orderDetails.isSuccessful){
-//                return orderDetails.body()!!
-//            }
-//        return emptyList()
-//    }
 
-    /**
-     * Get active orders for a specific table
-     * Filters orders client-side to those not in COMPLETED or CANCELLED status
-     */
-    suspend fun getActiveOrdersByTable(tableId: Int): Flow<Result<List<TblOrderResponse>>> = flow {
-        try {
-            val response = apiService.getAllOrders(sessionManager.getCompanyCode()?:"")
-
-            if (response.isSuccessful) {
-                val allOrders = response.body()
-                if (allOrders != null) {
-                    // Filter active orders for this table
-                    val activeOrders = allOrders.filter {
-                        it.table_id.toInt() == tableId &&
-                                it.order_status != OrderStatus.COMPLETED.name &&
-                                it.order_status != OrderStatus.CANCELLED.name
-                    }
-                    emit(Result.success(activeOrders))
-                } else {
-                    emit(Result.failure(Exception("No orders data received")))
-                }
-            } else {
-                emit(Result.failure(Exception("Error fetching orders: ${response.code()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
-        }
-    }
-
-    /**
-     * Print a KOT for an order
-     */
-// Assuming KOTRequest, ApiService, and PrintResponse are defined elsewhere
-// data class KOTRequest(val id: String) // Placeholder
-// interface ApiService { // Placeholder
-//    suspend fun printKOT(orderId: KOTRequest): retrofit2.Response<PrintResponse>
-// }
-// data class PrintResponse(val message: String, val status: String) // Placeholder
 
     suspend fun printKOT(orderId: KOTRequest,ipAddress:String): Flow<Result<String>> = flow { // Changed Flow type to Flow<Result<PrintResponse>>
         try {
@@ -615,28 +656,6 @@ class OrderRepository @Inject constructor(
             response.body()?.printerIpAddress?:""
         else
             ""
-    }
-    /**
-     * Update an order's status
-     */
-    suspend fun updateOrderStatus(orderId: String, newStatus: OrderStatus): Flow<Result<Int>> = flow {
-        try {
-            val statusUpdate = mapOf("status" to newStatus.name)
-            val response = apiService.updateOrderStatus(orderId, statusUpdate["status"]?:"",sessionManager.getCompanyCode()?:"")
-
-            if (response.isSuccessful) {
-                val updatedOrder = response.body()
-                if (updatedOrder != null) {
-                    emit(Result.success(updatedOrder))
-                } else {
-                    emit(Result.failure(Exception("Failed to update order status - empty response")))
-                }
-            } else {
-                emit(Result.failure(Exception("Error updating order status: ${response.code()}")))
-            }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
-        }
     }
 
     suspend fun getOrdersByOrderId(lng: String): Response<List<TblOrderDetailsResponse>> {

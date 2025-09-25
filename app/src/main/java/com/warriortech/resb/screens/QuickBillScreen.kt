@@ -3,10 +3,14 @@ package com.warriortech.resb.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
@@ -26,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -36,10 +41,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
 import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.util.CurrencySettings
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,13 +58,13 @@ fun QuickBillScreen(
     navController: NavHostController,
     viewModel: BillingViewModel = hiltViewModel(),
     orderDetailsResponse: Map<TblMenuItemResponse, Int>? = null,
-    orderMasterId: String? = null
-){
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
     val orderId by viewModel.orderId.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
 
     LaunchedEffect(uiState.errorMessage) {
@@ -63,10 +74,9 @@ fun QuickBillScreen(
         }
     }
 
-    LaunchedEffect(orderDetailsResponse, orderMasterId) {
+    LaunchedEffect(orderDetailsResponse) {
         when {
             orderDetailsResponse != null -> viewModel.setMenuDetails(orderDetailsResponse)
-            orderMasterId != null -> null
         }
         viewModel.updateTotal()
     }
@@ -77,13 +87,15 @@ fun QuickBillScreen(
             TopAppBar(
                 title = {
                     Text(
-                         "Bill Summary", color = SurfaceLight
+                        "Bill Summary", color = SurfaceLight
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -98,41 +110,67 @@ fun QuickBillScreen(
             ) {
                 MobileOptimizedButton(
                     onClick = {
-                        navController.navigate("payment_screen/${totalAmount}/${orderId}") {
-                            launchSingleTop = true
-                            restoreState = true
+                        scope.launch {
+                            viewModel.placeOrder(selectedItems)
+                            delay(5000)
+                            navController.navigate("payment_screen/${totalAmount}/${orderId}/${"--"}/${0L}") {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     },
                     text = "Proceed to Payment",
                     modifier = Modifier.weight(1f)
                 )
-
             }
         }
-    ){ paddingValues ->
-        LazyColumn(contentPadding = paddingValues) {
-            if (selectedItems.isEmpty()) {
-                item {
-                    Text(
-                        text = "No items selected",
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+    ) { paddingValues ->
+        BillContent(
+            modifier = Modifier.padding(paddingValues),
+            uiState = selectedItems,
+            onUpdateQuantity = { item, newQuantity ->
+                viewModel.updateItemQuantity(item, newQuantity)
+            },
+            onRemoveItem = { item ->
+                viewModel.removeItem(item)
             }
-            else{
-                items(selectedItems.size) { index ->
-                    val menuItem = selectedItems.keys.elementAt(index)
-                    val quantity = selectedItems[menuItem] ?: 0
-                    BillItemRow(
-                        menuItem = menuItem,
-                        quantity = quantity,
-                        tableStatus = uiState.tableStatus,
-                    )
-                }
-            }
-        }
+        )
     }
 }
+
+@Composable
+fun BillContent(
+    modifier: Modifier = Modifier,
+    uiState: Map<TblMenuItemResponse, Int>,
+    onUpdateQuantity: (TblMenuItemResponse, Int) -> Unit,
+    onRemoveItem: (TblMenuItemResponse) -> Unit
+) {
+    val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+
+        item {
+            Text("Items", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+        }
+        items(uiState.size) { index ->
+            val menuItem = uiState.keys.elementAt(index)
+            val quantity = uiState[menuItem] ?: 0
+            BillItemRow(
+                menuItem = menuItem,
+                quantity = quantity,
+                tableStatus = "",
+            )
+        }
+        item { ModernDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+    }
+}
+
 
 @Composable
 fun BillItemRow(

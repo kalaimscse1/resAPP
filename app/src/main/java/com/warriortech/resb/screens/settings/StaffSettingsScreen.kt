@@ -1,7 +1,5 @@
 package com.warriortech.resb.screens.settings
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,8 +7,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,21 +16,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Area
-import com.warriortech.resb.model.Customer
 import com.warriortech.resb.model.Role
 import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblStaff
 import com.warriortech.resb.model.TblStaffRequest
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
 import com.warriortech.resb.ui.viewmodel.StaffViewModel
 import com.warriortech.resb.util.AreaDropdown
 import com.warriortech.resb.util.CounterDropdown
 import com.warriortech.resb.util.RoleDropdown
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,8 +62,10 @@ fun StaffSettingsScreen(
                 title = { Text("Staff Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -83,8 +77,10 @@ fun StaffSettingsScreen(
             FloatingActionButton(
                 onClick = { showAddDialog = true }
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Staff",
-                    tint = SurfaceLight)
+                Icon(
+                    Icons.Default.Add, contentDescription = "Add Staff",
+                    tint = SurfaceLight
+                )
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -175,7 +171,7 @@ fun StaffCard(
                 text = staff.contact_no,
                 style = MaterialTheme.typography.bodySmall
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End

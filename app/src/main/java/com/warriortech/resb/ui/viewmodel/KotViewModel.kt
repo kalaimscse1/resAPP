@@ -1,8 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
-
 import android.annotation.SuppressLint
-import androidx.collection.emptyLongSet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.KotRepository
@@ -17,7 +15,6 @@ import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.ui.viewmodel.MenuViewModel.OrderUiState
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.getCurrentDateModern
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +32,8 @@ import kotlin.collections.map
 class KotViewModel @Inject constructor(
     private val repository: KotRepository,
     private val orderRepository: OrderRepository,
-    private val sessionManager: SessionManager) : ViewModel() {
+    private val sessionManager: SessionManager
+) : ViewModel() {
 
     sealed class KotUiState {
         object Loading : KotUiState()
@@ -59,28 +57,32 @@ class KotViewModel @Inject constructor(
     val _orderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
     val _beforeBilledItems = MutableStateFlow<Map<TblMenuItemResponse, Int>>(emptyMap())
     val _billedItems = MutableStateFlow<Map<TblMenuItemResponse, Int>>(emptyMap())
-    val _cessSpecific =MutableStateFlow<Double>( 0.0)
-    val _cessAmount =MutableStateFlow<Double>( 0.0) // Cess percentage if applicable
-    val _subtotal =MutableStateFlow<Double>( 0.0)
-    val _taxAmount =MutableStateFlow<Double>( 0.0)
-    val _totalAmount =MutableStateFlow<Double>( 0.0)
+    val _cessSpecific = MutableStateFlow<Double>(0.0)
+    val _cessAmount = MutableStateFlow<Double>(0.0) // Cess percentage if applicable
+    val _subtotal = MutableStateFlow<Double>(0.0)
+    val _taxAmount = MutableStateFlow<Double>(0.0)
+    val _totalAmount = MutableStateFlow<Double>(0.0)
     val _kot = MutableStateFlow<KotResponse?>(null)
 
     init {
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
-        loadKotReports(getCurrentDateModern(),getCurrentDateModern())
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
+        loadKotReports(getCurrentDateModern(), getCurrentDateModern())
     }
 
-    fun loadKotReports(fromDate: String,toDate: String) {
+    fun loadKotReports(fromDate: String, toDate: String) {
         viewModelScope.launch {
             try {
-                _kotReports.value = KotUiState.Success(repository.fetchKotReports(fromDate,toDate))
+                _kotReports.value = KotUiState.Success(repository.fetchKotReports(fromDate, toDate))
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
-    fun loadKot(kot : KotResponse){
+
+    fun loadKot(kot: KotResponse) {
         _kot.value = kot
     }
 
@@ -94,8 +96,9 @@ class KotViewModel @Inject constructor(
 
                     // This function sets billing details from an existing order response
                     // Set billing details from TblOrderDetailsResponse
-                    _orderDetails.value = orderDetailsResponse
-                    val menuItems = orderDetailsResponse.map {
+                    _orderDetails.value =
+                        orderDetailsResponse.filter { it.kot_number == _kot.value?.kot_number?.toInt() }
+                    val menuItems = _orderDetails.value.map {
 
                         TblMenuItemResponse(
                             menu_item_id = it.menuItem.menu_item_id,
@@ -140,12 +143,12 @@ class KotViewModel @Inject constructor(
                     var tableStatus = "TABLE" // Default
                     _billedItems.value = itemsMap
                     // Calculate totals from order details
-                    val subtotal = orderDetailsResponse.sumOf { it.total }
-                    val taxAmount = orderDetailsResponse.sumOf { it.tax_amount }
+                    val subtotal = _orderDetails.value.sumOf { it.total }
+                    val taxAmount = _orderDetails.value.sumOf { it.tax_amount }
                     val cessAmount =
-                        orderDetailsResponse.sumOf { if (it.cess > 0) it.cess else 0.0 }
+                        _orderDetails.value.sumOf { if (it.cess > 0) it.cess else 0.0 }
                     val cessSpecific =
-                        orderDetailsResponse.sumOf { if (it.cess_specific > 0) it.cess_specific else 0.0 }
+                        _orderDetails.value.sumOf { if (it.cess_specific > 0) it.cess_specific else 0.0 }
                     val totalAmount = subtotal + taxAmount + cessAmount + cessSpecific
 
                     _subtotal.value = subtotal
@@ -154,13 +157,13 @@ class KotViewModel @Inject constructor(
                     _cessSpecific.value = cessSpecific
                     _totalAmount.value = totalAmount
                     _kotActionState.value = KotActionState.Success(itemsMap)
-                }
-                else {
+                } else {
                     _kotActionState.value = KotActionState.Error("No order details found.")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _kotActionState.value = KotActionState.Error("Failed to load order items: ${e.message}")
+                _kotActionState.value =
+                    KotActionState.Error("Failed to load order items: ${e.message}")
             }
         }
     }
@@ -168,9 +171,9 @@ class KotViewModel @Inject constructor(
     @SuppressLint("DefaultLocale")
     fun Double.roundTo2(): Double {
         val dec = sessionManager.getDecimalPlaces()
-        return if (dec==2L)
+        return if (dec == 2L)
             BigDecimal.valueOf(this).setScale(2, RoundingMode.HALF_UP).toDouble()
-        else if (dec==3L)
+        else if (dec == 3L)
             BigDecimal.valueOf(this).setScale(3, RoundingMode.HALF_UP).toDouble()
         else
             BigDecimal.valueOf(this).setScale(4, RoundingMode.HALF_UP).toDouble()
@@ -182,23 +185,51 @@ class KotViewModel @Inject constructor(
             item.rate * qty
         }
         val tax = items.entries.sumOf { (item, qty) ->
-            val cess = calculateGstAndCess(item.actual_rate,item.tax_percentage.toDouble(),item.cess_per.toDouble(),true,item.cess_specific.toDouble(),item.tax_percentage.toDouble()/2,item.tax_percentage.toDouble()/2)
-            val tax =  calculateGst(item.actual_rate,item.tax_percentage.toDouble(),true,item.tax_percentage.toDouble()/2,item.tax_percentage.toDouble()/2)
-            if (_cessAmount.value>0)
+            val cess = calculateGstAndCess(
+                item.actual_rate,
+                item.tax_percentage.toDouble(),
+                item.cess_per.toDouble(),
+                true,
+                item.cess_specific.toDouble(),
+                item.tax_percentage.toDouble() / 2,
+                item.tax_percentage.toDouble() / 2
+            )
+            val tax = calculateGst(
+                item.actual_rate,
+                item.tax_percentage.toDouble(),
+                true,
+                item.tax_percentage.toDouble() / 2,
+                item.tax_percentage.toDouble() / 2
+            )
+            if (_cessAmount.value > 0)
                 cess.cessAmount.roundTo2() * qty
             else
                 tax.gstAmount.roundTo2() * qty
         }
         val cess = items.entries.sumOf { (item, qty) ->
-            val cess = calculateGstAndCess(item.actual_rate,item.tax_percentage.toDouble(),item.cess_per.toDouble(),true,item.cess_specific.toDouble(),item.tax_percentage.toDouble()/2,item.tax_percentage.toDouble()/2)
-            val tax =  calculateGst(item.actual_rate,item.tax_percentage.toDouble(),true,item.tax_percentage.toDouble()/2,item.tax_percentage.toDouble()/2)
-            if (_cessAmount.value>0)
+            val cess = calculateGstAndCess(
+                item.actual_rate,
+                item.tax_percentage.toDouble(),
+                item.cess_per.toDouble(),
+                true,
+                item.cess_specific.toDouble(),
+                item.tax_percentage.toDouble() / 2,
+                item.tax_percentage.toDouble() / 2
+            )
+            val tax = calculateGst(
+                item.actual_rate,
+                item.tax_percentage.toDouble(),
+                true,
+                item.tax_percentage.toDouble() / 2,
+                item.tax_percentage.toDouble() / 2
+            )
+            if (_cessAmount.value > 0)
                 cess.cessAmount.roundTo2() * qty
             else
-               0.0
+                0.0
         }
         val cessSpecific = _billedItems.value.entries.sumOf { (item, qty) ->
-            if (_cessSpecific.value>0) (item.cess_specific * qty).roundTo2() else 0.0
+            if (_cessSpecific.value > 0) (item.cess_specific * qty).roundTo2() else 0.0
         }
         val totalAmount = subtotal + tax + cess + cessSpecific
         _subtotal.value = subtotal
@@ -216,18 +247,19 @@ class KotViewModel @Inject constructor(
             currentItems.remove(menuItem)
         }
         _beforeBilledItems.value = _billedItems.value
-        _kotActionState.value =KotActionState.Success( currentItems)
+        _kotActionState.value = KotActionState.Success(currentItems)
         _billedItems.value = currentItems.toMap()
-         calc(currentItems)
+        calc(currentItems)
     }
 
     fun removeItem(menuItem: TblMenuItemResponse) {
-        val orderId = _orderDetails.value.filter { it.menuItem.menu_item_id == menuItem.menu_item_id }
-    viewModelScope.launch {
+        val orderId =
+            _orderDetails.value.filter { it.menuItem.menu_item_id == menuItem.menu_item_id }
+        viewModelScope.launch {
             val currentItems = _billedItems.value.toMutableMap()
             currentItems.remove(menuItem)
             _beforeBilledItems.value = _billedItems.value
-            _kotActionState.value =KotActionState.Success( currentItems)
+            _kotActionState.value = KotActionState.Success(currentItems)
             _billedItems.value = currentItems.toMap()
             calc(currentItems)
             orderRepository.deleteByid(orderDeatailId = orderId.first().order_details_id)
@@ -235,7 +267,7 @@ class KotViewModel @Inject constructor(
 
     }
 
-    fun reprint(): ApiResponse<Boolean>{
+    fun reprint(): ApiResponse<Boolean> {
         var data = false
         var msg = ""
         viewModelScope.launch {
@@ -268,8 +300,7 @@ class KotViewModel @Inject constructor(
                         paperWidth = 48
                     )
                     val ip = orderRepository.getIpAddress(category)
-                    orderRepository.printKOT(kotForCategory, ip).collect {
-                        result ->
+                    orderRepository.printKOT(kotForCategory, ip).collect { result ->
                         result.fold(
                             onSuccess = {
                                 data = true
@@ -278,7 +309,8 @@ class KotViewModel @Inject constructor(
                             onFailure = {
                                 data = false
                                 msg = "Failed to print KOT for $category"
-                                _kotActionState.value = KotActionState.Error("Failed to print KOT for $category")
+                                _kotActionState.value =
+                                    KotActionState.Error("Failed to print KOT for $category")
                             }
                         )
                     }
@@ -288,24 +320,25 @@ class KotViewModel @Inject constructor(
         return ApiResponse(data = data, message = msg, success = true)
     }
 
-    fun modify():ApiResponse<Boolean>{
+    fun modify(): ApiResponse<Boolean> {
         var data = false
         var msg = ""
         val orderItems = _billedItems.value.entries.map { (menuItem, quantity) ->
-            val id = _orderDetails.value.filter { it.menuItem.menu_item_id == menuItem.menu_item_id }
+            val id =
+                _orderDetails.value.filter { it.menuItem.menu_item_id == menuItem.menu_item_id }
             OrderItem(
                 quantity = quantity,
                 menuItem = menuItem,
                 orderDetailsId = id.first().order_details_id
             )
         }
-        val table= _kot.value?.table_name?:""
+        val table = _kot.value?.table_name ?: ""
         viewModelScope.launch {
             orderRepository.updateOrderDetails(
-                orderId=_kot.value?.order_master_id,
-                items=orderItems,
-                kotNumber=_kot.value?.kot_number?.toInt() ?:0,
-                tableStatus= if (table!="--") "TAKEAWAY" else "TABLE"
+                orderId = _kot.value?.order_master_id,
+                items = orderItems,
+                kotNumber = _kot.value?.kot_number?.toInt() ?: 0,
+                tableStatus = if (table != "--") "TAKEAWAY" else "TABLE"
             ).collect { result ->
                 result.fold(
                     onSuccess = { order ->
@@ -338,17 +371,19 @@ class KotViewModel @Inject constructor(
                                     paperWidth = 48
                                 )
                                 val ip = orderRepository.getIpAddress(category)
-                                orderRepository.printKOT(kotForCategory, ip).collect {
-                                    result ->
+                                orderRepository.printKOT(kotForCategory, ip).collect { result ->
                                     result.fold(
                                         onSuccess = {
                                             data = true
-                                            msg = "Order Modified and KOT Printed Successfully for $category"
+                                            msg =
+                                                "Order Modified and KOT Printed Successfully for $category"
                                         },
                                         onFailure = {
                                             data = false
-                                            msg = "Order Modified but Failed to print KOT for $category"
-                                            _kotActionState.value = KotActionState.Error("Failed to print KOT for $category")
+                                            msg =
+                                                "Order Modified but Failed to print KOT for $category"
+                                            _kotActionState.value =
+                                                KotActionState.Error("Failed to print KOT for $category")
                                         }
                                     )
                                 }

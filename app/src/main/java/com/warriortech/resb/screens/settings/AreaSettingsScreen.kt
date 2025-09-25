@@ -1,11 +1,5 @@
 package com.warriortech.resb.screens.settings
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DomainAdd
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.components.MobileOptimizedCard
@@ -32,18 +24,6 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.AreaViewModel
 import com.warriortech.resb.model.Area
 import kotlinx.coroutines.launch
-
-/**
- * Screen for managing areas in the application.
- * This screen allows users to view, add, edit, and delete areas.
- * It uses a [Scaffold] to provide a top app bar and a snackbar for messages.
- * The areas are displayed in a [LazyColumn] with each area represented by an [AreaCard].
- * The user can add a new area using an [AddAreaDialog] and edit existing areas with an [EditAreaDialog].
- * Handles loading states and displays progress indicators when necessary.
- * Messages are shown using a [SnackbarHost] to inform the user of success or error states.
- * @param onBackPressed Callback to handle back navigation.
- * @param viewModel The [AreaViewModel] instance to manage the area data.
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,8 +57,10 @@ fun AreaSettingsScreen(
                 title = { Text("Area Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -86,8 +68,10 @@ fun AreaSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Area",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Area",
+                            tint = SurfaceLight
+                        )
                     }
                 },
             )
@@ -183,7 +167,6 @@ fun AreaCard(
         }
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)

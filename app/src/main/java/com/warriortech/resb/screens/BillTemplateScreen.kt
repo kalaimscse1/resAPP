@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.warriortech.resb.model.*
 import com.warriortech.resb.ui.theme.GradientStart
@@ -71,9 +70,9 @@ fun BillTemplateScreen(
             )
         }
     ) { paddingValues ->
-       Column(modifier = Modifier.padding(paddingValues)) {
+        Column(modifier = Modifier.padding(paddingValues)) {
 
-       }
+        }
     }
 
     // Preview Dialog

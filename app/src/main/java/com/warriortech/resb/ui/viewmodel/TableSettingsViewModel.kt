@@ -30,20 +30,20 @@ class TableSettingsViewModel @Inject constructor(
                 _uiState.value = TableSettingsUiState.Loading
                 val tables = tableRepository.getAllTables()
                 val areas = tableRepository.getAllAreas()
-                _area.value= areas
+                _area.value = areas
                 tables.collect { result ->
                     result.map {
-                            Table(
-                                table_id = it.table_id,
-                                table_name = it.table_name,
-                                area_id = it.area_id,
-                                area_name = it.area_name,
-                                seating_capacity = it.seating_capacity,
-                                is_ac = it.is_ac,
-                                table_status = it.table_status,
-                                table_availability = it.table_availability,
-                                is_active = it.is_active
-                            )
+                        Table(
+                            table_id = it.table_id,
+                            table_name = it.table_name,
+                            area_id = it.area_id,
+                            area_name = it.area_name,
+                            seating_capacity = it.seating_capacity,
+                            is_ac = it.is_ac,
+                            table_status = it.table_status,
+                            table_availability = it.table_availability,
+                            is_active = it.is_active
+                        )
                     }.let { list ->
                         _uiState.value = TableSettingsUiState.Success(tables = list)
                     }
@@ -63,10 +63,11 @@ class TableSettingsViewModel @Inject constructor(
                     return@launch
                 }
                 if (table.seating_capacity <= 0) {
-                    _uiState.value = TableSettingsUiState.Error("Seating capacity must be greater than 0")
+                    _uiState.value =
+                        TableSettingsUiState.Error("Seating capacity must be greater than 0")
                     return@launch
                 }
-                
+
                 tableRepository.insertTable(table)
                 loadTables()
             } catch (e: Exception) {
@@ -74,7 +75,6 @@ class TableSettingsViewModel @Inject constructor(
             }
         }
     }
-
 
 
     fun updateTable(table: TblTable) {
@@ -86,10 +86,11 @@ class TableSettingsViewModel @Inject constructor(
                     return@launch
                 }
                 if (table.seating_capacity <= 0) {
-                    _uiState.value = TableSettingsUiState.Error("Seating capacity must be greater than 0")
+                    _uiState.value =
+                        TableSettingsUiState.Error("Seating capacity must be greater than 0")
                     return@launch
                 }
-                
+
                 tableRepository.updateTable(table)
                 loadTables()
             } catch (e: Exception) {

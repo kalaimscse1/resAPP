@@ -28,7 +28,8 @@ class LocaleViewModel @Inject constructor(
     val isRTL: StateFlow<Boolean> = _isRTL.asStateFlow()
 
     private val _availableLanguages = MutableStateFlow(LocaleHelper.getAvailableLanguages())
-    val availableLanguages: StateFlow<List<Pair<String, String>>> = _availableLanguages.asStateFlow()
+    val availableLanguages: StateFlow<List<Pair<String, String>>> =
+        _availableLanguages.asStateFlow()
 
     fun changeLanguage(language: String) {
         viewModelScope.launch {

@@ -1,4 +1,3 @@
-
 package com.warriortech.resb.screens.settings
 
 import androidx.compose.foundation.layout.*
@@ -19,7 +18,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.MenuCategory
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.ModifierSettingsViewModel
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
@@ -50,16 +48,19 @@ fun ModifierSettingsScreen(
                 title = { Text("Modifier Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { 
+                    IconButton(onClick = {
                         showAddDialog = true
                         viewModel.loadCategories()
                     }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Modifier",
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Modifier",
                             tint = SurfaceLight
                         )
                     }
@@ -72,53 +73,55 @@ fun ModifierSettingsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-            when (val state = uiState) {
-                is ModifierSettingsUiState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+        when (val state = uiState) {
+            is ModifierSettingsUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
-                is ModifierSettingsUiState.Success -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.modifiers) { modifier ->
-                            ModifierCard(
-                                modifier = modifier,
-                                categories = categories,
-                                onEdit = { 
-                                    editingModifier = modifier
-                                    viewModel.loadCategories()
-                                },
-                                onDelete = { 
-                                    scope.launch {
-                                        viewModel.deleteModifier(modifier.add_on_id)
-                                        snackbarHostState.showSnackbar("Modifier deleted")
-                                    }
+            }
+
+            is ModifierSettingsUiState.Success -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(state.modifiers) { modifier ->
+                        ModifierCard(
+                            modifier = modifier,
+                            categories = categories,
+                            onEdit = {
+                                editingModifier = modifier
+                                viewModel.loadCategories()
+                            },
+                            onDelete = {
+                                scope.launch {
+                                    viewModel.deleteModifier(modifier.add_on_id)
+                                    snackbarHostState.showSnackbar("Modifier deleted")
                                 }
-                            )
-                        }
-                    }
-                }
-                is ModifierSettingsUiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
+                            }
                         )
                     }
                 }
             }
+
+            is ModifierSettingsUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
 
         if (showAddDialog) {
             ModifierDialog(
@@ -159,8 +162,9 @@ fun ModifierCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val categoryName = categories.find { it.item_cat_id == modifier.item_cat_id }?.item_cat_name ?: "Unknown"
-    
+    val categoryName =
+        categories.find { it.item_cat_id == modifier.item_cat_id }?.item_cat_name ?: "Unknown"
+
     MobileOptimizedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -199,7 +203,7 @@ fun ModifierCard(
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
-                        Icons.Default.Delete, 
+                        Icons.Default.Delete,
                         contentDescription = "Delete",
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -249,12 +253,15 @@ fun ModifierDialog(
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
-                        value = categories.find { it.item_cat_id == selectedCategoryId }?.item_cat_name ?: "Select Category",
+                        value = categories.find { it.item_cat_id == selectedCategoryId }?.item_cat_name
+                            ?: "Select Category",
                         onValueChange = { },
                         readOnly = true,
                         label = { Text("Category") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,

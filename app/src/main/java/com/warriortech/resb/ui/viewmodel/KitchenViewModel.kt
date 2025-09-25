@@ -32,7 +32,7 @@ class KitchenViewModel @Inject constructor(
     fun loadKOTs() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            
+
             kitchenRepository.getKitchenKOTs().collect { result ->
                 result.fold(
                     onSuccess = { kots ->

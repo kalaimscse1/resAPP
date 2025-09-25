@@ -10,7 +10,7 @@ data class Modifiers(
 
 data class SaleModifiers(
     val sale_add_on_id: Long = 0,
-    val order_master_id :Long,
+    val order_master_id: Long,
     val item_add_on_id: Long,
     val menu_item_id: Long,
     val status: Boolean,

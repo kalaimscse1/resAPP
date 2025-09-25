@@ -28,7 +28,7 @@ fun PaymentModePieChart(
     modifier: Modifier = Modifier
 ) {
     val total = data.sumOf { it.amount }
-    
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -44,7 +44,7 @@ fun PaymentModePieChart(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -55,10 +55,12 @@ fun PaymentModePieChart(
                 ) {
                     drawPieChart(data, total)
                 }
-                
+
                 // Legend
                 Column(
-                    modifier = Modifier.weight(1f).padding(start = 16.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     data.forEach { item ->
@@ -113,10 +115,10 @@ fun DrawScope.drawPieChart(data: List<PaymentModeData>, total: Double) {
     val center = Offset(size.width / 2, size.height / 2)
     val radius = size.minDimension / 2.5f
     var currentAngle = -90f
-    
+
     data.forEach { item ->
         val sweepAngle = (item.amount / total * 360).toFloat()
-        
+
         drawArc(
             color = item.color,
             startAngle = currentAngle,
@@ -125,7 +127,7 @@ fun DrawScope.drawPieChart(data: List<PaymentModeData>, total: Double) {
             topLeft = Offset(center.x - radius, center.y - radius),
             size = Size(radius * 2, radius * 2)
         )
-        
+
         currentAngle += sweepAngle
     }
 }
@@ -136,7 +138,7 @@ fun WeeklySalesBarChart(
     modifier: Modifier = Modifier
 ) {
     val maxAmount = data.maxOfOrNull { it.amount } ?: 1.0
-    
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -152,7 +154,7 @@ fun WeeklySalesBarChart(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

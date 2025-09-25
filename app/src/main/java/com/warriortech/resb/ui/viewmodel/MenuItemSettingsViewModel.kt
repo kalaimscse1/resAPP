@@ -2,7 +2,6 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.data.repository.KitchenRepository
 import com.warriortech.resb.data.repository.MenuCategoryRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.data.repository.MenuRepository
@@ -10,10 +9,8 @@ import com.warriortech.resb.data.repository.TaxRepository
 import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.Menu
 import com.warriortech.resb.model.MenuCategory
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblMenuItemRequest
-import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
@@ -34,7 +31,8 @@ class MenuItemSettingsViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<MenuItemSettingsUiState>(MenuItemSettingsUiState.Loading)
+    private val _uiState =
+        MutableStateFlow<MenuItemSettingsUiState>(MenuItemSettingsUiState.Loading)
     val uiState: StateFlow<MenuItemSettingsUiState> = _uiState.asStateFlow()
 
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
@@ -54,9 +52,13 @@ class MenuItemSettingsViewModel @Inject constructor(
 
 
     init {
-        CurrencySettings.update(symbol = sessionManager.getRestaurantProfile()?.currency?:"", decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2)
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
 
     }
+
     fun loadMenuItems() {
         viewModelScope.launch {
             try {
@@ -88,7 +90,8 @@ class MenuItemSettingsViewModel @Inject constructor(
                 menuItemRepository.insertMenuItem(menuItem)
                 loadMenuItems()
             } catch (e: Exception) {
-                _uiState.value = MenuItemSettingsUiState.Error(e.message ?: "Failed to add menu item")
+                _uiState.value =
+                    MenuItemSettingsUiState.Error(e.message ?: "Failed to add menu item")
             }
         }
     }
@@ -99,7 +102,8 @@ class MenuItemSettingsViewModel @Inject constructor(
                 menuItemRepository.updateMenuItem(menuItem)
                 loadMenuItems()
             } catch (e: Exception) {
-                _uiState.value = MenuItemSettingsUiState.Error(e.message ?: "Failed to update menu item")
+                _uiState.value =
+                    MenuItemSettingsUiState.Error(e.message ?: "Failed to update menu item")
             }
         }
     }
@@ -107,16 +111,18 @@ class MenuItemSettingsViewModel @Inject constructor(
     fun deleteMenuItem(menuItemId: Int) {
         viewModelScope.launch {
             try {
-                val response=menuItemRepository.deleteMenuItem(menuItemId)
+                val response = menuItemRepository.deleteMenuItem(menuItemId)
                 if (response.isSuccessful) {
                     loadMenuItems()
-                }
-                else{
-                    _uiState.value = MenuItemSettingsUiState.Error(response.message() ?: "Failed to delete menu item")
+                } else {
+                    _uiState.value = MenuItemSettingsUiState.Error(
+                        response.message() ?: "Failed to delete menu item"
+                    )
                 }
 
             } catch (e: Exception) {
-                _uiState.value = MenuItemSettingsUiState.Error(e.message ?: "Failed to delete menu item")
+                _uiState.value =
+                    MenuItemSettingsUiState.Error(e.message ?: "Failed to delete menu item")
             }
         }
     }

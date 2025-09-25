@@ -2,7 +2,6 @@ package com.warriortech.resb.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.warriortech.resb.data.repository.AreaRepository
 import com.warriortech.resb.data.repository.CounterRepository
 import com.warriortech.resb.data.repository.RoleRepository
 import com.warriortech.resb.data.repository.StaffRepository
@@ -58,9 +57,9 @@ class StaffViewModel @Inject constructor(
                 val areas = areaRepository.getAllAreas()
                 val roles = roleRepository.getAllRoles()
                 val counters = counterRepository.getAllCounters()
-                _area.value= areas
-                _role.value= roles
-                _counter.value= counters
+                _area.value = areas
+                _role.value = roles
+                _counter.value = counters
                 _uiState.value = _uiState.value.copy(
                     staff = staff,
                     isLoading = false
@@ -74,7 +73,7 @@ class StaffViewModel @Inject constructor(
         }
     }
 
-    fun addStaff(staff  :TblStaffRequest) {
+    fun addStaff(staff: TblStaffRequest) {
         viewModelScope.launch {
             try {
 //                val staff = TblStaffRequest(

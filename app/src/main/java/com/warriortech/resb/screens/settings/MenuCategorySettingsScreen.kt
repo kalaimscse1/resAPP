@@ -17,7 +17,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuCategorySettingsViewModel
@@ -45,8 +44,10 @@ fun MenuCategorySettingsScreen(
                 title = { Text("MenuCategory Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -54,8 +55,10 @@ fun MenuCategorySettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add MenuCategory",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add MenuCategory",
+                            tint = SurfaceLight
+                        )
                     }
                 }
             )
@@ -63,30 +66,32 @@ fun MenuCategorySettingsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
 
-            when (val state=uiState) {
-                is MenuCategorySettingsViewModel.UiState.Loading -> {
+        when (val state = uiState) {
+            is MenuCategorySettingsViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is MenuCategorySettingsViewModel.UiState.Success -> {
+                if (state.categories.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text("No categories found", style = MaterialTheme.typography.bodyLarge)
                     }
-                }
-
-                is MenuCategorySettingsViewModel.UiState.Success -> {
-                    if (state.categories.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No categories found", style = MaterialTheme.typography.bodyLarge)
-                        }
-                    }else{
-                    LazyColumn(modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         items(state.categories) { category ->
                             CategoryCard(
                                 category = category,
@@ -99,16 +104,16 @@ fun MenuCategorySettingsScreen(
                             )
                         }
                     }
-                  }
-                }
-
-                is MenuCategorySettingsViewModel.UiState.Error -> {
-                    Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error
-                    )
                 }
             }
+
+            is MenuCategorySettingsViewModel.UiState.Error -> {
+                Text(
+                    text = state.message,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
 
 
         if (showAddDialog) {
@@ -185,10 +190,10 @@ fun CategoryDialog(
     ReusableBottomSheet(
         onDismiss = onDismiss,
         title = if (category == null) "Add Category" else "Edit Category",
-        onSave = {  onConfirm(name, orderBy, isActive) },
+        onSave = { onConfirm(name, orderBy, isActive) },
         isSaveEnabled = name.isNotBlank(),
         buttonText = if (category == null) "Add" else "Update"
-    ){
+    ) {
         Column {
             OutlinedTextField(
                 value = name,

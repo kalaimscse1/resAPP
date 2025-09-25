@@ -23,7 +23,6 @@ import com.warriortech.resb.ui.viewmodel.OrderScreenViewModel
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.theme.Black
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.LightGreen
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
@@ -123,7 +122,7 @@ fun OrderScreen(
                             // Handle order click
                             val orderId = order.orderId
                             viewModel.getOrdersByOrderId(orderId)
-                            onNavigateToBilling(tblOrderDetailsResponse,orderId)
+                            onNavigateToBilling(tblOrderDetailsResponse, orderId)
                         }
                     )
                 }
@@ -139,7 +138,7 @@ fun OrderScreen(
                             // Handle order click
                             val orderId = order.orderId
                             viewModel.getOrdersByOrderId(orderId)
-                            onNavigateToBilling(tblOrderDetailsResponse,orderId)
+                            onNavigateToBilling(tblOrderDetailsResponse, orderId)
                         }
 
                     )
@@ -156,7 +155,7 @@ fun OrderScreen(
                             // Handle order click
                             val orderId = order.orderId
                             viewModel.getOrdersByOrderId(orderId)
-                            onNavigateToBilling(tblOrderDetailsResponse,orderId)
+                            onNavigateToBilling(tblOrderDetailsResponse, orderId)
                         }
                     )
                 }
@@ -164,7 +163,6 @@ fun OrderScreen(
         }
     }
 }
-
 
 
 @Composable
@@ -226,7 +224,6 @@ private fun OrderSection(
                 orders.forEach { order ->
                     OrderItem(
                         order = order,
-                        contentColor = SurfaceLight,
                         onClick = { onOrderClick(order) }
                     )
                     if (order != orders.last()) {
@@ -251,7 +248,6 @@ private fun OrderSection(
 @Composable
 private fun OrderItem(
     order: OrderDisplayItem,
-    contentColor: Color,
     onClick: () -> Unit
 ) {
     Card(
@@ -260,7 +256,7 @@ private fun OrderItem(
         colors = CardDefaults.cardColors(
             containerColor = ghostWhite
         ),
-        onClick= onClick
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

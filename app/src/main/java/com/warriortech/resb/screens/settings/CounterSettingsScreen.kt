@@ -14,7 +14,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.TblCounter
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.viewmodel.CounterSettingsViewModel
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -49,8 +48,11 @@ fun CounterSettingsScreen(
                 title = { Text(stringResource(R.string.counter_settings), color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back),
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -58,91 +60,99 @@ fun CounterSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.add_counter),
-                            tint = SurfaceLight)}
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.add_counter),
+                            tint = SurfaceLight
+                        )
+                    }
                 }
             )
         }
     ) { paddingValues ->
 
-            when (val state = uiState) {
-                is CounterSettingsViewModel.UiState.Loading -> {
+        when (val state = uiState) {
+            is CounterSettingsViewModel.UiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is CounterSettingsViewModel.UiState.Success -> {
+                if (state.counters.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Text(
+                            text = "No counters available",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
-                }
-                is CounterSettingsViewModel.UiState.Success -> {
-                    if (state.counters.isEmpty()){
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "No counters available", style = MaterialTheme.typography.bodyLarge)
-                        }
-                    }else
-                    {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.counters) { counter ->
-                                CounterItem(
-                                    counter = counter,
-                                    onEdit = {
-                                        editingCounter = counter
-                                        showAddDialog = true
-                                    },
-                                    onDelete = {
-                                        scope.launch {
-                                            viewModel.deleteCounter(counter.counter_id)
-                                            snackbarHostState.showSnackbar("Tax deleted")
-                                        }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.counters) { counter ->
+                            CounterItem(
+                                counter = counter,
+                                onEdit = {
+                                    editingCounter = counter
+                                    showAddDialog = true
+                                },
+                                onDelete = {
+                                    scope.launch {
+                                        viewModel.deleteCounter(counter.counter_id)
+                                        snackbarHostState.showSnackbar("Tax deleted")
                                     }
-                                )
-                            }
+                                }
+                            )
                         }
-                    }
-                }
-                is CounterSettingsViewModel.UiState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = state.message)
                     }
                 }
             }
 
-            if (showAddDialog || editingCounter != null) {
-                AddEditCounterDialog(
-                    counter = editingCounter,
-                    onDismissRequest = {
-                        showAddDialog = false
-                        editingCounter = null
-                    },
-                    onSave = { newCounter ->
-                        if (editingCounter == null) {
-                            scope.launch {
-                                viewModel.addCounter(newCounter)
-                                snackbarHostState.showSnackbar("Counter added successfully")
-                            }
-                        } else {
-                            scope.launch {
-                                viewModel.updateCounter(newCounter)
-                                snackbarHostState.showSnackbar("Counter updated successfully")
-                            }
-                        }
-                        showAddDialog = false
-                        editingCounter = null
-                    }
-                )
+            is CounterSettingsViewModel.UiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = state.message)
+                }
             }
+        }
+
+        if (showAddDialog || editingCounter != null) {
+            AddEditCounterDialog(
+                counter = editingCounter,
+                onDismissRequest = {
+                    showAddDialog = false
+                    editingCounter = null
+                },
+                onSave = { newCounter ->
+                    if (editingCounter == null) {
+                        scope.launch {
+                            viewModel.addCounter(newCounter)
+                            snackbarHostState.showSnackbar("Counter added successfully")
+                        }
+                    } else {
+                        scope.launch {
+                            viewModel.updateCounter(newCounter)
+                            snackbarHostState.showSnackbar("Counter updated successfully")
+                        }
+                    }
+                    showAddDialog = false
+                    editingCounter = null
+                }
+            )
+        }
 
     }
 }
@@ -219,7 +229,7 @@ fun CounterItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column{
+            Column {
                 Text(
                     text = "Counter : ${counter.counter_name}",
                     style = MaterialTheme.typography.titleMedium,

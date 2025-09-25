@@ -30,7 +30,8 @@ class VoucherTypeSettingsViewModel @Inject constructor(
             try {
                 _uiState.value = UiState.Loading
                 val voucherTypes = voucherTypeRepository.getAllVoucherTypes()
-                _uiState.value = UiState.Success(voucherTypes.filter { it.voucher_type_name != "--" })
+                _uiState.value =
+                    UiState.Success(voucherTypes.filter { it.voucher_type_name != "--" })
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Unknown error")
             }

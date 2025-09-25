@@ -34,20 +34,25 @@ fun LanguageSettingsScreen(
     var selectedLanguage by remember { mutableStateOf(LocaleHelper.getLanguage(context)) }
     var showConfirmDialog by remember { mutableStateOf(false) }
     var pendingLanguage by remember { mutableStateOf("") }
-    
+
     val availableLanguages = remember { LocaleHelper.getAvailableLanguages() }
     val currentLocale = remember { LocaleHelper.getCurrentLocale(context) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.language_settings),
-                    color = SurfaceLight
-                ) },
+                title = {
+                    Text(
+                        stringResource(R.string.language_settings),
+                        color = SurfaceLight
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

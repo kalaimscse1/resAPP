@@ -25,9 +25,6 @@ import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.screens.settings.UnitSettingsScreen
-import com.warriortech.resb.screens.settings.KitchenCategorySettingsScreen
-import com.warriortech.resb.screens.settings.VoucherTypeSettingsScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,12 +40,12 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        if (selectedModule != null) selectedModule!!.title 
+                        if (selectedModule != null) selectedModule!!.title
                         else "Settings",
                         color = SurfaceLight
-                    ) 
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -91,35 +88,35 @@ fun SettingsMainScreen(
     onModuleSelected: (SettingsModule) -> Unit,
     sessionManager: SessionManager
 ) {
-    val role = sessionManager.getUser()?.role?:""
+    val role = sessionManager.getUser()?.role ?: ""
     val settingsModules = remember {
-        if(role == "RESBADMIN")
-        listOf(
+        if (role == "RESBADMIN")
+            listOf(
 //            SettingsModule.Area,
 //            SettingsModule.Table,
 //            SettingsModule.Menu,
 //            SettingsModule.MenuCategory,
 //            SettingsModule.MenuItem,
-            SettingsModule.Customer,
-            SettingsModule.Staff,
-            SettingsModule.Role,
-            SettingsModule.Printer,
-            SettingsModule.Tax,
-            SettingsModule.TaxSplit,
-            SettingsModule.Unit,
-            SettingsModule.KitchenCategory,
-            SettingsModule.VoucherType,
-                        SettingsModule.RestaurantProfile,
-                        SettingsModule.GeneralSettings,
-                        SettingsModule.CreateVoucher,
-                        SettingsModule.Counter,
-            SettingsModule.Language,
-            SettingsModule.PrinterSetting,
-            SettingsModule.Modifiers,
-            SettingsModule.ChangePassword,
+                SettingsModule.Customer,
+                SettingsModule.Staff,
+                SettingsModule.Role,
+                SettingsModule.Printer,
+                SettingsModule.Tax,
+                SettingsModule.TaxSplit,
+                SettingsModule.Unit,
+                SettingsModule.KitchenCategory,
+                SettingsModule.VoucherType,
+                SettingsModule.RestaurantProfile,
+                SettingsModule.GeneralSettings,
+                SettingsModule.CreateVoucher,
+                SettingsModule.Counter,
+                SettingsModule.Language,
+                SettingsModule.PrinterSetting,
+                SettingsModule.Modifiers,
+                SettingsModule.ChangePassword,
 //            SettingsModule.Support,
-            SettingsModule.ResetData
-        )
+                SettingsModule.ResetData
+            )
         else
             listOf(
 //                SettingsModule.Area,
@@ -229,7 +226,7 @@ fun SettingsModuleScreen(
 ) {
     when (module) {
         is SettingsModule.Area -> {
-           navController.navigate("area_setting")
+            navController.navigate("area_setting")
         }
 
         is SettingsModule.Table -> {
@@ -237,7 +234,7 @@ fun SettingsModuleScreen(
         }
 
         is SettingsModule.MenuItem -> {
-           navController.navigate("menu_item_setting")
+            navController.navigate("menu_item_setting")
         }
 
         is SettingsModule.Menu -> {
@@ -255,57 +252,75 @@ fun SettingsModuleScreen(
         is SettingsModule.Staff -> {
             navController.navigate("staff_setting")
         }
+
         is SettingsModule.Role -> {
             navController.navigate("role_setting")
         }
+
         is SettingsModule.Printer -> {
             navController.navigate("printer_setting")
         }
+
         is SettingsModule.Tax -> {
             navController.navigate("tax_setting")
         }
+
         is SettingsModule.TaxSplit -> {
             navController.navigate("tax_split_setting")
         }
+
         is SettingsModule.RestaurantProfile -> {
             navController.navigate("restaurant_profile_setting")
         }
+
         is SettingsModule.GeneralSettings -> {
             navController.navigate("general_settings")
         }
+
         is SettingsModule.CreateVoucher -> {
             navController.navigate("voucher_setting")
         }
+
         is SettingsModule.Counter -> {
             navController.navigate("counter_setting")
         }
+
         is SettingsModule.Language -> {
             navController.navigate("language_setting")
         }
+
         is SettingsModule.PrinterSetting -> {
             navController.navigate("template_screen")
         }
+
         is SettingsModule.Modifiers -> {
             navController.navigate("modifier_setting")
         }
+
         is SettingsModule.Unit -> {
             navController.navigate("unit_setting")
         }
+
         is SettingsModule.KitchenCategory -> {
             navController.navigate("kitchen_category_setting")
         }
+
         is SettingsModule.VoucherType -> {
             navController.navigate("voucher_type_setting")
         }
+
         is SettingsModule.ChangePassword -> {
             navController.navigate("change_password")
         }
+
         is SettingsModule.ChangeCompany -> {
             navController.navigate("change_company")
         }
+
         is SettingsModule.Support -> {
             navController.navigate("support_screen")
         }
+
         is SettingsModule.ResetData -> {
             navController.navigate("reset_data")
         }
@@ -324,7 +339,7 @@ sealed class SettingsModule(
         "Area",
         "Manage dining areas and zones",
         Icons.Default.LocationOn,
-        listOf("name","status")
+        listOf("name", "status")
     )
 
     object ChangeCompany : SettingsModule(
@@ -335,13 +350,14 @@ sealed class SettingsModule(
         listOf("company_id")
     )
 
-    object ChangePassword: SettingsModule(
+    object ChangePassword : SettingsModule(
         "change_password",
         "Change Password",
         "Manage Password",
         Icons.Default.ChangeCircle,
-        listOf("oldPassword","newPassword","ConfirmPassword")
+        listOf("oldPassword", "newPassword", "ConfirmPassword")
     )
+
     object Table : SettingsModule(
         "table",
         "Table",
@@ -421,7 +437,8 @@ sealed class SettingsModule(
         Icons.Default.CallSplit,
         listOf("name", "description", "split_type", "percentage")
     )
-        object RestaurantProfile : SettingsModule(
+
+    object RestaurantProfile : SettingsModule(
         "restaurant_profile",
         "Restaurant Profile",
         "Manage restaurant profile",
@@ -452,6 +469,7 @@ sealed class SettingsModule(
         Icons.Default.PointOfSale,
         listOf("name")
     )
+
     object Language : SettingsModule(
         "language",
         "Language",
@@ -459,6 +477,7 @@ sealed class SettingsModule(
         Icons.Default.Language,
         listOf("name", "code")
     )
+
     object PrinterSetting : SettingsModule(
         "printer_setting",
         "Receipt Template",
@@ -466,6 +485,7 @@ sealed class SettingsModule(
         Icons.Default.Kitchen,
         listOf("name", "ip_address", "port", "type", "location")
     )
+
     object Modifiers : SettingsModule(
         "modifiers",
         "Modifiers",
@@ -473,6 +493,7 @@ sealed class SettingsModule(
         Icons.Default.Add,
         listOf("name", "price", "category")
     )
+
     object Unit : SettingsModule(
         "unit",
         "Unit",
@@ -480,6 +501,7 @@ sealed class SettingsModule(
         Icons.Default.Scale,
         listOf("name", "is_active")
     )
+
     object KitchenCategory : SettingsModule(
         "kitchen_category",
         "Kitchen Category",
@@ -487,6 +509,7 @@ sealed class SettingsModule(
         Icons.Default.Kitchen,
         listOf("name", "is_active")
     )
+
     object VoucherType : SettingsModule(
         "voucher_type",
         "Voucher Type",
@@ -494,6 +517,7 @@ sealed class SettingsModule(
         Icons.Default.Category,
         listOf("name", "is_active")
     )
+
     object Support : SettingsModule(
         "support",
         "Help & Support",
@@ -501,6 +525,7 @@ sealed class SettingsModule(
         Icons.Default.Help,
         listOf("tutorials", "documentation")
     )
+
     object ResetData : SettingsModule(
         "reset_data",
         "Reset Data",

@@ -45,8 +45,10 @@ fun VoucherTypeSettingsScreen(
                 title = { Text("Voucher Type Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            tint = SurfaceLight
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -54,8 +56,10 @@ fun VoucherTypeSettingsScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Voucher Type",
-                            tint = SurfaceLight)
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Voucher Type",
+                            tint = SurfaceLight
+                        )
                     }
                 }
             )
@@ -71,13 +75,17 @@ fun VoucherTypeSettingsScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is VoucherTypeSettingsViewModel.UiState.Success -> {
                 if (state.voucherTypes.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No voucher types available", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "No voucher types available",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 } else {
                     LazyColumn(
@@ -105,6 +113,7 @@ fun VoucherTypeSettingsScreen(
                     }
                 }
             }
+
             is VoucherTypeSettingsViewModel.UiState.Error -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
