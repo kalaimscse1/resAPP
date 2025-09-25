@@ -272,96 +272,107 @@ fun MenuScreen(
             )
         },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(PrimaryGreen, SecondaryGreen)
-                        ),
-                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                    )
-                    .padding(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+//            BottomAppBar(
+//                containerColor = PrimaryGreen,
+//                contentColor = SurfaceLight,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .heightIn(min = 80.dp)
+//            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(PrimaryGreen, SecondaryGreen)
+                            ),
+                            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                        )
+                        .padding(12.dp)
                 ) {
-                    val newItemCount =
-                        if (viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
-                    val existingItemCount =
-                        if (viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
-                    val totalItemCount = newItemCount + existingItemCount
-                    val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
-                    val newTotalAmount = viewModel.getOrderNewTotal(effectiveStatus.toString())
-                    // 🔹 Row 1: Order Summary
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column {
-                            if (viewModel.isExistingOrderLoaded.value) {
+                        val newItemCount =
+                            if (viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
+                        val existingItemCount =
+                            if (viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
+                        val totalItemCount = newItemCount + existingItemCount
+                        val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
+                        val newTotalAmount = viewModel.getOrderNewTotal(effectiveStatus.toString())
+                        // 🔹 Row 1: Order Summary
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                if (viewModel.isExistingOrderLoaded.value) {
+                                    Text(
+                                        text = "Existing: $existingItemCount | New: $newItemCount",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        modifier = Modifier.clickable { showOrderDialog = true }
+                                    )
+                                }
                                 Text(
-                                    text = "Existing: $existingItemCount | New: $newItemCount",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.8f),
-                                    modifier = Modifier.clickable { showOrderDialog = true }
+                                    text = "Total Items: $totalItemCount",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White
                                 )
                             }
-                            Text(
-                                text = "Total Items: $totalItemCount",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
-                            )
-                        }
-                        Column {
-                            if (viewModel.isExistingOrderLoaded.value) {
+                            Column {
+                                if (viewModel.isExistingOrderLoaded.value) {
+                                    Text(
+                                        text = "Existing Total: ${
+                                            CurrencySettings.format(
+                                                totalAmount
+                                            )
+                                        }",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
                                 Text(
-                                    text = "Existing Total: ${CurrencySettings.format(totalAmount)}",
+                                    text = if (viewModel.isExistingOrderLoaded.value) "New Total: ${
+                                        CurrencySettings.format(
+                                            newTotalAmount
+                                        )
+                                    }" else
+                                        "Total: ${CurrencySettings.format(totalAmount)}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
                             }
-                            Text(
-                                text = if (viewModel.isExistingOrderLoaded.value) "New Total: ${
-                                    CurrencySettings.format(
-                                        newTotalAmount
-                                    )
-                                }" else
-                                    "Total: ${CurrencySettings.format(totalAmount)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
                         }
-                    }
 
-                    // 🔹 Row 2: Action Buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (viewModel.isExistingOrderLoaded.value) {
-                            if (sessionManager.getUser()?.role == "ADMIN" || sessionManager.getUser()?.role == "CASHIER") {
-                                MobileOptimizedButton(
-                                    onClick = {
-                                        navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
-                                            launchSingleTop = true
-                                        }
-                                        onBillPlaced(
-                                            viewModel.orderDetailsResponse.value,
-                                            viewModel.existingOrderId.value ?: ""
-                                        )
-                                    },
-                                    text = "Bill",
-                                    enabled = selectedItems.isNotEmpty(),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(48.dp)
-                                )
+                        // 🔹 Row 2: Action Buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (viewModel.isExistingOrderLoaded.value) {
+                                if (sessionManager.getUser()?.role == "ADMIN" || sessionManager.getUser()?.role == "CASHIER") {
+                                    MobileOptimizedButton(
+                                        onClick = {
+                                            navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
+                                                launchSingleTop = true
+                                            }
+                                            onBillPlaced(
+                                                viewModel.orderDetailsResponse.value,
+                                                viewModel.existingOrderId.value ?: ""
+                                            )
+                                        },
+                                        text = "Bill",
+                                        enabled = selectedItems.isNotEmpty(),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(48.dp)
+                                    )
 //                                MobileOptimizedButton(
 //                                    onClick = {
 //                                        navController.navigate("kot_screen/${viewModel.existingOrderId.value ?: ""}") {
@@ -374,25 +385,26 @@ fun MenuScreen(
 //                                        .weight(1f)
 //                                        .height(48.dp)
 //                                )
+                                }
+                                MobileOptimizedButton(
+                                    onClick = { showConfirmDialog = true },
+                                    enabled = (if (viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                                    text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
+                                    modifier = Modifier.weight(1f)
+                                )
+                            } else {
+                                MobileOptimizedButton(
+                                    onClick = { showConfirmDialog = true },
+                                    text = "Place Order",
+                                    enabled = (selectedItems.isNotEmpty()),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp)
+                                )
                             }
-                            MobileOptimizedButton(
-                                onClick = { showConfirmDialog = true },
-                                enabled = (if (viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
-                                text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
-                                modifier = Modifier.weight(1f)
-                            )
-                        } else {
-                            MobileOptimizedButton(
-                                onClick = { showConfirmDialog = true },
-                                text = "Place Order",
-                                enabled = (selectedItems.isNotEmpty()),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp)
-                            )
                         }
                     }
-                }
+//                }
             }
         },
         snackbarHost = {

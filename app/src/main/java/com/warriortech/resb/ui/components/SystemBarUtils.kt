@@ -3,6 +3,7 @@ package com.warriortech.resb.ui.components
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.Composable
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 
 /**
  * System bar utilities specifically designed for Redmi/MIUI devices
@@ -85,7 +87,7 @@ fun getSafeAreaInsets() = with(LocalDensity.current) {
     object {
         val top = systemBars.getTop(this@with).toDp()
         val bottom = systemBars.getBottom(this@with).toDp()
-        val left = systemBars.getLeft(this@with).toDp()
-        val right = systemBars.getRight(this@with).toDp()
+        val left = systemBars.getLeft(this@with, layoutDirection = LayoutDirection.Ltr ).toDp()
+        val right = systemBars.getRight(this@with, layoutDirection = LayoutDirection.Rtl).toDp()
     }
 }

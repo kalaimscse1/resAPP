@@ -43,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +63,8 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.KotViewModel
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.SuccessDialog
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -83,6 +86,7 @@ fun KotModifyScreen(
     var failed by remember { mutableStateOf(false) }
     var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
     var msg by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(orderMasterId, kotResponse) {
         when {
@@ -139,15 +143,18 @@ fun KotModifyScreen(
                 if (status?.order_status == "RUNNING") {
                     Button(
                         onClick = {
-                            val res = viewModel.modify()
-                            if (res.data == true) {
-                                success = true
-                                msg = res.message
-                            } else {
-                                failed = true
-                                msg = res.message
+                            scope.launch {
+                                val res = viewModel.modify()
+                                if (res.data == true) {
+                                    success = true
+                                    msg = res.message
+                                } else {
+                                    failed = true
+                                    msg = res.message
+                                }
+                                delay(2000)
+                                navController.navigate("kot_report")
                             }
-                            navController.navigate("kot_report")
                         },
                         modifier = Modifier
                             .weight(1f)
@@ -158,7 +165,6 @@ fun KotModifyScreen(
                     ) {
                         Text("Modify", color = SurfaceLight)
                     }
-
                 } else {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -191,7 +197,6 @@ fun KotModifyScreen(
                     ) {
                         CircularProgressIndicator()
                     }
-
                 }
 
                 is KotViewModel.KotActionState.Success -> {
@@ -208,7 +213,6 @@ fun KotModifyScreen(
                         },
                         modifier = Modifier.fillMaxSize()
                     )
-
                 }
 
                 is KotViewModel.KotActionState.Error -> {
@@ -295,13 +299,12 @@ fun KotItemsContent(
                 KotItemRow(
                     menuItem = menuItem,
                     quantity = quantity,
-                    tableStatus = "uiState.tableStatus",
+                    tableStatus = "",
                     currencyFormatter = currencyFormatter,
                     onQuantityChange = { newQuantity ->
                         onUpdateQuantity(menuItem, newQuantity)
                     },
                     onRemoveItem = {
-
                         onRemoveItem(menuItem)
                     }
                 )
@@ -318,7 +321,6 @@ fun KotItemsContent(
                 )
             }
         }
-
         // Subtotal
         item {
             EditableBillingRow(
@@ -327,7 +329,6 @@ fun KotItemsContent(
                 currencyFormatter = currencyFormatter
             )
         }
-
         // Tax (Allow editing if needed)
         item {
             EditableBillingRow(
@@ -354,8 +355,7 @@ fun KotItemsContent(
                 )
             }
         }
-
-//        // Discount (Allow editing)
+        // Discount (Allow editing)
 //        item {
 //            EditableBillingRow(
 //                label = "Discount",
@@ -363,7 +363,6 @@ fun KotItemsContent(
 //                currencyFormatter = currencyFormatter
 //            )
 //        }
-
         // Total
         item {
             ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -461,7 +460,6 @@ fun KotItemRow(
                         )
                     }
                 }
-
                 // Remove item button
                 IconButton(
                     onClick = onRemoveItem,

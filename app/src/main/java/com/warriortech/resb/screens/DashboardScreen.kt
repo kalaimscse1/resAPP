@@ -43,6 +43,7 @@ fun DashboardScreen(
     onNavigateToMenu: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToBilling: () -> Unit,
+    onNavigateToDue: () -> Unit,
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
@@ -160,7 +161,8 @@ fun DashboardScreen(
                         MetricsSection(
                             metrics = state.metrics,
                             onNavigateToOrders = onNavigateToOrders,
-                            onNavigateToBilling = onNavigateToBilling
+                            onNavigateToBilling = onNavigateToBilling,
+                            onNavigateToDue = onNavigateToDue
                         )
                     }
 
@@ -230,7 +232,8 @@ fun DashboardScreen(
 fun MetricsSection(
     metrics: DashboardMetrics,
     onNavigateToOrders: () -> Unit,
-    onNavigateToBilling: () -> Unit
+    onNavigateToBilling: () -> Unit,
+    onNavigateToDue:()-> Unit
 ) {
     Column {
         Text(
@@ -254,7 +257,7 @@ fun MetricsSection(
                 title = "Pending Bills",
                 value = metrics.pendingBills.toString(),
                 color = MaterialTheme.colorScheme.secondary,
-                onClick = onNavigateToBilling
+                onClick = onNavigateToDue
             )
         }
         Spacer(modifier = Modifier.height(8.dp))

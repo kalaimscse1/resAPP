@@ -89,6 +89,11 @@ android {
             ) {
                 outputFileName = "Res-B.apk"
             }
+            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl &&
+                buildType.name == "debug"
+            ) {
+                outputFileName = "Res-B.apk"
+            }
         }
     }
     lint {

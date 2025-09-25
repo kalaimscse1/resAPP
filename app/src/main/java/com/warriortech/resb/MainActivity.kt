@@ -189,12 +189,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Enable edge-to-edge display for proper system bar handling
-        enableEdgeToEdge()
-        
-        // Configure window for edge-to-edge display (important for Redmi/MIUI devices)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        
+//        // Enable edge-to-edge display for proper system bar handling
+//        enableEdgeToEdge()
+//
+//        // Configure window for edge-to-edge display (important for Redmi/MIUI devices)
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
+//
         val sessionManager = SessionManager(this)
         // Initialize sync when app starts
         lifecycleScope.launch {
@@ -631,7 +631,10 @@ fun AppNavigation(
                 sessionManager = sessionManager,
                 onQuickBill = {
                     navController.navigate("quick_bills")
-                }
+                },
+                onNavigateToDue = {
+                    navController.navigate("unpaid_bills")
+                },
             )
         }
 
