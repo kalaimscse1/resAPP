@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.TblOrderDetailsResponse
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.screens.OrderDisplayItem
+import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OrderScreenViewModel @Inject constructor(
-    private val orderRepository: OrderRepository
+    private val orderRepository: OrderRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _dineInOrders = MutableStateFlow<List<OrderDisplayItem>>(emptyList())
@@ -34,6 +37,12 @@ class OrderScreenViewModel @Inject constructor(
 
     val tblOrderDetailsResponse = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
+    init {
+        CurrencySettings.update(
+            symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
+            decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
+        )
+    }
     fun loadOrders() {
         viewModelScope.launch {
             _isLoading.value = true

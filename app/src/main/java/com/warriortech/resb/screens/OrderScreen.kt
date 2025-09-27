@@ -28,6 +28,7 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.ghostWhite
+import com.warriortech.resb.util.CurrencySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -275,21 +276,26 @@ private fun OrderItem(
 
 
                     )
-                    Text(
-                        text = "${order.areaName} | ${order.tableName} | ${order.totalAmount} ",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Black.copy(alpha = 0.8f)
-                    )
-//                    Text(
-//                        text = "${order.tableName}",
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = contentColor.copy(alpha = 0.8f)
-//                    )
-//                    Text(
-//                        text = "${order.totalAmount}",
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = contentColor.copy(alpha = 0.8f)
-//                    )
+                    if (order.areaName == "--" || order.tableName == "--") {
+                        Text(
+                            text = "${CurrencySettings.format(order.totalAmount)} ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Black.copy(alpha = 0.8f)
+                        )
+                    } else {
+                        Text(
+                            text = "${order.areaName} | ${order.tableName} |",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Black.copy(alpha = 0.8f)
+                        )
+                        Text(
+                            text = CurrencySettings.format(
+                                order.totalAmount
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Black.copy(alpha = 0.8f)
+                        )
+                    }
                 }
                 Card(
                     shape = RoundedCornerShape(8.dp),

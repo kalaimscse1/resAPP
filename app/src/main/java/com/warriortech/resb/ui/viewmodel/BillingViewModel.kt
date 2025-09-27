@@ -490,9 +490,12 @@ class BillingViewModel @Inject constructor(
         viewModelScope.launch {
 
             val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print == true
-            val amount = if (paymentMethod.name == "CASH")
-                currentState.cashAmount
-            else
+            val amount = if (paymentMethod.name == "CASH") {
+                if (currentState.cashAmount == 0.0)
+                    currentState.amountToPay
+                else
+                    currentState.cashAmount
+            } else
                 currentState.amountToPay
             billRepository.bill(
                 orderMasterId = currentState.orderMasterId ?: "",

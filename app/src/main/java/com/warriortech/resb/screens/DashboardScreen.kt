@@ -10,29 +10,30 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.components.MobileOptimizedButton
-import com.warriortech.resb.ui.viewmodel.DashboardViewModel
+import com.warriortech.resb.R
 import com.warriortech.resb.model.DashboardMetrics
 import com.warriortech.resb.model.RunningOrder
-import kotlinx.coroutines.launch
-import com.warriortech.resb.R
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.components.MobileOptimizedButton
+import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.PaymentModePieChart
 import com.warriortech.resb.ui.components.WeeklySalesBarChart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
+import com.warriortech.resb.ui.viewmodel.DashboardViewModel
 import com.warriortech.resb.util.CurrencySettings
+import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
@@ -233,7 +234,7 @@ fun MetricsSection(
     metrics: DashboardMetrics,
     onNavigateToOrders: () -> Unit,
     onNavigateToBilling: () -> Unit,
-    onNavigateToDue:()-> Unit
+    onNavigateToDue: () -> Unit
 ) {
     Column {
         Text(
@@ -299,11 +300,11 @@ fun MetricCard(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     title,
@@ -313,15 +314,24 @@ fun MetricCard(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    value,
-                    fontWeight = FontWeight.Bold,
-                    color = color,
-                    fontSize = 18.sp
-                )
+                if (title == "Total Sales" || title == "Pending Due") {
+                    Text(
+                        value,
+                        fontWeight = FontWeight.Bold,
+                        color = color,
+                        fontSize = 18.sp
+                    )
+                } else {
+                    Text(
+                        value,
+                        fontWeight = FontWeight.Bold,
+                        color = color,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }

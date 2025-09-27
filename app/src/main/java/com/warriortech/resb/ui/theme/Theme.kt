@@ -188,38 +188,52 @@ fun ResbTheme(
 ) {
     val systemUiController = rememberSystemUiController()
     val colorScheme = if (darkTheme) {
+        systemUiController.setStatusBarColor(DarkColorScheme.surface, darkIcons = false)
         DarkColorScheme
     } else {
+        systemUiController.setStatusBarColor(LightColorScheme.surface, darkIcons = true)
         LightColorScheme
-    }
-
-    // Configure system bars for edge-to-edge display (crucial for Redmi/MIUI devices)
-    SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = !darkTheme,
-            isNavigationBarContrastEnforced = false
-        )
-        
-        // Specifically handle navigation bar for Redmi devices
-        systemUiController.setNavigationBarColor(
-            color = Color.Transparent,
-            darkIcons = !darkTheme,
-            navigationBarContrastEnforced = false
-        )
-        
-        // Set status bar with proper contrast for MIUI
-        systemUiController.setStatusBarColor(
-            color = Color.Transparent,
-            darkIcons = !darkTheme
-        )
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = ResbTypography,
+        typography = Typography,
         content = content
     )
+//    val systemUiController = rememberSystemUiController()
+//    val colorScheme = if (darkTheme) {
+//        DarkColorScheme
+//    } else {
+//        LightColorScheme
+//    }
+//
+//    // Configure system bars for edge-to-edge display (crucial for Redmi/MIUI devices)
+//    SideEffect {
+//        systemUiController.setSystemBarsColor(
+//            color = Color.Transparent,
+//            darkIcons = !darkTheme,
+//            isNavigationBarContrastEnforced = false
+//        )
+//
+//        // Specifically handle navigation bar for Redmi devices
+//        systemUiController.setNavigationBarColor(
+//            color = Color.Transparent,
+//            darkIcons = !darkTheme,
+//            navigationBarContrastEnforced = false
+//        )
+//
+//        // Set status bar with proper contrast for MIUI
+//        systemUiController.setStatusBarColor(
+//            color = Color.Transparent,
+//            darkIcons = !darkTheme
+//        )
+//    }
+//
+//    MaterialTheme(
+//        colorScheme = colorScheme,
+//        typography = ResbTypography,
+//        content = content
+//    )
 }
 
 //@Composable

@@ -43,12 +43,12 @@ fun BillEditScreen(
         }
     }
 
-    if (selectedBill == null) {
-        LaunchedEffect(Unit) {
-            navController.navigateUp()
-        }
-        return
-    }
+//    if (selectedBill == null) {
+//        LaunchedEffect(Unit) {
+//            navController.navigateUp()
+//        }
+//        return
+//    }
 
     Scaffold(
         topBar = {
