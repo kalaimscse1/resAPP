@@ -30,4 +30,7 @@ interface TblOrderDetailsDao {
 
     @Query(" SELECT IFNULL(MAX(DISTINCT kot_number),0) FROM tbl_order_details od INNER JOIN tbl_order_master om ON od.order_master_id = om.order_master_id WHERE om.order_date =:orderDate")
     suspend fun getMaxKOTNumber(orderDate: String): Int
+
+    @Query("SELECT * FROM tbl_order_details WHERE order_master_id = :orderMasterId AND is_active=1")
+    suspend fun getByOrderMasterId(orderMasterId: String): List<TblOrderDetails>
 }

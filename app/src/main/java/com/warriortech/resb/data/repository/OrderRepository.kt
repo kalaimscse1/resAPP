@@ -14,6 +14,7 @@ import com.warriortech.resb.model.OrderDetails
 import com.warriortech.resb.model.OrderItem
 import com.warriortech.resb.model.OrderMaster
 import com.warriortech.resb.model.OrderStatus
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.model.TblOrderResponse
 import com.warriortech.resb.network.ApiService
@@ -615,6 +616,74 @@ class OrderRepository @Inject constructor(
         }
     }
 
+    private fun TblOrderDetails.toTblOrderDetailsResponse(): TblOrderDetailsResponse {
+        return TblOrderDetailsResponse(
+            order_master_id = this.order_master_id.toString(),
+            order_details_id = this.order_details_id.toLong(),
+            kot_number = this.kot_number?:0,
+            menuItem = TblMenuItemResponse(
+                menu_item_id = this.menu_item_id?.toLong() ?: 0L,
+                menu_item_name = "",
+                rate = 0.0,
+                ac_rate = 0.0,
+                parcel_rate = 0.0,
+                tax_id = 0,
+                tax_name = "",
+                tax_percentage = 0.0.toString(),
+                is_inventory = 0,
+                cess_per = 0.0.toString(),
+                cess_specific = 0.0,
+                menu_item_code = TODO(),
+                menu_item_name_tamil = TODO(),
+                menu_id = TODO(),
+                menu_name = TODO(),
+                item_cat_id = TODO(),
+                item_cat_name = TODO(),
+                image = TODO(),
+                parcel_charge = TODO(),
+                kitchen_cat_id = TODO(),
+                kitchen_cat_name = TODO(),
+                is_available = TODO(),
+                preparation_time = TODO(),
+                is_favourite = TODO(),
+                stock_maintain = TODO(),
+                rate_lock = TODO(),
+                unit_id = TODO(),
+                unit_name = TODO(),
+                min_stock = TODO(),
+                hsn_code = TODO(),
+                order_by = TODO(),
+                is_raw = TODO(),
+                is_active = TODO(),
+                qty = TODO(),
+                actual_rate = TODO()
+            ),
+            rate = this.rate ?: 0.0,
+            actual_rate = this.actual_rate ?: 0.0,
+            qty = this.qty ?: 0,
+            total = this.total ?: 0.0,
+            tax_id = this.tax_id?.toLong() ?: 0L,
+            tax_amount = this.tax_amount ?: 0.0,
+            sgst_per = this.sgst_per ?: 0.0,
+            sgst = this.sgst ?: 0.0,
+            cgst_per = this.cgst_per ?: 0.0,
+            cgst = this.cgst ?: 0.0,
+            igst_per = this.igst_per ?: 0.0,
+            igst = this.igst ?: 0.0,
+            cess_per = this.cess_per ?: 0.0,
+            cess = this.cess ?: 0.0,
+            cess_specific = this.cess_specific ?: 0.0,
+            grand_total = this.grand_total ?: 0.0,
+            prepare_status = this.prepare_status == true,
+            item_add_mode = this.item_add_mode == true,
+            is_flag = this.is_flag == true,
+            merge_order_nos = this.merge_order_nos.toString(),
+            merge_order_tables = this.merge_order_tables.toString(),
+            merge_pax = this.merge_pax ?: 0,
+            is_active = if (this.is_active == true) 1 else 0,
+            tax_name = ""
+        )
+    }
 
     suspend fun updateOrderDetails(
         orderId: String?,
