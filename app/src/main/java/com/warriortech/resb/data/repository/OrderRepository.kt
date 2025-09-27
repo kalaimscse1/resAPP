@@ -484,117 +484,137 @@ class OrderRepository @Inject constructor(
         itemsToPlace: List<OrderItem>,
         tableStatus: String,
         existingOpenOrderMasterId: String? = null
-    ) {
-        var currentOrderMasterId = existingOpenOrderMasterId
-        var orderMasterResponse: TblOrderResponse? = null
-        if (existingOpenOrderMasterId == null) {
-            val voucher = voucherDao.getActiveVoucherByType(
-                sessionManager.getUser()?.counter_id?.toInt() ?: 0, "ORDER"
-            )
-            val newOrderMasterId = generateNextBillNo(
-                voucher?.starting_no ?: "ORD0001",
-                voucher?.starting_no ?: "ORD0001"
-            )
-            val orderMaster = TblOrderMaster(
-                order_master_id = newOrderMasterId,
-                order_date = getCurrentDateModern(),
-                order_create_time = getCurrentTimeModern(),
-                order_completed_time = "",
-                staff_id = sessionManager.getUser()?.staff_id?.toInt() ?: 1,
-                is_dine_in = tableStatus != "TAKEAWAY" && tableStatus != "DELIVERY",
-                is_take_away = tableStatus == "TAKEAWAY",
-                is_delivery = tableStatus == "DELIVERY",
-                table_id = tableId.toInt(),
-                no_of_person = 0,
-                waiter_request_status = true,
-                kitchen_response_status = true,
-                order_status = "RUNNING",
-                is_merge = false,
-                is_active = true,
-                is_delivered = false,
-                is_online = false,
-                online_order_id = 1,
-                online_ref_no = "",
-                is_online_paid = false,
-                is_synced = SyncStatus.PENDING_SYNC
-            )
-            orderDao.insert(orderMaster)
-            tableDao.updateTableAvailability(tableId, "OCCUPIED")
-        } else {
-            val orderMaster = orderDao.getById(existingOpenOrderMasterId)
-            if (orderMaster != null) {
-                currentOrderMasterId = orderMaster.order_master_id
-            }
-        }
-        val newKotNumber = orderDetailsDao.getMaxKOTNumber(getCurrentDateModern())
-        val orderDetailsList = itemsToPlace.map { item ->
-            val pricePerUnit = when (tableStatus) {
-                "AC" -> item.menuItem.ac_rate
-                "PARCEL", "DELIVERY" -> item.menuItem.parcel_rate
-                else -> item.menuItem.rate
-            }
-            val tax =
-                apiService.getTaxSplit(item.menuItem.tax_id, sessionManager.getCompanyCode() ?: "")
-            val cgst = tax[0].tax_split_percentage
-            val sgst = tax[1].tax_split_percentage
-            val totalAmountForTaxCalc = pricePerUnit
-            val taxAmount = calculateGst(
-                totalAmountForTaxCalc,
-                item.menuItem.tax_percentage.toDouble(),
-                true,
-                sgst.toDouble(),
-                cgst.toDouble()
-            )
-            val cess = calculateGstAndCess(
-                totalAmountForTaxCalc,
-                item.menuItem.tax_percentage.toDouble(),
-                item.menuItem.cess_per.toDouble(),
-                true,
-                item.menuItem.cess_specific,
-                sgst.toDouble(),
-                cgst.toDouble()
-            )
-            TblOrderDetails(
-                order_master_id = currentOrderMasterId.toString(),
-                order_details_id = 0,
-                kot_number = newKotNumber,
-                menu_item_id = item.menuItem.menu_item_id.toInt(),
-                rate = if (item.menuItem.is_inventory != 1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
-                actual_rate = pricePerUnit,
-                qty = item.quantity,
-                total = if (item.menuItem.is_inventory != 1L) (taxAmount.basePrice * item.quantity).roundTo2() else (cess.basePrice * item.quantity).roundTo2(), // Total base price for this item line
-                tax_id = item.menuItem.tax_id.toInt(),
-                tax_amount = if (item.menuItem.is_inventory != 1L) (taxAmount.gstAmount * item.quantity).roundTo2() else (cess.gstAmount * item.quantity).roundTo2(),
-                sgst_per = if (tableStatus != "DELIVERY") sgst.toDouble() else 0.0,
-                sgst = if (item.menuItem.is_inventory != 1L) {
-                    if (tableStatus != "DELIVERY") (taxAmount.sgst * item.quantity).roundTo2() else 0.0
-                } else {
-                    if (tableStatus != "DELIVERY") (cess.sgst * item.quantity).roundTo2() else 0.0
-                },
-                cgst_per = if (tableStatus != "DELIVERY") cgst.toDouble() else 0.0,
-                cgst = if (item.menuItem.is_inventory != 1L) {
-                    if (tableStatus != "DELIVERY") (taxAmount.cgst * item.quantity).roundTo2() else 0.0
-                } else {
-                    if (tableStatus != "DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0
-                }, // Adjust if your backend calculates differently
-                igst_per = if (tableStatus == "DELIVERY") item.menuItem.tax_percentage.toDouble() else 0.0,
-                igst = if (tableStatus == "DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0,
-                cess_per = if (item.menuItem.is_inventory == 1L) item.menuItem.cess_per.toDouble() else 0.0,
-                cess = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
-                cess_specific = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0,
-                grand_total = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.totalPrice * item.quantity).roundTo2() else (taxAmount.totalPrice * item.quantity).roundTo2(),
-                prepare_status = true,
-                item_add_mode = existingOpenOrderMasterId != null,
-                is_flag = false,
-                merge_order_nos = "",
-                merge_order_tables = "",
-                merge_pax = 0,
-                is_active = true
-            )
+    ): Flow<Result<List<TblOrderDetailsResponse>>> = flow {
+        try {
+            var currentOrderMasterId = existingOpenOrderMasterId
+            var orderMasterResponse: TblOrderResponse? = null
 
+            // Step 1: Create Order Master if needed
+            if (existingOpenOrderMasterId == null) {
+                val voucher = voucherDao.getActiveVoucherByType(
+                    sessionManager.getUser()?.counter_id?.toInt() ?: 0, "ORDER"
+                )
+                val newOrderMasterId = generateNextBillNo(
+                    voucher?.starting_no ?: "ORD0001",
+                    voucher?.starting_no ?: "ORD0001"
+                )
+                val orderMaster = TblOrderMaster(
+                    order_master_id = newOrderMasterId,
+                    order_date = getCurrentDateModern(),
+                    order_create_time = getCurrentTimeModern(),
+                    order_completed_time = "",
+                    staff_id = sessionManager.getUser()?.staff_id?.toInt() ?: 1,
+                    is_dine_in = tableStatus != "TAKEAWAY" && tableStatus != "DELIVERY",
+                    is_take_away = tableStatus == "TAKEAWAY",
+                    is_delivery = tableStatus == "DELIVERY",
+                    table_id = tableId.toInt(),
+                    no_of_person = 0,
+                    waiter_request_status = true,
+                    kitchen_response_status = true,
+                    order_status = "RUNNING",
+                    is_merge = false,
+                    is_active = true,
+                    is_delivered = false,
+                    is_online = false,
+                    online_order_id = 1,
+                    online_ref_no = "",
+                    is_online_paid = false,
+                    is_synced = SyncStatus.PENDING_SYNC
+                )
+                orderDao.insert(orderMaster)
+                tableDao.updateTableAvailability(tableId, "OCCUPIED")
+                currentOrderMasterId = newOrderMasterId
+            } else {
+                val orderMaster = orderDao.getById(existingOpenOrderMasterId)
+                if (orderMaster != null) {
+                    currentOrderMasterId = orderMaster.order_master_id
+                }
+            }
+
+            // Step 2: Create Order Details
+            val newKotNumber = orderDetailsDao.getMaxKOTNumber(getCurrentDateModern())
+            val orderDetailsList = itemsToPlace.map { item ->
+                val pricePerUnit = when (tableStatus) {
+                    "AC" -> item.menuItem.ac_rate
+                    "PARCEL", "DELIVERY" -> item.menuItem.parcel_rate
+                    else -> item.menuItem.rate
+                }
+                val tax =
+                    apiService.getTaxSplit(
+                        item.menuItem.tax_id,
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                val cgst = tax[0].tax_split_percentage
+                val sgst = tax[1].tax_split_percentage
+                val totalAmountForTaxCalc = pricePerUnit
+                val taxAmount = calculateGst(
+                    totalAmountForTaxCalc,
+                    item.menuItem.tax_percentage.toDouble(),
+                    true,
+                    sgst.toDouble(),
+                    cgst.toDouble()
+                )
+                val cess = calculateGstAndCess(
+                    totalAmountForTaxCalc,
+                    item.menuItem.tax_percentage.toDouble(),
+                    item.menuItem.cess_per.toDouble(),
+                    true,
+                    item.menuItem.cess_specific,
+                    sgst.toDouble(),
+                    cgst.toDouble()
+                )
+
+                TblOrderDetails(
+                    order_master_id = currentOrderMasterId.toString(),
+                    order_details_id = 0,
+                    kot_number = newKotNumber,
+                    menu_item_id = item.menuItem.menu_item_id.toInt(),
+                    rate = if (item.menuItem.is_inventory != 1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
+                    actual_rate = pricePerUnit,
+                    qty = item.quantity,
+                    total = if (item.menuItem.is_inventory != 1L) (taxAmount.basePrice * item.quantity).roundTo2() else (cess.basePrice * item.quantity).roundTo2(),
+                    tax_id = item.menuItem.tax_id.toInt(),
+                    tax_amount = if (item.menuItem.is_inventory != 1L) (taxAmount.gstAmount * item.quantity).roundTo2() else (cess.gstAmount * item.quantity).roundTo2(),
+                    sgst_per = if (tableStatus != "DELIVERY") sgst.toDouble() else 0.0,
+                    sgst = if (item.menuItem.is_inventory != 1L) {
+                        if (tableStatus != "DELIVERY") (taxAmount.sgst * item.quantity).roundTo2() else 0.0
+                    } else {
+                        if (tableStatus != "DELIVERY") (cess.sgst * item.quantity).roundTo2() else 0.0
+                    },
+                    cgst_per = if (tableStatus != "DELIVERY") cgst.toDouble() else 0.0,
+                    cgst = if (item.menuItem.is_inventory != 1L) {
+                        if (tableStatus != "DELIVERY") (taxAmount.cgst * item.quantity).roundTo2() else 0.0
+                    } else {
+                        if (tableStatus != "DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0
+                    },
+                    igst_per = if (tableStatus == "DELIVERY") item.menuItem.tax_percentage.toDouble() else 0.0,
+                    igst = if (tableStatus == "DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0,
+                    cess_per = if (item.menuItem.is_inventory == 1L) item.menuItem.cess_per.toDouble() else 0.0,
+                    cess = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
+                    cess_specific = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0,
+                    grand_total = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.totalPrice * item.quantity).roundTo2() else (taxAmount.totalPrice * item.quantity).roundTo2(),
+                    prepare_status = true,
+                    item_add_mode = existingOpenOrderMasterId != null,
+                    is_flag = false,
+                    merge_order_nos = "",
+                    merge_order_tables = "",
+                    merge_pax = 0,
+                    is_active = true
+                )
+            }
+
+            orderDetailsDao.insertAll(orderDetailsList)
+
+            // Step 3: Fetch back inserted details as response
+            val savedDetails = orderDetailsDao.getByOrderMasterId(currentOrderMasterId.toString())
+            val responseList = savedDetails.map { it.toTblOrderDetailsResponse() }
+
+            emit(Result.success(responseList))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
         }
-        orderDetailsDao.insertAll(orderDetailsList)
     }
+
 
     suspend fun updateOrderDetails(
         orderId: String?,
