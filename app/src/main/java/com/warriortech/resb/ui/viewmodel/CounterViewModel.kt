@@ -12,6 +12,7 @@ import com.warriortech.resb.model.BillItem
 import com.warriortech.resb.model.Counters
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.OrderItem
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
@@ -272,7 +273,16 @@ class CounterViewModel @Inject constructor(
                             order.firstOrNull()?.order_master_id ?: "",
                             payment,
                             amount,
-                            0L,
+                            TblCustomer(
+                                customer_id = 1L,
+                                customer_name = "GUEST",
+                                contact_no = "",
+                                address = "",
+                                gst_no = "",
+                                is_active = 1L,
+                                email_address = "",
+                                igst_status = false
+                            ),
                             "",
                         ).collect { billResult ->
                             billResult.fold(

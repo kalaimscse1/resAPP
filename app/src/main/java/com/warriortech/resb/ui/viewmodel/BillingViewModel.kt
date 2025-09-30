@@ -501,8 +501,16 @@ class BillingViewModel @Inject constructor(
                 orderMasterId = currentState.orderMasterId ?: "",
                 paymentMethod = paymentMethod,
                 receivedAmt = amount,
-                customerId = if (_customerId.value == 0L) customer.value?.customer_id
-                    ?: 0L else _customerId.value,
+                customer = _customer.value?: TblCustomer(
+                    customer_id = 1L,
+                    customer_name = "GUEST",
+                    contact_no = "",
+                    address = "",
+                    gst_no = "",
+                    is_active = 1L,
+                    email_address="",
+                    igst_status = false
+                ),
                 billNo = _billNo.value,
                 cash = currentState.cashAmount,
                 card = currentState.cardAmount,

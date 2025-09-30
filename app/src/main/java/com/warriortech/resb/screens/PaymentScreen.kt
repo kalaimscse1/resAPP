@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -26,15 +27,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -42,9 +47,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.PaymentMethodCard
 import com.warriortech.resb.ui.components.PaymentSummaryCard
@@ -56,6 +63,7 @@ import com.warriortech.resb.ui.viewmodel.BillingViewModel
 import com.warriortech.resb.ui.viewmodel.PaymentProcessingState
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
+import com.warriortech.resb.util.StringDropdown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +80,8 @@ fun PaymentScreen(
     val customers by viewModel.customers.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val table = sessionManager.getGeneralSetting()?.is_table_allowed == true
+    var showCustomerDialog by remember { mutableStateOf(false) }
+    var customer by remember { mutableStateOf<TblCustomer?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadCustomers()
@@ -116,10 +126,11 @@ fun PaymentScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Complete Payment",
+                        text = "Complete Payment",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = SurfaceLight
+                        color = SurfaceLight,
+                        fontSize = 20.sp
                     )
                 },
                 navigationIcon = {
@@ -137,7 +148,18 @@ fun PaymentScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
-                )
+                ),
+                actions = {
+                    IconButton(onClick = {
+                        showCustomerDialog = true
+                    }) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = "Customer",
+                            tint = SurfaceLight
+                        )
+                    }
+                }
             )
         },
         bottomBar = {
@@ -146,7 +168,8 @@ fun PaymentScreen(
                 onConfirmPayment = {
                     viewModel.updateAmountToPay(amountToPayFromRoute ?: 0.0)
                     viewModel.processPayment()
-                }
+                },
+                customer = customers.find { it.customer_id == customer?.customer_id }
             )
         }
     ) { paddingValues ->
@@ -262,6 +285,7 @@ fun PaymentScreen(
                             onPaymentMethodChange = { viewModel.updatePaymentMethod(it) },
                             viewModel = viewModel,
                             onCustomer = {
+                                customer = it
                                 viewModel.setCustomer(it)
                             },
                             customers = customers
@@ -271,12 +295,78 @@ fun PaymentScreen(
             }
         }
     }
+    if (showCustomerDialog) {
+        CustomerSelectionDialog(
+            customers = customers,
+            onCustomerSelected = { it ->
+                viewModel.setCustomer(it)
+                showCustomerDialog = false
+            },
+            onDismissRequest = {
+                showCustomerDialog = false
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomerSelectionDialog(
+    customers: List<TblCustomer>,
+    onCustomerSelected: (TblCustomer) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        dragHandle = null,
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Select Customer",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            StringDropdown(
+                label = "Customer",
+                options = customers.map { it.customer_name },
+                onOptionSelected = { selectedName ->
+                    val selectedCustomer = customers.find { it.customer_name == selectedName }
+                    selectedCustomer?.let {
+                        onCustomerSelected(it)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                selectedOption = {
+                    customers.find { true }?.customer_name
+                        ?: customers.firstOrNull()?.customer_name
+                        ?: "Select Customer"
+                }.toString()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onDismissRequest,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Close")
+            }
+        }
+    }
 }
 
 @Composable
 fun PaymentBottomBar(
     uiState: BillingPaymentUiState,
-    onConfirmPayment: () -> Unit
+    onConfirmPayment: () -> Unit,
+    customer: TblCustomer? = null
 ) {
     val payingAmount = if (uiState.selectedPaymentMethod?.name == "OTHERS") {
         uiState.cashAmount + uiState.cardAmount + uiState.upiAmount
@@ -300,8 +390,13 @@ fun PaymentBottomBar(
             )
             Button(
                 onClick = onConfirmPayment,
-                enabled = uiState.selectedPaymentMethod != null && payingAmount > 0 &&
-                        uiState.paymentProcessingState == PaymentProcessingState.Idle
+                enabled = when (uiState.selectedPaymentMethod?.name) {
+                    "DUE" -> customer?.customer_id != null &&
+                            uiState.paymentProcessingState == PaymentProcessingState.Idle
+                    else -> uiState.selectedPaymentMethod != null &&
+                            payingAmount > 0 &&
+                            uiState.paymentProcessingState == PaymentProcessingState.Idle
+                }
             ) {
                 Text("Confirm Payment")
             }

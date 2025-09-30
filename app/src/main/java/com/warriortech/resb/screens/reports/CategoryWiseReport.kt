@@ -1,9 +1,10 @@
-package com.warriortech.resb.screens
+package com.warriortech.resb.screens.reports
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Menu
@@ -64,7 +65,7 @@ fun CategoryWiseReportScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                        androidx.compose.material.Icon(
+                        Icon(
                             Icons.Default.Menu, contentDescription = "Menu",
                             tint = SurfaceLight
                         )

@@ -4,6 +4,7 @@ package com.warriortech.resb.data.repository
 import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
+import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.viewmodel.PaymentMethod
@@ -64,7 +65,7 @@ class BillRepository @Inject constructor(
         orderMasterId: String,
         paymentMethod: PaymentMethod,
         receivedAmt: Double,
-        customerId: Long,
+        customer: TblCustomer,
         billNo: String,
         cash: Double = 0.0,
         card: Double = 0.0,
@@ -93,7 +94,7 @@ class BillRepository @Inject constructor(
             order_master_id = orderMasterId,
             voucher_id = voucher?.voucher_id ?: 0L,
             staff_id = sessionManager.getUser()?.staff_id ?: 0L,
-            customer_id = if (customerId == 0L) 1L else customerId,
+            customer_id = customer.customer_id,
             order_amt = orderMaster.sumOf { it.total },
             disc_amt = 0.0,
             tax_amt = orderMaster.sumOf { it.tax_amount },
@@ -131,6 +132,16 @@ class BillRepository @Inject constructor(
                     "COMPLETED",
                     sessionManager.getCompanyCode() ?: ""
                 )
+                if (customer.igst_status)
+                    apiService.updateIgstForOrderDetails(
+                        orderMasterId,
+                        sessionManager.getCompanyCode() ?: ""
+                    )
+                else
+                    apiService.updateGstForOrderDetails(
+                        orderMasterId,
+                        sessionManager.getCompanyCode() ?: ""
+                    )
                 emit(Result.success(res))
             } else {
                 emit(Result.failure(Exception("Error: ${response.message()}")))

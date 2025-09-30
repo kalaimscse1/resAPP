@@ -7,8 +7,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.core.view.WindowCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -34,17 +32,17 @@ import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import com.warriortech.resb.ui.theme.ResbTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
@@ -52,9 +50,9 @@ import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.PointOfSale
+import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.TableRestaurant
@@ -105,7 +103,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.content.edit
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.warriortech.resb.model.KotResponse
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
@@ -113,18 +110,18 @@ import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.RetrofitClient.apiService
 import com.warriortech.resb.screens.BillingScreen
 import com.warriortech.resb.screens.PaymentScreen
-import com.warriortech.resb.screens.OrderScreen
+import com.warriortech.resb.screens.reports.OrderScreen
 import com.warriortech.resb.screens.SettingsScreen
 import com.warriortech.resb.screens.SupportScreen
 import com.warriortech.resb.screens.DashboardScreen
 import com.warriortech.resb.screens.CounterScreen
 import com.warriortech.resb.screens.KitchenScreen
-import com.warriortech.resb.screens.ReportScreen
+import com.warriortech.resb.screens.reports.ReportScreen
 import com.warriortech.resb.screens.RegistrationScreen
 import com.warriortech.resb.screens.AIAssistantScreen
 import com.warriortech.resb.screens.BillEditScreen
 import com.warriortech.resb.screens.BillTemplateScreen
-import com.warriortech.resb.screens.CategoryWiseReportScreen
+import com.warriortech.resb.screens.reports.CategoryWiseReportScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
 import com.warriortech.resb.screens.settings.CounterSettingsScreen
@@ -148,13 +145,14 @@ import com.warriortech.resb.screens.TemplateEditorScreen
 import com.warriortech.resb.screens.TemplatePreviewScreen
 import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.screens.ItemWiseBillScreen
-import com.warriortech.resb.screens.ItemWiseReportScreen
+import com.warriortech.resb.screens.reports.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
-import com.warriortech.resb.screens.KotReportScreen
-import com.warriortech.resb.screens.PaidBillsScreen
+import com.warriortech.resb.screens.reports.KotReportScreen
+import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.SplashScreen
-import com.warriortech.resb.screens.UnpaidBillsScreen
+import com.warriortech.resb.screens.reports.UnpaidBillsScreen
+import com.warriortech.resb.screens.reports.gst.HsnReportScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
 import com.warriortech.resb.ui.components.ModernDivider
@@ -188,7 +186,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("ConfigurationScreenWidthHeight")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
 //        // Enable edge-to-edge display for proper system bar handling
 //        enableEdgeToEdge()
 //
@@ -619,8 +617,6 @@ fun AppNavigation(
             DashboardScreen(
                 drawerState = drawerState,
                 onNavigateToOrders = { navController.navigate("orders") },
-                onNavigateToMenu = { navController.navigate("menu") },
-                onNavigateToSettings = { navController.navigate("settings") },
                 onNavigateToBilling = { navController.navigate("counter") },
                 onDineInSelected = { navController.navigate("selects") },
                 onTakeawaySelected = {
@@ -633,7 +629,7 @@ fun AppNavigation(
                     navController.navigate("quick_bills")
                 },
                 onNavigateToDue = {
-                    navController.navigate("unpaid_bills")
+                    navController.navigate("due")
                 },
             )
         }
@@ -836,11 +832,16 @@ fun AppNavigation(
                 orderDetailsResponse = selecteItems
             )
         }
+        composable("hsn_reports") {
+            HsnReportScreen(
+                drawerState = drawerState
+            )
+        }
     }
 }
 
 enum class ExpandedMenu {
-    NONE, ORDERS, BILLING, MASTERS, REPORTS
+    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS
 }
 
 @Composable
@@ -979,7 +980,12 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Menu") else Text("") },
-                                icon = { Icon(Icons.Default.MenuBook, contentDescription = null) },
+                                icon = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.MenuBook,
+                                        contentDescription = null
+                                    )
+                                },
                                 selected = currentDestination?.route == "menu_setting",
                                 onClick = { onDestinationClicked("menu_setting") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1136,7 +1142,12 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
-                                icon = { Icon(Icons.Default.ListAlt, contentDescription = null) },
+                                icon = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ListAlt,
+                                        contentDescription = null
+                                    )
+                                },
                                 selected = currentDestination?.route == "paid_bills",
                                 onClick = { onDestinationClicked("paid_bills") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1200,6 +1211,41 @@ fun DrawerContent(
                             )
                         }
                     }
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("GST Reports") else Text("") },
+                        icon = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ReceiptLong,
+                                contentDescription = null
+                            )
+                        },
+                        selected = currentDestination?.route in listOf(
+                            "hsn_reports",
+                        ),
+                        onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.GSTREPORTS) ExpandedMenu.NONE else ExpandedMenu.GSTREPORTS) },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.GSTREPORTS) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("HSN Reports") else Text("") },
+                                icon = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ListAlt,
+                                        contentDescription = null
+                                    )
+                                },
+                                selected = currentDestination?.route == "hsn_reports",
+                                onClick = { onDestinationClicked("hsn_reports") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+
+                        }
+                    }
+
                 }
 
                 // 🔹 Settings (admin only)
@@ -1239,7 +1285,7 @@ fun DrawerContent(
                     label = { if (!isCollapsed) Text("Collapse Drawer") else Text("") },
                     icon = {
                         Icon(
-                            imageVector = if (isCollapsed) Icons.Default.KeyboardArrowRight else Icons.Default.KeyboardArrowLeft,
+                            imageVector = if (isCollapsed) Icons.AutoMirrored.Filled.KeyboardArrowRight else Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = "Toggle Collapse"
                         )
                     },
@@ -1257,7 +1303,7 @@ fun DrawerContent(
             if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CHEF", "CASHIER")) {
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Logout") else Text("") },
-                    icon = { Icon(Icons.Default.Logout, contentDescription = null) },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
                     selected = false,
                     onClick = { onDestinationClicked("logout") },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),

@@ -1,4 +1,4 @@
-package com.warriortech.resb.screens
+package com.warriortech.resb.screens.reports
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

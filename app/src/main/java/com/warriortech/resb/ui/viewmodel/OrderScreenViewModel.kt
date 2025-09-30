@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.OrderRepository
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.screens.OrderDisplayItem
+import com.warriortech.resb.screens.reports.OrderDisplayItem
 import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

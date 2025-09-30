@@ -1,4 +1,4 @@
-package com.warriortech.resb.screens
+package com.warriortech.resb.screens.reports
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -20,6 +22,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +59,7 @@ fun KotReportScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                        androidx.compose.material.Icon(
+                        Icon(
                             Icons.Default.Menu, contentDescription = "Menu",
                             tint = SurfaceLight
                         )
@@ -74,9 +77,9 @@ fun KotReportScreen(
                     // Show loading indicator
                     Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = androidx.compose.ui.Alignment.Center
+                        contentAlignment = Alignment.Center
                     ) {
-                        androidx.compose.material.CircularProgressIndicator()
+                        CircularProgressIndicator()
                     }
                 }
 
@@ -179,7 +182,7 @@ fun KotReportScreen(
                     // Show error message
                     Box(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = androidx.compose.ui.Alignment.Center
+                        contentAlignment = Alignment.Center
                     ) {
                         Text("Error: ${state.message}", color = Color.Red)
                     }

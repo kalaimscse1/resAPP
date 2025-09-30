@@ -3,7 +3,7 @@ package com.warriortech.resb.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.ReportRepository
-import com.warriortech.resb.screens.ReportUiState
+import com.warriortech.resb.screens.reports.ReportUiState
 import com.warriortech.resb.util.getCurrentDateModern
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

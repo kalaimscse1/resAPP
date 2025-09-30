@@ -660,6 +660,18 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
+    @DELETE("order/orderDetails/updateByGst/{order_master_id}")
+    suspend fun updateGstForOrderDetails(
+        @Path("order_master_id") orderId: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
+    @DELETE("order/orderDetails/updateByIgst/{order_master_id}")
+    suspend fun updateIgstForOrderDetails(
+        @Path("order_master_id") orderId: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
     /**
      * Reports Management
      */
@@ -926,5 +938,30 @@ interface ApiService {
     @POST("settings/reset")
     suspend fun resetData(@Header("X-Tenant-ID") tenantId: String): Response<ApiResponse<Boolean>>
 
+
+    /**
+     * GST Reports Management
+     */
+
+    @GET("report/getGSTReport")
+    suspend fun getGSTReport(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
+    ): Response<List<ReportGSTResponse>>
+
+    @GET("report/getHsnReport")
+    suspend fun getHsnReport(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
+    ): Response<List<HsnReport>>
+
+    @GET("report/getGstDocs")
+    suspend fun getGstDocs(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
+    ): Response<List<GSTRDOCS>>
 
 }

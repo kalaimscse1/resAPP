@@ -1,4 +1,4 @@
-package com.warriortech.resb.screens
+package com.warriortech.resb.screens.reports
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

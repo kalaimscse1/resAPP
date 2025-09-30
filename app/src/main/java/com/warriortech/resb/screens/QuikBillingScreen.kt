@@ -130,7 +130,7 @@ fun ItemWiseBillScreen(
                         color = Color(0xFF4CAF50),
                         enabled = !isProcessingCash
                     ) {
-                        if (selectedItems.isNotEmpty()){
+                        if (selectedItems.isNotEmpty()) {
                             isProcessingCash = true
                             viewModel.cashPrintBill()
                             scope.launch {
@@ -139,8 +139,7 @@ fun ItemWiseBillScreen(
                                 success = false
                                 isProcessingCash = false
                             }
-                        }
-                        else{
+                        } else {
                             showBillDialog = true
                         }
                     }
@@ -149,20 +148,11 @@ fun ItemWiseBillScreen(
                         color = Color.Gray,
                         enabled = !isProcessingOthers
                     ) {
-                        if(selectedItems.isNotEmpty()){
+                        if (selectedItems.isNotEmpty()) {
                             isProcessingOthers = true
                             onProceedToBilling(selectedItems)
                             navController.navigate("quick_bill")
-//                            viewModel.placeOrder(2, null)
-//                            scope.launch {
-//                                delay(4000)
-//                                navController.navigate("payment_screen/${viewModel.getOrderTotal()}/${orderId ?: ""}") {
-//                                    launchSingleTop = true
-//                                }
-//                                isProcessingOthers = false
-//                            }
-                        }
-                        else{
+                        } else {
                             showBillDialog = true
                         }
                     }
@@ -182,10 +172,33 @@ fun ItemWiseBillScreen(
                     .background(SecondaryGreen)
                     .padding(vertical = 8.dp, horizontal = 4.dp)
             ) {
-                Text("ITEM", modifier = Modifier.weight(3f), color = Color.White, fontWeight = FontWeight.Bold)
-                Text("QTY", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                Text("RATE", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
-                Text("TOTAL", modifier = Modifier.weight(2f), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
+                Text(
+                    "ITEM",
+                    modifier = Modifier.weight(3f),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "QTY",
+                    modifier = Modifier.weight(2f),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    "RATE",
+                    modifier = Modifier.weight(2f),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End
+                )
+                Text(
+                    "TOTAL",
+                    modifier = Modifier.weight(2f),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End
+                )
             }
 
             LazyColumn(
@@ -203,17 +216,23 @@ fun ItemWiseBillScreen(
 
                     Column {
                         Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 2.dp, vertical = 2.dp)
+                                .padding(start = 4.dp, end = 4.dp)
                                 .onGloballyPositioned { coords ->
                                     val pos = coords.localToWindow(Offset.Zero)
                                     cartOffset = with(density) { Offset(pos.x, pos.y) }
                                 },
-                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(item.menu_item_name, maxLines = 1, fontSize = 12.sp, modifier = Modifier.weight(3f))
+                            Text(
+                                item.menu_item_name,
+                                maxLines = 1,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(3f)
+                            )
                             Row(
                                 modifier = Modifier.weight(2f),
                                 horizontalArrangement = Arrangement.Center,
@@ -228,10 +247,19 @@ fun ItemWiseBillScreen(
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("-", color = Color.Red, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "-",
+                                        color = Color.Red,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
 
-                                Text("$qty", fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
+                                Text(
+                                    "$qty",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
 
                                 Box(
                                     modifier = Modifier
@@ -242,11 +270,26 @@ fun ItemWiseBillScreen(
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text("+", color = DarkGreen, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "+",
+                                        color = DarkGreen,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
-                            Text("${item.rate}", textAlign = TextAlign.End, fontSize = 12.sp, modifier = Modifier.weight(2f))
-                            Text("${qty * item.rate}", textAlign = TextAlign.End, fontSize = 12.sp, modifier = Modifier.weight(2f))
+                            Text(
+                                "${item.rate}",
+                                textAlign = TextAlign.End,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(2f)
+                            )
+                            Text(
+                                "${qty * item.rate}",
+                                textAlign = TextAlign.End,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(2f)
+                            )
                         }
                         Divider(color = Color.LightGray, thickness = 0.5.dp)
                     }
@@ -262,15 +305,27 @@ fun ItemWiseBillScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Total Items: ${selectedItems.values.sum()}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("Total: ${CurrencySettings.format(selectedItems.entries.sumOf { it.key.rate * it.value })}",
-                        color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Text(
+                        "Total Items: ${selectedItems.values.sum()}",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Text(
+                        "Total: ${CurrencySettings.format(selectedItems.entries.sumOf { it.key.rate * it.value })}",
+                        color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp
+                    )
                 }
             }
 
             when (val state = menuState) {
                 is CounterViewModel.MenuUiState.Loading -> {
-                    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator()
                     }
                 }
@@ -285,12 +340,18 @@ fun ItemWiseBillScreen(
                     }
 
                     if (menuItems.isEmpty()) {
-                        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(padding),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text("No menu items available")
                         }
                     } else {
                         if (categories.isNotEmpty()) {
-                            val selectedIndex = categories.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0
+                            val selectedIndex =
+                                categories.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0
                             ScrollableTabRow(
                                 selectedTabIndex = selectedIndex,
                                 backgroundColor = SecondaryGreen,
@@ -325,7 +386,11 @@ fun ItemWiseBillScreen(
                                             detectTapGestures { tapOffset ->
                                                 val start = tapOffset
                                                 val end = cartOffset
-                                                FlyToCartController.current?.invoke(product, start, end)
+                                                FlyToCartController.current?.invoke(
+                                                    product,
+                                                    start,
+                                                    end
+                                                )
                                                 viewModel.addItemToOrder(product)
                                             }
                                         },
@@ -358,12 +423,13 @@ fun ItemWiseBillScreen(
                         }
                     }
                 }
+
                 else -> {}
             }
         }
     }
     FlyToCartOverlay()
-    if (showDialog){
+    if (showDialog) {
         ClearDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
@@ -372,7 +438,7 @@ fun ItemWiseBillScreen(
             }
         )
     }
-    if (showBillDialog){
+    if (showBillDialog) {
         MessageBox(
             title = "Alert",
             message = "Please select items to proceed billing.",
@@ -381,7 +447,7 @@ fun ItemWiseBillScreen(
     }
     if (success) {
         SuccessDialog(
-            title = "Payment Successful",
+            title = "Bill Successful",
             description = "Payment Done Successfully",
             paddingValues = values
         )
@@ -411,7 +477,7 @@ fun ActionButton(
 @Composable
 fun ClearDialog(
     onDismiss: () -> Unit,
-    onConfirm:() -> Unit
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

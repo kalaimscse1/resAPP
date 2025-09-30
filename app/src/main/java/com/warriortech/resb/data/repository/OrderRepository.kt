@@ -228,8 +228,8 @@ class OrderRepository @Inject constructor(
                     } else {
                         if (tableStatus != "DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0
                     }, // Adjust if your backend calculates differently
-                    igst_per = if (tableStatus == "DELIVERY") item.menuItem.tax_percentage.toDouble() else 0.0,
-                    igst = if (tableStatus == "DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0,
+                    igst_per = item.menuItem.tax_percentage.toDouble(),
+                    igst = taxAmount.gstAmount.roundTo2(),
                     cess_per = if (item.menuItem.is_inventory == 1L) item.menuItem.cess_per.toDouble() else 0.0,
                     cess = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
                     cess_specific = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0,
@@ -435,8 +435,8 @@ class OrderRepository @Inject constructor(
                     } else {
                         if (tableStatus != "DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0
                     }, // Adjust if your backend calculates differently
-                    igst_per = if (tableStatus == "DELIVERY") item.menuItem.tax_percentage.toDouble() else 0.0,
-                    igst = if (tableStatus == "DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0,
+                    igst_per = item.menuItem.tax_percentage.toDouble(),
+                    igst = taxAmount.gstAmount.roundTo2(),
                     cess_per = if (item.menuItem.is_inventory == 1L) item.menuItem.cess_per.toDouble() else 0.0,
                     cess = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
                     cess_specific = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0,
@@ -588,8 +588,8 @@ class OrderRepository @Inject constructor(
                     } else {
                         if (tableStatus != "DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0
                     },
-                    igst_per = if (tableStatus == "DELIVERY") item.menuItem.tax_percentage.toDouble() else 0.0,
-                    igst = if (tableStatus == "DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0,
+                    igst_per = item.menuItem.tax_percentage.toDouble(),
+                    igst = taxAmount.gstAmount.roundTo2(),
                     cess_per = if (item.menuItem.is_inventory == 1L) item.menuItem.cess_per.toDouble() else 0.0,
                     cess = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
                     cess_specific = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0,
@@ -739,8 +739,8 @@ class OrderRepository @Inject constructor(
                 } else {
                     if (tableStatus != "DELIVERY") (cess.cgst * item.quantity).roundTo2() else 0.0
                 }, // Adjust if your backend calculates differently
-                igst_per = if (tableStatus == "DELIVERY") item.menuItem.tax_percentage.toDouble() else 0.0,
-                igst = if (tableStatus == "DELIVERY") taxAmount.gstAmount.roundTo2() else 0.0,
+                igst_per = item.menuItem.tax_percentage.toDouble(),
+                igst = taxAmount.gstAmount.roundTo2(),
                 cess_per = if (item.menuItem.is_inventory == 1L) item.menuItem.cess_per.toDouble() else 0.0,
                 cess = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (cess.cessAmount * item.quantity).roundTo2() else 0.0,
                 cess_specific = if (item.menuItem.is_inventory == 1L && item.menuItem.cess_specific != 0.00) (item.menuItem.cess_specific * item.quantity).roundTo2() else 0.0,

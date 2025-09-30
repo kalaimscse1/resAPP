@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -21,7 +20,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.DashboardMetrics
-import com.warriortech.resb.model.RunningOrder
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.MobileOptimizedCard
@@ -34,15 +32,12 @@ import com.warriortech.resb.ui.viewmodel.DashboardViewModel
 import com.warriortech.resb.util.CurrencySettings
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DefaultLocale")
 @Composable
 fun DashboardScreen(
     drawerState: DrawerState,
     onNavigateToOrders: () -> Unit,
-    onNavigateToMenu: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToBilling: () -> Unit,
     onNavigateToDue: () -> Unit,
     onDineInSelected: () -> Unit,
@@ -144,9 +139,7 @@ fun DashboardScreen(
                      */
                     item {
                         QuickActionsSection(
-                            onNavigateToMenu = onNavigateToMenu,
                             onNavigateToOrders = onNavigateToOrders,
-                            onNavigateToSettings = onNavigateToSettings,
                             onNavigateToBilling = onNavigateToBilling,
                             onDineInSelected = onDineInSelected,
                             onTakeawaySelected = onTakeawaySelected,
@@ -162,7 +155,6 @@ fun DashboardScreen(
                         MetricsSection(
                             metrics = state.metrics,
                             onNavigateToOrders = onNavigateToOrders,
-                            onNavigateToBilling = onNavigateToBilling,
                             onNavigateToDue = onNavigateToDue
                         )
                     }
@@ -233,7 +225,6 @@ fun DashboardScreen(
 fun MetricsSection(
     metrics: DashboardMetrics,
     onNavigateToOrders: () -> Unit,
-    onNavigateToBilling: () -> Unit,
     onNavigateToDue: () -> Unit
 ) {
     Column {
@@ -245,7 +236,7 @@ fun MetricsSection(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MetricCard(
                 title = "Running Orders",
@@ -264,7 +255,7 @@ fun MetricsSection(
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MetricCard(
                 title = "Total Sales",
@@ -299,39 +290,37 @@ fun MetricCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp),
+                .padding(5.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     title,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (title == "Total Sales" || title == "Pending Due") {
-                    Text(
-                        value,
-                        fontWeight = FontWeight.Bold,
-                        color = color,
-                        fontSize = 18.sp
-                    )
-                } else {
-                    Text(
-                        value,
-                        fontWeight = FontWeight.Bold,
-                        color = color,
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = color,
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -339,9 +328,7 @@ fun MetricCard(
 
 @Composable
 fun QuickActionsSection(
-    onNavigateToMenu: () -> Unit,
     onNavigateToOrders: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToBilling: () -> Unit,
     onDineInSelected: () -> Unit,
     onTakeawaySelected: () -> Unit,
@@ -422,174 +409,5 @@ fun QuickActionsSection(
                 )
             }
         )
-    }
-}
-
-@Composable
-fun RunningOrdersSection(
-    orders: List<RunningOrder>,
-    onNavigateToOrders: () -> Unit
-) {
-    Column {
-        Text(
-            "Running Orders",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        if (orders.isEmpty()) {
-            MobileOptimizedCard(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "No running orders",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
-        } else {
-            orders.forEach { order ->
-                RunningOrderCard(
-                    order = order,
-                    onClick = { onNavigateToOrders() }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-}
-
-@SuppressLint("DefaultLocale")
-@Composable
-fun RunningOrderCard(
-    order: RunningOrder,
-    onClick: () -> Unit
-) {
-    MobileOptimizedCard(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(
-                        "Order #${order.orderId}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        order.tableInfo,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = when (order.status) {
-                            "PREPARING" -> Color(0xFFFF9800).copy(alpha = 0.2f)
-                            "READY" -> Color(0xFF4CAF50).copy(alpha = 0.2f)
-                            else -> MaterialTheme.colorScheme.primaryContainer
-                        }
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        order.status,
-                        modifier = Modifier.padding(8.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    "Items: ${order.itemCount}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Text(
-                    "₹${String.format("%.2f", order.amount)}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Text(
-                "Time: ${order.orderTime}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-    }
-}
-
-@Composable
-fun RecentActivitySection(
-    activities: List<String>
-) {
-    Column {
-        Text(
-            "Recent Activity",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        MobileOptimizedCard(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                if (activities.isEmpty()) {
-                    Text(
-                        "No recent activity",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                } else {
-                    activities.forEach { activity ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.Circle,
-                                contentDescription = null,
-                                modifier = Modifier.size(8.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                activity,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
-            }
-        }
     }
 }
