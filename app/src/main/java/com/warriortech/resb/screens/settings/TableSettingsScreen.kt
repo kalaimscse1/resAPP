@@ -141,9 +141,16 @@ fun TableSettingsScreen(
                 table = null,
                 onDismiss = { showAddDialog = false },
                 onSave = { table ->
-                    scope.launch {
-                        viewModel.addTable(table)
-                        showAddDialog = false
+                    if (table.area_id.toInt() == 1 || table.area_id.toInt() == 0) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Please select a valid area")
+                        }
+                        return@TableDialog
+                    }else{
+                        scope.launch {
+                            viewModel.addTable(table)
+                            showAddDialog = false
+                        }
                     }
                 },
                 areas = areas
@@ -184,7 +191,7 @@ fun TableItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Table ${table.table_name}",
+                    text = "Table : ${table.table_name}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -281,13 +288,13 @@ fun TableDialog(
                 onClick = {
                     val newTable = TblTable(
                         table_id = table?.table_id ?: 0L,
-                        area_id = table?.area_id ?: areaId,
-                        table_name = table?.table_name ?: tableNumber,
-                        seating_capacity = table?.seating_capacity ?: capacity.toInt(),
-                        is_ac = table?.is_ac ?: isAc.toString(),
-                        table_status = table?.table_status ?: tableStatus.toString(),
-                        table_availability = table?.table_availability ?: "AVAILABLE",
-                        is_active = table?.is_active ?: isActive
+                        area_id = areaId,
+                        table_name = tableNumber,
+                        seating_capacity =  capacity.toInt(),
+                        is_ac =  isAc.toString(),
+                        table_status =  tableStatus.toString(),
+                        table_availability = "AVAILABLE",
+                        is_active =  isActive
                     )
                     onSave(newTable)
                 },

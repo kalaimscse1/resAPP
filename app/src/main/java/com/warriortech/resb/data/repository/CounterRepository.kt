@@ -40,20 +40,19 @@ class CounterRepository @Inject constructor(
         }
     }
 
-    suspend fun updateCounter(counter: TblCounter): Int? {
+    suspend fun updateCounter(counter: TblCounter): Int {
         return try {
             apiService.updateCounter(counter.counter_id, counter,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
-            null
+            0
         }
     }
 
-    suspend fun deleteCounter(id: Long): Boolean {
+    suspend fun deleteCounter(id: Long): Int {
         return try {
             apiService.deleteCounter(id,sessionManager.getCompanyCode()?:"")
-            true
         } catch (e: Exception) {
-            false
+            0
         }
     }
     // Simulated data - replace with actual database implementation

@@ -36,20 +36,19 @@ class PrinterRepository @Inject constructor(
         }
     }
 
-    suspend fun updatePrinter(printer: Printer): Int? {
+    suspend fun updatePrinter(printer: Printer): Int {
         return try {
             apiService.updatePrinter(printer.printer_id, printer,sessionManager.getCompanyCode()?:"")
         } catch (e: Exception) {
-            null
+            0
         }
     }
 
-    suspend fun deletePrinter(id: Long): Boolean {
+    suspend fun deletePrinter(id: Long): Int {
         return try {
             apiService.deletePrinter(id,sessionManager.getCompanyCode()?:"")
-            true
         } catch (e: Exception) {
-            false
+            0
         }
     }
 }

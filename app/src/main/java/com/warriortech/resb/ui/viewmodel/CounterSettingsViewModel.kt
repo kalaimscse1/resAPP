@@ -66,10 +66,8 @@ class CounterSettingsViewModel @Inject constructor(
     fun deleteCounter(id: Long) {
         viewModelScope.launch {
             try {
-                val success = counterRepository.deleteCounter(id)
-                if (success) {
-                    loadCounters()
-                }
+                counterRepository.deleteCounter(id)
+                loadCounters()
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to delete counter")
             }

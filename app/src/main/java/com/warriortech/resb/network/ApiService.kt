@@ -195,13 +195,13 @@ interface ApiService {
         @Path("item_cat_id") id: Long,
         @Body category: MenuCategory,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<MenuCategory>
+    ): Response<Int>
 
     @DELETE("menu/itemCategory/deleteItemCategoryById/{item_cat_id}")
     suspend fun deleteMenuCategory(
         @Path("item_cat_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Unit>
+    ): Response<Int>
 
     @GET("menu/itemCategory/getMaxOrderBy")
     suspend fun getMenuCategoryOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
@@ -378,9 +378,9 @@ interface ApiService {
 
     @DELETE("settings/counter/deleteCounterById/{counter_id}")
     suspend fun deleteCounter(
-        @Path("id") id: Long,
+        @Path("counter_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    )
+    ): Int
 
     /**
      * RoleSettings Management

@@ -63,10 +63,8 @@ class PrinterSettingsViewModel @Inject constructor(
     fun updatePrinter(printer: Printer) {
         viewModelScope.launch {
             try {
-                val updatedPrinter = printerRepository.updatePrinter(printer)
-                if (updatedPrinter != null) {
-                    loadPrinters()
-                }
+                 printerRepository.updatePrinter(printer)
+                loadPrinters()
             } catch (e: Exception) {
                 _uiState.value = PrinterSettingsUiState.Error(e.message ?: "Unknown error")
             }
@@ -76,10 +74,8 @@ class PrinterSettingsViewModel @Inject constructor(
     fun deletePrinter(id: Long) {
         viewModelScope.launch {
             try {
-                val success = printerRepository.deletePrinter(id)
-                if (success) {
-                    loadPrinters()
-                }
+               printerRepository.deletePrinter(id)
+                loadPrinters()
             } catch (e: Exception) {
                 _uiState.value = PrinterSettingsUiState.Error(e.message ?: "Unknown error")
             }

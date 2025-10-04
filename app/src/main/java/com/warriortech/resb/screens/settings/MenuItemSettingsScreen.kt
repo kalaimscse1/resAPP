@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -14,7 +16,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -251,6 +256,16 @@ fun MenuItemDialog(
 ) {
     val rateOptions = listOf("YES", "NO")
 
+    val nameFocus = remember { FocusRequester() }
+    val nameTamilFocus = remember { FocusRequester() }
+    val rateFocus = remember { FocusRequester() }
+    val acRateFocus = remember { FocusRequester() }
+    val parcelRateFocus = remember { FocusRequester() }
+    val parcelChargeFocus = remember { FocusRequester() }
+    val preparationTimeFocus = remember { FocusRequester() }
+    val hsnCodeFocus = remember { FocusRequester() }
+    val minStockFocus = remember { FocusRequester() }
+    val orderByFocus = remember { FocusRequester() }
     // Menu fields
     var name by remember { mutableStateOf(menuItem?.menu_item_name ?: "") }
     var nameTamil by remember { mutableStateOf(menuItem?.menu_item_name_tamil ?: "") }
@@ -327,6 +342,11 @@ fun MenuItemDialog(
                 onValueChange = { name = it.uppercase() },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(nameFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { nameTamilFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -335,6 +355,11 @@ fun MenuItemDialog(
                 onValueChange = { nameTamil = it },
                 label = { Text("Name (Tamil)") },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(nameTamilFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { rateFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -343,6 +368,11 @@ fun MenuItemDialog(
                 onValueChange = { rate = it },
                 label = { Text("Rate") },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(rateFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { acRateFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -351,6 +381,11 @@ fun MenuItemDialog(
                 onValueChange = { acRate = it },
                 label = { Text("AC Rate") },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(acRateFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { parcelRateFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -359,6 +394,11 @@ fun MenuItemDialog(
                 onValueChange = { parcelRate = it },
                 label = { Text("Parcel Rate") },
                 modifier = Modifier.fillMaxWidth()
+                    .focusRequester(parcelRateFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { parcelChargeFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -446,6 +486,11 @@ fun MenuItemDialog(
                     onValueChange = { hsnCode = it },
                     label = { Text("HSN Code") },
                     modifier = Modifier.fillMaxWidth()
+                        .focusRequester(hsnCodeFocus),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { minStockFocus.requestFocus() }
+                    )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -454,6 +499,11 @@ fun MenuItemDialog(
                     onValueChange = { minStock = it.toLong() },
                     label = { Text("Minimum Stock") },
                     modifier = Modifier.fillMaxWidth()
+                        .focusRequester(minStockFocus),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { orderByFocus.requestFocus() }
+                    )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -485,65 +535,8 @@ fun MenuItemDialog(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-//                StringDropdown(
-//                    options = listOf("YES", "NO"),
-//                    selectedOption = if (isActive == 1L) "YES" else "NO",
-//                    onOptionSelected = { isActive = if (it == "YES") 1 else 0 },
-//                    label = "Is Active",
-//                    modifier = Modifier.fillMaxWidth()
-//                )
         }
     }
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        title = { Text(if (menuItem != null) "Edit Menu Item" else "Add Menu Item") },
-//        text = {
-//
-//        },
-//        confirmButton = {
-//            TextButton(
-//                onClick = {
-//                    val newMenuItem = TblMenuItemRequest(
-//                        menu_item_id = menuItem?.menu_item_id ?: 0,
-//                        menu_item_name = name,
-//                        menu_item_name_tamil = nameTamil,
-//                        item_cat_id = menuItemCatId,
-//                        rate = rate.toDoubleOrNull() ?: 0.0,
-//                        ac_rate = acRate.toDoubleOrNull() ?: 0.0,
-//                        parcel_rate = parcelRate.toDoubleOrNull() ?: 0.0,
-//                        parcel_charge = parcelCharge.toDoubleOrNull() ?: 0.0,
-//                        tax_id = taxId,
-//                        cess_specific = 0.0,
-//                        kitchen_cat_id = kitchenCatId,
-//                        stock_maintain = stockMaintain,
-//                        rate_lock = rateLock,
-//                        unit_id = unitId,
-//                        min_stock = minStock,
-//                        hsn_code = hsnCode,
-//                        order_by = orderBy,
-//                        is_inventory = isInventory,
-//                        is_raw = isRaw,
-//                        is_available = isAvailable,
-//                        menu_item_code = menuItem?.menu_item_code ?: "",
-//                        menu_id = menuId,
-//                        is_favourite = isFavourite,
-//                        is_active = isActive,
-//                        image = "",
-//                        preparation_time = preparationTime
-//                    )
-//                    onSave(newMenuItem)
-//                },
-//                enabled = name.isNotBlank() && rate.isNotBlank()
-//            ) {
-//                Text("Save")
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text("Cancel")
-//            }
-//        }
-//    )
 }
 
 

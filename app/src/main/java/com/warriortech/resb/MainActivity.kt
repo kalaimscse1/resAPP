@@ -77,6 +77,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -937,7 +938,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Dashboard") else Text("") },
-                        icon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Default.Dashboard,null,isCollapsed)},
                         selected = currentDestination?.route == "dashboard",
                         onClick = { onDestinationClicked("dashboard") },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -949,7 +950,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Masters") else Text("") },
-                        icon = { Icon(Icons.Filled.Inventory, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Filled.Inventory, contentDescription = null,isCollapsed) },
                         selected = currentDestination?.route in listOf(
                             "menu_item_setting",
                             "menu_setting",
@@ -968,9 +969,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Menu Items") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.Restaurant,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "menu_item_setting",
@@ -981,9 +983,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Menu") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.AutoMirrored.Filled.MenuBook,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "menu_setting",
@@ -993,7 +996,7 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Menu Categories") else Text("") },
-                                icon = { Icon(Icons.Default.Category, contentDescription = null) },
+                                icon = { DrawerIcon(Icons.Default.Category, contentDescription = null,isCollapsed) },
                                 selected = currentDestination?.route == "menu_Category_setting",
                                 onClick = { onDestinationClicked("menu_Category_setting") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1002,9 +1005,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Tables") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.TableRestaurant,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "table_setting",
@@ -1015,9 +1019,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Areas") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.LocationOn,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "area_setting",
@@ -1033,7 +1038,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Orders") else Text("") },
-                        icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Default.Receipt, contentDescription = null,isCollapsed) },
                         selected = currentDestination?.route in listOf("selects", "takeaway_menu"),
                         onClick = {
                             setExpandedMenu(if (expandedMenu == ExpandedMenu.ORDERS) ExpandedMenu.NONE else ExpandedMenu.ORDERS)
@@ -1046,9 +1051,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Dine In") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.Restaurant,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "selects",
@@ -1058,7 +1064,7 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Takeaway") else Text("") },
-                                icon = { Icon(Icons.Default.Fastfood, contentDescription = null) },
+                                icon = { DrawerIcon(Icons.Default.Fastfood, contentDescription = null,isCollapsed) },
                                 selected = currentDestination?.route == "takeaway_menu",
                                 onClick = { onDestinationClicked("takeaway_menu") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1073,7 +1079,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Bills") else Text("") },
-                        icon = { Icon(Icons.Default.AttachMoney, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Default.AttachMoney, contentDescription = null,isCollapsed) },
                         selected = currentDestination?.route in listOf("counter", "quick_bills"),
                         onClick = {
                             setExpandedMenu(if (expandedMenu == ExpandedMenu.BILLING) ExpandedMenu.NONE else ExpandedMenu.BILLING)
@@ -1086,9 +1092,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Counter Billing") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.PointOfSale,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "counter",
@@ -1099,9 +1106,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Quick Bills") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.Bolt,
-                                        contentDescription = "Quick Bills"
+                                        contentDescription = "Quick Bills",
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "quick_bills",
@@ -1116,7 +1124,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Reports") else Text("") },
-                        icon = { Icon(Icons.Default.Assessment, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Default.Assessment, contentDescription = null,isCollapsed) },
                         selected = currentDestination?.route in listOf(
                             "report_screen",
                             "orders",
@@ -1134,7 +1142,7 @@ fun DrawerContent(
                         Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Orders") else Text("") },
-                                icon = { Icon(Icons.Default.Receipt, contentDescription = null) },
+                                icon = { DrawerIcon(Icons.Default.Receipt, contentDescription = null,isCollapsed) },
                                 selected = currentDestination?.route == "orders",
                                 onClick = { onDestinationClicked("orders") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1143,9 +1151,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Paid Bills") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.AutoMirrored.Filled.ListAlt,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "paid_bills",
@@ -1159,7 +1168,8 @@ fun DrawerContent(
                                     Icon(
                                         Icons.Filled.Payment,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(if (isCollapsed) 50.dp else 24.dp)
                                     )
                                 },
                                 selected = currentDestination?.route == "due",
@@ -1170,9 +1180,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Sales") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.Assessment,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "report_screen",
@@ -1183,9 +1194,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Item Wise") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.Default.Restaurant,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "item_wise",
@@ -1195,7 +1207,7 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Category Wise") else Text("") },
-                                icon = { Icon(Icons.Default.Category, contentDescription = null) },
+                                icon = { DrawerIcon(Icons.Default.Category, contentDescription = null,isCollapsed) },
                                 selected = currentDestination?.route == "category_wise",
                                 onClick = { onDestinationClicked("category_wise") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1203,7 +1215,7 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("KOT Report") else Text("") },
-                                icon = { Icon(Icons.Default.Kitchen, contentDescription = null) },
+                                icon = { DrawerIcon(Icons.Default.Kitchen, contentDescription = null,isCollapsed) },
                                 selected = currentDestination?.route == "kot_report",
                                 onClick = { onDestinationClicked("kot_report") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1214,9 +1226,10 @@ fun DrawerContent(
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("GST Reports") else Text("") },
                         icon = {
-                            Icon(
+                            DrawerIcon(
                                 Icons.AutoMirrored.Filled.ReceiptLong,
-                                contentDescription = null
+                                contentDescription = null,
+                                isCollapsed
                             )
                         },
                         selected = currentDestination?.route in listOf(
@@ -1232,9 +1245,10 @@ fun DrawerContent(
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("HSN Reports") else Text("") },
                                 icon = {
-                                    Icon(
+                                    DrawerIcon(
                                         Icons.AutoMirrored.Filled.ListAlt,
-                                        contentDescription = null
+                                        contentDescription = null,
+                                        isCollapsed
                                     )
                                 },
                                 selected = currentDestination?.route == "hsn_reports",
@@ -1252,7 +1266,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Settings") else Text("") },
-                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Default.Settings, contentDescription = null,isCollapsed) },
                         selected = currentDestination?.route == "settings",
                         onClick = { onDestinationClicked("settings") },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1271,7 +1285,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER", "CHEF")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Support") else Text("") },
-                        icon = { Icon(Icons.Default.SupportAgent, contentDescription = null) },
+                        icon = { DrawerIcon(Icons.Default.SupportAgent, contentDescription = null,isCollapsed) },
                         selected = currentDestination?.route == "support_screen",
                         onClick = { onDestinationClicked("support_screen") },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1284,9 +1298,10 @@ fun DrawerContent(
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Collapse Drawer") else Text("") },
                     icon = {
-                        Icon(
-                            imageVector = if (isCollapsed) Icons.AutoMirrored.Filled.KeyboardArrowRight else Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Toggle Collapse"
+                        DrawerIcon(
+                            if (isCollapsed) Icons.AutoMirrored.Filled.KeyboardArrowRight else Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Toggle Collapse",
+                            isCollapsed = isCollapsed
                         )
                     },
                     selected = false,
@@ -1303,7 +1318,7 @@ fun DrawerContent(
             if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CHEF", "CASHIER")) {
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Logout") else Text("") },
-                    icon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
+                    icon = { DrawerIcon(Icons.AutoMirrored.Filled.Logout, contentDescription = null,isCollapsed) },
                     selected = false,
                     onClick = { onDestinationClicked("logout") },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1314,3 +1329,11 @@ fun DrawerContent(
     }
 }
 
+@Composable
+fun DrawerIcon(icon: ImageVector, contentDescription: String?, isCollapsed: Boolean) {
+    Icon(
+        imageVector = icon,
+        contentDescription = contentDescription,
+        modifier = Modifier.size(if (isCollapsed) 50.dp else 24.dp) // 👈 bigger when collapsed
+    )
+}

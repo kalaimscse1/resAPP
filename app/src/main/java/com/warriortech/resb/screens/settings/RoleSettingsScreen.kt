@@ -205,22 +205,19 @@ fun RoleDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Active")
                 }
-
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    val newRole = role?.copy(
-                        role = name,
-                        is_active = isActive
-                    ) ?: Role(
-                        role_id = 0,
+                    val newRole = Role(
+                        role_id = role?.role_id ?: 0,
                         role = name,
                         is_active = isActive
                     )
                     onSave(newRole)
-                }
+                },
+                enabled = name.isNotBlank()
             ) {
                 Text(stringResource(R.string.save))
             }

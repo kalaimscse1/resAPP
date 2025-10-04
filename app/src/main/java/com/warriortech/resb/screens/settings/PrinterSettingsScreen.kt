@@ -246,7 +246,8 @@ fun PrinterDialog(
                         is_active = isActive
                     )
                     onSave(newPrinter)
-                }
+                },
+                enabled = name.isNotBlank() && ipAddress.isNotBlank() && kitchenCatId.toInt() != 0
             ) {
                 Text(stringResource(R.string.save))
             }

@@ -32,7 +32,7 @@ class MenuCategoryRepository @Inject constructor(
         }
     }
 
-    suspend fun updateCategory(category: MenuCategory): MenuCategory {
+    suspend fun updateCategory(category: MenuCategory): Int {
         val response = apiService.updateMenuCategory(category.item_cat_id, category,sessionManager.getCompanyCode()?:"")
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Failed to update category")

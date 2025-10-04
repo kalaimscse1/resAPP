@@ -320,7 +320,10 @@ fun AddStaffDialog(
                         address.isNotBlank() &&
                         phone.isNotBlank() &&
                         userName.isNotBlank() &&
-                        password.isNotBlank()
+                        password.isNotBlank() &&
+                        role != 0L &&
+                        areaId != 0L &&
+                        counterId != 0L
             ) {
                 Text("Add")
             }

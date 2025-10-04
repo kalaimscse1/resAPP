@@ -61,10 +61,13 @@ fun RegistrationScreen(
     LaunchedEffect(registrationResult) {
         registrationResult?.let { message ->
             snackbarHostState.showSnackbar(message)
-            viewModel.clearRegistrationResult()
-            navController.navigate("login") {
-                popUpTo("registration") { inclusive = true }
+            if (message=="Registration successful!") {
+                // Navigate to login screen after successful registration
+                navController.navigate("login") {
+                    popUpTo("registration") { inclusive = true }
+                }
             }
+            viewModel.clearRegistrationResult()
         }
     }
 
