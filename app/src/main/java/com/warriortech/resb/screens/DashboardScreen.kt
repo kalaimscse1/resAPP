@@ -386,7 +386,7 @@ fun QuickActionsSection(
     if (showOrderTypeDialog) {
         AlertDialog(
             onDismissRequest = { showOrderTypeDialog = false },
-            title = { Text("Select Order Type") },
+            title = { Text("Order Type") },
             text = { Text("Please choose order type:") },
             confirmButton = {
                 MobileOptimizedButton(
