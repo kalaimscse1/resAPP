@@ -1,8 +1,11 @@
+
 package com.warriortech.resb.util
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -16,6 +19,8 @@ fun ReusableBottomSheet(
     buttonText: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val scrollState = rememberScrollState()
+    
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -35,8 +40,16 @@ fun ReusableBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Custom Content (form fields)
-            content()
+            // Scrollable Content Container
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .verticalScroll(scrollState)
+            ) {
+                // Custom Content (form fields)
+                content()
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -58,25 +71,4 @@ fun ReusableBottomSheet(
             }
         }
     }
-}
-
-
-/**
- * A generic wrapper for handling different states of operations
- */
-sealed class Resulable<out T> {
-    /**
-     * Loading state
-     */
-    object Loading : Resulable<Nothing>()
-
-    /**
-     * Success state with data
-     */
-    data class Success<T>(val data: T) : Resulable<T>()
-
-    /**
-     * Error state with message
-     */
-    data class Error(val message: String) : Resulable<Nothing>()
 }
