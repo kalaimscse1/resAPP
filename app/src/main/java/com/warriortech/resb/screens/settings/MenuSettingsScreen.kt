@@ -3,8 +3,12 @@ package com.warriortech.resb.screens.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -226,11 +231,20 @@ fun MenuDialog(
     order: String
 ) {
 
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
     val nameFocus = remember { FocusRequester() }
     val descriptionFocus = remember { FocusRequester() }
     val startTimeFocus = remember { FocusRequester() }
     val endTimeFocus = remember { FocusRequester() }
     val isActiveFocus = remember { FocusRequester() }
+
+    val nameBringIntoView = remember { BringIntoViewRequester() }
+    val descriptionBringIntoView = remember { BringIntoViewRequester() }
+    val startTimeBringIntoView = remember { BringIntoViewRequester() }
+    val endTimeBringIntoView = remember { BringIntoViewRequester() }
+
     var name by remember { mutableStateOf(menu?.menu_name ?: "") }
     var description by remember { mutableStateOf(menu?.order_by ?: order) }
     var isActive by remember { mutableStateOf(menu?.is_active ?: true) }
@@ -261,57 +275,80 @@ fun MenuDialog(
                 label = { Text("Name") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(nameFocus),
+                    .focusRequester(nameFocus)
+                    .bringIntoViewRequester(nameBringIntoView),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onNext = { descriptionFocus.requestFocus() }
+                    onNext = {
+                        descriptionFocus.requestFocus()
+                    }
                 )
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.uppercase() },
                 label = { Text("OrderBy") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(descriptionFocus),
+                    .focusRequester(descriptionFocus)
+                    .bringIntoViewRequester(descriptionBringIntoView),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onNext = { startTimeFocus.requestFocus() }
+                    onNext = {
+                        startTimeFocus.requestFocus()
+                    }
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "Menu Time Settings",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = startTime,
                 onValueChange = { startTime = it },
                 label = { Text("Start Time") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(startTimeFocus),
+                    .focusRequester(startTimeFocus)
+                    .bringIntoViewRequester(startTimeBringIntoView),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
-                    onNext = { endTimeFocus.requestFocus() }
+                    onNext = {
+                        endTimeFocus.requestFocus()
+                    }
                 )
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = endTime,
                 onValueChange = { endTime = it },
                 label = { Text("End Time") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(endTimeFocus),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    .focusRequester(endTimeFocus)
+                    .bringIntoViewRequester(endTimeBringIntoView),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
-                    onNext = { isActiveFocus.requestFocus() }
+                    onDone = {
+                        isActiveFocus.requestFocus()
+                    }
                 )
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {

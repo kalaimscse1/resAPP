@@ -1,6 +1,7 @@
 package com.warriortech.resb.ui.viewmodel
 
 import android.annotation.SuppressLint
+import androidx.collection.emptyLongSet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.model.MenuItem
@@ -405,8 +406,19 @@ class MenuViewModel @Inject constructor(
     }
 
     fun getOrderTotal(tableStatus: String): Double {
-        return _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
-            menuItem.actual_rate * quantity
+        return if (_isExistingOrderLoaded.value) {
+            _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
+                menuItem.actual_rate * quantity
+            }
+        } else {
+            _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
+                if (tableStatus == "AC")
+                    menuItem.ac_rate * quantity
+                else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY")
+                    menuItem.parcel_rate * quantity
+                else
+                    menuItem.rate * quantity
+            }
         }
     }
 
