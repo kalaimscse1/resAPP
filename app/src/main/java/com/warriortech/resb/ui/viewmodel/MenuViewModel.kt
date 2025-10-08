@@ -405,19 +405,8 @@ class MenuViewModel @Inject constructor(
     }
 
     fun getOrderTotal(tableStatus: String): Double {
-        return if (isExistingOrderLoaded.value) {
-            _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
-                menuItem.actual_rate * quantity
-            }
-        } else {
-            _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
-                if (tableStatus == "AC")
-                    menuItem.ac_rate * quantity
-                else if (tableStatus == "TAKEAWAY" || tableStatus == "DELIVERY")
-                    menuItem.parcel_rate * quantity
-                else
-                    menuItem.rate * quantity
-            }
+        return _selectedItems.value.entries.sumOf { (menuItem, quantity) ->
+            menuItem.actual_rate * quantity
         }
     }
 

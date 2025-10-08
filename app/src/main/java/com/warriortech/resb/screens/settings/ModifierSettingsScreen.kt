@@ -45,7 +45,7 @@ fun ModifierSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Modifier Settings", color = SurfaceLight) },
+                title = { Text("AddOn Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(

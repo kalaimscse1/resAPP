@@ -30,12 +30,14 @@ fun MenuCategorySettingsScreen(
     viewModel: MenuCategorySettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val order by viewModel.orderBy.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<MenuCategory?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
+        viewModel.getOrderBy()
         viewModel.loadCategories()
     }
     Scaffold(
@@ -125,7 +127,8 @@ fun MenuCategorySettingsScreen(
                         viewModel.addCategory(name, description, sortOrder)
                         showAddDialog = false
                     }
-                }
+                },
+                order = order
             )
         }
 
@@ -138,7 +141,8 @@ fun MenuCategorySettingsScreen(
                         viewModel.updateCategory(category.item_cat_id, name, description, sortOrder)
                         editingCategory = null
                     }
-                }
+                },
+                order = order
             )
         }
     }
@@ -181,10 +185,11 @@ fun CategoryCard(
 fun CategoryDialog(
     category: MenuCategory?,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, Boolean) -> Unit
+    onConfirm: (String, String, Boolean) -> Unit,
+    order : String
 ) {
     var name by remember { mutableStateOf(category?.item_cat_name ?: "") }
-    var orderBy by remember { mutableStateOf(category?.order_by ?: "1") }
+    var orderBy by remember { mutableStateOf(category?.order_by ?: order) }
     var isActive by remember { mutableStateOf(category?.is_active != false) }
 
     ReusableBottomSheet(

@@ -153,6 +153,7 @@ import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.SplashScreen
 import com.warriortech.resb.screens.reports.UnpaidBillsScreen
+import com.warriortech.resb.screens.reports.gst.GSTRReportScreen
 import com.warriortech.resb.screens.reports.gst.HsnReportScreen
 import com.warriortech.resb.screens.settings.ChangePasswordScreen
 import com.warriortech.resb.screens.settings.ResetScreen
@@ -838,6 +839,11 @@ fun AppNavigation(
                 drawerState = drawerState
             )
         }
+        composable("gstR_Docs") {
+            GSTRReportScreen(
+                drawerState = drawerState
+            )
+        }
     }
 }
 
@@ -1002,78 +1008,83 @@ fun DrawerContent(
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                 colors = subMenuColors
                             )
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Tables") else Text("") },
-                                icon = {
-                                    DrawerIcon(
-                                        Icons.Default.TableRestaurant,
-                                        contentDescription = null,
-                                        isCollapsed
-                                    )
-                                },
-                                selected = currentDestination?.route == "table_setting",
-                                onClick = { onDestinationClicked("table_setting") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Areas") else Text("") },
-                                icon = {
-                                    DrawerIcon(
-                                        Icons.Default.LocationOn,
-                                        contentDescription = null,
-                                        isCollapsed
-                                    )
-                                },
-                                selected = currentDestination?.route == "area_setting",
-                                onClick = { onDestinationClicked("area_setting") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
+                            if (sessionManager.getGeneralSetting()?.is_table_allowed==true){
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Tables") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.TableRestaurant,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "table_setting",
+                                    onClick = { onDestinationClicked("table_setting") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Areas") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "area_setting",
+                                    onClick = { onDestinationClicked("area_setting") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
+                            }
                         }
                     }
                 }
 
                 // 🔹 Orders
-                if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER")) {
-                    NavigationDrawerItem(
-                        label = { if (!isCollapsed) Text("Orders") else Text("") },
-                        icon = { DrawerIcon(Icons.Default.Receipt, contentDescription = null,isCollapsed) },
-                        selected = currentDestination?.route in listOf("selects", "takeaway_menu"),
-                        onClick = {
-                            setExpandedMenu(if (expandedMenu == ExpandedMenu.ORDERS) ExpandedMenu.NONE else ExpandedMenu.ORDERS)
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        colors = drawerItemColors
-                    )
-                    AnimatedVisibility(expandedMenu == ExpandedMenu.ORDERS) {
-                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Dine In") else Text("") },
-                                icon = {
-                                    DrawerIcon(
-                                        Icons.Default.Restaurant,
-                                        contentDescription = null,
-                                        isCollapsed
-                                    )
-                                },
-                                selected = currentDestination?.route == "selects",
-                                onClick = { onDestinationClicked("selects") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Takeaway") else Text("") },
-                                icon = { DrawerIcon(Icons.Default.Fastfood, contentDescription = null,isCollapsed) },
-                                selected = currentDestination?.route == "takeaway_menu",
-                                onClick = { onDestinationClicked("takeaway_menu") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
+                if (sessionManager.getGeneralSetting()?.is_table_allowed==true){
+                    if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER")) {
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Orders") else Text("") },
+                            icon = { DrawerIcon(Icons.Default.Receipt, contentDescription = null,isCollapsed) },
+                            selected = currentDestination?.route in listOf("selects", "takeaway_menu"),
+                            onClick = {
+                                setExpandedMenu(if (expandedMenu == ExpandedMenu.ORDERS) ExpandedMenu.NONE else ExpandedMenu.ORDERS)
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = drawerItemColors
+                        )
+                        AnimatedVisibility(expandedMenu == ExpandedMenu.ORDERS) {
+                            Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Dine In") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.Restaurant,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "selects",
+                                    onClick = { onDestinationClicked("selects") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Takeaway") else Text("") },
+                                    icon = { DrawerIcon(Icons.Default.Fastfood, contentDescription = null,isCollapsed) },
+                                    selected = currentDestination?.route == "takeaway_menu",
+                                    onClick = { onDestinationClicked("takeaway_menu") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
 
+                            }
                         }
                     }
                 }
+
 
                 // 🔹 Billing
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
@@ -1234,6 +1245,7 @@ fun DrawerContent(
                         },
                         selected = currentDestination?.route in listOf(
                             "hsn_reports",
+                            "gstR_Docs"
                         ),
                         onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.GSTREPORTS) ExpandedMenu.NONE else ExpandedMenu.GSTREPORTS) },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1253,6 +1265,21 @@ fun DrawerContent(
                                 },
                                 selected = currentDestination?.route == "hsn_reports",
                                 onClick = { onDestinationClicked("hsn_reports") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("GSTR-Docs") else Text("") },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.AutoMirrored.Filled.ReceiptLong,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
+                                selected = currentDestination?.route == "gstR_Docs",
+                                onClick = { onDestinationClicked("gstR_Docs") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                 colors = subMenuColors
                             )

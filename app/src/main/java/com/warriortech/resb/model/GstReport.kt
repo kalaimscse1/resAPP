@@ -16,8 +16,8 @@ data class HsnReport(
 
 data class GSTRDOCS(
     val description: String,
-    val from: String,
-    val to: String,
+    val billFrom: String,
+    val billTo: String,
     val nos: Int,
     val cancelled: Int,
 )

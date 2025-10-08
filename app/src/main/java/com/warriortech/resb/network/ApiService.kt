@@ -85,7 +85,7 @@ interface ApiService {
     suspend fun deleteArea(
         @Path("area_id") lng: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Int>
+    ):Response<ResponseBody>
 
     /**
      * Table Management
@@ -172,7 +172,7 @@ interface ApiService {
     suspend fun deleteMenu(
         @Path("menu_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Int>
+    ): Response<ResponseBody>
 
     @GET("menu/getMaxOrderBy")
     suspend fun getOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
@@ -201,7 +201,7 @@ interface ApiService {
     suspend fun deleteMenuCategory(
         @Path("item_cat_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Int>
+    ): Response<ResponseBody>
 
     @GET("menu/itemCategory/getMaxOrderBy")
     suspend fun getMenuCategoryOrderBy(@Header("X-Tenant-ID") tenantId: String): Response<Map<String, Long>>
@@ -227,7 +227,7 @@ interface ApiService {
     suspend fun deleteMenuItem(
         @Path("menu_item_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Any>
+    ): Response<ResponseBody>
 
     @GET("menu/menuItem/getMenuItemsByIsActive")
     suspend fun getMenuItems(@Header("X-Tenant-ID") tenantId: String): Response<List<TblMenuItemResponse>>
@@ -380,7 +380,7 @@ interface ApiService {
     suspend fun deleteCounter(
         @Path("counter_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Int
+    ): Response<String>
 
     /**
      * RoleSettings Management
@@ -775,7 +775,7 @@ interface ApiService {
     ): Response<Unit>
 
     /**
-     * Modifiers Management
+     * AddOn Management
      */
 
     @GET("menu/addOn/getAddOnByIsActive")

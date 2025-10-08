@@ -225,7 +225,7 @@ class CounterViewModel @Inject constructor(
                 )
             }
             _menuState.value = MenuUiState.Loading
-            orderRepository.placeOrderLocalDb(
+            orderRepository.placeOrUpdateOrders(
                 tableId, orderItems,
                 tableStatus1.toString()
             ).collect { result ->

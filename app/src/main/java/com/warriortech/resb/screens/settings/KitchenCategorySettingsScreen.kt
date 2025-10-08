@@ -179,7 +179,7 @@ fun KitchenCategoryCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Category: ${kitchenCategory.kitchen_cat_name}",
+                    text = kitchenCategory.kitchen_cat_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )

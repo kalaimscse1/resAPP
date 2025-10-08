@@ -650,10 +650,10 @@ class SyncWorker @AssistedInject constructor(
         handleServerSync("ItemCategories") { /* TODO: Implement item category sync */ }
 
     private suspend fun syncPendingModifiersToServer() =
-        handlePendingSync("Modifiers") { /* TODO: Implement modifier sync */ }
+        handlePendingSync("AddOn") { /* TODO: Implement modifier sync */ }
 
     private suspend fun syncModifiersFromServer() =
-        handleServerSync("Modifiers") { /* TODO: Implement modifier sync */ }
+        handleServerSync("AddOn") { /* TODO: Implement modifier sync */ }
 
     private suspend fun syncPendingGeneralSettingsToServer() =
         handlePendingSync("GeneralSettings") { /* TODO: Implement general settings sync */ }

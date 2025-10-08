@@ -17,7 +17,7 @@ class CounterRepository @Inject constructor(
 ) {
     suspend fun getAllCounters(): List<TblCounter> {
         return try {
-            apiService.getCounters(sessionManager.getCompanyCode()?:"")
+            apiService.getCounters(sessionManager.getCompanyCode() ?: "")
         } catch (e: Exception) {
             emptyList()
         }
@@ -25,7 +25,7 @@ class CounterRepository @Inject constructor(
 
     suspend fun getCounterById(id: Long): TblCounter? {
         return try {
-            apiService.getCounterById(id,sessionManager.getCompanyCode()?:"")
+            apiService.getCounterById(id, sessionManager.getCompanyCode() ?: "")
         } catch (e: Exception) {
             null
         }
@@ -34,7 +34,7 @@ class CounterRepository @Inject constructor(
 
     suspend fun createCounter(counter: TblCounter): TblCounter? {
         return try {
-            apiService.createCounter(counter,sessionManager.getCompanyCode()?:"")
+            apiService.createCounter(counter, sessionManager.getCompanyCode() ?: "")
         } catch (e: Exception) {
             null
         }
@@ -42,19 +42,20 @@ class CounterRepository @Inject constructor(
 
     suspend fun updateCounter(counter: TblCounter): Int {
         return try {
-            apiService.updateCounter(counter.counter_id, counter,sessionManager.getCompanyCode()?:"")
+            apiService.updateCounter(
+                counter.counter_id,
+                counter,
+                sessionManager.getCompanyCode() ?: ""
+            )
         } catch (e: Exception) {
             0
         }
     }
 
-    suspend fun deleteCounter(id: Long): Int {
-        return try {
-            apiService.deleteCounter(id,sessionManager.getCompanyCode()?:"")
-        } catch (e: Exception) {
-            0
-        }
+    suspend fun deleteCounter(id: Long): retrofit2.Response<String> {
+        return apiService.deleteCounter(id, sessionManager.getCompanyCode() ?: "")
     }
+
     // Simulated data - replace with actual database implementation
     private val counters = listOf(
         Counters(1L, "Counter 1", "C1", "Main billing counter", true, "Ground Floor", "Staff 1"),

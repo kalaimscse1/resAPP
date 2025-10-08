@@ -109,8 +109,8 @@ fun CounterSettingsScreen(
                                 },
                                 onDelete = {
                                     scope.launch {
-                                        viewModel.deleteCounter(counter.counter_id)
-                                        snackbarHostState.showSnackbar("Tax deleted")
+                                        val res = viewModel.deleteCounter(counter.counter_id)
+                                        snackbarHostState.showSnackbar(res)
                                     }
                                 }
                             )
@@ -231,12 +231,12 @@ fun CounterItem(
         ) {
             Column {
                 Text(
-                    text = "Counter : ${counter.counter_name}",
+                    text = counter.counter_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "IpAddress : ${counter.ip_address}",
+                    text = counter.ip_address,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

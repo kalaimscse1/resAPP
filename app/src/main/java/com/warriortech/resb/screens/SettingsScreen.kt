@@ -112,7 +112,7 @@ fun SettingsMainScreen(
                 SettingsModule.Counter,
                 SettingsModule.Language,
                 SettingsModule.PrinterSetting,
-                SettingsModule.Modifiers,
+                SettingsModule.AddOn,
                 SettingsModule.ChangePassword,
 //            SettingsModule.Support,
                 SettingsModule.ResetData
@@ -124,7 +124,7 @@ fun SettingsMainScreen(
 //                SettingsModule.Menu,
 //                SettingsModule.MenuCategory,
 //                SettingsModule.MenuItem,
-                SettingsModule.Modifiers,
+                SettingsModule.AddOn,
                 SettingsModule.Staff,
                 SettingsModule.Role,
                 SettingsModule.Printer,
@@ -293,7 +293,7 @@ fun SettingsModuleScreen(
             navController.navigate("template_screen")
         }
 
-        is SettingsModule.Modifiers -> {
+        is SettingsModule.AddOn -> {
             navController.navigate("modifier_setting")
         }
 
@@ -486,9 +486,9 @@ sealed class SettingsModule(
         listOf("name", "ip_address", "port", "type", "location")
     )
 
-    object Modifiers : SettingsModule(
+    object AddOn : SettingsModule(
         "modifiers",
-        "Modifiers",
+        "AddOn",
         "Manage menu item modifiers",
         Icons.Default.Add,
         listOf("name", "price", "category")

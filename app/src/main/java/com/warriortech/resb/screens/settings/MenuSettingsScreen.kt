@@ -1,6 +1,10 @@
 package com.warriortech.resb.screens.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -10,6 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +42,7 @@ fun MenuSettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
+        viewModel.getOrderBy()
         viewModel.loadMenus()
     }
 
@@ -53,7 +61,6 @@ fun MenuSettingsScreen(
                 actions = {
                     IconButton(onClick = {
                         showAddDialog = true
-                        viewModel.getOrderBy()
                     }) {
                         Icon(
                             Icons.Default.Add, contentDescription = "Add Menu",
@@ -88,13 +95,14 @@ fun MenuSettingsScreen(
                         Text("No menus available. Please add a menu.")
                     }
                 } else {
-                    FlowColumn(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        state.menus.forEach { menu ->
+                    )  {
+                        items(state.menus) { menu ->
                             MenuCard(
                                 menu = menu,
                                 onEdit = { editingMenu = it },
@@ -218,11 +226,16 @@ fun MenuDialog(
     order: String
 ) {
 
+    val nameFocus = remember { FocusRequester() }
+    val descriptionFocus = remember { FocusRequester() }
+    val startTimeFocus = remember { FocusRequester() }
+    val endTimeFocus = remember { FocusRequester() }
+    val isActiveFocus = remember { FocusRequester() }
     var name by remember { mutableStateOf(menu?.menu_name ?: "") }
     var description by remember { mutableStateOf(menu?.order_by ?: order) }
     var isActive by remember { mutableStateOf(menu?.is_active ?: true) }
-    var startTime by remember { mutableStateOf(menu?.start_time ?: 0f) }
-    var endTime by remember { mutableStateOf(menu?.end_time ?: 0f) }
+    var startTime by remember { mutableStateOf(menu?.start_time?.toString()?:"0.0") }
+    var endTime by remember { mutableStateOf(menu?.end_time?.toString()?:"0.0") }
 
     ReusableBottomSheet(
         onDismiss = onDismiss,
@@ -232,8 +245,8 @@ fun MenuDialog(
                 menu_id = menu?.menu_id ?: 0L,
                 menu_name = name,
                 order_by = description,
-                start_time = startTime,
-                end_time = endTime,
+                start_time = startTime.toFloat(),
+                end_time = endTime.toFloat(),
                 is_active = isActive
             )
             onConfirm(menu)
@@ -246,14 +259,26 @@ fun MenuDialog(
                 value = name,
                 onValueChange = { name = it.uppercase() },
                 label = { Text("Name") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(nameFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { descriptionFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.uppercase() },
                 label = { Text("OrderBy") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(descriptionFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { startTimeFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -262,17 +287,29 @@ fun MenuDialog(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             OutlinedTextField(
-                value = startTime.toString(),
-                onValueChange = { startTime = it.toFloat() },
+                value = startTime,
+                onValueChange = { startTime = it },
                 label = { Text("Start Time") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(startTimeFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { endTimeFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
-                value = endTime.toString(),
-                onValueChange = { endTime = it.toFloat() },
+                value = endTime,
+                onValueChange = { endTime = it },
                 label = { Text("End Time") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(endTimeFocus),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { isActiveFocus.requestFocus() }
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -287,76 +324,4 @@ fun MenuDialog(
             }
         }
     }
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        title = { Text(if (menu == null) "Add Menu" else "Edit Menu") },
-//        text = {
-//            Column {
-//                OutlinedTextField(
-//                    value = name,
-//                    onValueChange = { name = it.uppercase() },
-//                    label = { Text("Name") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                OutlinedTextField(
-//                    value = description,
-//                    onValueChange = { description = it.uppercase() },
-//                    label = { Text("OrderBy") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Text(
-//                    text = "Menu Time Settings",
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant
-//                )
-//                OutlinedTextField(
-//                    value = startTime.toString(),
-//                    onValueChange = { startTime = it.toFloat() },
-//                    label = { Text("Start Time") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                OutlinedTextField(
-//                    value = endTime.toString(),
-//                    onValueChange = { endTime = it.toFloat()},
-//                    label = { Text("End Time") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Switch(
-//                        checked = isActive,
-//                        onCheckedChange = { isActive = it }
-//                    )
-//                    Spacer(modifier = Modifier.width(8.dp))
-//                    Text("Active")
-//                }
-//            }
-//        },
-//        confirmButton = {
-//            TextButton(
-//                onClick = {
-//                    val menu = Menu(
-//                        menu_id = menu?.menu_id ?: 0L,
-//                        menu_name = name,
-//                        order_by = description,
-//                        start_time = startTime,
-//                        end_time = endTime,
-//                        is_active = isActive
-//                    )
-//                    onConfirm(menu) }
-//            ) {
-//                Text(if (menu == null) "Add" else "Update")
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text("Cancel")
-//            }
-//        }
-//    )
 }

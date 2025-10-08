@@ -67,7 +67,8 @@ data class BillingPaymentUiState(
     val errorMessage: String? = null,
     val cashAmount: Double = 0.0,
     val cardAmount: Double = 0.0,
-    val upiAmount: Double = 0.0
+    val upiAmount: Double = 0.0,
+    val customer: TblCustomer?=null
 )
 
 @HiltViewModel
@@ -122,6 +123,9 @@ class BillingViewModel @Inject constructor(
         _customerId.value = id
     }
 
+    fun updateSelectedCustomer(customer: TblCustomer) {
+        _uiState.value = _uiState.value.copy(customer = customer)
+    }
     fun updateBillNo(billNo: String) {
         _billNo.value = billNo
     }

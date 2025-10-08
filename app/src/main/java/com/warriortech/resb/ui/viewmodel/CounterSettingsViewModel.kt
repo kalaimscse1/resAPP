@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.Response
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,14 +64,11 @@ class CounterSettingsViewModel @Inject constructor(
         }
     }
 
-    fun deleteCounter(id: Long) {
-        viewModelScope.launch {
-            try {
-                counterRepository.deleteCounter(id)
-                loadCounters()
-            } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Failed to delete counter")
-            }
+    suspend fun deleteCounter(id: Long) :String {
+        val res = counterRepository.deleteCounter(id)
+        loadCounters()
+        return if (res.isSuccessful) {"Counter deleted successfully" } else {
+           res.message()
         }
     }
 }

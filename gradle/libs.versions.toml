@@ -12,7 +12,7 @@ espressoCore = "3.6.1"
 lifecycleLivedataKtx = "2.5.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.10.1"
-composeBom = "2024.06.00"
+composeBom = "2024.10.00"
 loggingInterceptor = "4.9.3"
 material = "1.5.1"
 navigationRuntimeAndroid = "2.9.0"
@@ -34,6 +34,7 @@ hiltCommon = "1.2.0"
 hiltWork = "1.2.0"
 firebaseFunctionsKtx = "22.0.0"
 firebaseMlModeldownloaderKtx = "26.0.0"
+foundation = "1.9.2"
 
 [libraries]
 hilt-android-core = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
@@ -81,6 +82,7 @@ androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.
 androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-ml-modeldownloader-ktx = { group = "com.google.firebase", name = "firebase-ml-modeldownloader-ktx", version.ref = "firebaseMlModeldownloaderKtx" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

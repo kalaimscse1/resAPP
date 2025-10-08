@@ -13,6 +13,7 @@ import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -139,7 +140,7 @@ class MenuItemRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteMenuItem(menuItemId: Int): Response<Any> {
+    suspend fun deleteMenuItem(menuItemId: Int): Response<ResponseBody> {
         val response = apiService.deleteMenuItem(menuItemId,sessionManager.getCompanyCode()?:"")
         if (!response.isSuccessful) {
             throw Exception("Failed to delete menu item: ${response.message()}")

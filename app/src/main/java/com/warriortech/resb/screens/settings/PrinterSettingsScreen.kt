@@ -124,6 +124,11 @@ fun PrinterSettingsScreen(
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
+                                            text = printer.kitchen_cat.kitchen_cat_name,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
                                             text = printer.ip_address,
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant

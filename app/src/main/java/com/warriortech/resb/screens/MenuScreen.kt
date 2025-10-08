@@ -2,7 +2,6 @@ package com.warriortech.resb.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,13 +11,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.ui.viewmodel.MenuViewModel
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -34,56 +31,39 @@ import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.RemoveShoppingCart
 import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.warriortech.resb.model.MenuItem
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.TextPrimary
 import kotlinx.coroutines.launch
-import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
-import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.R
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.theme.Black
 import com.warriortech.resb.ui.theme.BluePrimary
-import com.warriortech.resb.ui.theme.CyanSecondary
 import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.LightGreen
-import com.warriortech.resb.ui.theme.MintGreenPrimary
 import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.SuccessDialog
-import com.warriortech.resb.util.ensureLastItemVisible
 import com.warriortech.resb.util.getDeviceInfo
-import com.warriortech.resb.util.scrollToBottomSmooth
 import kotlinx.coroutines.delay
 
 @SuppressLint(
@@ -93,10 +73,10 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
-    isTakeaway: String, // "TABLE", "TAKEAWAY", "DELIVERY"
-    tableStatId: Boolean, // True if it's a table order and tableId is relevant for fetching existing order
+    isTakeaway: String,
+    tableStatId: Boolean,
     tableId: Long,
-    tableName: String,// Actual table ID for table orders, or a placeholder for others
+    tableName: String,
     onBackPressed: () -> Unit,
     onOrderPlaced: () -> Unit,
     onBillPlaced: (orderDetailsResponse: List<TblOrderDetailsResponse>, orderId: String) -> Unit,
@@ -113,8 +93,6 @@ fun MenuScreen(
     val scope = rememberCoroutineScope()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
-    // No longer lateinit, it will be derived inside the Success state
-    // lateinit var filteredMenuItems:List<MenuItem>
     val tableStatusFromVM by viewModel.tableStatus.collectAsStateWithLifecycle() // Assuming tableStatus is part of the table info
     val isExistingOrderLoaded by viewModel.isExistingOrderLoaded.collectAsStateWithLifecycle()
     val orderDetailsResponse by viewModel.orderDetailsResponse.collectAsStateWithLifecycle()
@@ -130,25 +108,23 @@ fun MenuScreen(
     var sucess by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
 
-    // Determine the effective status string for pricing and display
     val effectiveStatus = remember(isTakeaway, tableStatusFromVM) {
         when (isTakeaway) {
-            "TABLE" -> tableStatusFromVM // Use status from ViewModel (e.g., "AC", "Non-AC")
+            "TABLE" -> tableStatusFromVM
             "TAKEAWAY" -> "TAKEAWAY"
             "DELIVERY" -> "DELIVERY"
-            else -> tableStatusFromVM // Fallback or default
+            else -> tableStatusFromVM
         }
     }
 
     LaunchedEffect(key1 = isTakeaway, key2 = tableId, key3 = tableStatId) {
-        // This effect will run when these key parameters change, or on initial composition.
         viewModel.setTableId(tableId)
         val isTableOrderScenario = isTakeaway == "TABLE" && tableStatId
         viewModel.initializeScreen(isTableOrder = isTableOrderScenario, currentTableId = tableId)
     }
 
     LaunchedEffect(orderState) {
-        when (val currentOrderState = orderState) { // Use a stable val
+        when (val currentOrderState = orderState) {
             is MenuViewModel.OrderUiState.Success -> {
                 scope.launch {
                     if (sessionManager.getGeneralSetting()?.is_kot!!) {
@@ -158,7 +134,7 @@ fun MenuScreen(
                     } else {
                         sucess = true
                         delay(2000)
-                        onOrderPlaced() // This should navigate away or reset the screen
+                        onOrderPlaced()
                     }
                 }
             }
@@ -180,24 +156,22 @@ fun MenuScreen(
             selectedItems = if (viewModel.isExistingOrderLoaded.value && newselectedItems.isNotEmpty()) newselectedItems else selectedItems,
             totalAmount = if (viewModel.isExistingOrderLoaded.value && newselectedItems.isNotEmpty()) viewModel.getOrderNewTotal(
                 effectiveStatus.toString()
-            ) else viewModel.getOrderTotal(effectiveStatus.toString()), // Use effectiveStatus
+            ) else viewModel.getOrderTotal(effectiveStatus.toString()),
             onConfirm = {
-                // The tableId passed here is the one this screen was launched with.
-                // For takeaway/delivery, it might be a specific ID like 0, 1, or 2 as per your existing logic.
-                // For table orders, it's the actual tableId.
-                viewModel.placeOrder(tableId, effectiveStatus) // Use effectiveStatus
+                viewModel.placeOrder(tableId, effectiveStatus)
                 showConfirmDialog = false
             },
             onDismiss = { showConfirmDialog = false },
-            tableStatus = effectiveStatus.toString() // Use effectiveStatus
+            tableStatus = effectiveStatus.toString()
         )
     }
     if (showOrderDialog) {
         OrderDetailsDialog(
             selectedItems = selectedItems,
-            totalAmount = viewModel.getOrderTotal(effectiveStatus.toString()), // Use effectiveStatus
+            totalAmount = viewModel.getOrderTotal(effectiveStatus.toString()),
             onConfirm = { showOrderDialog = false },
-            tableStatus = effectiveStatus.toString() // Use effectiveStatus
+            tableStatus = effectiveStatus.toString(),
+            items= orderDetailsResponse
         )
     }
 
@@ -272,147 +246,130 @@ fun MenuScreen(
             )
         },
         bottomBar = {
-//            BottomAppBar(
-//                containerColor = PrimaryGreen,
-//                contentColor = SurfaceLight,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .heightIn(min = 80.dp)
-//            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(PrimaryGreen, SecondaryGreen)
-                            ),
-                            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                        )
-                        .padding(12.dp)
+            BottomAppBar(
+                containerColor = SecondaryGreen,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(SecondaryGreen, SecondaryGreen)
+                        ),
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                    )
+                    .padding(12.dp)
+            ) {
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
+                    val newItemCount =
+                        if (viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
+                    val existingItemCount =
+                        if (viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
+                    val totalItemCount = newItemCount + existingItemCount
+                    val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
+                    val newTotalAmount =
+                        viewModel.getOrderNewTotal(effectiveStatus.toString())
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val newItemCount =
-                            if (viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
-                        val existingItemCount =
-                            if (viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
-                        val totalItemCount = newItemCount + existingItemCount
-                        val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
-                        val newTotalAmount = viewModel.getOrderNewTotal(effectiveStatus.toString())
-                        // 🔹 Row 1: Order Summary
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                if (viewModel.isExistingOrderLoaded.value) {
-                                    Text(
-                                        text = "Existing: $existingItemCount | New: $newItemCount",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White.copy(alpha = 0.8f),
-                                        modifier = Modifier.clickable { showOrderDialog = true }
-                                    )
-                                }
+                        Column {
+                            if (viewModel.isExistingOrderLoaded.value) {
                                 Text(
-                                    text = "Total Items: $totalItemCount",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White
+                                    text = "Existing: $existingItemCount | New: $newItemCount",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    modifier = Modifier.clickable { showOrderDialog = true }
                                 )
                             }
-                            Column {
-                                if (viewModel.isExistingOrderLoaded.value) {
-                                    Text(
-                                        text = "Existing Total: ${
-                                            CurrencySettings.format(
-                                                totalAmount
-                                            )
-                                        }",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                }
+                            Text(
+                                text = "Total Items: $totalItemCount",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
+                        }
+                        Column {
+                            if (viewModel.isExistingOrderLoaded.value) {
                                 Text(
-                                    text = if (viewModel.isExistingOrderLoaded.value) "New Total: ${
+                                    text = "Existing Total: ${
                                         CurrencySettings.format(
-                                            newTotalAmount
+                                            orderDetailsResponse.sumOf { it.actual_rate * it.qty }
                                         )
-                                    }" else
-                                        "Total: ${CurrencySettings.format(totalAmount)}",
+                                    }",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
                             }
-                        }
-
-                        // 🔹 Row 2: Action Buttons
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (viewModel.isExistingOrderLoaded.value) {
-                                if (sessionManager.getUser()?.role == "ADMIN" || sessionManager.getUser()?.role == "CASHIER") {
-                                    MobileOptimizedButton(
-                                        onClick = {
-                                            navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
-                                                launchSingleTop = true
-                                            }
-                                            onBillPlaced(
-                                                viewModel.orderDetailsResponse.value,
-                                                viewModel.existingOrderId.value ?: ""
-                                            )
-                                        },
-                                        text = "Bill",
-                                        enabled = selectedItems.isNotEmpty(),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(48.dp)
+                            Text(
+                                text = if (viewModel.isExistingOrderLoaded.value) "New Total: ${
+                                    CurrencySettings.format(
+                                        newTotalAmount
                                     )
-//                                MobileOptimizedButton(
-//                                    onClick = {
-//                                        navController.navigate("kot_screen/${viewModel.existingOrderId.value ?: ""}") {
-//                                            launchSingleTop = true
-//                                        }
-//                                    },
-//                                    text = "Modify KOT",
-//                                    enabled = true,
-//                                    modifier = Modifier
-//                                        .weight(1f)
-//                                        .height(48.dp)
-//                                )
-                                }
+                                }" else
+                                    "Total: ${CurrencySettings.format(totalAmount)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (viewModel.isExistingOrderLoaded.value) {
+                            if (sessionManager.getUser()?.role == "ADMIN" || sessionManager.getUser()?.role == "CASHIER") {
                                 MobileOptimizedButton(
-                                    onClick = { showConfirmDialog = true },
-                                    enabled = (if (viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
-                                    text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
-                                    modifier = Modifier.weight(1f)
-                                )
-                            } else {
-                                MobileOptimizedButton(
-                                    onClick = { showConfirmDialog = true },
-                                    text = "Place Order",
-                                    enabled = (selectedItems.isNotEmpty()),
+                                    onClick = {
+                                        navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
+                                            launchSingleTop = true
+                                        }
+                                        onBillPlaced(
+                                            viewModel.orderDetailsResponse.value,
+                                            viewModel.existingOrderId.value ?: ""
+                                        )
+                                    },
+                                    text = "Bill",
+                                    enabled = selectedItems.isNotEmpty(),
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(48.dp)
                                 )
                             }
+                            MobileOptimizedButton(
+                                onClick = { showConfirmDialog = true },
+                                enabled = (if (viewModel.isExistingOrderLoaded.value) newselectedItems.isNotEmpty() else selectedItems.isNotEmpty()) && orderState !is MenuViewModel.OrderUiState.Loading,
+                                text = if (isTakeaway == "TABLE" && viewModel.isExistingOrderLoaded.value) "Update KOT" else "Place Order",
+                                modifier = Modifier.weight(1f)
+                            )
+                        } else {
+                            MobileOptimizedButton(
+                                onClick = { showConfirmDialog = true },
+                                text = "Place Order",
+                                enabled = (selectedItems.isNotEmpty()),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                            )
                         }
                     }
-//                }
+                }
+
             }
+
         },
         snackbarHost = {
             AnimatedSnackbarDemo(snackbarHostState)
         },
     ) { paddingValues ->
         values = paddingValues
-        when (val currentMenuState = menuState) { // Use stable val
+        when (val currentMenuState = menuState) {
             is MenuViewModel.MenuUiState.Loading -> {
                 Box(
                     modifier = Modifier
@@ -428,13 +385,13 @@ fun MenuScreen(
                 val menuItems = currentMenuState.menuItems
                 val filteredMenuItems =
                     if (selectedCategory != null && selectedCategory == "FAVOURITES") {
-                        menuItems.filter { it.is_favourite == true }// Make sure selectedCategory is handled safely
+                        menuItems.filter { it.is_favourite == true }
                     } else if (selectedCategory != null && selectedCategory == "ALL") {
                         menuItems
                     } else if (selectedCategory != null) {
-                        menuItems.filter { it.item_cat_name == selectedCategory } // Show all items if "ALL" is selected
+                        menuItems.filter { it.item_cat_name == selectedCategory }
                     } else {
-                        menuItems // No filtering if no category is selected
+                        menuItems
                     }
 
                 if (menuItems.isEmpty()) {
@@ -452,16 +409,12 @@ fun MenuScreen(
                     val scope = rememberCoroutineScope()
                     val bottomBarHeight = 80.dp
 
-                    // 👇 Reusable helper: auto-correct when last item overlaps BottomBar
-//                    listState.ensureLastItemVisible(bottomBarHeight)
-
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
                             .background(color = Color.White)
                     ) {
-                        // Categories TabRow
                         if (categories.isNotEmpty()) {
                             ScrollableTabRow(
                                 selectedTabIndex = categories.indexOf(selectedCategory)
@@ -504,13 +457,13 @@ fun MenuScreen(
                                     onAddItem = {
                                         viewModel.addItemToOrder(menuItem)
                                         scope.launch {
-                                            listState.animateScrollToItem(index) // 👈 scrolls up to clicked item
+                                            listState.animateScrollToItem(index)
                                         }
                                     },
                                     onRemoveItem = {
                                         viewModel.removeItemFromOrder(menuItem)
                                         scope.launch {
-                                            listState.animateScrollToItem(index) // 👈 also works on remove
+                                            listState.animateScrollToItem(index)
                                         }
                                     },
                                     tableStatus = effectiveStatus.toString(),
@@ -528,7 +481,6 @@ fun MenuScreen(
                                 )
                             }
 
-                            // 👇 Spacer ensures last item never hides under BottomBar
                             item { Spacer(modifier = Modifier.height(bottomBarHeight)) }
                         }
                     }
@@ -556,7 +508,6 @@ fun MenuScreen(
             }
         }
 
-        // Show loading overlay when placing an order
         if (orderState is MenuViewModel.OrderUiState.Loading) {
             Box(
                 modifier = Modifier
@@ -762,7 +713,7 @@ fun MenuItemCard(
 //                        ) {
 //                            androidx.compose.material3.Icon(
 //                                Icons.Default.Tune,
-//                                contentDescription = "Modifiers",
+//                                contentDescription = "AddOn",
 //                                tint = Color.Blue
 //                            )
 //                        }
@@ -954,8 +905,10 @@ fun OrderDetailsDialog(
     selectedItems: Map<TblMenuItemResponse, Int>,
     totalAmount: Double,
     onConfirm: () -> Unit,
-    tableStatus: String
+    tableStatus: String,
+    items : List<TblOrderDetailsResponse>
 ) {
+    val amount = items.sumOf { it.actual_rate * it.qty }
     AlertDialog(
         onDismissRequest = onConfirm,
         confirmButton = {
@@ -981,26 +934,55 @@ fun OrderDetailsDialog(
                         .heightIn(max = 250.dp) // restrict height so dialog doesn’t grow infinitely
                         .verticalScroll(rememberScrollState())
                 ) {
-                    selectedItems.forEach { (item, qty) ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                "${item.menu_item_name} × $qty",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-
-
-
-                            Text(
-                                CurrencySettings.format((item.actual_rate * qty)),
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                    val existingItems = items.groupBy { it.kot_number }
+                    existingItems.forEach {
+                        Text(
+                            "KOT No: ${it.key}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                        ModernDivider()
+                        it.value.forEach { orderDetail ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    "${orderDetail.menuItem.menu_item_name} × ${orderDetail.qty}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    CurrencySettings.format((orderDetail.actual_rate * orderDetail.qty)),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
+
+//                    selectedItems.forEach { (item, qty) ->
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(vertical = 4.dp),
+//                            horizontalArrangement = Arrangement.SpaceBetween
+//                        ) {
+//                            Text(
+//                                "${item.menu_item_name} × $qty",
+//                                style = MaterialTheme.typography.bodySmall
+//                            )
+//
+//
+//
+//                            Text(
+//                                CurrencySettings.format((item.actual_rate * qty)),
+//                                style = MaterialTheme.typography.bodySmall
+//                            )
+//                        }
+//                    }
                 }
 
                 ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -1015,7 +997,7 @@ fun OrderDetailsDialog(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        CurrencySettings.format(totalAmount),
+                        CurrencySettings.format(amount),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

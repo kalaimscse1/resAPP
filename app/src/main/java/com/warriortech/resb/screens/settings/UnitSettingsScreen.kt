@@ -176,7 +176,7 @@ fun UnitCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Unit: ${unit.unit_name}",
+                    text = unit.unit_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )

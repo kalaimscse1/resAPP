@@ -88,7 +88,6 @@ fun PaymentMethodCard(
         )
     }
     viewModel.loadCustomers()
-    val inCustomers = remember { customers.firstOrNull() }
     ModernCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -163,8 +162,11 @@ fun PaymentMethodCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 CustomerDropdown(
                     customers = customers,
-                    selectedCustomer = inCustomers,
-                    onCustomerSelected = onCustomer,
+                    selectedCustomer = uiState.customer,
+                    onCustomerSelected = { selected ->
+                        viewModel.updateSelectedCustomer(selected)
+                        onCustomer(selected)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }

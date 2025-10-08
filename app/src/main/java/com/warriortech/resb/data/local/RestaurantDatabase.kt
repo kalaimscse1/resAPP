@@ -38,7 +38,7 @@ import com.warriortech.resb.data.local.entity.*
         TblVoucher::class,
         TblVoucherType::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 

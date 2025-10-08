@@ -178,24 +178,24 @@ fun VoucherCard(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "VoucherName:${voucher.voucher_name}",
+                    text = voucher.voucher_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "VoucherType:" + voucher.voucherType.voucher_type_name,
+                    text = voucher.voucherType.voucher_type_name,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    text = "VoucherPrefix:" + voucher.voucher_prefix,
+                    text = voucher.voucher_prefix,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "VoucherSuffix:" + voucher.voucher_suffix,
+                    text = voucher.voucher_suffix,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "StartingNo:" + voucher.starting_no,
+                    text = voucher.starting_no,
                     style = MaterialTheme.typography.bodySmall
                 )
 
@@ -239,11 +239,7 @@ fun VoucherBottomSheet(
     var startingNo by remember { mutableStateOf(initialVoucher?.starting_no ?: 1) }
     var isActive by remember { mutableStateOf(initialVoucher?.is_active ?: true) }
     var counterId by remember { mutableStateOf(initialVoucher?.counter?.counter_id ?: 0L) }
-    var voucherTypeId by remember {
-        mutableStateOf(
-            initialVoucher?.voucherType?.voucher_Type_id ?: 0L
-        )
-    }
+    var voucherTypeId by remember { mutableStateOf(initialVoucher?.voucherType?.voucher_Type_id ?: 1L) }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -352,10 +348,9 @@ fun VoucherBottomSheet(
                             voucher_suffix = voucherSuffix,
                             starting_no = startingNo.toString(),
                             voucher_id = initialVoucher?.voucher_id ?: 0L,
-                            counter_id = initialVoucher?.counter?.counter_id ?: counterId,
+                            counter_id = counterId,
                             is_active = isActive,
-                            voucher_Type_id = initialVoucher?.voucherType?.voucher_Type_id
-                                ?: voucherTypeId
+                            voucher_type = voucherTypeId
                         )
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
                             onConfirm(updatedVoucher)

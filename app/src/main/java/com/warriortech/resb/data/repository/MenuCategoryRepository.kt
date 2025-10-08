@@ -65,4 +65,14 @@ class MenuCategoryRepository @Inject constructor(
             throw Exception("Failed to fetch units: ${response.message()}")
         }
     }
+
+    suspend fun getOrderBy(): Map<String, Long>{
+        val response = apiService.getMenuCategoryOrderBy(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyMap()
+        }
+        else{
+            throw Exception("Failed to get OrderBy: ${response.message()}")
+        }
+    }
 }

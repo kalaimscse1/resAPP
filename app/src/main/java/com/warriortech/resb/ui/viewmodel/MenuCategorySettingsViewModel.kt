@@ -19,6 +19,9 @@ class MenuCategorySettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    private val _orderBy = MutableStateFlow<String>("")
+    val orderBy: StateFlow<String> = _orderBy.asStateFlow()
+
     sealed class UiState {
         object Loading : UiState()
         data class Success(val categories: List<MenuCategory>) : UiState()
@@ -78,6 +81,17 @@ class MenuCategorySettingsViewModel @Inject constructor(
                 loadCategories()
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to delete category")
+            }
+        }
+    }
+
+    fun getOrderBy() {
+        viewModelScope.launch {
+            try {
+                val response = categoryRepository.getOrderBy()
+                _orderBy.value = response["order_by"].toString()
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.message ?: "Failed to getOrderBy")
             }
         }
     }

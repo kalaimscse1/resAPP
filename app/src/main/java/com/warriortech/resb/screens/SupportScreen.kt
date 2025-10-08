@@ -537,7 +537,7 @@ val supportCategories = listOf(
                 videoUrl = "https://www.youtube.com/watch?v=receipt-template-tutorial"
             ),
             SupportItem(
-                title = "Modifiers",
+                title = "AddOn",
                 description = "Create menu item modifiers like extra cheese, spice levels, cooking preferences, and add-ons.",
                 icon = Icons.Default.Add,
                 videoUrl = "https://www.youtube.com/watch?v=modifiers-tutorial"

@@ -179,12 +179,12 @@ fun TaxItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Tax : ${tax.tax_name}",
+                    text = tax.tax_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Tax % : ${tax.tax_percentage} | Cess % : ${tax.cess_percentage}",
+                    text = "Tax % : ${tax.tax_percentage} ",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

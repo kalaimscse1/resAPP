@@ -345,24 +345,25 @@ fun QuickActionsSection(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
         )
+        if (sessionManager.getGeneralSetting()?.is_table_allowed == true){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                MobileOptimizedButton(
+                    onClick = { showOrderTypeDialog = true },
+                    text = "New Order",
+                    modifier = Modifier.weight(0.5f)
+                )
+                MobileOptimizedButton(
+                    onClick = onNavigateToOrders,
+                    text = "View Orders",
+                    modifier = Modifier.weight(0.5f)
+                )
+            }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            MobileOptimizedButton(
-                onClick = { showOrderTypeDialog = true },
-                text = "New Order",
-                modifier = Modifier.weight(0.5f)
-            )
-            MobileOptimizedButton(
-                onClick = onNavigateToOrders,
-                text = "View Orders",
-                modifier = Modifier.weight(0.5f)
-            )
+            Spacer(modifier = Modifier.height(8.dp))
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         if (role == "RESBADMIN" || role == "ADMIN") {
             Row(

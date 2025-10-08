@@ -200,7 +200,7 @@ fun VoucherTypeDropdown(
     selectedVoucherType: TblVoucherType?,
     onVoucherTypeSelected: (TblVoucherType) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Select Counter"
+    label: String = "Select VoucherType"
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -229,7 +229,7 @@ fun VoucherTypeDropdown(
         ) {
             if (voucherTypes.isEmpty()) {
                 DropdownMenuItem(
-                    text = { Text("No Counter available") },
+                    text = { Text("No VoucherType available") },
                     onClick = {
                         expanded = false
                     },

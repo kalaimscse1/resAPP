@@ -49,7 +49,7 @@ fun ModifierSelectionDialog(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Modifiers List
+                // AddOn List
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -131,7 +131,7 @@ fun ModifierSelectionDialog(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Select Modifiers",
+                    text = "Select AddOn",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)

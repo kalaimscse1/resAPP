@@ -13,6 +13,7 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.RemoveShoppingCart
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -42,6 +44,7 @@ import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.ErrorRed
 import com.warriortech.resb.ui.theme.PrimaryGreen
@@ -481,32 +484,24 @@ fun CounterMenuItemCard(
                             )
                         }
                         Spacer(modifier = Modifier.padding(horizontal = 16.dp))
-                        // ---- MODIFIER BUTTON ----
 
-
-//                        Box(
-//                            modifier = Modifier
-//                                .size(36.dp)
-//                                .border(1.dp, BluePrimary, RoundedCornerShape(4.dp))
-//                                .clickable { onModifierClick() },
-//                            contentAlignment = Alignment.Center
-//                        ) {
-//                            Text(
-//                                "A",
-//                                color = DarkGreen,
-//                                style = MaterialTheme.typography.titleMedium,
-//                                fontWeight = FontWeight.Bold
-//                            )
-//                        }
-//                        IconButton(
-//                            onClick = onModifierClick
-//                        ) {
-//                            Icon(
-//                                Icons.Default.Tune,
-//                                contentDescription = "Modifiers",
-//                                tint = Color.Blue
-//                            )
-//                        }
+//                         ---- MODIFIER BUTTON ----
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .border(1.dp, BluePrimary, RoundedCornerShape(4.dp))
+                                .pointerInput(Unit) {
+                                    detectTapGestures(onTap = { onModifierClick() })
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "A",
+                                color = DarkGreen,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 } else {
                     Text(

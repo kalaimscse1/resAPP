@@ -191,7 +191,7 @@ fun TableItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Table : ${table.table_name}",
+                    text = table.table_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
