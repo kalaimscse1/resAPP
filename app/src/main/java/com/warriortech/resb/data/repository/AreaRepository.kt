@@ -5,6 +5,8 @@ import com.warriortech.resb.model.Area
 import com.warriortech.resb.network.SessionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.ResponseBody
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,10 +47,8 @@ class AreaRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteArea(areaId: Long) {
+    suspend fun deleteArea(areaId: Long) : Response<ResponseBody> {
         val response = apiService.deleteArea(areaId,sessionManager.getCompanyCode()?:"")
-        if (!response.isSuccessful) {
-            throw Exception("Failed to delete area: ${response.message()}")
-        }
+     return response
     }
 }

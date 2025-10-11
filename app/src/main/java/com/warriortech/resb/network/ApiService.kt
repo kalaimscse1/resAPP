@@ -146,7 +146,7 @@ interface ApiService {
     suspend fun deleteTable(
         @Path("table_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Unit>
+    ): Response<ResponseBody>
 
     /**
      * Menu Management

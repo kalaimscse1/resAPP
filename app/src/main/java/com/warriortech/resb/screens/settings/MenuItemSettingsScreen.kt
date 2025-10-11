@@ -8,11 +8,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,6 +46,8 @@ import com.warriortech.resb.util.KitchenGroupDropdown
 import com.warriortech.resb.util.MenuCategoryDropdown
 import com.warriortech.resb.util.MenuDropdown
 import com.warriortech.resb.util.ReusableBottomSheet
+import com.warriortech.resb.util.SuccessDialog
+import com.warriortech.resb.util.SuccessDialogWithButton
 import com.warriortech.resb.util.TaxDropdown
 import com.warriortech.resb.util.UnitDropdown
 
@@ -63,16 +68,31 @@ fun MenuItemSettingsScreen(
     val kitchenCategories by viewModel.kitchenCategories.collectAsStateWithLifecycle()
     val taxes by viewModel.taxes.collectAsStateWithLifecycle()
     val units by viewModel.units.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    var sucess by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
+    val currentItemCount = remember(uiState) {
+        when (val state = uiState) {
+            is MenuItemSettingsUiState.Success -> state.menuItems.size
+            else -> 0
+        }
+    }
+    var search by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
     }
-    LaunchedEffect(uiState) {
-        if (uiState is MenuItemSettingsUiState.Error) {
-            val message = (uiState as MenuItemSettingsUiState.Error).message
-            snackbarHostState.showSnackbar(message)
-        }
 
+    LaunchedEffect(errorMessage) {
+        if (errorMessage!= null) {
+            if (errorMessage=="Menu item deleted successfully") {
+                sucess = true
+            } else {
+                failed = true
+            }
+        }
     }
 
     Scaffold(
@@ -82,7 +102,7 @@ fun MenuItemSettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
                             tint = SurfaceLight
                         )
                     }
@@ -97,18 +117,34 @@ fun MenuItemSettingsScreen(
                             tint = SurfaceLight
                         )
                     }
+
+                    IconButton(onClick = {
+                        search = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = SurfaceLight
+                        )
+                    }
                 },
             )
         },
-
-//        floatingActionButton = {
-//            FloatingActionButton(
-//                onClick = { showAddDialog = true }
-//            ) {
-//                Icon(Icons.Default.Add, contentDescription = "Add Area")
-//            }
-//        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = PrimaryGreen,
+                contentColor = SurfaceLight,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                // 3. Display the count
+                Text(
+                    text = "Total Menu Items: $currentItemCount",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     ) { paddingValues ->
 
         when (val state = uiState) {
@@ -140,6 +176,28 @@ fun MenuItemSettingsScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        if (search){
+                            item{
+                                OutlinedTextField(
+                                    value = searchQuery,
+                                    onValueChange = {
+                                                    searchQuery = it
+                                                    viewModel.searchMenuItems(searchQuery)
+                                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    placeholder = { Text("Search Menu Items") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = "Search Icon"
+                                        )
+                                    },
+                                    singleLine = true
+                                )
+                            }
+                        }
+
                         items(state.menuItems) { menuItem ->
                             MenuItemCard(
                                 menuItem = menuItem,
@@ -156,9 +214,15 @@ fun MenuItemSettingsScreen(
             }
 
             is MenuItemSettingsUiState.Error -> {
-                scope.launch {
-                    val message = state.message
-                    snackbarHostState.showSnackbar(message)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Show error message
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
@@ -187,6 +251,32 @@ fun MenuItemSettingsScreen(
                 kitchenCategories = kitchenCategories,
                 taxes = taxes,
                 units = units
+            )
+        }
+
+        if (sucess) {
+            SuccessDialogWithButton(
+                title = "Success",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    sucess = false
+                    viewModel.loadMenuItems()
+                    viewModel.clearErrorMessage()
+                }
+            )
+        }
+
+        if (failed){
+            SuccessDialogWithButton(
+                title = "Failure",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    failed = false
+                    viewModel.loadMenuItems()
+                    viewModel.clearErrorMessage()
+                }
             )
         }
     }

@@ -990,7 +990,7 @@ fun DrawerContent(
                                 colors = subMenuColors
                             )
                             NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Menu") else Text("") },
+                                label = { if (!isCollapsed) Text("Menu Chart") else Text("") },
                                 icon = {
                                     DrawerIcon(
                                         Icons.AutoMirrored.Filled.MenuBook,

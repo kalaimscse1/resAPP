@@ -3,6 +3,8 @@ package com.warriortech.resb.data.repository
 import com.warriortech.resb.model.Menu
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import okhttp3.ResponseBody
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,11 +41,9 @@ class MenuRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteMenu(menuId: Long) {
+    suspend fun deleteMenu(menuId: Long): Response<ResponseBody> {
         val response = apiService.deleteMenu(menuId,sessionManager.getCompanyCode()?:"")
-        if (!response.isSuccessful) {
-            throw Exception("Failed to delete menu: ${response.message()}")
-        }
+       return response
     }
     suspend fun getOrderBy(): Map<String, Long>{
         val response = apiService.getOrderBy(sessionManager.getCompanyCode()?:"")

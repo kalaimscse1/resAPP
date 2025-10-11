@@ -24,6 +24,9 @@ class TableSettingsViewModel @Inject constructor(
     private val _area = MutableStateFlow<List<Area>>(emptyList())
     val areas: StateFlow<List<Area>> = _area
 
+    private val errorMesage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = errorMesage.asStateFlow()
+
     fun loadTables() {
         viewModelScope.launch {
             try {

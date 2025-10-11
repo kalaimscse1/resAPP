@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.AreaRepository
 import com.warriortech.resb.model.Area
+import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,11 +27,19 @@ class AreaViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AreaUiState())
     val uiState: StateFlow<AreaUiState> = _uiState.asStateFlow()
 
+    val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+
     init {
         loadAreas()
     }
 
-    private fun loadAreas() {
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
+
+    fun loadAreas() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
@@ -79,9 +88,31 @@ class AreaViewModel @Inject constructor(
     fun deleteArea(areaId: Long) {
         viewModelScope.launch {
             try {
-                areaRepository.deleteArea(areaId)
-                loadAreas()
-                _uiState.value = _uiState.value.copy(successMessage = "Area deleted successfully")
+                val response= areaRepository.deleteArea(areaId)
+                when(response.code()){
+                    in 200..299 ->{
+                        loadAreas()
+                        _errorMessage.value = "Area deleted successfully"
+                    }
+                    400 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    401 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    409 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    404 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    500 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    else -> {
+                        _uiState.value = _uiState.value.copy(errorMessage="${response.code()} : ${response.message()}")
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(errorMessage = e.message)
             }

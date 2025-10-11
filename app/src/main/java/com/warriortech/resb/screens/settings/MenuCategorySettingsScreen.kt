@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -22,6 +23,7 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuCategorySettingsViewModel
 import com.warriortech.resb.util.ReusableBottomSheet
+import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,11 +38,25 @@ fun MenuCategorySettingsScreen(
     var editingCategory by remember { mutableStateOf<MenuCategory?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    var sucess by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.getOrderBy()
         viewModel.loadCategories()
     }
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage!= null) {
+            if (errorMessage=="Menu Category deleted successfully") {
+                sucess = true
+            } else {
+                failed = true
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,7 +64,7 @@ fun MenuCategorySettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
                             tint = SurfaceLight
                         )
                     }
@@ -144,6 +160,32 @@ fun MenuCategorySettingsScreen(
                     }
                 },
                 order = order
+            )
+        }
+
+        if (sucess) {
+            SuccessDialogWithButton(
+                title = "Success",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    sucess = false
+                    viewModel.loadCategories()
+                    viewModel.clearErrorMessage()
+                }
+            )
+        }
+
+        if (failed){
+            SuccessDialogWithButton(
+                title = "Failure",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    failed = false
+                    viewModel.loadCategories()
+                    viewModel.clearErrorMessage()
+                }
             )
         }
     }

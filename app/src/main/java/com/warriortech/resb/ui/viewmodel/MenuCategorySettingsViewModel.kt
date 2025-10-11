@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.MenuCategoryRepository
 import com.warriortech.resb.model.MenuCategory
+import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,9 @@ class MenuCategorySettingsViewModel @Inject constructor(
 
     private val _orderBy = MutableStateFlow<String>("")
     val orderBy: StateFlow<String> = _orderBy.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     sealed class UiState {
         object Loading : UiState()
@@ -40,6 +44,9 @@ class MenuCategorySettingsViewModel @Inject constructor(
         }
     }
 
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
     fun addCategory(name: String, sortOrder: String, is_active: Boolean) {
         viewModelScope.launch {
             try {
@@ -77,8 +84,31 @@ class MenuCategorySettingsViewModel @Inject constructor(
     fun deleteCategory(id: Long) {
         viewModelScope.launch {
             try {
-                categoryRepository.deleteCategory(id)
-                loadCategories()
+               val response= categoryRepository.deleteCategory(id)
+                when(response.code()){
+                    in 200..299 ->{
+                        loadCategories()
+                        _errorMessage.value = "Menu Category deleted successfully"
+                    }
+                    400 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    401 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    409 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    404 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    500 -> {
+                        _errorMessage.value = response.errorBody()?.string()
+                    }
+                    else -> {
+                        _uiState.value = UiState.Error("${response.code()} : ${response.message()}")
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.message ?: "Failed to delete category")
             }

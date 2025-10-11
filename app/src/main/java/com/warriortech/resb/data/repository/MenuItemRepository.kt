@@ -142,9 +142,6 @@ class MenuItemRepository @Inject constructor(
 
     suspend fun deleteMenuItem(menuItemId: Int): Response<ResponseBody> {
         val response = apiService.deleteMenuItem(menuItemId,sessionManager.getCompanyCode()?:"")
-        if (!response.isSuccessful) {
-            throw Exception("Failed to delete menu item: ${response.message()}")
-        }
         return response
     }
 }

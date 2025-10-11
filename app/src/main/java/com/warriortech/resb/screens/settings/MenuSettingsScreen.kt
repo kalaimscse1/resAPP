@@ -32,6 +32,7 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuSettingsViewModel
 import com.warriortech.resb.util.ReusableBottomSheet
+import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,10 +47,23 @@ fun MenuSettingsScreen(
     var editingMenu by remember { mutableStateOf<Menu?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    var sucess by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.getOrderBy()
         viewModel.loadMenus()
+    }
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage!= null) {
+            if (errorMessage=="Menu deleted successfully") {
+                sucess = true
+            } else {
+                failed = true
+            }
+        }
     }
 
     Scaffold(
@@ -176,6 +190,32 @@ fun MenuSettingsScreen(
                     }
                 },
                 order = order
+            )
+        }
+
+        if (sucess) {
+            SuccessDialogWithButton(
+                title = "Success",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    sucess = false
+                    viewModel.loadMenus()
+                    viewModel.clearErrorMessage()
+                }
+            )
+        }
+
+        if (failed){
+            SuccessDialogWithButton(
+                title = "Failure",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    failed = false
+                    viewModel.loadMenus()
+                    viewModel.clearErrorMessage()
+                }
             )
         }
     }

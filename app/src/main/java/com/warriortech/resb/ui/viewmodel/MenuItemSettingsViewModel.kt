@@ -50,6 +50,9 @@ class MenuItemSettingsViewModel @Inject constructor(
     private val _units = MutableStateFlow<List<TblUnit>>(emptyList())
     val units: StateFlow<List<TblUnit>> = _units.asStateFlow()
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
 
     init {
         CurrencySettings.update(
@@ -57,6 +60,23 @@ class MenuItemSettingsViewModel @Inject constructor(
             decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
         )
 
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
+
+    fun searchMenuItems(query: String) {
+        val currentState = _uiState.value
+        if (currentState is MenuItemSettingsUiState.Success) {
+            val filteredItems = if (query.isEmpty())
+                currentState.menuItems
+                else
+                currentState.menuItems.filter {
+                it.menu_item_name.contains(query, ignoreCase = true)
+            }
+            _uiState.value = MenuItemSettingsUiState.Success(filteredItems)
+        }
     }
 
     fun loadMenuItems() {
@@ -115,38 +135,27 @@ class MenuItemSettingsViewModel @Inject constructor(
                 when(response.code()){
                     in 200..299 ->{
                         loadMenuItems()
-                        _uiState.value = MenuItemSettingsUiState.Error("Menu item deleted successfully")
+                        _errorMessage.value = "Menu item deleted successfully"
                     }
                     400 -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("Bad Request: ${response.message()}")
+                        _errorMessage.value = response.errorBody()?.string()
                     }
                     401 -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("Unauthorized: ${response.message()}")
+                        _errorMessage.value = response.errorBody()?.string()
                     }
                     409 -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("Conflict: ${response.message()}")
+                        _errorMessage.value = response.errorBody()?.string()
                     }
                     404 -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("Not Found: ${response.message()}")
+                        _errorMessage.value = response.errorBody()?.string()
                     }
                     500 -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("Server Error: ${response.message()}")
+                        _errorMessage.value = response.errorBody()?.string()
                     }
                     else -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("Error ${response.code()}: ${response.message()}")
+                        _uiState.value = MenuItemSettingsUiState.Error("${response.code()} : ${response.message()}")
                     }
                 }
-//                if (response.isSuccessful) {
-//                    loadMenuItems()
-//                    _uiState.value =MenuItemSettingsUiState.Error(
-//                        response.message() ?: "Failed to delete menu item"
-//                    )
-//                } else {
-//                    _uiState.value = MenuItemSettingsUiState.Error(
-//                        response.message() ?: "Failed to delete menu item"
-//                    )
-//                }
-
             } catch (e: Exception) {
                 _uiState.value =
                     MenuItemSettingsUiState.Error(e.message ?: "Failed to delete menu item")

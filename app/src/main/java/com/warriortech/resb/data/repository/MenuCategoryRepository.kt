@@ -5,6 +5,8 @@ import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
+import okhttp3.Response
+import okhttp3.ResponseBody
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,11 +43,9 @@ class MenuCategoryRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteCategory(categoryId: Long) {
+    suspend fun deleteCategory(categoryId: Long): retrofit2.Response<ResponseBody> {
         val response = apiService.deleteMenuCategory(categoryId,sessionManager.getCompanyCode()?:"")
-        if (!response.isSuccessful) {
-            throw Exception("Failed to delete category: ${response.message()}")
-        }
+        return response
     }
 
     suspend fun getAllKitchenCategories(): List<KitchenCategory> {

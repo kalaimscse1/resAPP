@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -24,6 +25,7 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.AreaViewModel
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.ui.theme.BluePrimary
+import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +38,9 @@ fun AreaSettingsScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var editingArea by remember { mutableStateOf<Area?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
-
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    var sucess by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
     // Handle messages
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let {
@@ -52,6 +56,16 @@ fun AreaSettingsScreen(
         }
     }
 
+    LaunchedEffect(errorMessage) {
+        if (errorMessage!= null) {
+            if (errorMessage=="Menu item deleted successfully") {
+                sucess = true
+            } else {
+                failed = true
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,7 +73,7 @@ fun AreaSettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
                             tint = SurfaceLight
                         )
                     }
@@ -104,6 +118,31 @@ fun AreaSettingsScreen(
                     )
                 }
             }
+        }
+        if (sucess) {
+            SuccessDialogWithButton(
+                title = "Success",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    sucess = false
+                    viewModel.loadAreas()
+                    viewModel.clearErrorMessage()
+                }
+            )
+        }
+
+        if (failed){
+            SuccessDialogWithButton(
+                title = "Failure",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    failed = false
+                    viewModel.loadAreas()
+                    viewModel.clearErrorMessage()
+                }
+            )
         }
     }
 
