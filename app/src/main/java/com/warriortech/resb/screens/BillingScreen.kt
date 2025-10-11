@@ -93,6 +93,8 @@ fun BillingScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedKotNumber by remember { mutableStateOf<Int?>(null) }
     var showKotSelectionDialog by remember { mutableStateOf(false) }
+    val orderDetails by viewModel._originalOrderDetails.collectAsStateWithLifecycle()
+
 
     LaunchedEffect(key1 = orderDetailsResponse, key2 = orderMasterId) {
         when {
@@ -166,8 +168,10 @@ fun BillingScreen(
             },
             onRemoveItem = { menuItem ->
                 viewModel.removeItem(menuItem)
-            }
+            },
+            orderDetails = orderDetails
         )
+
     }
 }
 
@@ -176,7 +180,8 @@ fun BillingContent(
     modifier: Modifier = Modifier,
     uiState: BillingPaymentUiState,
     onUpdateQuantity: (TblMenuItemResponse, Int) -> Unit,
-    onRemoveItem: (TblMenuItemResponse) -> Unit
+    onRemoveItem: (TblMenuItemResponse) -> Unit,
+    orderDetails: List<TblOrderDetailsResponse>
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
 
@@ -191,20 +196,53 @@ fun BillingContent(
                 Text("Items", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
             }
-            items(uiState.billedItems.toList()) { (menuItem, quantity) ->
-                BilledItemRow(
-                    menuItem = menuItem,
-                    quantity = quantity,
-                    tableStatus = uiState.tableStatus,
-                    currencyFormatter = currencyFormatter,
-                    onQuantityChange = { newQuantity ->
-                        onUpdateQuantity(menuItem, newQuantity)
-                    },
-                    onRemoveItem = {
-                        onRemoveItem(menuItem)
-                    }
+            val filteredOrderDetails = orderDetails.groupBy { it.kot_number }
+            items(filteredOrderDetails.toList()){
+                Text(
+                    text = "KOT #${it.first}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
+                it.second.forEach {
+                    BilledItemRow(
+                        menuItem = it.menuItem,
+                        quantity = it.qty,
+                        tableStatus = uiState.tableStatus,
+                        currencyFormatter = currencyFormatter,
+                        onQuantityChange = { newQuantity ->
+                            onUpdateQuantity(it.menuItem, newQuantity)
+                        },
+                        onRemoveItem = {
+                            onRemoveItem(it.menuItem)
+                        }
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+                ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
+//            filteredOrderDetails.forEach { (kotNumber, items) ->
+//
+//            }
+//            items(filteredOrderDetails.toList()){
+//
+//
+//            }
+//            items(uiState.billedItems.toList()) { (menuItem, quantity) ->
+//
+//                BilledItemRow(
+//                    menuItem = menuItem,
+//                    quantity = quantity,
+//                    tableStatus = uiState.tableStatus,
+//                    currencyFormatter = currencyFormatter,
+//                    onQuantityChange = { newQuantity ->
+//                        onUpdateQuantity(menuItem, newQuantity)
+//                    },
+//                    onRemoveItem = {
+//                        onRemoveItem(menuItem)
+//                    }
+//                )
+//            }
             item { ModernDivider(modifier = Modifier.padding(vertical = 8.dp)) }
         } else {
             item {
@@ -288,7 +326,7 @@ fun BilledItemRow(
     currencyFormatter: NumberFormat,
     onQuantityChange: (Int) -> Unit,
     onRemoveItem: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),

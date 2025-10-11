@@ -26,7 +26,8 @@ import com.warriortech.resb.util.CurrencySettings
 @Composable
 fun BillEditScreen(
     navController: NavHostController,
-    viewModel: PaidBillsViewModel = hiltViewModel()
+    viewModel: PaidBillsViewModel = hiltViewModel(),
+    bill_no : String
 ) {
     val selectedBill by viewModel.selectedBill.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -43,17 +44,10 @@ fun BillEditScreen(
         }
     }
 
-//    if (selectedBill == null) {
-//        LaunchedEffect(Unit) {
-//            navController.navigateUp()
-//        }
-//        return
-//    }
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Bill #${selectedBill!!.bill_no}") },
+                title = { Text("Edit Bill #$bill_no") },
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.clearSelection()

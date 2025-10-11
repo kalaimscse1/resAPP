@@ -19,6 +19,7 @@ import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.Printer
 import com.warriortech.resb.model.TblPrinterResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.PrinterSettingsViewModel
@@ -137,15 +138,15 @@ fun PrinterSettingsScreen(
 
                                     Row {
                                         IconButton(onClick = { editingPrinter = printer }) {
-                                            Icon(
-                                                Icons.Default.Edit,
-                                                contentDescription = stringResource(R.string.edit)
-                                            )
+                                            Icon(Icons.Default.Edit,
+                                                contentDescription = "Edit",
+                                                tint = BluePrimary)
                                         }
                                         IconButton(onClick = { viewModel.deletePrinter(printer.printer_id) }) {
                                             Icon(
                                                 Icons.Default.Delete,
-                                                contentDescription = stringResource(R.string.delete)
+                                                contentDescription = "Delete",
+                                                tint = MaterialTheme.colorScheme.error
                                             )
                                         }
                                     }

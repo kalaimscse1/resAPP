@@ -162,7 +162,7 @@ fun PaidBillsScreen(
                                     onEditClick = {
                                         // Navigate to edit screen or show edit dialog
                                         viewModel.selectBill(bill)
-                                        navController.navigate("bill_edit")
+                                        navController.navigate("bill_edit/${bill.bill_no}")
                                     },
                                     onDeleteClick = {
                                         billToDelete = bill

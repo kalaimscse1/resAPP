@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +24,7 @@ import com.warriortech.resb.model.TblVoucherRequest
 import com.warriortech.resb.model.TblVoucherResponse
 import com.warriortech.resb.model.TblVoucherType
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -183,19 +186,19 @@ fun VoucherCard(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = voucher.voucherType.voucher_type_name,
+                    text = "Voucher Type:"+voucher.voucherType.voucher_type_name,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    text = voucher.voucher_prefix,
+                    text = "Prefix:"+voucher.voucher_prefix,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = voucher.voucher_suffix,
+                    text = "Suffix:"+voucher.voucher_suffix,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = voucher.starting_no,
+                    text = "Starting:"+voucher.starting_no,
                     style = MaterialTheme.typography.bodySmall
                 )
 
@@ -204,16 +207,17 @@ fun VoucherCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onEdit) {
-                        Text("Edit")
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = BluePrimary)
                     }
-                    TextButton(
-                        onClick = onDelete,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.error
                         )
-                    ) {
-                        Text("Delete")
                     }
                 }
             }

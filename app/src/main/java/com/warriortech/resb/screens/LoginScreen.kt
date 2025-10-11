@@ -134,6 +134,7 @@ fun LoginScreen(
              */
             MobileOptimizedCard(
                 modifier = Modifier.fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 MobileOptimizedTextField(
                     value = uiState.value.companyCode,

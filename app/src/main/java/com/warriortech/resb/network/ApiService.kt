@@ -223,7 +223,7 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
-    @DELETE("menu/deleteMenuItemById/{menu_item_id}")
+    @DELETE("menu/menuItem/deleteMenuItemById/{menu_item_id}")
     suspend fun deleteMenuItem(
         @Path("menu_item_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
@@ -316,6 +316,12 @@ interface ApiService {
 
     @POST("print/bill")
     suspend fun printReceipt(
+        @Body bill: Bill,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ResponseBody>
+
+    @GET("print/bill/preview")
+    suspend fun getBillPreview(
         @Body bill: Bill,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ResponseBody>

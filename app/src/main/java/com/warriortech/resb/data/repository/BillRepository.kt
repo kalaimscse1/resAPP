@@ -1,6 +1,8 @@
 package com.warriortech.resb.data.repository
 
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
@@ -174,5 +176,14 @@ class BillRepository @Inject constructor(
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
+    }
+
+    suspend fun fetchBillPreview(bill: Bill): Bitmap? {
+        val response = apiService.getBillPreview(bill, sessionManager.getCompanyCode() ?: "")
+        return if (response.isSuccessful) {
+            response.body()?.byteStream()?.use { stream ->
+                BitmapFactory.decodeStream(stream)
+            }
+        } else null
     }
 }

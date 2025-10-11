@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Menu
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.MenuSettingsViewModel
@@ -201,11 +202,6 @@ fun MenuCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = menu.order_by,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
                     text = if (menu.is_active) "Active" else "Inactive",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (menu.is_active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
@@ -213,11 +209,16 @@ fun MenuCard(
             }
 
             IconButton(onClick = { onEdit(menu) }) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit")
+                Icon(Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = BluePrimary)
             }
-
             IconButton(onClick = { onDelete(menu) }) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens.settings
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,6 +35,7 @@ import com.warriortech.resb.ui.viewmodel.MenuItemSettingsViewModel
 import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.TblUnit
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.CurrencySettings
@@ -44,6 +46,7 @@ import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.TaxDropdown
 import com.warriortech.resb.util.UnitDropdown
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuItemSettingsScreen(
@@ -63,6 +66,13 @@ fun MenuItemSettingsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
+    }
+    LaunchedEffect(uiState) {
+        if (uiState is MenuItemSettingsUiState.Error) {
+            val message = (uiState as MenuItemSettingsUiState.Error).message
+            snackbarHostState.showSnackbar(message)
+        }
+
     }
 
     Scaffold(
@@ -146,22 +156,9 @@ fun MenuItemSettingsScreen(
             }
 
             is MenuItemSettingsUiState.Error -> {
-
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Error: ${state.message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Button(
-                        onClick = { viewModel.loadMenuItems() },
-                        modifier = Modifier.padding(top = 16.dp)
-                    ) {
-                        Text("Retry")
-                    }
+                scope.launch {
+                    val message = state.message
+                    snackbarHostState.showSnackbar(message)
                 }
             }
         }
@@ -233,10 +230,16 @@ fun MenuItemCard(
 
             Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    Icon(Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = BluePrimary)
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }

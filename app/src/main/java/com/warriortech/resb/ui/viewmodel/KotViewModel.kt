@@ -297,7 +297,8 @@ class KotViewModel @Inject constructor(
                         waiterName = _kot.value?.staff_name,
                         items = items,
                         orderCreatedAt = "${_kot.value?.order_date} + ${_kot.value?.order_create_time}",
-                        paperWidth = 48
+                        paperWidth = 48,
+                        modify = "Reprint"
                     )
                     val ip = orderRepository.getIpAddress(category)
                     orderRepository.printKOT(kotForCategory, ip).collect { result ->
@@ -368,7 +369,8 @@ class KotViewModel @Inject constructor(
                                     waiterName = _kot.value?.staff_name,
                                     items = items,
                                     orderCreatedAt = "${_kot.value?.order_date} + ${_kot.value?.order_create_time}",
-                                    paperWidth = 48
+                                    paperWidth = 48,
+                                    modify = "Modified"
                                 )
                                 val ip = orderRepository.getIpAddress(category)
                                 orderRepository.printKOT(kotForCategory, ip).collect { result ->

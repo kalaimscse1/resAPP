@@ -31,7 +31,7 @@ val ghostWhiteLight = Color(0xFFE6E6FA)
 val ghostWhiteDark = Color(0xFFB0C4DE)
 
 val DarkGreen = Color(0xFF006400)
-val LightGreen = Color(0xFF90EE90)
+val LightGreen = Color(0xFFB5EED1)
 val DarkRed = Color(0xFF8B0000)
 
 val red = Color(0xFFF44336)

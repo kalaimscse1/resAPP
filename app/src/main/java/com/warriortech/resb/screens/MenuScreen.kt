@@ -266,7 +266,7 @@ fun MenuScreen(
                     val newItemCount =
                         if (viewModel.isExistingOrderLoaded.value) newselectedItems.values.sum() else selectedItems.values.sum()
                     val existingItemCount =
-                        if (viewModel.isExistingOrderLoaded.value) selectedItems.values.sum() else 0
+                        if (viewModel.isExistingOrderLoaded.value) orderDetailsResponse.sumOf { it.qty } else 0
                     val totalItemCount = newItemCount + existingItemCount
                     val totalAmount = viewModel.getOrderTotal(effectiveStatus.toString())
                     val newTotalAmount =

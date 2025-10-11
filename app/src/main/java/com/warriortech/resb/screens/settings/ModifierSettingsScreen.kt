@@ -20,6 +20,7 @@ import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.ui.viewmodel.ModifierSettingsViewModel
 import com.warriortech.resb.ui.components.MobileOptimizedCard
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.CurrencySettings
@@ -199,7 +200,9 @@ fun ModifierCard(
 
             Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    Icon(Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = BluePrimary)
                 }
                 IconButton(onClick = onDelete) {
                     Icon(

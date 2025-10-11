@@ -112,13 +112,40 @@ class MenuItemSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = menuItemRepository.deleteMenuItem(menuItemId)
-                if (response.isSuccessful) {
-                    loadMenuItems()
-                } else {
-                    _uiState.value = MenuItemSettingsUiState.Error(
-                        response.message() ?: "Failed to delete menu item"
-                    )
+                when(response.code()){
+                    in 200..299 ->{
+                        loadMenuItems()
+                        _uiState.value = MenuItemSettingsUiState.Error("Menu item deleted successfully")
+                    }
+                    400 -> {
+                        _uiState.value = MenuItemSettingsUiState.Error("Bad Request: ${response.message()}")
+                    }
+                    401 -> {
+                        _uiState.value = MenuItemSettingsUiState.Error("Unauthorized: ${response.message()}")
+                    }
+                    409 -> {
+                        _uiState.value = MenuItemSettingsUiState.Error("Conflict: ${response.message()}")
+                    }
+                    404 -> {
+                        _uiState.value = MenuItemSettingsUiState.Error("Not Found: ${response.message()}")
+                    }
+                    500 -> {
+                        _uiState.value = MenuItemSettingsUiState.Error("Server Error: ${response.message()}")
+                    }
+                    else -> {
+                        _uiState.value = MenuItemSettingsUiState.Error("Error ${response.code()}: ${response.message()}")
+                    }
                 }
+//                if (response.isSuccessful) {
+//                    loadMenuItems()
+//                    _uiState.value =MenuItemSettingsUiState.Error(
+//                        response.message() ?: "Failed to delete menu item"
+//                    )
+//                } else {
+//                    _uiState.value = MenuItemSettingsUiState.Error(
+//                        response.message() ?: "Failed to delete menu item"
+//                    )
+//                }
 
             } catch (e: Exception) {
                 _uiState.value =

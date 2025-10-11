@@ -39,7 +39,7 @@ fun MobileOptimizedCard(
     } else {
         if (deviceInfo.isTablet) 6.dp else 4.dp
     }
-    val padding = if (deviceInfo.isTablet) 24.dp else 20.dp
+    val padding = if (deviceInfo.isTablet) 24.dp else 5.dp
 
     Card(
         modifier = modifier

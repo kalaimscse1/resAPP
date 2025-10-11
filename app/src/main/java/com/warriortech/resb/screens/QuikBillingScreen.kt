@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -114,11 +115,16 @@ fun ItemWiseBillScreen(
             )
         },
         bottomBar = {
-            Column(
+            BottomAppBar(
+                containerColor = SecondaryGreen,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PrimaryGreen)
-                    .padding(12.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(SecondaryGreen, SecondaryGreen)
+                        ),
+                        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
+                    )
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -158,6 +164,7 @@ fun ItemWiseBillScreen(
                     }
                 }
             }
+
         }
     ) { padding ->
         Column(

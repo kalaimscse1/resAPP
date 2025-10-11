@@ -41,6 +41,7 @@ import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Restaurant
@@ -818,9 +819,11 @@ fun AppNavigation(
                 navController = navController,
             )
         }
-        composable("bill_edit") {
+        composable("bill_edit/{bill_no}") { backStackEntry ->
+            val bill_no = backStackEntry.arguments?.getString("bill_no") ?: ""
             BillEditScreen(
                 navController = navController,
+                bill_no = bill_no
             )
         }
         composable("due") {
@@ -1307,6 +1310,15 @@ fun DrawerContent(
 //                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
 //                    colors = drawerItemColors
 //                )
+
+//                    NavigationDrawerItem(
+//                        label = { if (!isCollapsed) Text("Template") else Text("") },
+//                        icon = { DrawerIcon(Icons.Default.Business, contentDescription = null,isCollapsed) },
+//                        selected = currentDestination?.route == "template_screen",
+//                        onClick = { onDestinationClicked("template_screen") },
+//                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+//                        colors = drawerItemColors
+//                    )
                 }
 
                 if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER", "CHEF")) {

@@ -1,5 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -68,7 +69,7 @@ data class BillingPaymentUiState(
     val cashAmount: Double = 0.0,
     val cardAmount: Double = 0.0,
     val upiAmount: Double = 0.0,
-    val customer: TblCustomer?=null
+    val customer: TblCustomer? = null
 )
 
 @HiltViewModel
@@ -93,11 +94,12 @@ class BillingViewModel @Inject constructor(
     private val _selectedItems = MutableStateFlow<Map<TblMenuItemResponse, Int>>(emptyMap())
     val selectedItems: StateFlow<Map<TblMenuItemResponse, Int>> = _selectedItems.asStateFlow()
 
-    private val _originalOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
+    val _originalOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
     private val _filteredOrderDetails = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount.asStateFlow()
+
     private val _orderId = MutableStateFlow("")
     val orderId: StateFlow<String> = _orderId.asStateFlow()
 
@@ -106,6 +108,9 @@ class BillingViewModel @Inject constructor(
 
     private val _customerId = MutableStateFlow(0L)
     val customerId: StateFlow<Long> = _customerId.asStateFlow()
+
+    private val _preview = MutableStateFlow<Bitmap?>(null)
+    val preview: StateFlow<Bitmap?> = _preview
 
     init {
         viewModelScope.launch {
@@ -123,9 +128,17 @@ class BillingViewModel @Inject constructor(
         _customerId.value = id
     }
 
+    fun loadBillPreview(bill: Bill) {
+        viewModelScope.launch {
+            val bmp = billRepository.fetchBillPreview(bill)
+            _preview.value = bmp
+        }
+    }
+
     fun updateSelectedCustomer(customer: TblCustomer) {
         _uiState.value = _uiState.value.copy(customer = customer)
     }
+
     fun updateBillNo(billNo: String) {
         _billNo.value = billNo
     }
@@ -505,14 +518,14 @@ class BillingViewModel @Inject constructor(
                 orderMasterId = currentState.orderMasterId ?: "",
                 paymentMethod = paymentMethod,
                 receivedAmt = amount,
-                customer = _customer.value?: TblCustomer(
+                customer = _customer.value ?: TblCustomer(
                     customer_id = 1L,
                     customer_name = "GUEST",
                     contact_no = "",
                     address = "",
                     gst_no = "",
                     is_active = 1L,
-                    email_address="",
+                    email_address = "",
                     igst_status = false
                 ),
                 billNo = _billNo.value,
