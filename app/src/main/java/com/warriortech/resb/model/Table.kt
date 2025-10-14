@@ -34,5 +34,7 @@ data class TableStatusResponse(
     var table_status: String,
     var table_availability: String,
     var is_active: Boolean,
-    var grandTotal: Double
+    var grandTotal: Double,
+    var staff_name:String,
+    var order_time:String
 )

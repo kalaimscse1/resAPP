@@ -159,48 +159,53 @@ class MenuViewModel @Inject constructor(
 
     fun loadMenuItems(category: String? = null) {
         viewModelScope.launch {
-            _menuState.value = MenuUiState.Loading
-            val menus = menuRepository.getMenus().associateBy { it.menu_id }
-            tableStatus.value = _selectedTableId.value?.let { tableRepository.getstatus(it) }
-            menuRepository.getMenuItems(category).collect { result ->
-                result.fold(
-                    onSuccess = { menuItems ->
-                        val showMenu =
-                            sessionManager.getGeneralSetting()?.menu_show_in_time ?: false
+            try {
+                _menuState.value = MenuUiState.Loading
+                val menus = menuRepository.getMenus().associateBy { it.menu_id }
+                tableStatus.value = _selectedTableId.value?.let { tableRepository.getstatus(it) }
+                menuRepository.getMenuItems(category).collect { result ->
+                    result.fold(
+                        onSuccess = { menuItems ->
+                            val showMenu =
+                                sessionManager.getGeneralSetting()?.menu_show_in_time ?: false
 
-                        val itemsToShow = if (showMenu) {
-                            val currentTime = getCurrentTimeAsFloat()
-                            val filteredMenuItems = menuItems.filter { menuItem ->
-                                val menu = menus[menuItem.menu_id]
-                                val startTime = menu?.start_time ?: 0.00f
-                                val endTime = menu?.end_time ?: 24.00f
-                                if (startTime <= endTime) {
-                                    currentTime in startTime..endTime
-                                } else {
-                                    (currentTime >= startTime) || (currentTime <= endTime)
+                            val itemsToShow = if (showMenu) {
+                                val currentTime = getCurrentTimeAsFloat()
+                                val filteredMenuItems = menuItems.filter { menuItem ->
+                                    val menu = menus[menuItem.menu_id]
+                                    val startTime = menu?.start_time ?: 0.00f
+                                    val endTime = menu?.end_time ?: 24.00f
+                                    if (startTime <= endTime) {
+                                        currentTime in startTime..endTime
+                                    } else {
+                                        (currentTime >= startTime) || (currentTime <= endTime)
+                                    }
                                 }
+                                filteredMenuItems
+                            } else {
+                                menuItems
                             }
-                            filteredMenuItems
-                        } else {
-                            menuItems
+
+                            _menuState.value = MenuUiState.Success(itemsToShow)
+
+                            val data = buildList {
+                                add("FAVOURITES")
+                                add("ALL")
+                                addAll(itemsToShow.map { it.item_cat_name }.distinct())
+                            }
+                            categories.value = data
+                            selectedCategory.value = categories.value.firstOrNull()
+
+                        },
+                        onFailure = { error ->
+                            _menuState.value =
+                                MenuUiState.Error(error.message ?: "Failed to load menu items")
                         }
-
-                        _menuState.value = MenuUiState.Success(itemsToShow)
-
-                        val data = buildList {
-                            add("FAVOURITES")
-                            add("ALL")
-                            addAll(itemsToShow.map { it.item_cat_name }.distinct())
-                        }
-                        categories.value = data
-                        selectedCategory.value = categories.value.firstOrNull()
-
-                    },
-                    onFailure = { error ->
-                        _menuState.value =
-                            MenuUiState.Error(error.message ?: "Failed to load menu items")
-                    }
-                )
+                    )
+                }
+            }catch (e:Exception){
+                _menuState.value =
+                    MenuUiState.Error(e.message ?: "Failed to load menu items")
             }
         }
     }

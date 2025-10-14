@@ -83,47 +83,52 @@ class CounterViewModel @Inject constructor(
 
     fun loadMenuItems(category: String? = null) {
         viewModelScope.launch {
-            _menuState.value = MenuUiState.Loading
-            val menus = menuRepository.getMenus().associateBy { it.menu_id }
-            menuRepository.getMenuItems(category).collect { result ->
-                result.fold(
-                    onSuccess = { menuItems ->
-                        val showMenu = sessionManager.getGeneralSetting()?.menu_show_in_time == true
-                        if (showMenu) {
-                            val currentTime = getCurrentTimeAsFloat()
+            try{
+                _menuState.value = MenuUiState.Loading
+                val menus = menuRepository.getMenus().associateBy { it.menu_id }
+                menuRepository.getMenuItems(category).collect { result ->
+                    result.fold(
+                        onSuccess = { menuItems ->
+                            val showMenu = sessionManager.getGeneralSetting()?.menu_show_in_time == true
+                            if (showMenu) {
+                                val currentTime = getCurrentTimeAsFloat()
 
-                            val filteredMenuItems = menuItems.filter { menuItem ->
-                                val menu = menus[menuItem.menu_id]
-                                val startTime = menu?.start_time ?: 0f
-                                val endTime = menu?.end_time ?: 24f
-                                currentTime in startTime..endTime
+                                val filteredMenuItems = menuItems.filter { menuItem ->
+                                    val menu = menus[menuItem.menu_id]
+                                    val startTime = menu?.start_time ?: 0f
+                                    val endTime = menu?.end_time ?: 24f
+                                    currentTime in startTime..endTime
+                                }
+                                lastSuccessfulMenuItems = filteredMenuItems
+                                _menuState.value = MenuUiState.Success(filteredMenuItems)
+                                val data = buildList {
+                                    add("FAVOURITES")
+                                    add("ALL")
+                                    addAll(filteredMenuItems.map { it.item_cat_name }.distinct())
+                                }
+                                _categories.value = data
+                                selectedCategory.value = categories.value.firstOrNull()
+                            } else {
+                                lastSuccessfulMenuItems = menuItems
+                                _menuState.value = MenuUiState.Success(menuItems)
+                                val data = buildList {
+                                    add("FAVOURITES")
+                                    add("ALL")
+                                    addAll(menuItems.map { it.item_cat_name }.distinct())
+                                }
+                                _categories.value = data
+                                selectedCategory.value = categories.value.firstOrNull()
                             }
-                            lastSuccessfulMenuItems = filteredMenuItems
-                            _menuState.value = MenuUiState.Success(filteredMenuItems)
-                            val data = buildList {
-                                add("FAVOURITES")
-                                add("ALL")
-                                addAll(filteredMenuItems.map { it.item_cat_name }.distinct())
-                            }
-                            _categories.value = data
-                            selectedCategory.value = categories.value.firstOrNull()
-                        } else {
-                            lastSuccessfulMenuItems = menuItems
-                            _menuState.value = MenuUiState.Success(menuItems)
-                            val data = buildList {
-                                add("FAVOURITES")
-                                add("ALL")
-                                addAll(menuItems.map { it.item_cat_name }.distinct())
-                            }
-                            _categories.value = data
-                            selectedCategory.value = categories.value.firstOrNull()
+                        },
+                        onFailure = { error ->
+                            MenuUiState.Error(error.message ?: "Failed to load menu items")
                         }
-                    },
-                    onFailure = { error ->
-                        MenuUiState.Error(error.message ?: "Failed to load menu items")
-                    }
-                )
+                    )
+                }
+            }catch (e:Exception){
+                MenuUiState.Error(e.message ?: "Failed to load menu items")
             }
+
         }
     }
 
@@ -284,6 +289,7 @@ class CounterViewModel @Inject constructor(
                                 igst_status = false
                             ),
                             "",
+                            voucherType = "BILL"
                         ).collect { billResult ->
                             billResult.fold(
                                 onSuccess = { response ->

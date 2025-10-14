@@ -481,7 +481,7 @@ class BillingViewModel @Inject constructor(
     }
 
 
-    fun processPayment() {
+    fun processPayment(voucherType:String) {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
         val amount = if (paymentMethod?.name == "OTHERS") {
@@ -531,7 +531,8 @@ class BillingViewModel @Inject constructor(
                 billNo = _billNo.value,
                 cash = currentState.cashAmount,
                 card = currentState.cardAmount,
-                upi = currentState.upiAmount
+                upi = currentState.upiAmount,
+                voucherType = voucherType
             ).collect { result ->
                 result.fold(
                     onSuccess = { response ->

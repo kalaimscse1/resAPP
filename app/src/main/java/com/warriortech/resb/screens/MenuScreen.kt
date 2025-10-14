@@ -107,6 +107,7 @@ fun MenuScreen(
     var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
     var sucess by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
+    var alert by remember { mutableStateOf(false) }
 
     val effectiveStatus = remember(isTakeaway, tableStatusFromVM) {
         when (isTakeaway) {
@@ -327,13 +328,18 @@ fun MenuScreen(
                             if (sessionManager.getUser()?.role == "ADMIN" || sessionManager.getUser()?.role == "CASHIER") {
                                 MobileOptimizedButton(
                                     onClick = {
-                                        navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
-                                            launchSingleTop = true
+                                        if (newselectedItems.isNotEmpty()){
+                                            alert= true
                                         }
-                                        onBillPlaced(
-                                            viewModel.orderDetailsResponse.value,
-                                            viewModel.existingOrderId.value ?: ""
-                                        )
+                                        else{
+                                            navController.navigate("billing_screen/${viewModel.existingOrderId.value ?: ""}") {
+                                                launchSingleTop = true
+                                            }
+                                            onBillPlaced(
+                                                viewModel.orderDetailsResponse.value,
+                                                viewModel.existingOrderId.value ?: ""
+                                            )
+                                        }
                                     },
                                     text = "Bill",
                                     enabled = selectedItems.isNotEmpty(),
@@ -496,7 +502,6 @@ fun MenuScreen(
                         snackbarHostState.showSnackbar(errorMessage)
                     }
                 }
-
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -549,6 +554,13 @@ fun MenuScreen(
                 viewModel.addMenuItemWithModifiers(selectedMenuItemForModifier!!, selectedModifiers)
             },
             onDismiss = { viewModel.hideModifierDialog() }
+        )
+    }
+    if (alert) {
+        BillAlertDialog(
+            onConfirm = {
+                alert = false
+            }
         )
     }
 }
@@ -1003,6 +1015,34 @@ fun OrderDetailsDialog(
                     )
                 }
 
+            }
+        }
+    )
+}
+
+@Composable
+fun BillAlertDialog(
+    onConfirm: () -> Unit
+) {
+
+    AlertDialog(
+        onDismissRequest = onConfirm,
+        confirmButton = {
+            MobileOptimizedButton(
+                onClick = onConfirm,
+                text = "OK",
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        title = {
+            Text("Alert", style = MaterialTheme.typography.titleLarge)
+        },
+        text = {
+            Column {
+                Text(
+                    "Clear Selection to proceed to Billing / Click UpdateKot to proceed with existing selection to add items to Order.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     )

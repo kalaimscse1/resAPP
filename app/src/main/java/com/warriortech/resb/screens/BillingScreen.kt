@@ -153,7 +153,7 @@ fun BillingScreen(
         },
         bottomBar = {
             BillingBottomBar(uiState = uiState, orderMasterId = orderMasterId) {
-                navController.navigate("payment_screen/${uiState.totalAmount}/${uiState.orderMasterId}/${"--"}/${0L}") {
+                navController.navigate("payment_screen/${uiState.totalAmount}/${uiState.orderMasterId}/${"--"}/${0L}/${""}") {
                     launchSingleTop = true
                     restoreState = true
                 }
@@ -197,25 +197,26 @@ fun BillingContent(
                 Spacer(Modifier.height(8.dp))
             }
             val filteredOrderDetails = orderDetails.groupBy { it.kot_number }
-            items(filteredOrderDetails.toList()){
+            items(filteredOrderDetails.toList()){ it ->
                 Text(
                     text = "KOT #${it.first}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
-                it.second.forEach {
+                it.second.forEach {details->
                     BilledItemRow(
-                        menuItem = it.menuItem,
-                        quantity = it.qty,
+                        menuItem = details.menuItem,
+                        quantity = details.qty,
                         tableStatus = uiState.tableStatus,
                         currencyFormatter = currencyFormatter,
                         onQuantityChange = { newQuantity ->
-                            onUpdateQuantity(it.menuItem, newQuantity)
+                            onUpdateQuantity(details.menuItem, newQuantity)
                         },
                         onRemoveItem = {
-                            onRemoveItem(it.menuItem)
-                        }
+                            onRemoveItem(details.menuItem)
+                        },
+                        rate = details.actual_rate
                     )
                     Spacer(Modifier.height(8.dp))
                 }
@@ -327,6 +328,7 @@ fun BilledItemRow(
     onQuantityChange: (Int) -> Unit,
     onRemoveItem: () -> Unit,
     modifier: Modifier = Modifier,
+    rate: Double
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -355,7 +357,7 @@ fun BilledItemRow(
                     )
                 }
                 Text(
-                    text = CurrencySettings.format(menuItem.actual_rate * quantity),
+                    text = CurrencySettings.format(rate * quantity),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

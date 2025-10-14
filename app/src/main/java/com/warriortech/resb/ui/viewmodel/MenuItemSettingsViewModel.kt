@@ -11,11 +11,13 @@ import com.warriortech.resb.model.Menu
 import com.warriortech.resb.model.MenuCategory
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblMenuItemRequest
+import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
 import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,6 +55,10 @@ class MenuItemSettingsViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _menuItems = MutableStateFlow<List<TblMenuItemResponse>>(emptyList())
+    val menuItems: StateFlow<List<TblMenuItemResponse>> = _menuItems.asStateFlow()
+
+
 
     init {
         CurrencySettings.update(
@@ -83,26 +89,40 @@ class MenuItemSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value = MenuItemSettingsUiState.Loading
-                val menus = menuRepository.getAllMenus()
-                val menuCategories = menuCategoryRepository.getAllCategories()
-                val taxes = taxRepository.getAllTaxes()
-                val kitchenCategories = menuCategoryRepository.getAllKitchenCategories()
-                val units = menuCategoryRepository.getAllUnits()
+
+                // Run all API calls concurrently
+                val menusDeferred = async { menuRepository.getAllMenus() }
+                val menuCategoriesDeferred = async { menuCategoryRepository.getAllCategories() }
+                val taxesDeferred = async { taxRepository.getAllTaxes() }
+                val kitchenCategoriesDeferred = async { menuCategoryRepository.getAllKitchenCategories() }
+                val unitsDeferred = async { menuCategoryRepository.getAllUnits() }
+
+                // Await results
+                val menus = menusDeferred.await()
+                val menuCategories = menuCategoriesDeferred.await()
+                val taxes = taxesDeferred.await()
+                val kitchenCategories = kitchenCategoriesDeferred.await()
+                val units = unitsDeferred.await()
+
+                // Update states
                 _menus.value = menus
                 _menuCategories.value = menuCategories
                 _taxes.value = taxes
                 _kitchenCategories.value = kitchenCategories
                 _units.value = units
-                val menuItems = menuItemRepository.getAllMenuItems()
-                menuItems.collect {
+
+                // Collect menu items last
+                menuItemRepository.getAllMenuItems().collect {
                     _uiState.value = MenuItemSettingsUiState.Success(it)
                 }
 
             } catch (e: Exception) {
+                e.printStackTrace()
                 _uiState.value = MenuItemSettingsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
+
 
     fun addMenuItem(menuItem: TblMenuItemRequest) {
         viewModelScope.launch {

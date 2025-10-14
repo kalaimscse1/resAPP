@@ -150,7 +150,7 @@ fun ItemWiseReportScreen(
             Spacer(Modifier.height(16.dp))
 
             // 👉 State handling
-            when (uiState) {
+            when (val state =uiState) {
                 is ItemWiseReportReportUiState.Idle -> Text("Please select dates and load reports")
 
                 is ItemWiseReportReportUiState.Loading -> Box(
@@ -161,7 +161,7 @@ fun ItemWiseReportScreen(
                 }
 
                 is ItemWiseReportReportUiState.Success -> {
-                    val bills = (uiState as ItemWiseReportReportUiState.Success).bills
+                    val bills = state.bills
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(bills) { bill ->
                             Card(
@@ -185,7 +185,7 @@ fun ItemWiseReportScreen(
                 }
 
                 is ItemWiseReportReportUiState.Error -> {
-                    val message = (uiState as ReportUiState.Error).message
+                    val message = state.message
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("⚠️ $message", color = MaterialTheme.colorScheme.error)
                     }

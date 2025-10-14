@@ -249,28 +249,28 @@ class MainActivity : ComponentActivity() {
                             scope.launch { drawerState.close() }
                             if (route == "logout") {
                                 scope.launch {
-                                    val sharedPref = context.getSharedPreferences(
-                                        "user_prefs",
-                                        MODE_PRIVATE
-                                    )
+                                    val sharedPref = context.getSharedPreferences("user_prefs", MODE_PRIVATE)
                                     sessionManager.saveUserLogin(false)
                                     sharedPref.edit { clear() }
-                                    Toast.makeText(
-                                        context,
-                                        "Logged out successfully",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+
                                     navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
                                     }
+
+                                    // ✅ Finish activity to prevent going back
+                                    (context as? ComponentActivity)?.finish()
                                 }
-                            } else {
+                            }
+                            else {
                                 navController.navigate(route) {
                                     popUpTo(navController.graph.startDestinationId) {
                                         inclusive = true
                                     }
                                     launchSingleTop = true
                                 }
+//                                (context as? ComponentActivity)?.finish()
                             }
                         },
                         navController = navController,
@@ -279,46 +279,51 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (showDrawer) {
-                    if (isLargeScreen) {
-                        // Use PermanentNavigationDrawer for large screens
-                        PermanentNavigationDrawer(drawerContent = drawerContent) {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                elevation = 4.dp,
-                                shape = MaterialTheme.shapes.large,
-                                color = MaterialTheme.colorScheme.background
+                    when{
+                        isLargeScreen->{
+                            ModalNavigationDrawer(
+                                drawerState = drawerState,
+                                drawerContent = drawerContent,
+                                gesturesEnabled = true
                             ) {
-                                Column {
-                                    NetworkStatusBar(connectionState = connectionState)
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        AppNavigation(drawerState, navController, sessionManager)
+                                Surface(
+                                    modifier = Modifier.fillMaxSize(),
+                                    elevation = 2.dp,
+                                    shape = MaterialTheme.shapes.large,
+                                    color = MaterialTheme.colorScheme.background
+                                ) {
+                                    Column {
+                                        NetworkStatusBar(connectionState = connectionState)
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AppNavigation(drawerState, navController, sessionManager)
+                                        }
                                     }
                                 }
                             }
                         }
-                    } else {
-                        // Use ModalNavigationDrawer for smaller screens
-                        ModalNavigationDrawer(
-                            drawerState = drawerState,
-                            drawerContent = drawerContent,
-                            gesturesEnabled = true
-                        ) {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                elevation = 2.dp,
-                                shape = MaterialTheme.shapes.large,
-                                color = MaterialTheme.colorScheme.background
+                        else->{
+                            ModalNavigationDrawer(
+                                drawerState = drawerState,
+                                drawerContent = drawerContent,
+                                gesturesEnabled = true
                             ) {
-                                Column {
-                                    NetworkStatusBar(connectionState = connectionState)
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        AppNavigation(drawerState, navController, sessionManager)
+                                Surface(
+                                    modifier = Modifier.fillMaxSize(),
+                                    elevation = 2.dp,
+                                    shape = MaterialTheme.shapes.large,
+                                    color = MaterialTheme.colorScheme.background
+                                ) {
+                                    Column {
+                                        NetworkStatusBar(connectionState = connectionState)
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AppNavigation(drawerState, navController, sessionManager)
+                                        }
                                     }
                                 }
                             }
@@ -370,6 +375,7 @@ fun AppNavigation(
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
     var kotRes by remember { mutableStateOf<KotResponse?>(null) }
     var selecteItems by remember { mutableStateOf<Map<TblMenuItemResponse, Int>>(mutableMapOf()) }
+    val waiter = sessionManager.getUser()?.role ?: ""
 
     // Check subscription status
     LaunchedEffect(Unit) {
@@ -391,8 +397,15 @@ fun AppNavigation(
                     val isLoggedInPref = sessionManager.getUserLogin()
                     if (isLoggedInPref) {
                         isLoggedIn = true
-                        navController.navigate("dashboard") {
-                            popUpTo("splash") { inclusive = true }
+                        if (sessionManager.getUser()?.role =="WAITER"){
+                            navController.navigate("selects") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        }
+                        else{
+                            navController.navigate("dashboard") {
+                                popUpTo("splash") { inclusive = true }
+                            }
                         }
                     } else {
                         navController.navigate("login") {
@@ -407,8 +420,15 @@ fun AppNavigation(
             LoginScreen(
                 onLoginSuccess = {
                     isLoggedIn = true
-                    navController.navigate("dashboard") {
-                        popUpTo("login") { inclusive = true }
+                    if (sessionManager.getUser()?.role =="WAITER"){
+                        navController.navigate("selects") {
+                            popUpTo("splash") { inclusive = true }
+                        }
+                    }
+                    else{
+                        navController.navigate("dashboard") {
+                            popUpTo("splash") { inclusive = true }
+                        }
                     }
                 },
                 onRegisterClick = {
@@ -483,7 +503,7 @@ fun AppNavigation(
             )
         }
 
-        composable("payment_screen/{amountToPayFromRoute}/{orderId}/{bill_no}/{customerId}") { it ->
+        composable("payment_screen/{amountToPayFromRoute}/{orderId}/{bill_no}/{customerId}/{voucherType}") { it ->
             PaymentScreen(
                 navController = navController,
                 amountToPayFromRoute = it.arguments?.getString("amountToPayFromRoute")
@@ -491,7 +511,8 @@ fun AppNavigation(
                 orderMasterId = it.arguments?.getString("orderId") ?: "",
                 sessionManager = sessionManager,
                 billNo = it.arguments?.getString("bill_no") ?: "",
-                customerId = it.arguments?.getString("customerId")?.toLongOrNull() ?: 0L
+                customerId = it.arguments?.getString("customerId")?.toLongOrNull() ?: 0L,
+                voucherType = it.arguments?.getString("voucherType") ?: ""
             )
         }
 
@@ -555,7 +576,8 @@ fun AppNavigation(
             MenuItemSettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
-                }
+                },
+                sessionManager = sessionManager
             )
         }
 

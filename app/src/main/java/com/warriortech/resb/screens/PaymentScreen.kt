@@ -74,6 +74,7 @@ fun PaymentScreen(
     orderMasterId: String? = null,
     billNo: String? = null,
     customerId: Long? = null,
+    voucherType: String? = null,
     sessionManager: SessionManager
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -167,7 +168,7 @@ fun PaymentScreen(
                 uiState = uiState,
                 onConfirmPayment = {
                     viewModel.updateAmountToPay(amountToPayFromRoute ?: 0.0)
-                    viewModel.processPayment()
+                    viewModel.processPayment(voucherType = voucherType?:"BILL")
                 },
                 customer = customers.find { it.customer_id == customer?.customer_id }
             )

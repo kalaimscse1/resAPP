@@ -11,17 +11,23 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.TableChart
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -38,6 +44,7 @@ import com.warriortech.resb.ui.viewmodel.MenuItemSettingsViewModel
 import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.TblUnit
+import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -45,6 +52,7 @@ import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.KitchenGroupDropdown
 import com.warriortech.resb.util.MenuCategoryDropdown
 import com.warriortech.resb.util.MenuDropdown
+import com.warriortech.resb.util.ReportExport
 import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.SuccessDialog
 import com.warriortech.resb.util.SuccessDialogWithButton
@@ -56,8 +64,10 @@ import com.warriortech.resb.util.UnitDropdown
 @Composable
 fun MenuItemSettingsScreen(
     onBackPressed: () -> Unit,
-    viewModel: MenuItemSettingsViewModel = hiltViewModel()
+    viewModel: MenuItemSettingsViewModel = hiltViewModel(),
+    sessionManager: SessionManager
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var editingMenuItem by remember { mutableStateOf<TblMenuItemResponse?>(null) }
@@ -79,6 +89,8 @@ fun MenuItemSettingsScreen(
     }
     var search by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    val menuItems by viewModel.menuItems.collectAsStateWithLifecycle()
+
 
 
     LaunchedEffect(Unit) {
@@ -135,15 +147,44 @@ fun MenuItemSettingsScreen(
             BottomAppBar(
                 containerColor = PrimaryGreen,
                 contentColor = SurfaceLight,
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                // 3. Display the count
-                Text(
-                    text = "Total Menu Items: $currentItemCount",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                actions = {
+                    if (uiState is MenuItemSettingsUiState.Success){
+                        Text(
+                            text = "Total: $currentItemCount",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        val menuItems = (uiState as MenuItemSettingsUiState.Success).menuItems
+                        IconButton(onClick = {
+                            ReportExport.menuItemsExportToPdf(
+                                context,
+                                menuItems,
+                                sessionManager = sessionManager
+                            )
+                        }) {
+                            Icon(Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
+                        }
+                        IconButton(onClick = { ReportExport.menuItemsExportToExcel(context, menuItems,sessionManager = sessionManager) }) {
+                            Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
+                        }
+                        IconButton(onClick = {
+                            ReportExport.viewReport(context, "MenuItemReport.pdf", "application/pdf")
+                        }) {
+                            Icon(Icons.Default.Visibility, contentDescription = "View PDF")
+                        }
+                        IconButton(onClick = {
+                            ReportExport.viewReport(
+                                context,
+                                "MenuItemReport.xlsx",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            )
+                        }) {
+                            Icon(Icons.Default.InsertDriveFile, contentDescription = "View Excel")
+                        }
+                    }
+                }
+            )
         }
     ) { paddingValues ->
 

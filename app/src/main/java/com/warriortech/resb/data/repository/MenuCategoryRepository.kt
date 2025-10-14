@@ -49,11 +49,15 @@ class MenuCategoryRepository @Inject constructor(
     }
 
     suspend fun getAllKitchenCategories(): List<KitchenCategory> {
-        val response = apiService.getAllKitchenCategories(sessionManager.getCompanyCode()?:"")
-        if (response.isSuccessful) {
-            return response.body() ?: emptyList()
-        } else {
-            throw Exception("Failed to fetch categories: ${response.message()}")
+        try {
+            val response = apiService.getAllKitchenCategories(sessionManager.getCompanyCode()?:"")
+            if (response.isSuccessful) {
+                return response.body() ?: emptyList()
+            } else {
+                throw Exception("Failed to fetch categories: ${response.message()}")
+            }
+        }catch (e: Exception){
+            throw e
         }
     }
 

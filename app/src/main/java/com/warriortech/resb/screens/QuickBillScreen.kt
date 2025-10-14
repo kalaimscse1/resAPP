@@ -125,16 +125,36 @@ fun QuickBillScreen(
             }
         }
     ) { paddingValues ->
-        BillContent(
-            modifier = Modifier.padding(paddingValues),
-            uiState = selectedItems,
-            onUpdateQuantity = { item, newQuantity ->
-                viewModel.updateItemQuantity(item, newQuantity)
-            },
-            onRemoveItem = { item ->
-                viewModel.removeItem(item)
+        if (selectedItems.isEmpty()){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No items Found.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
             }
-        )
+            return@Scaffold
+        }
+        else{
+            BillContent(
+                modifier = Modifier.padding(paddingValues),
+                uiState = selectedItems,
+                onUpdateQuantity = { item, newQuantity ->
+                    viewModel.updateItemQuantity(item, newQuantity)
+                },
+                onRemoveItem = { item ->
+                    viewModel.removeItem(item)
+                }
+            )
+        }
     }
 }
 

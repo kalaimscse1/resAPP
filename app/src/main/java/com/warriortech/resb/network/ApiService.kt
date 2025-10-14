@@ -639,6 +639,7 @@ interface ApiService {
     @GET("payment/getBillNoByCounterId")
     suspend fun getBillNoByCounterId(
         @Query("counterId") counterId: Long,
+        @Query("voucherType") voucherType: String,
         @Header("X-Tenant-ID") tenantId: String
     ): Map<String, String>
 

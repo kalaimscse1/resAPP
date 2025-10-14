@@ -3,10 +3,13 @@ package com.warriortech.resb.data.repository
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.model.TblCustomer
+import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.viewmodel.PaymentMethod
@@ -71,24 +74,55 @@ class BillRepository @Inject constructor(
         billNo: String,
         cash: Double = 0.0,
         card: Double = 0.0,
-        upi: Double = 0.0
+        upi: Double = 0.0,
+        voucherType:String
     ): Flow<Result<TblBillingResponse>> = flow {
         if (billNo != "--") {
             apiService.resetDue(billNo, sessionManager.getCompanyCode() ?: "")
         }
-        val billNo = apiService.getBillNoByCounterId(
+        if (paymentMethod.name=="DUE" && customer.customer_id == 1L) {
+            emit(Result.failure(Exception("Please select a customer for due payment")))
+            return@flow
+        }
+        val billNo =  if (paymentMethod.name=="DUE") apiService.getBillNoByCounterId(
             sessionManager.getUser()?.counter_id!!,
+            "DUE",
+            sessionManager.getCompanyCode() ?: ""
+        )else if (voucherType=="DUE")
+            apiService.getBillNoByCounterId(
+                sessionManager.getUser()?.counter_id!!,
+                "DUE",
+                sessionManager.getCompanyCode() ?: ""
+            )
+            else apiService.getBillNoByCounterId(
+            sessionManager.getUser()?.counter_id!!,
+            "BILL",
             sessionManager.getCompanyCode() ?: ""
         )
-        val voucher = apiService.getVoucherByCounterId(
+        val voucher = if (paymentMethod.name=="DUE") apiService.getVoucherByCounterId(
             sessionManager.getUser()?.counter_id!!,
             sessionManager.getCompanyCode() ?: "",
+            "DUE"
+        ).body()else if(voucherType=="DUE")
+            apiService.getVoucherByCounterId(
+                sessionManager.getUser()?.counter_id!!,
+                sessionManager.getCompanyCode() ?: "",
+                "DUE"
+            ).body()
+        else
+            apiService.getVoucherByCounterId(
+            sessionManager.getUser()?.counter_id!!,
+            sessionManager.getCompanyCode()?: "",
             "BILL"
         ).body()
+        var order : List<TblOrderDetailsResponse> = emptyList()
         val orderMaster = apiService.getOpenOrderDetailsForTable(
             orderMasterId,
             sessionManager.getCompanyCode() ?: ""
-        ).body()!!
+        )
+        if (orderMaster.isSuccessful) {
+            order = orderMaster.body()!!
+        }
         val request = TblBillingRequest(
             bill_no = billNo["bill_no"] ?: "",
             bill_date = getCurrentDateModern(),
@@ -97,15 +131,15 @@ class BillRepository @Inject constructor(
             voucher_id = voucher?.voucher_id ?: 0L,
             staff_id = sessionManager.getUser()?.staff_id ?: 0L,
             customer_id = customer.customer_id,
-            order_amt = orderMaster.sumOf { it.total },
+            order_amt = order.sumOf { it.total },
             disc_amt = 0.0,
-            tax_amt = orderMaster.sumOf { it.tax_amount },
-            cess = orderMaster.sumOf { it.cess },
-            cess_specific = orderMaster.sumOf { it.cess_specific },
+            tax_amt = order.sumOf { it.tax_amount },
+            cess = order.sumOf { it.cess },
+            cess_specific = order.sumOf { it.cess_specific },
             delivery_amt = 0.0,
-            grand_total = orderMaster.sumOf { it.grand_total },
+            grand_total = order.sumOf { it.grand_total },
             round_off = 0.0,
-            rounded_amt = orderMaster.sumOf { it.grand_total },
+            rounded_amt = order.sumOf { it.grand_total },
             cash = if (paymentMethod.name == "CASH") receivedAmt else if (paymentMethod.name == "OTHERS") cash else 0.0,
             card = if (paymentMethod.name == "CARD") receivedAmt else if (paymentMethod.name == "OTHERS") card else 0.0,
             upi = if (paymentMethod.name == "UPI") receivedAmt else if (paymentMethod.name == "OTHERS") upi else 0.0,

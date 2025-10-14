@@ -18,6 +18,8 @@ import com.itextpdf.text.pdf.PdfWriter
 import com.warriortech.resb.model.CategoryReport
 import com.warriortech.resb.model.ItemReport
 import com.warriortech.resb.model.TblBillingResponse
+import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.network.SessionManager
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
@@ -548,6 +550,147 @@ object ReportExport {
                 row.createCell(0).setCellValue(bill.item_cat_name)
                 row.createCell(1).setCellValue(bill.qty.toString())
                 row.createCell(2).setCellValue(bill.grand_total)
+            }
+
+            val outputStream = FileOutputStream(file)
+            workbook.write(outputStream)
+            outputStream.close()
+            workbook.close()
+
+            shareFile(
+                context,
+                file,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+        } catch (e: Exception) {
+            Toast.makeText(context, "Excel Export Failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    @SuppressLint("DefaultLocale")
+    fun menuItemsExportToPdf(context: Context, bills: List<TblMenuItemResponse>, sessionManager: SessionManager) {
+        try {
+            val company = sessionManager.getRestaurantProfile()
+            val pdfDir = File(context.getExternalFilesDir(null), "reports")
+            if (!pdfDir.exists()) pdfDir.mkdirs()
+
+            val file = File(pdfDir, "MenuItems.pdf")
+            val document = Document(PageSize.A4, 10f, 10f, 20f, 20f)
+            PdfWriter.getInstance(document, FileOutputStream(file))
+            document.open()
+
+            // Title
+            val titleFont = Font(Font.FontFamily.HELVETICA, 16f, Font.BOLD)
+            val title = Paragraph("Menu Item Report\n\n", titleFont)
+            title.alignment = Element.ALIGN_CENTER
+            document.add(title)
+
+            document.add(Paragraph("Generated on: ${Date()}\n\n" +
+                    "${company?.company_name}\n${company?.address1}\nPhone: ${company?.contact_no}\n\n"))
+
+            // ✅ Define columns
+            val table = PdfPTable(8)
+            table.widthPercentage = 100f
+            table.setWidths(floatArrayOf(2f, 2f, 3f, 3f, 2.5f, 2f, 2f, 2.5f))
+
+            val headerFont = Font(Font.FontFamily.HELVETICA, 12f, Font.BOLD)
+            val headers = listOf(
+                "Item Name", "Category", "Menu Chart", "Tax",
+                "Rate", "Ac Rate", "Parcel Rate","Stock"
+            )
+
+            // Add headers
+            headers.forEach {
+                val cell = PdfPCell(Phrase(it, headerFont))
+                cell.backgroundColor = BaseColor.LIGHT_GRAY
+                cell.horizontalAlignment = Element.ALIGN_CENTER
+                table.addCell(cell)
+            }
+
+            // Totals
+            val totalBillAmount = bills.size
+
+            // ✅ Date formatter
+            val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+            // Add rows
+            for (bill in bills) {
+                table.addCell(bill.menu_item_name)
+                table.addCell(bill.item_cat_name)
+                table.addCell(bill.menu_name)
+                table.addCell(bill.tax_percentage)
+                val rate = PdfPCell(Phrase("₹${String.format("%.2f", bill.rate)}"))
+                rate.horizontalAlignment = Element.ALIGN_RIGHT
+                table.addCell(rate)
+                val acRate = PdfPCell(Phrase("₹${String.format("%.2f", bill.ac_rate)}"))
+                acRate.horizontalAlignment = Element.ALIGN_RIGHT
+                table.addCell(acRate)
+                val parcelRate = PdfPCell(Phrase("₹${String.format("%.2f", bill.parcel_rate)}"))
+                parcelRate.horizontalAlignment = Element.ALIGN_RIGHT
+                table.addCell(parcelRate)
+                table.addCell(bill.stock_maintain)
+
+                // accumulate totals
+            }
+
+            // ✅ Add Summary Row
+            val boldFont = Font(Font.FontFamily.HELVETICA, 12f, Font.BOLD)
+
+            val summaryCell = PdfPCell(Phrase("TOTAL", boldFont))
+            summaryCell.colspan = 5
+            summaryCell.horizontalAlignment = Element.ALIGN_RIGHT
+            summaryCell.backgroundColor = BaseColor.YELLOW
+            table.addCell(summaryCell)
+
+            val totalBillCell =
+                PdfPCell(Phrase(totalBillAmount.toString(), boldFont))
+            totalBillCell.horizontalAlignment = Element.ALIGN_RIGHT
+            totalBillCell.backgroundColor = BaseColor.YELLOW
+            table.addCell(totalBillCell)
+
+            document.add(table)
+            document.close()
+
+            shareFile(context, file, "application/pdf")
+            Toast.makeText(context, "PDF Exported Successfully!", Toast.LENGTH_LONG).show()
+
+        } catch (e: Exception) {
+            Toast.makeText(context, "PDF Export Failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun menuItemsExportToExcel(context: Context, bills: List<TblMenuItemResponse>,sessionManager: SessionManager) {
+        try {
+
+            val excelDir = File(context.getExternalFilesDir(null), "reports")
+            if (!excelDir.exists()) excelDir.mkdirs()
+
+            val file = File(excelDir, "MenuItemsReport.xlsx")
+            val workbook = XSSFWorkbook()
+            val sheet = workbook.createSheet("MenuItems Report")
+
+            val headerRow = sheet.createRow(0)
+            headerRow.createCell(0).setCellValue("Item Name")
+            headerRow.createCell(1).setCellValue("Category")
+            headerRow.createCell(2).setCellValue("Menu Chart")
+            headerRow.createCell(3).setCellValue("Tax")
+            headerRow.createCell(4).setCellValue("Rate")
+            headerRow.createCell(5).setCellValue("Ac Rate")
+            headerRow.createCell(6).setCellValue("Parcel Rate")
+            headerRow.createCell(7).setCellValue("Stock")
+
+            bills.forEachIndexed { index, bill ->
+
+                val row = sheet.createRow(index + 1)
+                row.createCell(0).setCellValue(bill.menu_item_name)
+                row.createCell(1).setCellValue(bill.item_cat_name)
+                row.createCell(2).setCellValue(bill.menu_name)
+                row.createCell(3).setCellValue(bill.tax_percentage)
+                row.createCell(4).setCellValue(bill.rate)
+                row.createCell(5).setCellValue(bill.ac_rate)
+                row.createCell(6).setCellValue(bill.parcel_rate)
+                row.createCell(7).setCellValue(bill.stock_maintain)
             }
 
             val outputStream = FileOutputStream(file)

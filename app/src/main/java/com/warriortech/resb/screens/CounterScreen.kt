@@ -44,9 +44,11 @@ import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
 import com.warriortech.resb.ui.components.ModernDivider
+import com.warriortech.resb.ui.theme.Black
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.DarkGreen
 import com.warriortech.resb.ui.theme.ErrorRed
+import com.warriortech.resb.ui.theme.LightGreen
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
@@ -286,7 +288,16 @@ fun CounterScreen(
                                         viewModel.removeItemFromOrder(menuItem)
                                         scope.scrollToBottomSmooth(listState) // 👈 reusable
                                     },
-                                    onModifierClick = { viewModel.showModifierDialog(menuItem) }
+                                    onModifierClick = { viewModel.showModifierDialog(menuItem) },
+                                    backgroundColor = if ((selectedItems[menuItem]
+                                            ?: 0) > 0
+                                    )
+                                        LightGreen else SecondaryGreen,
+                                    contentColor = if ((selectedItems[menuItem]
+                                            ?: 0) > 0
+                                    )
+                                        LightGreen else ghostWhite,
+                                    textColor = Black
                                 )
                             }
 
@@ -338,6 +349,9 @@ fun CounterMenuItemCard(
     onAddItem: () -> Unit,
     onRemoveItem: () -> Unit,
     onModifierClick: () -> Unit,
+    backgroundColor: Color,
+    contentColor: Color,
+    textColor: Color
 ) {
     val IconBoldA: ImageVector = ImageVector.Builder(
         name = "BoldA",
@@ -373,12 +387,11 @@ fun CounterMenuItemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(2.dp, SecondaryGreen, RoundedCornerShape(cornerRadius)),
+            .border(2.dp, backgroundColor, RoundedCornerShape(cornerRadius)),
         shape = RoundedCornerShape(cornerRadius),
         colors = CardDefaults.cardColors(
-            containerColor = ghostWhite
+            containerColor = contentColor
         ),
-
         ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -396,18 +409,9 @@ fun CounterMenuItemCard(
                             text = menuItem.menu_item_name,
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            color = textColor
                         )
-
-//                        if (menuItem.menu_item_name_tamil.isNotBlank()) {
-//                            Spacer(modifier = Modifier.height(4.dp))
-//                            Text(
-//                                text = menuItem.menu_item_name_tamil,
-//                                style = MaterialTheme.typography.bodySmall,
-//                                maxLines = 2,
-//                                overflow = TextOverflow.Ellipsis
-//                            )
-//                        }
                     }
                 }
             }
@@ -423,7 +427,8 @@ fun CounterMenuItemCard(
                         Text(
                             CurrencySettings.format(menuItem.rate),
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = textColor
                         )
                         Spacer(modifier = Modifier.padding(horizontal = 28.dp))
 
@@ -441,7 +446,7 @@ fun CounterMenuItemCard(
                                 "-",
                                 color = ErrorRed,
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
                         }
                         Spacer(modifier = Modifier.padding(horizontal = 2.dp))
@@ -459,7 +464,8 @@ fun CounterMenuItemCard(
                             Text(
                                 text = quantity.toString(),
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = textColor
                             )
                         }
 //                        } else {
@@ -527,13 +533,15 @@ fun CounterMenuItemCard(
                     ) {
                         Text(
                             text = "$quantity × ${CurrencySettings.format(menuItem.rate)}",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = textColor
                         )
 
                         Text(
                             text = CurrencySettings.format(quantity * menuItem.rate),
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = textColor
                         )
                     }
                 }

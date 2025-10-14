@@ -33,10 +33,14 @@ fun PaymentModePieChart(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceLight)
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
+
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(), // ensure Column can center its content
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Payment Modes - Today",
@@ -51,7 +55,7 @@ fun PaymentModePieChart(
             ) {
                 // Pie Chart
                 Canvas(
-                    modifier = Modifier.size(120.dp)
+                    modifier = Modifier.size(120.dp),
                 ) {
                     drawPieChart(data, total)
                 }
@@ -146,7 +150,10 @@ fun WeeklySalesBarChart(
         colors = CardDefaults.cardColors(containerColor = SurfaceLight)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(), // ensure Column can center its content
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "This Week Sales",

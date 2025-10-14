@@ -27,15 +27,20 @@ class ItemWiseViewModel @Inject constructor(
 
     fun loadReports(fromDate: String, toDate: String) {
         viewModelScope.launch {
-            _reportState.value = ItemWiseReportReportUiState.Loading
-            repository.getItemReport(fromDate, toDate).collect { res ->
-                res.fold(
-                    onSuccess = { _reportState.value = ItemWiseReportReportUiState.Success(it) },
-                    onFailure = {
-                        _reportState.value =
-                            ItemWiseReportReportUiState.Error(it.message ?: "Unknown Error")
-                    }
-                )
+            try {
+                _reportState.value = ItemWiseReportReportUiState.Loading
+                repository.getItemReport(fromDate, toDate).collect { res ->
+                    res.fold(
+                        onSuccess = { _reportState.value = ItemWiseReportReportUiState.Success(it) },
+                        onFailure = {
+                            _reportState.value =
+                                ItemWiseReportReportUiState.Error(it.message ?: "Unknown Error")
+                        }
+                    )
+                }
+            }catch (e: Exception) {
+                _reportState.value =
+                    ItemWiseReportReportUiState.Error(e.message ?: "Failed to load report")
             }
         }
     }

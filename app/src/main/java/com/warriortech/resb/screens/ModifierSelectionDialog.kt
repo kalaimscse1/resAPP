@@ -70,16 +70,16 @@ fun ModifierSelectionDialog(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Total Price
-                Text(
-                    text = "Total: ₹%.2f".format(totalPrice),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+//
+//                // Total Price
+//                Text(
+//                    text = "Total: ₹%.2f".format(totalPrice),
+//                    style = MaterialTheme.typography.titleMedium,
+//                    fontWeight = FontWeight.Bold,
+//                    color = MaterialTheme.colorScheme.primary
+//                )
+//
+//                Spacer(modifier = Modifier.height(16.dp))
 
                 // Action Buttons
                 Row(
