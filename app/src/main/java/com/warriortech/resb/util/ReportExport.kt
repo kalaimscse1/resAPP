@@ -574,7 +574,7 @@ object ReportExport {
             val pdfDir = File(context.getExternalFilesDir(null), "reports")
             if (!pdfDir.exists()) pdfDir.mkdirs()
 
-            val file = File(pdfDir, "MenuItems.pdf")
+            val file = File(pdfDir, "MenuItemsReport.pdf")
             val document = Document(PageSize.A4, 10f, 10f, 20f, 20f)
             PdfWriter.getInstance(document, FileOutputStream(file))
             document.open()
@@ -630,7 +630,6 @@ object ReportExport {
                 parcelRate.horizontalAlignment = Element.ALIGN_RIGHT
                 table.addCell(parcelRate)
                 table.addCell(bill.stock_maintain)
-
                 // accumulate totals
             }
 

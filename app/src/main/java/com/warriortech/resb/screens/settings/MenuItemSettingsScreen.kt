@@ -169,14 +169,14 @@ fun MenuItemSettingsScreen(
                             Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
                         }
                         IconButton(onClick = {
-                            ReportExport.viewReport(context, "MenuItemReport.pdf", "application/pdf")
+                            ReportExport.viewReport(context, "MenuItemsReport.pdf", "application/pdf")
                         }) {
                             Icon(Icons.Default.Visibility, contentDescription = "View PDF")
                         }
                         IconButton(onClick = {
                             ReportExport.viewReport(
                                 context,
-                                "MenuItemReport.xlsx",
+                                "MenuItemsReport.xlsx",
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                             )
                         }) {

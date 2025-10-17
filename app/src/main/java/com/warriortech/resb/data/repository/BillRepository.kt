@@ -1,10 +1,7 @@
 package com.warriortech.resb.data.repository
 
-
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
@@ -218,6 +215,13 @@ class BillRepository @Inject constructor(
             response.body()?.byteStream()?.use { stream ->
                 BitmapFactory.decodeStream(stream)
             }
+        } else null
+    }
+
+    suspend fun getPaymentByBillNo(billNo: String): TblBillingResponse? {
+        val response = apiService.getPaymentByBillNo(billNo, sessionManager.getCompanyCode() ?: "")
+        return if (response.isSuccessful) {
+            response.body()
         } else null
     }
 }

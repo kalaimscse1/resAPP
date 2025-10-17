@@ -64,7 +64,8 @@ class ModifierSettingsViewModel @Inject constructor(
     fun addModifier(modifier: Modifiers) {
         viewModelScope.launch {
             try {
-                modifierRepository.createModifier(modifier)
+              val res=  modifierRepository.createModifier(modifier)
+                if (res.isSuccess)
                 loadModifiers()
             } catch (e: Exception) {
                 _uiState.value =

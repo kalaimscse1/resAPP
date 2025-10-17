@@ -500,13 +500,13 @@ fun TableItem(
                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 8.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Start,
-                                modifier = Modifier.weight(0.5f)
+                                modifier = Modifier.weight(1f)
                             )
-                            Text(CurrencySettings.format(table.grandTotal),
-                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 8.sp),
+                            Text("₹${table.grandTotal.toInt()}",
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
                                 color = ErrorRed,
                                 textAlign = TextAlign.End,
-                                modifier = Modifier.weight(0.5f),
+                                modifier = Modifier.weight(1f),
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -532,13 +532,13 @@ fun TableItem(
                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 8.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Start,
-                                modifier = Modifier.weight(0.5f)
+                                modifier = Modifier.weight(1.1f)
                             )
-                            Text("${table.seating_capacity} Seats",
+                            Text("${table.seating_capacity}/S",
                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 8.sp),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.End,
-                                modifier = Modifier.weight(0.5f))
+                                modifier = Modifier.weight(0.3f))
                         }
 
                     } else {

@@ -38,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Bolt
@@ -47,6 +48,7 @@ import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Exposure
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.ListAlt
@@ -125,6 +127,7 @@ import com.warriortech.resb.screens.BillEditScreen
 import com.warriortech.resb.screens.BillTemplateScreen
 import com.warriortech.resb.screens.reports.CategoryWiseReportScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
+import com.warriortech.resb.screens.GroupScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
 import com.warriortech.resb.screens.settings.CounterSettingsScreen
 import com.warriortech.resb.screens.settings.CustomerSettingsScreen
@@ -149,6 +152,7 @@ import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.screens.ItemWiseBillScreen
 import com.warriortech.resb.screens.reports.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
+import com.warriortech.resb.screens.LedgerScreen
 import com.warriortech.resb.screens.reports.KotReportScreen
 import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
@@ -249,10 +253,15 @@ class MainActivity : ComponentActivity() {
                             scope.launch { drawerState.close() }
                             if (route == "logout") {
                                 scope.launch {
-                                    val sharedPref = context.getSharedPreferences("user_prefs", MODE_PRIVATE)
+                                    val sharedPref =
+                                        context.getSharedPreferences("user_prefs", MODE_PRIVATE)
                                     sessionManager.saveUserLogin(false)
                                     sharedPref.edit { clear() }
-                                    Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Logged out successfully",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
 
                                     navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }
@@ -262,8 +271,7 @@ class MainActivity : ComponentActivity() {
                                     // ✅ Finish activity to prevent going back
                                     (context as? ComponentActivity)?.finish()
                                 }
-                            }
-                            else {
+                            } else {
                                 navController.navigate(route) {
                                     popUpTo(navController.graph.startDestinationId) {
                                         inclusive = true
@@ -279,8 +287,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (showDrawer) {
-                    when{
-                        isLargeScreen->{
+                    when {
+                        isLargeScreen -> {
                             ModalNavigationDrawer(
                                 drawerState = drawerState,
                                 drawerContent = drawerContent,
@@ -298,13 +306,18 @@ class MainActivity : ComponentActivity() {
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            AppNavigation(drawerState, navController, sessionManager)
+                                            AppNavigation(
+                                                drawerState,
+                                                navController,
+                                                sessionManager
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
-                        else->{
+
+                        else -> {
                             ModalNavigationDrawer(
                                 drawerState = drawerState,
                                 drawerContent = drawerContent,
@@ -322,7 +335,11 @@ class MainActivity : ComponentActivity() {
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            AppNavigation(drawerState, navController, sessionManager)
+                                            AppNavigation(
+                                                drawerState,
+                                                navController,
+                                                sessionManager
+                                            )
                                         }
                                     }
                                 }
@@ -397,12 +414,11 @@ fun AppNavigation(
                     val isLoggedInPref = sessionManager.getUserLogin()
                     if (isLoggedInPref) {
                         isLoggedIn = true
-                        if (sessionManager.getUser()?.role =="WAITER"){
+                        if (sessionManager.getUser()?.role == "WAITER") {
                             navController.navigate("selects") {
                                 popUpTo("splash") { inclusive = true }
                             }
-                        }
-                        else{
+                        } else {
                             navController.navigate("dashboard") {
                                 popUpTo("splash") { inclusive = true }
                             }
@@ -420,12 +436,11 @@ fun AppNavigation(
             LoginScreen(
                 onLoginSuccess = {
                     isLoggedIn = true
-                    if (sessionManager.getUser()?.role =="WAITER"){
+                    if (sessionManager.getUser()?.role == "WAITER") {
                         navController.navigate("selects") {
                             popUpTo("splash") { inclusive = true }
                         }
-                    }
-                    else{
+                    } else {
                         navController.navigate("dashboard") {
                             popUpTo("splash") { inclusive = true }
                         }
@@ -869,6 +884,16 @@ fun AppNavigation(
                 drawerState = drawerState
             )
         }
+        composable("group_screen") {
+            GroupScreen(
+                drawerState = drawerState,
+            )
+        }
+        composable("ledger_screen") {
+            LedgerScreen(
+                drawerState = drawerState
+            )
+        }
     }
 }
 
@@ -969,7 +994,7 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Dashboard") else Text("") },
-                        icon = { DrawerIcon(Icons.Default.Dashboard,null,isCollapsed)},
+                        icon = { DrawerIcon(Icons.Default.Dashboard, null, isCollapsed) },
                         selected = currentDestination?.route == "dashboard",
                         onClick = { onDestinationClicked("dashboard") },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -981,13 +1006,21 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Masters") else Text("") },
-                        icon = { DrawerIcon(Icons.Filled.Inventory, contentDescription = null,isCollapsed) },
+                        icon = {
+                            DrawerIcon(
+                                Icons.Filled.Inventory,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
                         selected = currentDestination?.route in listOf(
                             "menu_item_setting",
                             "menu_setting",
                             "menu_Category_setting",
                             "table_setting",
-                            "area_setting"
+                            "area_setting",
+                            "group_screen",
+                            "ledger_screen"
                         ),
                         onClick = {
                             setExpandedMenu(if (expandedMenu == ExpandedMenu.MASTERS) ExpandedMenu.NONE else ExpandedMenu.MASTERS)
@@ -1027,13 +1060,19 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Menu Categories") else Text("") },
-                                icon = { DrawerIcon(Icons.Default.Category, contentDescription = null,isCollapsed) },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.Default.Category,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
                                 selected = currentDestination?.route == "menu_Category_setting",
                                 onClick = { onDestinationClicked("menu_Category_setting") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                 colors = subMenuColors
                             )
-                            if (sessionManager.getGeneralSetting()?.is_table_allowed==true){
+                            if (sessionManager.getGeneralSetting()?.is_table_allowed == true) {
                                 NavigationDrawerItem(
                                     label = { if (!isCollapsed) Text("Tables") else Text("") },
                                     icon = {
@@ -1062,18 +1101,57 @@ fun DrawerContent(
                                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                     colors = subMenuColors
                                 )
+
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Account Group") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.Exposure,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "group_screen",
+                                    onClick = { onDestinationClicked("group_screen") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
+
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Ledger") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.AccountBalance,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "ledger_screen",
+                                    onClick = { onDestinationClicked("ledger_screen") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
                             }
                         }
                     }
                 }
 
                 // 🔹 Orders
-                if (sessionManager.getGeneralSetting()?.is_table_allowed==true){
+                if (sessionManager.getGeneralSetting()?.is_table_allowed == true) {
                     if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER")) {
                         NavigationDrawerItem(
                             label = { if (!isCollapsed) Text("Orders") else Text("") },
-                            icon = { DrawerIcon(Icons.Default.Receipt, contentDescription = null,isCollapsed) },
-                            selected = currentDestination?.route in listOf("selects", "takeaway_menu"),
+                            icon = {
+                                DrawerIcon(
+                                    Icons.Default.Receipt,
+                                    contentDescription = null,
+                                    isCollapsed
+                                )
+                            },
+                            selected = currentDestination?.route in listOf(
+                                "selects",
+                                "takeaway_menu"
+                            ),
                             onClick = {
                                 setExpandedMenu(if (expandedMenu == ExpandedMenu.ORDERS) ExpandedMenu.NONE else ExpandedMenu.ORDERS)
                             },
@@ -1098,7 +1176,13 @@ fun DrawerContent(
                                 )
                                 NavigationDrawerItem(
                                     label = { if (!isCollapsed) Text("Takeaway") else Text("") },
-                                    icon = { DrawerIcon(Icons.Default.Fastfood, contentDescription = null,isCollapsed) },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.Fastfood,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
                                     selected = currentDestination?.route == "takeaway_menu",
                                     onClick = { onDestinationClicked("takeaway_menu") },
                                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1115,7 +1199,13 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Bills") else Text("") },
-                        icon = { DrawerIcon(Icons.Default.AttachMoney, contentDescription = null,isCollapsed) },
+                        icon = {
+                            DrawerIcon(
+                                Icons.Default.AttachMoney,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
                         selected = currentDestination?.route in listOf("counter", "quick_bills"),
                         onClick = {
                             setExpandedMenu(if (expandedMenu == ExpandedMenu.BILLING) ExpandedMenu.NONE else ExpandedMenu.BILLING)
@@ -1160,7 +1250,13 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Reports") else Text("") },
-                        icon = { DrawerIcon(Icons.Default.Assessment, contentDescription = null,isCollapsed) },
+                        icon = {
+                            DrawerIcon(
+                                Icons.Default.Assessment,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
                         selected = currentDestination?.route in listOf(
                             "report_screen",
                             "orders",
@@ -1178,7 +1274,13 @@ fun DrawerContent(
                         Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Orders") else Text("") },
-                                icon = { DrawerIcon(Icons.Default.Receipt, contentDescription = null,isCollapsed) },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.Default.Receipt,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
                                 selected = currentDestination?.route == "orders",
                                 onClick = { onDestinationClicked("orders") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1243,7 +1345,13 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("Category Wise") else Text("") },
-                                icon = { DrawerIcon(Icons.Default.Category, contentDescription = null,isCollapsed) },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.Default.Category,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
                                 selected = currentDestination?.route == "category_wise",
                                 onClick = { onDestinationClicked("category_wise") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1251,7 +1359,13 @@ fun DrawerContent(
                             )
                             NavigationDrawerItem(
                                 label = { if (!isCollapsed) Text("KOT Report") else Text("") },
-                                icon = { DrawerIcon(Icons.Default.Kitchen, contentDescription = null,isCollapsed) },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.Default.Kitchen,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
                                 selected = currentDestination?.route == "kot_report",
                                 onClick = { onDestinationClicked("kot_report") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1318,7 +1432,13 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Settings") else Text("") },
-                        icon = { DrawerIcon(Icons.Default.Settings, contentDescription = null,isCollapsed) },
+                        icon = {
+                            DrawerIcon(
+                                Icons.Default.Settings,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
                         selected = currentDestination?.route == "settings",
                         onClick = { onDestinationClicked("settings") },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1346,7 +1466,13 @@ fun DrawerContent(
                 if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CASHIER", "CHEF")) {
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Support") else Text("") },
-                        icon = { DrawerIcon(Icons.Default.SupportAgent, contentDescription = null,isCollapsed) },
+                        icon = {
+                            DrawerIcon(
+                                Icons.Default.SupportAgent,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
                         selected = currentDestination?.route == "support_screen",
                         onClick = { onDestinationClicked("support_screen") },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1379,7 +1505,13 @@ fun DrawerContent(
             if (role in listOf("RESBADMIN", "ADMIN", "WAITER", "CHEF", "CASHIER")) {
                 NavigationDrawerItem(
                     label = { if (!isCollapsed) Text("Logout") else Text("") },
-                    icon = { DrawerIcon(Icons.AutoMirrored.Filled.Logout, contentDescription = null,isCollapsed) },
+                    icon = {
+                        DrawerIcon(
+                            Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = null,
+                            isCollapsed
+                        )
+                    },
                     selected = false,
                     onClick = { onDestinationClicked("logout") },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),

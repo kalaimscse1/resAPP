@@ -85,7 +85,7 @@ interface ApiService {
     suspend fun deleteArea(
         @Path("area_id") lng: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ):Response<ResponseBody>
+    ): Response<ResponseBody>
 
     /**
      * Table Management
@@ -505,7 +505,7 @@ interface ApiService {
         @Path("company_code") companyCode: String,
         @Body profile: RestaurantProfile,
         @Header("X-Tenant-ID") tenantId: String
-    ): RestaurantProfile
+    ): Int
 
     @POST("company/addCompany")
     suspend fun addRestaurantProfile(
@@ -971,4 +971,114 @@ interface ApiService {
         @Query("toDate") toDate: String
     ): Response<List<GSTRDOCS>>
 
+    /**
+     * Ledger Management
+     */
+
+    @GET("master/ledger/getLedgersByIsActive")
+    suspend fun getAllLedgers(
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<TblLedgerDetails>>
+
+    @POST("master/ledger/addLedger")
+    suspend fun createLedger(
+        @Body ledger: TblLedgerDetails,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblLedgerDetails>
+
+    @PUT("master/ledger/updateLedger/{ledger_name}")
+    suspend fun updateLedger(
+        @Path("ledger_name") id: String,
+        @Body ledger: TblLedgerDetails,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
+    @DELETE("master/ledger/deleteLedger/{ledger_name}")
+    suspend fun deleteLedger(
+        @Path("ledger_name") id: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ResponseBody>
+
+    @GET("master/ledger/getLedgerByName/{ledger_name}")
+    suspend fun getLedgerByName(
+        @Path("ledger_name") ledgerName: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblLedgerDetails>
+
+    /**
+     * Group Management
+     */
+
+    @GET("master/group/getGroupsByIsActive")
+    suspend fun getAllGroups(
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<TblGroupDetails>>
+
+    @GET("master/group/getGroup/{group_id}")
+    suspend fun getGroupById(
+        @Path("group_id") id: Int,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblGroupDetails>
+
+    @POST("master/group/addGroup")
+    suspend fun createGroup(
+        @Body group: TblGroupDetails,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblGroupDetails>
+
+    @PUT("master/group/updateGroup/{group_id}")
+    suspend fun updateGroup(
+        @Path("group_id") id: Long,
+        @Body group: TblGroupDetails,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
+    @DELETE("master/group/deleteGroupById/{group_id}")
+    suspend fun deleteGroup(
+        @Path("group_id") id: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ResponseBody>
+
+    /**
+     * BankDetails Management
+     */
+
+    @GET("master/bankDetails/getBankDetailsByIsActive")
+    suspend fun getAllBankDetails(
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<TblBankDetails>>
+
+    @POST("master/bankDetails/addBankDetails")
+    suspend fun createBankDetails(
+        @Body bankDetails: TblBankDetails,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblBankDetails>
+
+    @PUT("master/bankDetails/updateBankDetails/{bank_details_id}")
+    suspend fun updateBankDetails(
+        @Path("bank_details_id") id: Long,
+        @Body bankDetails: TblBankDetails,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
+    @DELETE("master/bankDetails/deleteBankDetailsById/{bank_details_id}")
+    suspend fun deleteBankDetails(
+        @Path("bank_details_id") id: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ResponseBody>
+
+    @GET("master/bankDetails/getBankDetailsByLedgerId/{ledger_name}")
+    suspend fun getBankDetailsByLedgerId(
+        @Path("ledger_name") ledgerName: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblBankDetails>
+
+    /**
+     * GroupNature Management
+     */
+    
+    @GET("master/group/getGroupNatures")
+    suspend fun getGroupNatures(
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<TblGroupNature>>
 }

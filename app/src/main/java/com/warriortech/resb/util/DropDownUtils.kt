@@ -21,6 +21,7 @@ import com.warriortech.resb.model.Role
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblCustomer
+import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.model.TblVoucherType
 import kotlin.collections.forEach
@@ -639,6 +640,62 @@ fun StringDropdown(
                         text = { Text(option) },
                         onClick = {
                             onOptionSelected(option)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GroupNatureDropdown(
+    groupNatures: List<TblGroupNature>,
+    selectedGroupNature: TblGroupNature?,
+    onGroupNatureSelected: (TblGroupNature) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select GroupNature"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedGroupNature?.g_nature_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (groupNatures.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No GroupNature available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no GroupNatures
+                )
+            } else {
+                groupNatures.forEach { group ->
+                    DropdownMenuItem(
+                        text = { Text(group.g_nature_name) },
+                        onClick = {
+                            onGroupNatureSelected(group)
                             expanded = false
                         }
                     )

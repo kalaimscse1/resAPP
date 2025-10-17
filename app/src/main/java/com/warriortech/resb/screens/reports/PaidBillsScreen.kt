@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Whatsapp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -167,6 +169,12 @@ fun PaidBillsScreen(
                                     onDeleteClick = {
                                         billToDelete = bill
                                         showDeleteDialog = true
+                                    },
+                                    onPrintClick = { bill_no ->
+                                        viewModel.printBill( bill_no)
+                                    },
+                                    onWhatsappClick = { bill_no ->
+                                        viewModel.sendBillViaWhatsApp()
                                     }
                                 )
                             }
@@ -242,7 +250,9 @@ fun PaidBillsScreen(
 fun PaidBillItem(
     bill: TblBillingResponse,
     onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    onPrintClick:(bill_no:String)-> Unit,
+    onWhatsappClick:(bill_no:String)-> Unit
 ) {
     Card(
         modifier = Modifier
@@ -282,6 +292,26 @@ fun PaidBillItem(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    IconButton(
+                        onClick = { onPrintClick(bill.bill_no) },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Print,
+                            contentDescription = "Print",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(
+                        onClick = { /* View details action */ },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Whatsapp,
+                            contentDescription = "Whatsapp",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     IconButton(
                         onClick = { onEditClick() },
                         modifier = Modifier.size(24.dp)
