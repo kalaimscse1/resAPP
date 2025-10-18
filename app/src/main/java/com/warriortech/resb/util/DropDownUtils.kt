@@ -21,6 +21,7 @@ import com.warriortech.resb.model.Role
 import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblCounter
 import com.warriortech.resb.model.TblCustomer
+import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.model.TblVoucherType
@@ -696,6 +697,62 @@ fun GroupNatureDropdown(
                         text = { Text(group.g_nature_name) },
                         onClick = {
                             onGroupNatureSelected(group)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GroupDropdown(
+    groups: List<TblGroupDetails>,
+    selectedGroup: TblGroupDetails?,
+    onGroupSelected: (TblGroupDetails) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Group"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedGroup?.group_name ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (groups.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No GroupNature available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no GroupNatures
+                )
+            } else {
+                groups.forEach { group ->
+                    DropdownMenuItem(
+                        text = { Text(group.group_name) },
+                        onClick = {
+                            onGroupSelected(group)
                             expanded = false
                         }
                     )

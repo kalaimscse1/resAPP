@@ -22,15 +22,21 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
+import com.warriortech.resb.model.TblGroupRequest
+import com.warriortech.resb.model.TblLedgerRequest
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.GroupDetailsViewModel
+import com.warriortech.resb.util.GroupDropdown
 import com.warriortech.resb.util.GroupNatureDropdown
+import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
+import kotlin.collections.find
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +48,16 @@ fun GroupScreen(
     var showDialog by remember { mutableStateOf(false) }
     var editingGroup by remember { mutableStateOf<TblGroupDetails?>(null) }
     val scope = rememberCoroutineScope()
+    val uiSate by viewModel.groupState.collectAsStateWithLifecycle()
+    val groupNature by viewModel.groupNatures.collectAsStateWithLifecycle()
+    val groups by viewModel.groups.collectAsStateWithLifecycle()
+    val order by viewModel.orderBy.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadGroupNature()
+        viewModel.loadGroups()
+        viewModel.getOrderBy()
+    }
 
     Scaffold(
         topBar = {
@@ -50,7 +66,7 @@ fun GroupScreen(
                     Row {
                         Column {
                             androidx.compose.material3.Text(
-                                "Group Details",
+                                "Group List",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = SurfaceLight
@@ -75,74 +91,111 @@ fun GroupScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
-                )
+                ),
+                actions = {
+                    IconButton(onClick = {
+                        editingGroup = null
+                        showDialog = true
+                    }) {
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Group",
+                            tint = SurfaceLight
+                        )
+                    }
+                }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                editingGroup = null
-                showDialog = true
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
-            }
-        }
+//        floatingActionButton = {
+//            FloatingActionButton(onClick = {
+//                editingGroup = null
+//                showDialog = true
+//            }) {
+//                Icon(Icons.Default.Add, contentDescription = "Add")
+//            }
+//        }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
-            items(viewModel.groups) { group ->
-                Card(
+
+        when (val state = uiSate) {
+            is GroupDetailsViewModel.GroupUiState.Loading -> {
+                Text(
+                    "Loading...", modifier = Modifier
+                        .padding(padding)
+                        .padding(16.dp)
+                )
+            }
+
+            is GroupDetailsViewModel.GroupUiState.Error -> {
+                Text(
+                    "Error: ${state.message}",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
+                        .padding(padding)
+                        .padding(16.dp)
+                )
+            }
+
+            is GroupDetailsViewModel.GroupUiState.Success -> {
+                val group = state.groups
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize()
+                        .padding(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                "${group.group_name} (${group.group_code})",
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text("Nature: ${group.group_nature.g_nature_name}")
-                            Text("Active: ${if (group.is_active) "Yes" else "No"}")
-                        }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            IconButton(onClick = {
-                                editingGroup = group
-                                showDialog = true
-                            }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit")
-                            }
-                            IconButton(onClick = { viewModel.deleteGroup(group.group_id) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                    items(group) { group ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        "${group.group_name} ",
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text("Nature: ${group.group_nature.g_nature_name}")
+                                    Text("Active: ${if (group.is_active) "Yes" else "No"}")
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    IconButton(onClick = {
+                                        editingGroup = group
+                                        showDialog = true
+                                    }) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                                    }
+                                    IconButton(onClick = { viewModel.deleteGroup(group.group_id) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                    }
+                                }
                             }
                         }
                     }
                 }
+
             }
         }
 
         if (showDialog) {
             GroupFormDialog(
                 group = editingGroup,
-                natures = viewModel.getNatures(),
+                natures = groupNature,
                 onDismiss = { showDialog = false },
                 onSave = {
                     if (editingGroup == null)
                         viewModel.addGroup(it)
                     else
-                        viewModel.updateGroup(it)
+                        viewModel.updateGroup(it.group_id, it)
                     showDialog = false
-                }
+                },
+                groups = groups,
+                order = order.toInt()
             )
         }
     }
@@ -153,94 +206,104 @@ fun GroupFormDialog(
     group: TblGroupDetails?,
     natures: List<TblGroupNature>,
     onDismiss: () -> Unit,
-    onSave: (TblGroupDetails) -> Unit
+    onSave: (TblGroupRequest) -> Unit,
+    groups: List<TblGroupDetails>,
+    order:Int
 ) {
     val groupList = listOf("YES", "NO")
-    var groupCode by remember { mutableStateOf(group?.group_code ?: "") }
-    var groupName by remember { mutableStateOf(group?.group_name ?: "") }
-    var groupOrder by remember { mutableStateOf(group?.group_order?.toString() ?: "") }
+    var groupCode by remember { mutableStateOf(group?.group_name ?: "") }
+    var groupName by remember { mutableStateOf(group?.group_fullname ?: "") }
+    var groupOrder by remember { mutableStateOf(group?.group_order?.toString() ?: "$order") }
     var subGroup by remember { mutableStateOf(group?.sub_group ?: "") }
-    var grossProfit by remember { mutableStateOf(group?.gross_profit?.toString() ?: "") }
+    var grossProfit by remember { mutableStateOf(group?.gross_profit ?: "") }
     var tamilText by remember { mutableStateOf(group?.tamil_text ?: "") }
-    var groupBy by remember { mutableStateOf(group?.group_by ?: "") }
+    var groupBy by remember { mutableStateOf(group?.group_by ?: 1) }
     var isActive by remember { mutableStateOf(group?.is_active ?: true) }
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedNature by remember { mutableStateOf(group?.group_nature ?: natures.firstOrNull()) }
+    var selectedNature by remember { mutableStateOf(group?.group_nature ?: natures[2]) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (group == null) "Add Group" else "Edit Group") },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                OutlinedTextField(
-                    value = groupCode,
-                    onValueChange = { groupCode = it },
-                    label = { Text("Group Code") })
-                OutlinedTextField(
-                    value = groupName,
-                    onValueChange = { groupName = it },
-                    label = { Text("Group Name") })
-                OutlinedTextField(
-                    value = groupOrder,
-                    onValueChange = { groupOrder = it },
-                    label = { Text("Order") })
-                StringDropdown(
-                    options = groupList,
-                    selectedOption = groupList.find { it == subGroup },
-                    onOptionSelected = { subGroup = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = "Sub Group"
-                )
-                GroupNatureDropdown(
-                    groupNatures = natures,
-                    selectedGroupNature = natures.find { it.g_nature_id == selectedNature?.g_nature_id },
-                    onGroupNatureSelected = { selectedNature = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = "Group Nature"
-                )
-                StringDropdown(
-                    options = groupList,
-                    selectedOption = groupList.find { it == grossProfit },
-                    onOptionSelected = { grossProfit = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = "Gross Profit Effect"
-                )
-                OutlinedTextField(
-                    value = tamilText,
-                    onValueChange = { tamilText = it },
-                    label = { Text("Tamil Text") })
-                OutlinedTextField(
-                    value = groupBy,
-                    onValueChange = { groupBy = it },
-                    label = { Text("Group") })
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = isActive, onCheckedChange = { isActive = it })
-                    Text("Active")
-                }
-            }
+
+    ReusableBottomSheet(
+        onDismiss = onDismiss,
+        title = if (group != null) "Edit Group" else "Add Group",
+        onSave = {
+            val updatedGroup = TblGroupRequest(
+                group_id = group?.group_id ?: 0,
+                group_name = groupCode,
+                group_fullname = groupCode,
+                group_order = groupOrder.toIntOrNull() ?: 0,
+                sub_group = subGroup,
+                group_nature = selectedNature.g_nature_id,
+                gross_profit = grossProfit,
+                tamil_text = tamilText,
+                is_active = isActive,
+                group_by = groupBy
+            )
+            onSave(updatedGroup)
         },
-        confirmButton = {
-            Button(onClick = {
-                val updatedGroup = TblGroupDetails(
-                    group_id = group?.group_id ?: 0,
-                    group_code = groupCode,
-                    group_name = groupName,
-                    group_order = groupOrder.toIntOrNull() ?: 0,
-                    sub_group = subGroup,
-                    group_nature = selectedNature ?: TblGroupNature(0, "", true),
-                    gross_profit = grossProfit,
-                    tamil_text = tamilText,
-                    is_active = isActive,
-                    group_by = groupBy
-                )
-                onSave(updatedGroup)
-            }) {
-                Text("Save")
+        isSaveEnabled = groupCode.isNotBlank() && groupName.isNotBlank(),
+        buttonText = if (group != null) "Update" else "Add"
+    ){
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 400.dp) // limit dialog height
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ){
+            OutlinedTextField(
+                value = groupCode,
+                onValueChange = { groupCode = it },
+                label = { Text("Group Name") },
+                modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = groupCode,
+                onValueChange = { groupName = it },
+                label = { Text("Group FullName") },
+                modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = groupOrder,
+                onValueChange = { groupOrder = it },
+                label = { Text("Order") },
+                modifier = Modifier.fillMaxWidth())
+            StringDropdown(
+                options = groupList,
+                selectedOption = groupList.find { it == subGroup },
+                onOptionSelected = { subGroup = it },
+                label = "Sub Group",
+                modifier = Modifier.fillMaxWidth()
+            )
+            GroupNatureDropdown(
+                groupNatures = natures,
+                selectedGroupNature = natures.find { it.g_nature_id == selectedNature.g_nature_id },
+                onGroupNatureSelected = { selectedNature = it },
+                label = "Group Nature",
+                modifier = Modifier.fillMaxWidth()
+            )
+            StringDropdown(
+                options = groupList,
+                selectedOption = groupList.find { it == grossProfit },
+                onOptionSelected = { grossProfit = it },
+                label = "Gross Profit Effect",
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = tamilText,
+                onValueChange = { tamilText = it },
+                label = { Text("Tamil Text") },
+                modifier = Modifier.fillMaxWidth())
+            GroupDropdown(
+                groups = groups,
+                selectedGroup = groups.find{ it.group_id == groupBy},
+                onGroupSelected ={groupBy = it.group_id},
+                modifier = Modifier.fillMaxWidth(),
+                label = "Select Group"
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = isActive, onCheckedChange = { isActive = it })
+                Text("Active")
             }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
         }
-    )
+    }
 }

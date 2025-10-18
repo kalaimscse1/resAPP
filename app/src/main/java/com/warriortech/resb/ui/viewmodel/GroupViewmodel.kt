@@ -4,10 +4,15 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.AreaRepository
+import com.warriortech.resb.data.repository.GroupRepository
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
+import com.warriortech.resb.model.TblGroupRequest
+import com.warriortech.resb.model.TblLedgerDetails
 import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
+import com.warriortech.resb.ui.viewmodel.LedgerViewModel.LedgerUiState
+import com.warriortech.resb.ui.viewmodel.MenuCategorySettingsViewModel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,65 +21,71 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GroupDetailsViewModel @Inject constructor() : ViewModel() {
+class GroupDetailsViewModel @Inject constructor(
+    private val groupRepository: GroupRepository
+) : ViewModel() {
 
-    private val _groups = mutableStateListOf<TblGroupDetails>()
-    val groups: List<TblGroupDetails> get() = _groups
-
-    private val natures = listOf(
-        TblGroupNature(1, "Income", true),
-        TblGroupNature(2, "Expense", true),
-        TblGroupNature(3, "Asset", true),
-        TblGroupNature(4, "Liability", true)
-    )
-
-    init {
-        // sample data
-        _groups.addAll(
-            listOf(
-                TblGroupDetails(
-                    1,
-                    "G001",
-                    "Food",
-                    1,
-                    "Main",
-                    natures[0],
-                    "YES",
-                    "உணவு",
-                    true,
-                    "Admin"
-                ),
-                TblGroupDetails(
-                    2,
-                    "G002",
-                    "Drinks",
-                    2,
-                    "Main",
-                    natures[1],
-                    "YES",
-                    "பானம்",
-                    true,
-                    "Admin"
-                )
-            )
-        )
+    sealed class GroupUiState {
+        object Loading : GroupUiState()
+        data class Success(val groups: List<TblGroupDetails>) : GroupUiState()
+        data class Error(val message: String) : GroupUiState()
     }
 
-    fun getNatures() = natures
+    private val _groupState = MutableStateFlow<GroupUiState>(GroupUiState.Loading)
+    val groupState: StateFlow<GroupUiState> = _groupState.asStateFlow()
+    private val _groups = MutableStateFlow<List<TblGroupDetails>>(emptyList())
+    val groups = _groups.asStateFlow()
 
-    fun addGroup(group: TblGroupDetails) {
-        val nextId = (_groups.maxOfOrNull { it.group_id } ?: 0) + 1
-        _groups.add(group.copy(group_id = nextId))
+    private val _groupNatures = MutableStateFlow<List<TblGroupNature>>(emptyList())
+    val groupNatures = _groupNatures.asStateFlow()
+
+    private val _orderBy = MutableStateFlow<String>("")
+    val orderBy: StateFlow<String> = _orderBy.asStateFlow()
+    fun loadGroups(){
+        viewModelScope.launch {
+            groupRepository.getGroups().let {
+                _groups.value = it ?: emptyList()
+                _groupState.value = GroupUiState.Success(it ?: emptyList())
+            }
+        }
     }
 
-    fun updateGroup(updated: TblGroupDetails) {
-        val index = _groups.indexOfFirst { it.group_id == updated.group_id }
-        if (index != -1) _groups[index] = updated
+    fun getOrderBy() {
+        viewModelScope.launch {
+            try {
+                val response = groupRepository.getOrderBy()
+                _orderBy.value = response["order_by"].toString()
+            } catch (e: Exception) {
+                _groupState.value = GroupUiState.Error(e.message ?: "Failed to getOrderBy")
+            }
+        }
     }
 
-    fun deleteGroup(id: Int) {
-        _groups.removeAll { it.group_id == id }
+    fun loadGroupNature(){
+        viewModelScope.launch {
+            groupRepository.getGroupNatures().let {
+                _groupNatures.value = it ?: emptyList()
+            }
+        }
     }
 
+    fun addGroup(group: TblGroupRequest) {
+        viewModelScope.launch {
+            groupRepository.createGroup(group)
+        }
+    }
+
+    fun updateGroup(group_id: Int,group : TblGroupRequest){
+        viewModelScope.launch {
+            groupRepository.updateGroup(group_id.toLong(),group)
+        }
+    }
+
+    fun deleteGroup(group_id: Int){
+        viewModelScope.launch {
+            groupRepository.deleteGroup(group_id.toLong())
+
+        }
+    }
 
 }

@@ -1101,6 +1101,20 @@ fun DrawerContent(
                                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                     colors = subMenuColors
                                 )
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Ledger") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.AccountBalance,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "ledger_screen",
+                                    onClick = { onDestinationClicked("ledger_screen") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
 
                                 NavigationDrawerItem(
                                     label = { if (!isCollapsed) Text("Account Group") else Text("") },
@@ -1117,20 +1131,7 @@ fun DrawerContent(
                                     colors = subMenuColors
                                 )
 
-                                NavigationDrawerItem(
-                                    label = { if (!isCollapsed) Text("Ledger") else Text("") },
-                                    icon = {
-                                        DrawerIcon(
-                                            Icons.Default.AccountBalance,
-                                            contentDescription = null,
-                                            isCollapsed
-                                        )
-                                    },
-                                    selected = currentDestination?.route == "ledger_screen",
-                                    onClick = { onDestinationClicked("ledger_screen") },
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                    colors = subMenuColors
-                                )
+
                             }
                         }
                     }

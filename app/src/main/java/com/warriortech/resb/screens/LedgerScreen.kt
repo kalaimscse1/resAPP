@@ -3,11 +3,16 @@ package com.warriortech.resb.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -19,9 +24,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,10 +43,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblLedgerDetails
+import com.warriortech.resb.model.TblLedgerRequest
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.LedgerViewModel
+import com.warriortech.resb.util.GroupDropdown
+import com.warriortech.resb.util.ReusableBottomSheet
 import kotlinx.coroutines.launch
 
 
@@ -55,11 +64,16 @@ fun LedgerScreen(
     var editingGroup by remember { mutableStateOf<TblLedgerDetails?>(null) }
     val scope = rememberCoroutineScope()
     val ledgerState by viewModel.ledgerState.collectAsStateWithLifecycle()
+    val groups by viewModel.group.collectAsStateWithLifecycle()
+    val order by viewModel.orderBy.collectAsStateWithLifecycle()
 
 
     LaunchedEffect(Unit) {
         viewModel.loadLedgers()
+        viewModel.getGroups()
+        viewModel.getOrderBy()
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -67,7 +81,7 @@ fun LedgerScreen(
                     Row {
                         Column {
                             androidx.compose.material3.Text(
-                                "Ledger Details",
+                                "Ledger List",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = SurfaceLight
@@ -92,29 +106,43 @@ fun LedgerScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
-                )
+                ),
+                actions = {
+                    IconButton(onClick = { showDialog = true }) {
+                        Icon(
+                            Icons.Default.Add, contentDescription = "Add Ledger",
+                            tint = SurfaceLight
+                        )
+                    }
+                }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                editingGroup = null
-                showDialog = true
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
-            }
-        }
+//        floatingActionButton = {
+//            FloatingActionButton(onClick = {
+//                editingGroup = null
+//                showDialog = true
+//            }) {
+//                Icon(Icons.Default.Add, contentDescription = "Add")
+//            }
+//        }
     ) { paddingValues ->
-        when(val state = ledgerState) {
+        when (val state = ledgerState) {
             is LedgerViewModel.LedgerUiState.Loading -> {
                 // Show loading indicator)
-                Text("Loading...", modifier = Modifier.padding(paddingValues).padding(16.dp))
+                Text(
+                    "Loading...", modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(16.dp)
+                )
             }
 
             is LedgerViewModel.LedgerUiState.Error -> {
                 // Show error message
                 Text(
                     "Error: ${state.message}",
-                    modifier = Modifier.padding(paddingValues).padding(16.dp)
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(16.dp)
                 )
             }
 
@@ -123,7 +151,9 @@ fun LedgerScreen(
                 if (ledgers.isEmpty()) {
                     Text(
                         "No ledger details found.",
-                        modifier = Modifier.padding(paddingValues).padding(16.dp)
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .padding(16.dp)
                     )
                 } else {
                     LazyColumn(
@@ -132,7 +162,7 @@ fun LedgerScreen(
                             .fillMaxSize()
                             .padding(8.dp)
                     ) {
-                        items(viewModel.groups) { group ->
+                        items(ledgers) { group ->
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -148,10 +178,10 @@ fun LedgerScreen(
                                 ) {
                                     Column(Modifier.weight(1f)) {
                                         Text(
-                                            "${group.ledger_code} (${group.ledger_name})",
+                                            "${group.ledger_name} (${group.ledger_fullname})",
                                             fontWeight = FontWeight.Bold
                                         )
-                                        Text(group.ledger_group)
+                                        Text(group.group.group_name)
                                         Text(if (group.is_active) "Yes" else "No")
                                     }
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -161,9 +191,12 @@ fun LedgerScreen(
                                         }) {
                                             Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
-//                            IconButton(onClick = { viewModel.deleteGroup(group.group_id) }) {
-//                                Icon(Icons.Default.Delete, contentDescription = "Delete")
-//                            }
+                                        IconButton(onClick = { viewModel.deleteLedger(group.ledger_name) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete"
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -171,23 +204,142 @@ fun LedgerScreen(
                     }
                 }
             }
-
         }
-//        if (showDialog) {
-//            GroupFormDialog(
-//                group = editingGroup,
-//                natures = viewModel.getNatures(),
-//                onDismiss = { showDialog = false },
-//                onSave = {
-//                    if (editingGroup == null)
-//                        viewModel.addGroup(it)
-//                    else
-//                        viewModel.updateGroup(it)
-//                    showDialog = false
-//                }
-//            )
-//        }
+        if (showDialog) {
+            LedgerDialog(
+                ledger = editingGroup,
+                onDismiss = {
+                    showDialog = false
+                },
+                onSave = {
+                    if (editingGroup == null)
+                        viewModel.addLedger(it)
+                    else
+                        viewModel.updateLedger(it.ledger_name, it)
+                    showDialog = false
+                },
+                group = groups,
+                onBankDialog = {},
+                order = order.toInt()
+            )
+        }
 
     }
 
+}
+
+@Composable
+fun LedgerDialog(
+    ledger: TblLedgerDetails?,
+    onDismiss: () -> Unit,
+    onSave: (TblLedgerRequest) -> Unit,
+    group: List<TblGroupDetails>,
+    onBankDialog: () -> Unit,
+    order: Int
+) {
+    val options = listOf("YES", "NO")
+    val opening = listOf("0DR", "0CR")
+
+    // Ledger Expense fields
+    var ledgerName by remember { mutableStateOf(ledger?.ledger_name ?: "") }
+    var ledgerFullName by remember { mutableStateOf(ledger?.ledger_fullname ?: "") }
+    var orderBy by remember { mutableStateOf(ledger?.order_by ?: order) }
+    var groupId by remember { mutableStateOf(ledger?.group?.group_id ?: 1) }
+
+    // Ledger Other Fields
+    var address by remember { mutableStateOf(ledger?.address ?: "") }
+    var address1 by remember { mutableStateOf(ledger?.address1 ?: "") }
+    var place by remember { mutableStateOf(ledger?.place ?: "") }
+    var distance by remember { mutableStateOf(ledger?.distance ?: 0.0) }
+    var pincode by remember { mutableStateOf(ledger?.pincode ?: 0) }
+    var country by remember { mutableStateOf(ledger?.country ?: "") }
+    var stateCode by remember { mutableStateOf(ledger?.state_code ?: "") }
+    var stateName by remember { mutableStateOf(ledger?.state_name ?: "") }
+    var contact_no by remember { mutableStateOf(ledger?.contact_no ?: "") }
+    var email by remember { mutableStateOf(ledger?.email ?: "") }
+    var bankDetails by remember { mutableStateOf(ledger?.bank_details ?: options.first()) }
+    var sacCode by remember { mutableStateOf(ledger?.sac_code ?: "") }
+    var panNo by remember { mutableStateOf(ledger?.pan_no ?: "") }
+    var gstNo by remember { mutableStateOf(ledger?.gst_no ?: "") }
+    var igst_status by remember { mutableStateOf(ledger?.igst_status ?: options.first()) }
+    var openingBalance by remember { mutableStateOf(ledger?.opening_balance ?: opening.first()) }
+    var tamilText by remember { mutableStateOf(ledger?.tamil_text ?: "") }
+    var dueDate by remember { mutableStateOf(ledger?.due_date ?: "0000-00-00") }
+    var isActive by remember { mutableStateOf(ledger?.is_active ?: true) }
+
+
+    ReusableBottomSheet(
+        onDismiss = onDismiss,
+        title = if (ledger != null) "Edit Ledger" else "Add Ledger",
+        onSave = {
+            val ledger = TblLedgerRequest(
+                ledger_name = ledger?.ledger_name ?: ledgerName,
+                ledger_fullname = ledger?.ledger_fullname ?: ledgerName,
+                order_by = ledger?.order_by ?: orderBy,
+                group_id = ledger?.group?.group_id ?: groupId,
+                address = ledger?.address ?: address,
+                address1 = ledger?.address1 ?: address1,
+                place = ledger?.place ?: place,
+                distance = ledger?.distance ?: distance,
+                pincode = ledger?.pincode ?: pincode,
+                country = ledger?.country ?: country,
+                contact_no = ledger?.contact_no ?: contact_no,
+                email = ledger?.email ?: email,
+                gst_no = ledger?.gst_no ?: gstNo,
+                pan_no = ledger?.pan_no ?: panNo,
+                state_code = ledger?.state_code ?: stateCode,
+                state_name = ledger?.state_name ?: stateName,
+                sac_code = ledger?.sac_code ?: sacCode,
+                igst_status = ledger?.igst_status ?: igst_status,
+                opening_balance = ledger?.opening_balance ?: openingBalance,
+                due_date = ledger?.due_date ?: dueDate,
+                bank_details = ledger?.bank_details ?: bankDetails,
+                tamil_text = ledger?.tamil_text ?: tamilText,
+                is_active = ledger?.is_active ?: isActive
+            )
+            onSave(ledger)
+        },
+        isSaveEnabled = ledgerName.isNotBlank() && ledgerFullName.isNotBlank(),
+        buttonText = if (ledger != null) "Update" else "Add"
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 400.dp) // limit dialog height
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Common Ledger Fields
+            OutlinedTextField(
+                value = ledgerName,
+                onValueChange = { ledgerName = it },
+                label = { Text("Ledger Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = ledgerName,
+                onValueChange = { ledgerFullName = it },
+                label = { Text("Ledger FullName") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = orderBy.toString(),
+                onValueChange = { orderBy = it.toInt() },
+                label = { androidx.compose.material3.Text("Order") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            GroupDropdown(
+                groups = group,
+                selectedGroup = group.find { it.group_id == groupId },
+                onGroupSelected = { groupId = it.group_id },
+                modifier = Modifier.fillMaxWidth(),
+                label = "Select Group"
+            )
+
+        }
+
+    }
 }

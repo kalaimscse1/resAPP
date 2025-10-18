@@ -2,6 +2,7 @@ package com.warriortech.resb.data.repository
 
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
+import com.warriortech.resb.model.TblGroupRequest
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import okhttp3.ResponseBody
@@ -28,7 +29,7 @@ class GroupRepository @Inject constructor(
         }
     }
 
-    suspend fun createGroup(group: TblGroupDetails): TblGroupDetails? {
+    suspend fun createGroup(group: TblGroupRequest): TblGroupDetails? {
         return try {
             apiService.createGroup(group, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -36,7 +37,7 @@ class GroupRepository @Inject constructor(
         }
     }
 
-    suspend fun updateGroup(groupId: Long, group: TblGroupDetails): Int? {
+    suspend fun updateGroup(groupId: Long, group: TblGroupRequest): Int? {
         return try {
             apiService.updateGroup(groupId, group, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -57,6 +58,16 @@ class GroupRepository @Inject constructor(
             apiService.getGroupNatures(sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun getOrderBy(): Map<String, Long>{
+        val response = apiService.getMaxOrderBy(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyMap()
+        }
+        else{
+            throw Exception("Failed to get OrderBy: ${response.message()}")
         }
     }
 }

@@ -982,20 +982,20 @@ interface ApiService {
 
     @POST("master/ledger/addLedger")
     suspend fun createLedger(
-        @Body ledger: TblLedgerDetails,
+        @Body ledger: TblLedgerRequest,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblLedgerDetails>
 
     @PUT("master/ledger/updateLedger/{ledger_name}")
     suspend fun updateLedger(
         @Path("ledger_name") id: String,
-        @Body ledger: TblLedgerDetails,
+        @Body ledger: TblLedgerRequest,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
     @DELETE("master/ledger/deleteLedger/{ledger_name}")
     suspend fun deleteLedger(
-        @Path("ledger_name") id: Long,
+        @Path("ledger_name") id: String,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ResponseBody>
 
@@ -1005,11 +1005,16 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblLedgerDetails>
 
+    @GET("master/ledger/getMaxOrderBy")
+    suspend fun getLedgerMaxOrderBy(
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<Map<String, Long>>
+
     /**
      * Group Management
      */
 
-    @GET("master/group/getGroupsByIsActive")
+    @GET("master/group/getAllGroups")
     suspend fun getAllGroups(
         @Header("X-Tenant-ID") tenantId: String
     ): Response<List<TblGroupDetails>>
@@ -1022,14 +1027,14 @@ interface ApiService {
 
     @POST("master/group/addGroup")
     suspend fun createGroup(
-        @Body group: TblGroupDetails,
+        @Body group: TblGroupRequest,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblGroupDetails>
 
     @PUT("master/group/updateGroup/{group_id}")
     suspend fun updateGroup(
         @Path("group_id") id: Long,
-        @Body group: TblGroupDetails,
+        @Body group: TblGroupRequest,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
@@ -1038,6 +1043,11 @@ interface ApiService {
         @Path("group_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ResponseBody>
+
+    @GET("master/group/getMaxOrderBy")
+    suspend fun getMaxOrderBy(
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<Map<String, Long>>
 
     /**
      * BankDetails Management
@@ -1077,7 +1087,7 @@ interface ApiService {
      * GroupNature Management
      */
     
-    @GET("master/group/getGroupNatures")
+    @GET("master/group/getGroupNatureByIsActive")
     suspend fun getGroupNatures(
         @Header("X-Tenant-ID") tenantId: String
     ): Response<List<TblGroupNature>>

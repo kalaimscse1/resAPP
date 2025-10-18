@@ -26,7 +26,7 @@ class LedgerRepository @Inject constructor(
         }
     }
 
-    suspend fun createLedger(ledger: com.warriortech.resb.model.TblLedgerDetails): com.warriortech.resb.model.TblLedgerDetails? {
+    suspend fun createLedger(ledger: com.warriortech.resb.model.TblLedgerRequest): com.warriortech.resb.model.TblLedgerDetails? {
         return try {
             apiService.createLedger(ledger, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -34,7 +34,7 @@ class LedgerRepository @Inject constructor(
         }
     }
 
-    suspend fun updateLedger(ledgerId: String, ledger: com.warriortech.resb.model.TblLedgerDetails): Int? {
+    suspend fun updateLedger(ledgerId: String, ledger: com.warriortech.resb.model.TblLedgerRequest): Int? {
         return try {
             apiService.updateLedger(ledgerId, ledger, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -42,7 +42,7 @@ class LedgerRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteLedger(ledgerId: Long): ResponseBody? {
+    suspend fun deleteLedger(ledgerId: String): ResponseBody? {
         return try {
             apiService.deleteLedger(ledgerId, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -73,6 +73,7 @@ class LedgerRepository @Inject constructor(
             null
         }
     }
+    
     suspend fun deleteBankDetails(bankId: Long): ResponseBody? {
         return try {
             apiService.deleteBankDetails(bankId, sessionManager.getCompanyCode()?:"").body()
@@ -86,6 +87,16 @@ class LedgerRepository @Inject constructor(
             apiService.getBankDetailsByLedgerId(ledgerName, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun getOrderBy(): Map<String, Long>{
+        val response = apiService.getLedgerMaxOrderBy(sessionManager.getCompanyCode()?:"")
+        if (response.isSuccessful) {
+            return response.body() ?: emptyMap()
+        }
+        else{
+            throw Exception("Failed to get OrderBy: ${response.message()}")
         }
     }
 }
