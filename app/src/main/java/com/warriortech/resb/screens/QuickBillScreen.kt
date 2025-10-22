@@ -112,7 +112,7 @@ fun QuickBillScreen(
                     onClick = {
                         scope.launch {
                             viewModel.placeOrder(selectedItems)
-                            delay(5000)
+                            delay(2000)
                             navController.navigate("payment_screen/${totalAmount}/${orderId}/${"--"}/${0L}/${""}") {
                                 launchSingleTop = true
                                 restoreState = true

@@ -264,18 +264,17 @@ class MainActivity : ComponentActivity() {
                                     ).show()
 
                                     navController.navigate("login") {
-                                        popUpTo(0) { inclusive = true }
+                                        popUpTo(0) { inclusive = true } // completely clears stack
                                         launchSingleTop = true
                                     }
 
+
                                     // ✅ Finish activity to prevent going back
-                                    (context as? ComponentActivity)?.finish()
+//                                    (context as? ComponentActivity)?.finish()
                                 }
                             } else {
                                 navController.navigate(route) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        inclusive = true
-                                    }
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
                                     launchSingleTop = true
                                 }
 //                                (context as? ComponentActivity)?.finish()
@@ -378,7 +377,13 @@ class MainActivity : ComponentActivity() {
  * * It handles user authentication, table selection, menu navigation, billing, and various settings.
  * * It also manages the state of selected tables, takeaway options, order details, and user login status.
  */
+@Composable
+fun AuthNavigation(
+    navController: NavHostController,
+    sessionManager: SessionManager
+){
 
+}
 @Composable
 fun AppNavigation(
     drawerState: DrawerState,

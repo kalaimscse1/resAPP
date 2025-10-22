@@ -1,5 +1,6 @@
 package com.warriortech.resb.ui.viewmodel
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.ModifierRepository
@@ -61,6 +62,7 @@ class ModifierSettingsViewModel @Inject constructor(
         }
     }
 
+    @SuppressLint("SuspiciousIndentation")
     fun addModifier(modifier: Modifiers) {
         viewModelScope.launch {
             try {

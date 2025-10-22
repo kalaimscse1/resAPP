@@ -1,6 +1,7 @@
 package com.warriortech.resb.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomAppBar
 //noinspection UsingMaterialAndMaterial3Libraries
@@ -47,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -118,7 +121,17 @@ fun KotModifyScreen(
             )
         },
         bottomBar = {
-            BottomAppBar(backgroundColor = SecondaryGreen) {
+            androidx.compose.material3.BottomAppBar(
+                containerColor = SecondaryGreen,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(SecondaryGreen, SecondaryGreen)
+                        ),
+                        shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)
+                    )
+            ) {
                 Button(
                     onClick = {
                         val res = viewModel.reprint()
@@ -169,6 +182,57 @@ fun KotModifyScreen(
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
+//            BottomAppBar(backgroundColor = SecondaryGreen) {
+//                Button(
+//                    onClick = {
+//                        val res = viewModel.reprint()
+//                        if (res.data == true) {
+//                            success = true
+//                            msg = res.message
+//                        } else {
+//                            failed = true
+//                            msg = res.message
+//                        }
+//                        navController.navigate("kot_report")
+//                    },
+//                    modifier = Modifier
+//                        .weight(1f)
+//                        .padding(8.dp),
+//                    colors = ButtonDefaults.buttonColors(
+//                        backgroundColor = DarkGreen
+//                    )
+//                ) {
+//                    Text("Reprint", color = SurfaceLight)
+//                }
+//                if (status?.order_status == "RUNNING") {
+//                    Button(
+//                        onClick = {
+//                            scope.launch {
+//                                val res = viewModel.modify()
+//                                if (res.data == true) {
+//                                    success = true
+//                                    msg = res.message
+//                                } else {
+//                                    failed = true
+//                                    msg = res.message
+//                                }
+//                                delay(2000)
+//                                navController.navigate("kot_report")
+//                            }
+//                        },
+//                        modifier = Modifier
+//                            .weight(1f)
+//                            .padding(8.dp),
+//                        colors = ButtonDefaults.buttonColors(
+//                            backgroundColor = DarkGreen
+//                        )
+//                    ) {
+//                        Text("Modify", color = SurfaceLight)
+//                    }
+//                } else {
+//                    Spacer(modifier = Modifier.weight(1f))
+//                }
+//            }
         }
     ) { paddingValues ->
         values = paddingValues

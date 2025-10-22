@@ -33,6 +33,7 @@ import com.warriortech.resb.ui.viewmodel.PaidBillsUiState
 import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
 import com.warriortech.resb.util.CurrencySettings
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,16 +46,19 @@ fun PaidBillsScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var fromDate by remember { mutableStateOf(LocalDate.now().toString()) }
-    var toDate by remember { mutableStateOf(LocalDate.now().toString()) }
-    var showDatePicker by remember { mutableStateOf(false) }
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var billToDelete by remember { mutableStateOf<TblBillingResponse?>(null) }
+    var fromDate by remember { mutableStateOf(LocalDate.now().minusDays(30)) }
+    var toDate by remember { mutableStateOf(LocalDate.now()) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var isFromDatePicker by remember { mutableStateOf(true) }
 
-    // Load paid bills on initial load
-    LaunchedEffect(Unit) {
-        viewModel.loadPaidBills(fromDate, toDate)
+    LaunchedEffect(fromDate, toDate) {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        viewModel.loadPaidBills(fromDate.format(formatter), toDate.format(formatter))
     }
+
 
     // Show error messages
     LaunchedEffect(uiState) {
@@ -98,33 +102,99 @@ fun PaidBillsScreen(
                 .padding(paddingValues)
                 .background(SurfaceLight)
         ) {
-            // Date range display
+            // Date Range Selection
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "From: $fromDate",
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Date Range",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = "To: $toDate",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Button(
-                        onClick = { viewModel.loadPaidBills(fromDate, toDate) },
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Refresh", color = Color.White)
+                        OutlinedCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    isFromDatePicker = true
+                                    showDatePicker = true
+                                },
+                            colors = CardDefaults.outlinedCardColors(
+                                containerColor = Color.White
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = PrimaryGreen,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "From",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = fromDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+
+                        OutlinedCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable {
+                                    isFromDatePicker = false
+                                    showDatePicker = true
+                                },
+                            colors = CardDefaults.outlinedCardColors(
+                                containerColor = Color.White
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = PrimaryGreen,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "To",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = toDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -208,6 +278,37 @@ fun PaidBillsScreen(
                         )
                     }
                 }
+            }
+        }
+        // Date Picker Dialog
+        if (showDatePicker) {
+            val datePickerState = rememberDatePickerState()
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            datePickerState.selectedDateMillis?.let { millis ->
+                                val selectedDate = LocalDate.ofEpochDay(millis / (24 * 60 * 60 * 1000))
+                                if (isFromDatePicker) {
+                                    fromDate = selectedDate
+                                } else {
+                                    toDate = selectedDate
+                                }
+                            }
+                            showDatePicker = false
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
             }
         }
 

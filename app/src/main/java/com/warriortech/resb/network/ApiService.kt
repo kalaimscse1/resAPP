@@ -794,26 +794,26 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): List<Modifiers>
 
-    @GET("modifiers/menu-item/{menuItemId}")
+    @GET("menu/addOn/{menuItemId}")
     suspend fun getModifiersByMenuItem(
         @Path("menuItemId") menuItemId: Long,
         @Header("X-Tenant-ID") tenantId: String
     ): List<Modifiers>
 
-    @POST("modifiers")
+    @POST("menu/addOn/addAddOn")
     suspend fun createModifier(
         @Body modifier: Modifiers,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Modifiers>
 
-    @PUT("modifiers/{id}")
+    @PUT("menu/addOn/updateAddOn/{add_on_id}")
     suspend fun updateModifier(
-        @Path("id") id: Long,
+        @Path("add_on_id") id: Long,
         @Body modifier: Modifiers,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Modifiers>
 
-    @DELETE("modifiers/{id}")
+    @DELETE("menu/addOn/deleteAddOnById/{add_on_id}")
     suspend fun deleteModifier(
         @Path("id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
