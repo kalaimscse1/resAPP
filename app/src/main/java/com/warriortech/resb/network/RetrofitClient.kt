@@ -10,8 +10,10 @@ import java.util.concurrent.TimeUnit
  * Singleton object for creating and managing the Retrofit client
  */
 object RetrofitClient {
-    const val BASE_URL = "http://154.210.206.184:5050/api/" // Replace with your actual API URL
+//    const val BASE_URL = "http://192.168.1.13:5050/api/" // Replace with your actual API URL
+    const val BASE_URL = "http://154.210.206.184:5050/api/"
     // Create OkHttpClient with logging and timeout settings
+
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

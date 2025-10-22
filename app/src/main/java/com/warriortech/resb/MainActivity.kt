@@ -512,7 +512,7 @@ fun AppNavigation(
                 },
                 navController = navController,
                 sessionManager = sessionManager,
-                tableName = "Takeaway"
+                tableName = "TAKEAWAY"
             )
         }
         composable("billing_screen/{orderMasterId}") { backStackEntry ->

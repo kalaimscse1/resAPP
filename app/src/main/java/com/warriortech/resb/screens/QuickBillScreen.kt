@@ -29,8 +29,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +67,8 @@ fun QuickBillScreen(
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
     val orderId by viewModel.orderId.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    var isOrderPlaced by remember { mutableStateOf(false) }
+    val orderDetailsResponse1 by viewModel.orderDetailsResponse1.collectAsStateWithLifecycle()
 
 
     LaunchedEffect(uiState.errorMessage) {
@@ -79,6 +83,19 @@ fun QuickBillScreen(
             orderDetailsResponse != null -> viewModel.setMenuDetails(orderDetailsResponse)
         }
         viewModel.updateTotal()
+    }
+
+    LaunchedEffect(orderDetailsResponse1, isOrderPlaced) {
+        scope.launch {
+            if (isOrderPlaced && orderDetailsResponse1.isNotEmpty()) {
+//                delay(2000)
+                navController.navigate("payment_screen/${totalAmount}/${orderId}/${"--"}/${0L}/${""}") {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                isOrderPlaced = false
+            }
+        }
     }
 
     Scaffold(
@@ -112,11 +129,7 @@ fun QuickBillScreen(
                     onClick = {
                         scope.launch {
                             viewModel.placeOrder(selectedItems)
-                            delay(2000)
-                            navController.navigate("payment_screen/${totalAmount}/${orderId}/${"--"}/${0L}/${""}") {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                            isOrderPlaced = true
                         }
                     },
                     text = "Proceed to Payment",
@@ -125,36 +138,46 @@ fun QuickBillScreen(
             }
         }
     ) { paddingValues ->
-        if (selectedItems.isEmpty()){
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "No items Found.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                )
+        BillContent(
+            modifier = Modifier.padding(paddingValues),
+            uiState = selectedItems,
+            onUpdateQuantity = { item, newQuantity ->
+                viewModel.updateItemQuantity(item, newQuantity)
+            },
+            onRemoveItem = { item ->
+                viewModel.removeItem(item)
             }
-            return@Scaffold
-        }
-        else{
-            BillContent(
-                modifier = Modifier.padding(paddingValues),
-                uiState = selectedItems,
-                onUpdateQuantity = { item, newQuantity ->
-                    viewModel.updateItemQuantity(item, newQuantity)
-                },
-                onRemoveItem = { item ->
-                    viewModel.removeItem(item)
-                }
-            )
-        }
+        )
+//        if (selectedItems.isEmpty()){
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .padding(paddingValues)
+//                    .padding(16.dp),
+//                verticalArrangement = Arrangement.Center,
+//                horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//                Text(
+//                    text = "No items Found.",
+//                    style = MaterialTheme.typography.bodyLarge,
+//                    fontWeight = FontWeight.Medium,
+//                    textAlign = TextAlign.Center
+//                )
+//            }
+//            return@Scaffold
+//        }
+//        else{
+//            BillContent(
+//                modifier = Modifier.padding(paddingValues),
+//                uiState = selectedItems,
+//                onUpdateQuantity = { item, newQuantity ->
+//                    viewModel.updateItemQuantity(item, newQuantity)
+//                },
+//                onRemoveItem = { item ->
+//                    viewModel.removeItem(item)
+//                }
+//            )
+//        }
     }
 }
 

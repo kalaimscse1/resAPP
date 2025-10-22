@@ -61,7 +61,7 @@ fun ModifierSettingsScreen(
                         viewModel.loadCategories()
                     }) {
                         Icon(
-                            Icons.Default.Add, contentDescription = "Add Modifier",
+                            Icons.Default.Add, contentDescription = "Add AddOn",
                             tint = SurfaceLight
                         )
                     }
@@ -103,7 +103,7 @@ fun ModifierSettingsScreen(
                             onDelete = {
                                 scope.launch {
                                     viewModel.deleteModifier(modifier.add_on_id)
-                                    snackbarHostState.showSnackbar("Modifier deleted")
+                                    snackbarHostState.showSnackbar("AddOn deleted")
                                 }
                             }
                         )
@@ -132,7 +132,7 @@ fun ModifierSettingsScreen(
                     scope.launch {
                         viewModel.addModifier(modifier)
                         showAddDialog = false
-                        snackbarHostState.showSnackbar("Modifier added")
+                        snackbarHostState.showSnackbar("AddOn added")
                     }
                 },
                 onDismiss = { showAddDialog = false }
@@ -147,7 +147,7 @@ fun ModifierSettingsScreen(
                     scope.launch {
                         viewModel.updateModifier(updatedModifier)
                         editingModifier = null
-                        snackbarHostState.showSnackbar("Modifier updated")
+                        snackbarHostState.showSnackbar("AddOn updated")
                     }
                 },
                 onDismiss = { editingModifier = null }
@@ -232,7 +232,7 @@ fun ModifierDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (modifier == null) "Add Modifier" else "Edit Modifier") },
+        title = { Text(if (modifier == null) "Add AddOn" else "Edit AddOn") },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -240,7 +240,7 @@ fun ModifierDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it.uppercase() },
-                    label = { Text("Modifier Name") },
+                    label = { Text("AddOn Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
 

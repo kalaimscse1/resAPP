@@ -111,6 +111,8 @@ class BillingViewModel @Inject constructor(
 
     private val _preview = MutableStateFlow<Bitmap?>(null)
     val preview: StateFlow<Bitmap?> = _preview
+    var res = false
+    val orderDetailsResponse1 = MutableStateFlow<List<TblOrderDetailsResponse>>(emptyList())
 
     init {
         viewModelScope.launch {
@@ -314,7 +316,6 @@ class BillingViewModel @Inject constructor(
     fun placeOrder(item: Map<TblMenuItemResponse, Int>) {
         // Implementation for placing order if needed
         viewModelScope.launch {
-
             val orderItems = item.map { (menuItem, quantity) ->
                 OrderItem(
                     quantity = quantity,
@@ -328,6 +329,7 @@ class BillingViewModel @Inject constructor(
                 result.fold(
                     onSuccess = { order ->
                         _orderId.value = order.firstOrNull()?.order_master_id ?: ""
+                        orderDetailsResponse1.value = order
                         _selectedItems.value =
                             emptyMap() // Clear selected items after placing order
                     },

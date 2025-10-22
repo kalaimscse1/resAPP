@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.ui.viewmodel.MenuViewModel
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -182,7 +183,7 @@ fun MenuScreen(
                 title = {
                     Column {
                         Text(
-                            if (tableStatusFromVM != "TAKEAWAY" && tableStatusFromVM != "DELIVERY") "Menu -${tableName}" else "Menu ",
+                            if (effectiveStatus != "TAKEAWAY" && effectiveStatus != "DELIVERY") "Menu -${tableName}" else "Menu ",
                             style = MaterialTheme.typography.titleLarge,
                             color = SurfaceLight
                         )
@@ -358,6 +359,14 @@ fun MenuScreen(
                             MobileOptimizedButton(
                                 onClick = { showConfirmDialog = true },
                                 text = "Place Order",
+                                enabled = (selectedItems.isNotEmpty()),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(48.dp)
+                            )
+                            MobileOptimizedButton(
+                                onClick = { showConfirmDialog = true },
+                                text = "Place Order & Bill",
                                 enabled = (selectedItems.isNotEmpty()),
                                 modifier = Modifier
                                     .weight(1f)

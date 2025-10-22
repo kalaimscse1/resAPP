@@ -38,7 +38,6 @@ import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
 import kotlin.collections.find
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupScreen(
@@ -162,6 +161,7 @@ fun GroupScreen(
                                     )
                                     Text("Nature: ${group.group_nature.g_nature_name}")
                                     Text("Active: ${if (group.is_active) "Yes" else "No"}")
+                                    Text("Group:${groups.find { it.group_id == group.group_by }?.group_name}")
                                 }
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     IconButton(onClick = {

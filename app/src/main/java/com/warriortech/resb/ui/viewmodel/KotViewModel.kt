@@ -291,14 +291,14 @@ class KotViewModel @Inject constructor(
 
                 for ((category, items) in category) {
                     val kotForCategory = KOTRequest(
-                        tableNumber = _kot.value?.table_name ?: "",
+                        tableNumber = if (_kot.value?.table_name == "--") "TAKEAWAY" else _kot.value?.table_name ?: "",
                         kotId = _kot.value?.kot_number?.toInt() ?: 0,
                         orderId = _kot.value?.order_master_id,
                         waiterName = _kot.value?.staff_name,
                         items = items,
                         orderCreatedAt = "${_kot.value?.order_date} + ${_kot.value?.order_create_time}",
                         paperWidth = 48,
-                        modify = "Reprint"
+                        modify = "REPRINT"
                     )
                     val ip = orderRepository.getIpAddress(category)
                     orderRepository.printKOT(kotForCategory, ip).collect { result ->
@@ -363,14 +363,14 @@ class KotViewModel @Inject constructor(
 
                             for ((category, items) in category) {
                                 val kotForCategory = KOTRequest(
-                                    tableNumber = _kot.value?.table_name ?: "",
+                                    tableNumber = if (table == "--") "TAKEAWAY" else _kot.value?.table_name ?: "",
                                     kotId = _kot.value?.kot_number?.toInt() ?: 0,
                                     orderId = _kot.value?.order_master_id,
                                     waiterName = _kot.value?.staff_name,
                                     items = items,
                                     orderCreatedAt = "${_kot.value?.order_date} + ${_kot.value?.order_create_time}",
                                     paperWidth = 48,
-                                    modify = "Modified"
+                                    modify = "MODIFIED"
                                 )
                                 val ip = orderRepository.getIpAddress(category)
                                 orderRepository.printKOT(kotForCategory, ip).collect { result ->
