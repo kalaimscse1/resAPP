@@ -51,6 +51,7 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.LedgerViewModel
 import com.warriortech.resb.util.GroupDropdown
 import com.warriortech.resb.util.ReusableBottomSheet
+import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 
 
@@ -66,12 +67,18 @@ fun LedgerScreen(
     val ledgerState by viewModel.ledgerState.collectAsStateWithLifecycle()
     val groups by viewModel.group.collectAsStateWithLifecycle()
     val order by viewModel.orderBy.collectAsStateWithLifecycle()
-
+    val msg by viewModel.msg.collectAsStateWithLifecycle()
+    var showAlert by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadLedgers()
         viewModel.getGroups()
         viewModel.getOrderBy()
+    }
+    LaunchedEffect(msg) {
+        if (msg.isNotEmpty()) {
+            showAlert = true
+        }
     }
 
     Scaffold(
@@ -191,7 +198,7 @@ fun LedgerScreen(
                                         }) {
                                             Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
-                                        IconButton(onClick = { viewModel.deleteLedger(group.ledger_name) }) {
+                                        IconButton(onClick = { viewModel.deleteLedger(group.ledger_id) }) {
                                             Icon(
                                                 Icons.Default.Delete,
                                                 contentDescription = "Delete"
@@ -215,12 +222,24 @@ fun LedgerScreen(
                     if (editingGroup == null)
                         viewModel.addLedger(it)
                     else
-                        viewModel.updateLedger(it.ledger_name, it)
+                        viewModel.updateLedger(it.ledger_id, it)
                     showDialog = false
                 },
                 group = groups,
                 onBankDialog = {},
                 order = order.toInt()
+            )
+        }
+        if(showAlert){
+            SuccessDialogWithButton(
+                title = "Success",
+                paddingValues = paddingValues,
+                description = msg,
+                onClick = {
+                    showAlert = false
+                    viewModel.loadLedgers()
+                    viewModel.clearMsg()
+                },
             )
         }
 
@@ -273,6 +292,7 @@ fun LedgerDialog(
         title = if (ledger != null) "Edit Ledger" else "Add Ledger",
         onSave = {
             val ledger = TblLedgerRequest(
+                ledger_id = ledger?.ledger_id ?: 0,
                 ledger_name = ledger?.ledger_name ?: ledgerName,
                 ledger_fullname = ledger?.ledger_fullname ?: ledgerName,
                 order_by = ledger?.order_by ?: orderBy,
@@ -299,7 +319,7 @@ fun LedgerDialog(
             )
             onSave(ledger)
         },
-        isSaveEnabled = ledgerName.isNotBlank() && ledgerFullName.isNotBlank(),
+        isSaveEnabled = ledgerName.isNotBlank() ,
         buttonText = if (ledger != null) "Update" else "Add"
     ) {
         Column(
@@ -320,7 +340,7 @@ fun LedgerDialog(
             OutlinedTextField(
                 value = ledgerName,
                 onValueChange = { ledgerFullName = it },
-                label = { Text("Ledger FullName") },
+                label = { Text("Ledger Description") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))

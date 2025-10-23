@@ -1,5 +1,7 @@
 package com.warriortech.resb.data.repository
 
+import androidx.datastore.preferences.protobuf.Api
+import com.warriortech.resb.model.ApiResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
 import okhttp3.ResponseBody
@@ -34,7 +36,7 @@ class LedgerRepository @Inject constructor(
         }
     }
 
-    suspend fun updateLedger(ledgerId: String, ledger: com.warriortech.resb.model.TblLedgerRequest): Int? {
+    suspend fun updateLedger(ledgerId: Int, ledger: com.warriortech.resb.model.TblLedgerRequest): Boolean? {
         return try {
             apiService.updateLedger(ledgerId, ledger, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -42,7 +44,7 @@ class LedgerRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteLedger(ledgerId: String): ResponseBody? {
+    suspend fun deleteLedger(ledgerId: Int): Boolean? {
         return try {
             apiService.deleteLedger(ledgerId, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -97,6 +99,14 @@ class LedgerRepository @Inject constructor(
         }
         else{
             throw Exception("Failed to get OrderBy: ${response.message()}")
+        }
+    }
+
+    suspend fun checkexists(ledgerName: String): ApiResponse<Boolean> {
+        return try {
+            apiService.checkExistsOrNot(ledgerName, sessionManager.getCompanyCode() ?: "").body()!!
+        } catch (e: Exception) {
+            ApiResponse(false, e.message.toString(),false )
         }
     }
 }

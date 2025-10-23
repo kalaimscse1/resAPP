@@ -33,6 +33,9 @@ class LedgerViewModel @Inject constructor(
     private val _legerState = MutableStateFlow<LedgerUiState>(LedgerUiState.Loading)
     val ledgerState: StateFlow<LedgerUiState> = _legerState.asStateFlow()
 
+    private val _msg = MutableStateFlow<String>("")
+    val msg: StateFlow<String> = _msg.asStateFlow()
+
     private val _groups = MutableStateFlow< List<TblGroupDetails>>(emptyList())
     val group : StateFlow<List<TblGroupDetails>> = _groups.asStateFlow()
 
@@ -47,15 +50,27 @@ class LedgerViewModel @Inject constructor(
 
     fun addLedger(ledger: TblLedgerRequest) {
         viewModelScope.launch {
+            val res = ledgerRepository.checkexists(ledger.ledger_name)
+            if (res.data==true){
+                val newLedger = ledgerRepository.createLedger(ledger)
+                if (newLedger != null)
+                    _msg.value = "Ledger added successfully"
+            }
+            else{
+                val msg = res.message
+                _msg.value = msg
+            }
             val newLedger = ledgerRepository.createLedger(ledger)
+            if (newLedger!=null)
             loadLedgers()
         }
     }
 
-    fun updateLedger(ledgerId: String, ledger: TblLedgerRequest) {
+    fun updateLedger(ledgerId: Int, ledger: TblLedgerRequest) {
         viewModelScope.launch {
-            ledgerRepository.updateLedger(ledgerId, ledger)
-
+           val res =  ledgerRepository.updateLedger(ledgerId, ledger)
+            if (res!=null)
+                _msg.value = "Ledger updated successfully"
         }
     }
 
@@ -69,13 +84,17 @@ class LedgerViewModel @Inject constructor(
             }
         }
     }
-    fun deleteLedger(ledgerId: String) {
+    fun deleteLedger(ledgerId: Int) {
         viewModelScope.launch {
-            ledgerRepository.deleteLedger(ledgerId)
-            loadLedgers()
+            val res = ledgerRepository.deleteLedger(ledgerId)
+            if (res!=null)
+                _msg.value = "Ledger deleted successfully"
         }
     }
 
+    fun clearMsg(){
+        _msg.value = ""
+    }
     fun getBankDetails() {
         viewModelScope.launch {
             val bankDetails = ledgerRepository.getBankDetails()
@@ -97,4 +116,16 @@ class LedgerViewModel @Inject constructor(
         // Implementation to update bank detail
     }
 
+    fun checkExists(ledgerName: String) {
+        viewModelScope.launch {
+            try {
+                val res = ledgerRepository.checkexists(ledgerName)
+                if (res.success) {
+
+                }
+            }catch (e: Exception){
+
+            }
+        }
+    }
 }

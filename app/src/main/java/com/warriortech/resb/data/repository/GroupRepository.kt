@@ -1,5 +1,6 @@
 package com.warriortech.resb.data.repository
 
+import com.warriortech.resb.model.ApiResponse
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblGroupRequest
@@ -37,7 +38,7 @@ class GroupRepository @Inject constructor(
         }
     }
 
-    suspend fun updateGroup(groupId: Long, group: TblGroupRequest): Int? {
+    suspend fun updateGroup(groupId: Int, group: TblGroupRequest): Boolean? {
         return try {
             apiService.updateGroup(groupId, group, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -45,7 +46,7 @@ class GroupRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteGroup(groupId: Long): ResponseBody? {
+    suspend fun deleteGroup(groupId: Int): Boolean? {
         return try {
             apiService.deleteGroup(groupId, sessionManager.getCompanyCode()?:"").body()
         } catch (e: Exception) {
@@ -68,6 +69,18 @@ class GroupRepository @Inject constructor(
         }
         else{
             throw Exception("Failed to get OrderBy: ${response.message()}")
+        }
+    }
+
+    suspend fun checkExists(groupName:String): ApiResponse<Boolean>{
+        return try {
+            apiService.checkExistsOrNotGroup(groupName, sessionManager.getCompanyCode()?:"").body()!!
+        }catch (e:Exception){
+            ApiResponse(
+                false,
+                message ="",
+                data = false
+            )
         }
     }
 }

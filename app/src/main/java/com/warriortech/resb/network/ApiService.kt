@@ -986,18 +986,18 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblLedgerDetails>
 
-    @PUT("master/ledger/updateLedger/{ledger_name}")
+    @PUT("master/ledger/updateLedger/{ledger_id}")
     suspend fun updateLedger(
-        @Path("ledger_name") id: String,
+        @Path("ledger_id") id: Int,
         @Body ledger: TblLedgerRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Int>
+    ): Response<Boolean>
 
-    @DELETE("master/ledger/deleteLedger/{ledger_name}")
+    @DELETE("master/ledger/deleteLedger/{ledger_id}")
     suspend fun deleteLedger(
-        @Path("ledger_name") id: String,
+        @Path("ledger_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<ResponseBody>
+    ): Response<Boolean>
 
     @GET("master/ledger/getLedgerByName/{ledger_name}")
     suspend fun getLedgerByName(
@@ -1009,6 +1009,14 @@ interface ApiService {
     suspend fun getLedgerMaxOrderBy(
         @Header("X-Tenant-ID") tenantId: String
     ) : Response<Map<String, Long>>
+
+
+    @GET("master/ledger/checkExistsOrNot/{ledger_name}")
+    suspend fun checkExistsOrNot(
+        @Path("ledger_name") ledgerName: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ApiResponse<Boolean>>
+
 
     /**
      * Group Management
@@ -1033,21 +1041,28 @@ interface ApiService {
 
     @PUT("master/group/updateGroup/{group_id}")
     suspend fun updateGroup(
-        @Path("group_id") id: Long,
+        @Path("group_id") id: Int,
         @Body group: TblGroupRequest,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Int>
+    ): Response<Boolean>
 
     @DELETE("master/group/deleteGroupById/{group_id}")
     suspend fun deleteGroup(
-        @Path("group_id") id: Long,
+        @Path("group_id") id: Int,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<ResponseBody>
+    ): Response<Boolean>
 
     @GET("master/group/getMaxOrderBy")
     suspend fun getMaxOrderBy(
         @Header("X-Tenant-ID") tenantId: String
     ) : Response<Map<String, Long>>
+
+    @GET("master/group/checkExistsOrNot/{group_name}")
+    suspend fun checkExistsOrNotGroup(
+        @Path("group_name") groupName: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ApiResponse<Boolean>>
+
 
     /**
      * BankDetails Management

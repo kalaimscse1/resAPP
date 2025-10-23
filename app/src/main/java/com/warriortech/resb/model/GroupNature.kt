@@ -15,6 +15,7 @@ data class TblBankDetails(
 )
 
 data class TblLedgerDetails(
+    val ledger_id: Int,
     val ledger_name: String,
     val ledger_fullname: String,
     val order_by: Int,
@@ -41,6 +42,7 @@ data class TblLedgerDetails(
 )
 
 data class TblLedgerRequest(
+    val ledger_id:Int =0,
     val ledger_name: String,
     val ledger_fullname: String,
     val order_by: Int,

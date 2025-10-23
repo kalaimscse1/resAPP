@@ -35,6 +35,7 @@ import com.warriortech.resb.util.GroupDropdown
 import com.warriortech.resb.util.GroupNatureDropdown
 import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.StringDropdown
+import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 import kotlin.collections.find
 
@@ -51,11 +52,19 @@ fun GroupScreen(
     val groupNature by viewModel.groupNatures.collectAsStateWithLifecycle()
     val groups by viewModel.groups.collectAsStateWithLifecycle()
     val order by viewModel.orderBy.collectAsStateWithLifecycle()
+    val msg by viewModel.msg.collectAsStateWithLifecycle()
+    var showAlert by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadGroupNature()
         viewModel.loadGroups()
         viewModel.getOrderBy()
+    }
+
+    LaunchedEffect(msg) {
+        if (msg.isNotEmpty()) {
+            showAlert = true
+        }
     }
 
     Scaffold(
@@ -198,6 +207,18 @@ fun GroupScreen(
                 order = order.toInt()
             )
         }
+        if(showAlert){
+            SuccessDialogWithButton(
+                title = "Success",
+                paddingValues = padding,
+                description = msg,
+                onClick = {
+                    showAlert = false
+                    viewModel.loadGroups()
+                    viewModel.clearMsg()
+                },
+            )
+        }
     }
 }
 
@@ -242,7 +263,7 @@ fun GroupFormDialog(
             )
             onSave(updatedGroup)
         },
-        isSaveEnabled = groupCode.isNotBlank() && groupName.isNotBlank(),
+        isSaveEnabled = groupCode.isNotBlank() ,
         buttonText = if (group != null) "Update" else "Add"
     ){
         Column(
@@ -260,7 +281,7 @@ fun GroupFormDialog(
             OutlinedTextField(
                 value = groupCode,
                 onValueChange = { groupName = it },
-                label = { Text("Group FullName") },
+                label = { Text("Group Description") },
                 modifier = Modifier.fillMaxWidth())
             OutlinedTextField(
                 value = groupOrder,

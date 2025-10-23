@@ -31,6 +31,10 @@ class GroupDetailsViewModel @Inject constructor(
         data class Error(val message: String) : GroupUiState()
     }
 
+    private val _msg = MutableStateFlow<String>("")
+    val msg: StateFlow<String> = _msg.asStateFlow()
+
+
     private val _groupState = MutableStateFlow<GroupUiState>(GroupUiState.Loading)
     val groupState: StateFlow<GroupUiState> = _groupState.asStateFlow()
     private val _groups = MutableStateFlow<List<TblGroupDetails>>(emptyList())
@@ -41,7 +45,7 @@ class GroupDetailsViewModel @Inject constructor(
 
     private val _orderBy = MutableStateFlow<String>("")
     val orderBy: StateFlow<String> = _orderBy.asStateFlow()
-    fun loadGroups(){
+    fun loadGroups() {
         viewModelScope.launch {
             groupRepository.getGroups().let {
                 _groups.value = it ?: emptyList()
@@ -61,7 +65,7 @@ class GroupDetailsViewModel @Inject constructor(
         }
     }
 
-    fun loadGroupNature(){
+    fun loadGroupNature() {
         viewModelScope.launch {
             groupRepository.getGroupNatures().let {
                 _groupNatures.value = it ?: emptyList()
@@ -71,20 +75,48 @@ class GroupDetailsViewModel @Inject constructor(
 
     fun addGroup(group: TblGroupRequest) {
         viewModelScope.launch {
-            groupRepository.createGroup(group)
+            val res = groupRepository.checkExists(group.group_name)
+            if (res.data==true){
+                val res = groupRepository.createGroup(group)
+                if (res != null)
+                    _msg.value = "Group added successfully"
+            }
+            else{
+                val msg = res.message
+                _msg.value = msg
+            }
         }
     }
 
-    fun updateGroup(group_id: Int,group : TblGroupRequest){
+    fun updateGroup(group_id: Int, group: TblGroupRequest) {
         viewModelScope.launch {
-            groupRepository.updateGroup(group_id.toLong(),group)
+            val res = groupRepository.updateGroup(group_id, group)
+            if (res != null)
+                _msg.value = "Group Updated successfully"
+        }
+    }
+    fun clearMsg(){
+        _msg.value = ""
+    }
+    fun deleteGroup(group_id: Int) {
+        viewModelScope.launch {
+            val res = groupRepository.deleteGroup(group_id)
+            if (res != null)
+                _msg.value = "Group deleted successfully"
         }
     }
 
-    fun deleteGroup(group_id: Int){
+    fun checkExists(group_name: String) {
         viewModelScope.launch {
-            groupRepository.deleteGroup(group_id.toLong())
+            try {
+                val res = groupRepository.checkExists(group_name)
+                if (res.data == false) {
+                    val msg = res.message
+                    _msg.value = msg
+                }
+            } catch (e: Exception) {
 
+            }
         }
     }
 
