@@ -1,4 +1,4 @@
-package com.warriortech.resb.screens
+package com.warriortech.resb.screens.accounts.master
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.warriortech.resb.screens
+package com.warriortech.resb.screens.accounts.master
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -20,15 +20,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblGroupRequest
-import com.warriortech.resb.model.TblLedgerRequest
 import com.warriortech.resb.ui.theme.PrimaryGreen
-import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.GroupDetailsViewModel
 import com.warriortech.resb.util.GroupDropdown

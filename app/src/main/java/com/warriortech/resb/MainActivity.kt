@@ -39,10 +39,11 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Restaurant
@@ -51,11 +52,9 @@ import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Exposure
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Kitchen
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.PointOfSale
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.TableRestaurant
@@ -66,7 +65,6 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -127,7 +125,7 @@ import com.warriortech.resb.screens.BillEditScreen
 import com.warriortech.resb.screens.BillTemplateScreen
 import com.warriortech.resb.screens.reports.CategoryWiseReportScreen
 import com.warriortech.resb.screens.CounterSelectionScreen
-import com.warriortech.resb.screens.GroupScreen
+import com.warriortech.resb.screens.accounts.master.GroupScreen
 import com.warriortech.resb.screens.settings.AreaSettingsScreen
 import com.warriortech.resb.screens.settings.CounterSettingsScreen
 import com.warriortech.resb.screens.settings.CustomerSettingsScreen
@@ -152,11 +150,12 @@ import com.warriortech.resb.util.LocaleHelper
 import com.warriortech.resb.screens.ItemWiseBillScreen
 import com.warriortech.resb.screens.reports.ItemWiseReportScreen
 import com.warriortech.resb.screens.KotModifyScreen
-import com.warriortech.resb.screens.LedgerScreen
+import com.warriortech.resb.screens.accounts.master.LedgerScreen
 import com.warriortech.resb.screens.reports.KotReportScreen
 import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.SplashScreen
+import com.warriortech.resb.screens.accounts.transaction.DayEntryScreen
 import com.warriortech.resb.screens.reports.UnpaidBillsScreen
 import com.warriortech.resb.screens.reports.gst.GSTRReportScreen
 import com.warriortech.resb.screens.reports.gst.HsnReportScreen
@@ -899,11 +898,17 @@ fun AppNavigation(
                 drawerState = drawerState
             )
         }
+        composable("day_entry") {
+            DayEntryScreen(
+                drawerState = drawerState,
+                navController = navController
+            )
+        }
     }
 }
 
 enum class ExpandedMenu {
-    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS
+    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS,ACCOUNTSENTRY
 }
 
 @Composable
@@ -1203,6 +1208,41 @@ fun DrawerContent(
 
                 // 🔹 Billing
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Accounts Entry") else Text("") },
+                        icon = {
+                            DrawerIcon(
+                                Icons.Default.AccountBox,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
+                        selected = currentDestination?.route in listOf("daily_entry"),
+                        onClick = {
+                            setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSENTRY) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSENTRY)
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.ACCOUNTSENTRY) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Day Entry") else Text("") },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.Default.AccountCircle,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
+                                selected = currentDestination?.route == "day_entry",
+                                onClick = { onDestinationClicked("day_entry") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+                        }
+                    }
+
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Bills") else Text("") },
                         icon = {

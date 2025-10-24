@@ -1106,4 +1106,40 @@ interface ApiService {
     suspend fun getGroupNatures(
         @Header("X-Tenant-ID") tenantId: String
     ): Response<List<TblGroupNature>>
+
+
+    /**
+     * LedgerDetails Management
+     */
+
+    @GET("ledger/transaction/getLedgerDetailsId")
+    suspend fun getLedgerdetails(
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<TblLedgerDetailsIdResponse>>
+
+    @POST("ledger/transaction/addLedgerDetailsId")
+    suspend fun addLedgerDetails(
+        @Body ledgerDetails: TblLedgerDetailIdRequest,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblLedgerDetailsIdResponse>
+
+    @GET("ledger/transaction/getLedgerDetailsById/{ledger_details_id}")
+    suspend fun getLedgerDetailsById(
+        @Path("ledger_details_id") ledgerDetailId: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblLedgerDetailsIdResponse>
+
+    @PUT("ledger/transaction/updateLedgerDetails/{ledger_details_id}")
+    suspend fun updateLedgerDetails(
+        @Path("ledger_details_id") ledgerDetailId: Long,
+        @Body ledgerDetails: TblLedgerDetailIdRequest,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
+    @DELETE("ledger/transaction/deleteLedgerDetails/{ledger_details_id}")
+    suspend fun deleteLedgerDetails(
+        @Path("ledger_details_id") ledgerId: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
 }
