@@ -77,7 +77,7 @@ class LedgerViewModel @Inject constructor(
     fun getOrderBy() {
         viewModelScope.launch {
             try {
-                val response = groupRepository.getOrderBy()
+                val response = ledgerRepository.getOrderBy()
                 _orderBy.value = response["order_by"].toString()
             } catch (e: Exception) {
                 _legerState.value = LedgerUiState.Error(e.message ?: "Failed to getOrderBy")

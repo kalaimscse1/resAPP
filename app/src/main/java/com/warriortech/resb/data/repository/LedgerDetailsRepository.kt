@@ -41,4 +41,15 @@ class LedgerDetailsRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun getEntryNo():Map<String, String>{
+        return try {
+            apiService.getEntryNo(
+                sessionManager.getUser()?.counter_id?:0,
+                "ACCOUNTS",
+                sessionManager.getCompanyCode()?:"").body()!!
+        }catch (e: Exception){
+            emptyMap()
+        }
+    }
 }

@@ -1142,4 +1142,11 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
+    @GET("ledger/transaction/getEntryNoByCounterId/{counterId}/{voucherType}")
+    suspend fun getEntryNo(
+        @Path("counterId") counterId: Long,
+        @Path("voucherType") voucherType: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<Map<String,String>>
+
 }

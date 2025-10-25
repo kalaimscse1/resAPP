@@ -50,6 +50,8 @@ data class TblLedgerDetailIdRequest(
     var party_member:String,
     var party_id:Long,
     var member:String,
+    var member_id:Long,
+    var purpose: String,
     var entry_bill_no:String,
     var amount_in:Double,
     var amount_out:Double,
