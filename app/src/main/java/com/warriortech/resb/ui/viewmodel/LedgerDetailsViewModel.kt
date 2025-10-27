@@ -5,83 +5,25 @@ import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.GroupRepository
 import com.warriortech.resb.data.repository.LedgerDetailsRepository
 import com.warriortech.resb.data.repository.LedgerRepository
+import com.warriortech.resb.data.repository.VoucherRepository
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblLedgerDetailIdRequest
 import com.warriortech.resb.model.TblLedgerDetails
+import com.warriortech.resb.model.TblVoucher
+import com.warriortech.resb.model.TblVoucherResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-//@HiltViewModel
-//class LedgerDetailsViewModel @Inject constructor(
-//    private val ledgerDetailsRepository: LedgerDetailsRepository,
-//    private val ledgerRepository: LedgerRepository,
-//    private val groupRepository: GroupRepository
-//) : ViewModel(){
-//    sealed class LedgerDetailsUiState {
-//        object Loading : LedgerDetailsUiState()
-//        data class Success(val ledgers: List<TblLedgerDetails>,
-//            val groups: List<TblGroupNature>
-//        ) : LedgerDetailsUiState()
-//        data class Error(val message: String) : LedgerDetailsUiState()
-//    }
-//    sealed class TransactionUiState{
-//        object Loading : TransactionUiState()
-//        data class Success(val message:String): TransactionUiState()
-//        data class Error(val message:String): TransactionUiState()
-//    }
-//    private val _legerDetailsState = MutableStateFlow<LedgerDetailsUiState>(LedgerDetailsUiState.Loading)
-//    val ledgerDetailsState: StateFlow<LedgerDetailsUiState> = _legerDetailsState.asStateFlow()
-//
-//    private val _transactionState = MutableStateFlow<TransactionUiState>(TransactionUiState.Loading)
-//    val transactionState: StateFlow<TransactionUiState> = _transactionState.asStateFlow()
-//
-//    private val _categories = MutableStateFlow<List<String>>(emptyList())
-//    val categories: StateFlow<List<String>> = _categories.asStateFlow()
-//
-//    private val _selectedLedger = MutableStateFlow<List<TblLedgerDetails>>(emptyList())
-//    val selectedLedger: StateFlow<List<TblLedgerDetails>> = _selectedLedger
-//
-//    private val _ledgerList = MutableStateFlow<List<TblLedgerDetails>>(emptyList())
-//    val ledgerList : StateFlow<List<TblLedgerDetails>> = _ledgerList.asStateFlow()
-//
-//    init {
-//        viewModelScope.launch {
-//            val ledgers = ledgerRepository.getLedgers()!!
-//            val groups = groupRepository.getGroupNatures()!!
-//            _ledgerList.value = ledgers
-//            _categories.value = groups.map { it.g_nature_name }.distinct()
-//            _legerDetailsState.value = LedgerDetailsUiState.Success(ledgers,groups)
-//        }
-//    }
-//
-//    fun addLedgerDetails(ledgerDetails: TblLedgerDetailIdRequest){
-//        viewModelScope.launch {
-//            val res = ledgerDetailsRepository.addLedgerDetails(ledgerDetails)
-//            if (res!=null)
-//                _transactionState.value = TransactionUiState.Success("Entry Added Successfully")
-//        }
-//    }
-//    fun addItemToOrder(ledgerDetails: TblLedgerDetails){
-//        _selectedLedger.value = _selectedLedger.value + ledgerDetails
-//
-//    }
-//
-//    fun clear(){
-//        _selectedLedger.value = emptyList()
-//    }
-//
-//}
-
 @HiltViewModel
 class LedgerDetailsViewModel @Inject constructor(
     private val ledgerDetailsRepository: LedgerDetailsRepository,
     private val ledgerRepository: LedgerRepository,
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository,
+    private val voucherRepository: VoucherRepository
 ) : ViewModel() {
 
     sealed class LedgerDetailsUiState {
@@ -126,19 +68,24 @@ class LedgerDetailsViewModel @Inject constructor(
     private val _entryNo = MutableStateFlow("")
     val entryNo = _entryNo.asStateFlow()
 
+    private val _voucher = MutableStateFlow<TblVoucherResponse?>(null)
+    val voucher: StateFlow<TblVoucherResponse?> = _voucher.asStateFlow()
+
 
     init {
         loadData()
     }
 
-    private fun loadData() {
+   fun loadData() {
         viewModelScope.launch {
             try {
                 val ledgers = ledgerRepository.getLedgers().orEmpty()
                 val groups = groupRepository.getGroupNatures().orEmpty()
                 val entry = ledgerDetailsRepository.getEntryNo()
+                val vouch = voucherRepository.getVoucherByCounterId("ACCOUNTS")
                 _entryNo.value = entry["entry_no"] ?:""
                 _ledgerList.value = ledgers
+                _voucher.value = vouch
                 _categories.value = groups.map { it.g_nature_name }.distinct()
                 _ledgerDetailsState.value = LedgerDetailsUiState.Success(ledgers, groups)
             } catch (e: Exception) {
@@ -168,10 +115,10 @@ class LedgerDetailsViewModel @Inject constructor(
                 _transactionState.value = TransactionUiState.Loading
                 val response = ledgerDetailsRepository.addLedgerDetails(entry.first())
                 if (response != null) {
-                    _transactionState.value =
-                        TransactionUiState.Success("Entry Added Successfully")
                     clear()
                     loadData()
+                    _transactionState.value =
+                        TransactionUiState.Success("Entry Added Successfully")
                 } else {
                     _transactionState.value = TransactionUiState.Error("Failed to save entry.")
                 }

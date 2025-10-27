@@ -52,6 +52,7 @@ import com.warriortech.resb.ui.viewmodel.LedgerViewModel
 import com.warriortech.resb.util.GroupDropdown
 import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.SuccessDialogWithButton
+import com.warriortech.resb.util.getCurrentDateModern
 import kotlinx.coroutines.launch
 
 
@@ -283,7 +284,7 @@ fun LedgerDialog(
     var igst_status by remember { mutableStateOf(ledger?.igst_status ?: options.first()) }
     var openingBalance by remember { mutableStateOf(ledger?.opening_balance ?: opening.first()) }
     var tamilText by remember { mutableStateOf(ledger?.tamil_text ?: "") }
-    var dueDate by remember { mutableStateOf(ledger?.due_date ?: "0000-00-00") }
+    var dueDate by remember { mutableStateOf(ledger?.due_date ?: getCurrentDateModern()) }
     var isActive by remember { mutableStateOf(ledger?.is_active ?: true) }
 
 

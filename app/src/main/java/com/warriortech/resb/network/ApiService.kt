@@ -1149,4 +1149,10 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ) : Response<Map<String,String>>
 
+    @GET("ledger/transaction/findById/{id}")
+    suspend fun getByLedgerId(
+        @Path("id") ledgerId: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<List<TblLedgerDetailsIdResponse>>
+
 }

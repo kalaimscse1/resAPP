@@ -904,11 +904,14 @@ fun AppNavigation(
                 navController = navController
             )
         }
+        composable("day_entry_report"){
+
+        }
     }
 }
 
 enum class ExpandedMenu {
-    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS,ACCOUNTSENTRY
+    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS,ACCOUNTSENTRY,ACCOUNTSREPORT
 }
 
 @Composable
@@ -1465,6 +1468,44 @@ fun DrawerContent(
                                 },
                                 selected = currentDestination?.route == "gstR_Docs",
                                 onClick = { onDestinationClicked("gstR_Docs") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
+
+                        }
+                    }
+
+                    NavigationDrawerItem(
+                        label = { if (!isCollapsed) Text("Accounts Reports") else Text("") },
+                        icon = {
+                            DrawerIcon(
+                                Icons.AutoMirrored.Filled.ReceiptLong,
+                                contentDescription = null,
+                                isCollapsed
+                            )
+                        },
+                        selected = currentDestination?.route in listOf(
+                            "hsn_reports",
+                            "gstR_Docs"
+                        ),
+                        onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.GSTREPORTS) ExpandedMenu.NONE else ExpandedMenu.GSTREPORTS) },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = drawerItemColors
+                    )
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.GSTREPORTS) {
+                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Day Entry Report") else Text("") },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.AutoMirrored.Filled.ListAlt,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
+                                selected = currentDestination?.route == "day_entry_report",
+                                onClick = { onDestinationClicked("day_entry_report") },
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                 colors = subMenuColors
                             )
