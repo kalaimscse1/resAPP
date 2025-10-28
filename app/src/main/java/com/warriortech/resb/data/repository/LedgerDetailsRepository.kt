@@ -52,4 +52,15 @@ class LedgerDetailsRepository @Inject constructor(
             emptyMap()
         }
     }
+
+    suspend fun getLedgerDetailsById(ledgerId:Long) : List<TblLedgerDetailsIdResponse>{
+        return try {
+            apiService.getByLedgerId(
+                ledgerId,
+                sessionManager.getCompanyCode()?:""
+            ).body()!!
+        }catch (e: Exception){
+            emptyList()
+        }
+    }
 }

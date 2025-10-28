@@ -155,6 +155,7 @@ import com.warriortech.resb.screens.reports.KotReportScreen
 import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.SplashScreen
+import com.warriortech.resb.screens.accounts.reports.DayEntryReportScreen
 import com.warriortech.resb.screens.accounts.transaction.DayEntryScreen
 import com.warriortech.resb.screens.reports.UnpaidBillsScreen
 import com.warriortech.resb.screens.reports.gst.GSTRReportScreen
@@ -905,7 +906,12 @@ fun AppNavigation(
             )
         }
         composable("day_entry_report"){
+            DayEntryReportScreen(
+                drawerState = drawerState,
+                onEditClick = {
 
+                }
+            )
         }
     }
 }
@@ -1485,14 +1491,13 @@ fun DrawerContent(
                             )
                         },
                         selected = currentDestination?.route in listOf(
-                            "hsn_reports",
-                            "gstR_Docs"
+                            "day_entry_report"
                         ),
-                        onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.GSTREPORTS) ExpandedMenu.NONE else ExpandedMenu.GSTREPORTS) },
+                        onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSREPORT) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSREPORT) },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                         colors = drawerItemColors
                     )
-                    AnimatedVisibility(expandedMenu == ExpandedMenu.GSTREPORTS) {
+                    AnimatedVisibility(expandedMenu == ExpandedMenu.ACCOUNTSREPORT) {
                         Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
 
                             NavigationDrawerItem(

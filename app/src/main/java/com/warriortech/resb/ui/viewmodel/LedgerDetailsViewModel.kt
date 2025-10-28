@@ -86,7 +86,11 @@ class LedgerDetailsViewModel @Inject constructor(
                 _entryNo.value = entry["entry_no"] ?:""
                 _ledgerList.value = ledgers
                 _voucher.value = vouch
-                _categories.value = groups.map { it.g_nature_name }.distinct()
+                val data = buildList {
+                    add("ALL")
+                    addAll(ledgers.map { it.group.group_nature.g_nature_name }.distinct())
+                }
+                _categories.value = data
                 _ledgerDetailsState.value = LedgerDetailsUiState.Success(ledgers, groups)
             } catch (e: Exception) {
                 _ledgerDetailsState.value = LedgerDetailsUiState.Error(e.message ?: "Failed to load data")
