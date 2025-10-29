@@ -27,7 +27,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
@@ -38,6 +40,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +56,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -69,6 +73,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -77,6 +83,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.MainActivity
 import com.warriortech.resb.model.TblLedgerDetailIdRequest
 import com.warriortech.resb.model.TblLedgerDetails
 import com.warriortech.resb.screens.ActionButton
@@ -90,7 +97,9 @@ import com.warriortech.resb.ui.theme.ghostWhite
 import com.warriortech.resb.ui.viewmodel.LedgerDetailsViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
+import com.warriortech.resb.util.LedgerDetailsEntryDropdown
 import com.warriortech.resb.util.LedgerDropdown
+import com.warriortech.resb.util.StringDropdown
 import com.warriortech.resb.util.SuccessDialogWithButton
 import com.warriortech.resb.util.getCurrentDateModern
 import com.warriortech.resb.util.getCurrentTimeModern
@@ -101,7 +110,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.collections.indexOf
 
-@SuppressLint("ConfigurationScreenWidthHeight")
+@SuppressLint("ConfigurationScreenWidthHeight", "ContextCastToActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayEntryScreen(
@@ -117,6 +126,7 @@ fun DayEntryScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val voucher by viewModel.voucher.collectAsStateWithLifecycle()
+    val ledgerDetails by viewModel.ledgerDetails.collectAsStateWithLifecycle()
 
     // --- Screen state ---
     var selectedCategory by remember { mutableStateOf<String>("") }
@@ -150,6 +160,25 @@ fun DayEntryScreen(
     var selectedLedger by remember { mutableStateOf<TblLedgerDetails?>(null) }
     val listState = rememberLazyListState()
     var showDeleteDialog by remember { mutableStateOf<Long?>(null) }
+    var showLedgerDetailDialog by remember { mutableStateOf(false) }
+    var selectedLedgerDetail by remember { mutableStateOf<TblLedgerDetailIdRequest?>(null) }
+
+
+    val context = LocalContext.current as? MainActivity
+    var showDropdown by remember { mutableStateOf(false) }
+
+    // Register callback
+    LaunchedEffect(Unit) {
+        context?.onVolumeUpPressed = {
+            showDropdown = true
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            context?.onVolumeUpPressed = null
+        }
+    }
 
     LaunchedEffect(transactionState) {
         when (val state = transactionState) {
@@ -199,6 +228,16 @@ fun DayEntryScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showDropdown = true }
+            ) {
+                Icon(
+                    Icons.Default.Edit, contentDescription = "Modify",
+                    tint = SurfaceLight
+                )
+            }
         },
         bottomBar = {
             BottomAppBar(
@@ -312,6 +351,10 @@ fun DayEntryScreen(
                                 .padding(start = 4.dp, end = 4.dp)
                                 .pointerInput(Unit) {
                                     detectTapGestures(
+                                        onTap = {
+                                            selectedLedgerDetail = entry
+                                            showLedgerDetailDialog = true
+                                        },
                                         onLongPress = {
                                             showDeleteDialog = ledgerId
                                         }
@@ -556,6 +599,49 @@ fun DayEntryScreen(
             text = { Text("Are you sure you want to delete this entry?") }
         )
     }
+
+    if (showDropdown){
+        AlertDialog(
+            onDismissRequest = { showDropdown = false },
+            confirmButton = {
+
+            },
+            dismissButton = {
+                TextButton(onClick = { showDropdown = false }) { Text("Cancel") }
+            },
+            title = { Text("Select Entry No To Edit") },
+            text = {
+                StringDropdown(
+                    options = ledgerDetails,
+                    selectedOption = ledgerDetails.firstOrNull() ,
+                    onOptionSelected = {
+                        navController.navigate("modify_day_entry/{$it}")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        )
+    }
+    if (showLedgerDetailDialog && selectedLedgerDetail != null){
+        LedgerDetailEntryDialog(
+            ledgerList = ledgerList,
+            ledger = selectedLedgerDetail!!,
+            onDismiss = { showLedgerDetailDialog = false },
+            onAdd = { remark, amount, isPayment ->
+                if (amount <= 0) {
+                    scope.launch { snackbarHostState.showSnackbar("Amount must be greater than zero") }
+                    return@LedgerDetailEntryDialog
+                }
+                val id = selectedLedgerDetail!!.id
+                entriesState[id] = entriesState[id]?.copy(
+                    purpose = remark,
+                    amount_in = if (isPayment) 0.0 else amount,
+                    amount_out = if (isPayment) amount else 0.0,
+                ) ?: return@LedgerDetailEntryDialog
+                showLedgerDetailDialog = false
+            }
+        )
+    }
 }
 
 /** Ledger popup for remark, amount, payment/receipt with autofocus on Amount */
@@ -610,7 +696,7 @@ fun LedgerEntryDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
-                    textStyle = androidx.compose.ui.text.TextStyle(
+                    textStyle = TextStyle(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -630,7 +716,7 @@ fun LedgerEntryDialog(
 
 
 @Composable
-private fun PaymentModeRow(
+fun PaymentModeRow(
     paymentMode: PaymentMode,
     onModeChange: (PaymentMode) -> Unit,
     ledgerList: List<TblLedgerDetails>,
@@ -710,9 +796,9 @@ private fun PaymentModeRow(
     }
 }
 
-private data class Totals(val debit: Double, val credit: Double)
+data class Totals(val debit: Double, val credit: Double)
 
-private enum class PaymentMode(val label: String) {
+enum class PaymentMode(val label: String) {
     CASH("CASH"),
     CARD("CARD"),
     UPI("UPI"),

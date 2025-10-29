@@ -10,6 +10,7 @@ import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblLedgerDetailIdRequest
 import com.warriortech.resb.model.TblLedgerDetails
+import com.warriortech.resb.model.TblLedgerDetailsIdResponse
 import com.warriortech.resb.model.TblVoucher
 import com.warriortech.resb.model.TblVoucherResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 @HiltViewModel
 class LedgerDetailsViewModel @Inject constructor(
     private val ledgerDetailsRepository: LedgerDetailsRepository,
@@ -32,6 +34,7 @@ class LedgerDetailsViewModel @Inject constructor(
             val ledgers: List<TblLedgerDetails>,
             val groups: List<TblGroupNature>
         ) : LedgerDetailsUiState()
+
         data class Error(val message: String) : LedgerDetailsUiState()
     }
 
@@ -42,6 +45,13 @@ class LedgerDetailsViewModel @Inject constructor(
         data class Error(val message: String) : TransactionUiState()
     }
 
+    sealed class ModifyUiState {
+        object Idle : ModifyUiState()
+        object Loading : ModifyUiState()
+        data class Success(val ledgerDetails: List<TblLedgerDetailsIdResponse>) : ModifyUiState()
+        data class Error(val message: String) : ModifyUiState()
+    }
+
     private val _ledgerDetailsState =
         MutableStateFlow<LedgerDetailsUiState>(LedgerDetailsUiState.Loading)
     val ledgerDetailsState = _ledgerDetailsState.asStateFlow()
@@ -49,6 +59,10 @@ class LedgerDetailsViewModel @Inject constructor(
     private val _transactionState =
         MutableStateFlow<TransactionUiState>(TransactionUiState.Idle)
     val transactionState = _transactionState.asStateFlow()
+
+    private val _modifyState =
+        MutableStateFlow<ModifyUiState>(ModifyUiState.Idle)
+    val modifyState = _modifyState.asStateFlow()
 
     private val _categories = MutableStateFlow<List<String>>(emptyList())
     val categories = _categories.asStateFlow()
@@ -71,21 +85,26 @@ class LedgerDetailsViewModel @Inject constructor(
     private val _voucher = MutableStateFlow<TblVoucherResponse?>(null)
     val voucher: StateFlow<TblVoucherResponse?> = _voucher.asStateFlow()
 
+    private val _ledgerDetails = MutableStateFlow<List<String>>(emptyList())
+    val ledgerDetails: StateFlow<List<String>> = _ledgerDetails.asStateFlow()
+
 
     init {
         loadData()
     }
 
-   fun loadData() {
+    fun loadData() {
         viewModelScope.launch {
             try {
                 val ledgers = ledgerRepository.getLedgers().orEmpty()
                 val groups = groupRepository.getGroupNatures().orEmpty()
                 val entry = ledgerDetailsRepository.getEntryNo()
                 val vouch = voucherRepository.getVoucherByCounterId("ACCOUNTS")
-                _entryNo.value = entry["entry_no"] ?:""
+                val entries = ledgerDetailsRepository.getLedgerDetails().orEmpty()
+                _entryNo.value = entry["entry_no"] ?: ""
                 _ledgerList.value = ledgers
                 _voucher.value = vouch
+                _ledgerDetails.value = entries.map { it.member_id }.distinct()
                 val data = buildList {
                     add("ALL")
                     addAll(ledgers.map { it.group.group_nature.g_nature_name }.distinct())
@@ -93,7 +112,8 @@ class LedgerDetailsViewModel @Inject constructor(
                 _categories.value = data
                 _ledgerDetailsState.value = LedgerDetailsUiState.Success(ledgers, groups)
             } catch (e: Exception) {
-                _ledgerDetailsState.value = LedgerDetailsUiState.Error(e.message ?: "Failed to load data")
+                _ledgerDetailsState.value =
+                    LedgerDetailsUiState.Error(e.message ?: "Failed to load data")
             }
         }
     }
@@ -117,20 +137,65 @@ class LedgerDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _transactionState.value = TransactionUiState.Loading
-                val response = ledgerDetailsRepository.addLedgerDetails(entry.first())
+                val response = ledgerDetailsRepository.addAllLedgerDetails(entry)
                 if (response != null) {
                     clear()
                     loadData()
                     _transactionState.value =
-                        TransactionUiState.Success("Entry Added Successfully")
+                        TransactionUiState.Success("Ledger Details Added Successfully")
                 } else {
-                    _transactionState.value = TransactionUiState.Error("Failed to save entry.")
+                    _transactionState.value =
+                        TransactionUiState.Error("Failed to save Ledger Details.")
                 }
             } catch (e: Exception) {
                 _transactionState.value =
-                    TransactionUiState.Error(e.message ?: "Error while saving entry.")
+                    TransactionUiState.Error(e.message ?: "Error while saving Ledger Details.")
             }
         }
+    }
+
+    fun updateLedgerDetails(entry: List<TblLedgerDetailIdRequest>) {
+        viewModelScope.launch {
+            try {
+                _transactionState.value = TransactionUiState.Loading
+                val response = ledgerDetailsRepository.updateAllLedgerDetails(entry)
+                if (response != null) {
+                    clear()
+                    loadData()
+                    _transactionState.value =
+                        TransactionUiState.Success("Ledger Details Updated Successfully")
+                } else {
+                    _transactionState.value =
+                        TransactionUiState.Error("Failed to save Ledger Details.")
+                }
+            } catch (e: Exception) {
+                _transactionState.value =
+                    TransactionUiState.Error(e.message ?: "Error while update Ledger Details.")
+            }
+        }
+    }
+
+    fun getLedgerDetailsByEntryNo(entryNo: String) {
+        viewModelScope.launch {
+            try {
+                _modifyState.value = ModifyUiState.Loading
+                val response = ledgerDetailsRepository.getLedgerDetailsByLedgerId(
+                    entryNo.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                )
+                if (response != null) {
+                    val data = response.filter { it.ledger_details_id.toInt() % 2 != 0 }
+                    _modifyState.value = ModifyUiState.Success(data)
+                } else {
+                    _modifyState.value = ModifyUiState.Error("Failed to load data")
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+    }
+
+    fun deleteLedgerDetailsByEntryNo(entryNo: String) {
+
     }
 
     fun clear() {

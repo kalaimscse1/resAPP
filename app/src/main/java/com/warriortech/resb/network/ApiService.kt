@@ -1155,4 +1155,22 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ) : Response<List<TblLedgerDetailsIdResponse>>
 
+    @POST("ledger/transaction/addAllLedgerDetailsId")
+    suspend fun saveAllLedgerDetails(
+        @Body ledgerDetails: List<TblLedgerDetailIdRequest>,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Boolean>
+
+    @POST("ledger/transaction/updateAllLedgerDetailsId")
+    suspend fun updateAllLedgerDetails(
+        @Body ledgerDetails: List<TblLedgerDetailIdRequest>,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<Boolean>
+
+    @GET("ledger/transaction/getLedgerDetailsByEntryNo/{entry_no}")
+    suspend fun getLedgerDetailsByEntryNo(
+        @Path("entry_no") entryNo: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<List<TblLedgerDetailsIdResponse>>
+
 }

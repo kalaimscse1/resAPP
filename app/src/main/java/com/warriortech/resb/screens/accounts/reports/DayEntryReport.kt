@@ -56,7 +56,6 @@ import kotlinx.coroutines.launch
 fun DayEntryReportScreen(
     viewModel: DayEntryReportViewmodel = hiltViewModel(),
     drawerState: DrawerState,
-    onEditClick: () -> Unit
 ){
     val ledgerDetailsState by viewModel.ledgerDetailsState.collectAsStateWithLifecycle()
     val ledgerList by viewModel.ledgerList.collectAsStateWithLifecycle()
@@ -68,7 +67,7 @@ fun DayEntryReportScreen(
             TopAppBar(
                 title = {
                     androidx.compose.material.Text(
-                        "Day Entry Reports",
+                        "Ledger Reports",
                         style = MaterialTheme.typography.titleLarge,
                         color = SurfaceLight
                     )
@@ -172,12 +171,6 @@ fun DayEntryReportScreen(
                                     color = Color.White,
                                     modifier = Modifier.width(100.dp)
                                 )
-                                Text(
-                                    "Action",
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White,
-                                    modifier = Modifier.width(100.dp)
-                                )
                             }
                         }
                         items(state.ledgers) { ledger ->
@@ -203,12 +196,6 @@ fun DayEntryReportScreen(
                                     color = if (ledger.amount_in > 0) SecondaryGreen else Color.Black
                                 )
 
-                                Button(
-                                    onClick = { onEditClick() },
-                                    modifier = Modifier.width(100.dp)
-                                ) {
-                                    Text("Edit")
-                                }
                             }
                         }
 

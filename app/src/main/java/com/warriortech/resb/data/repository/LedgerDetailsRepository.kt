@@ -26,6 +26,30 @@ class LedgerDetailsRepository @Inject constructor(
         }
     }
 
+    suspend fun addAllLedgerDetails(ledgerDetails:List<TblLedgerDetailIdRequest>): Boolean?{
+        return try {
+            apiService.saveAllLedgerDetails(ledgerDetails,sessionManager.getCompanyCode() ?: "").body()
+        }catch (e: Exception){
+            null
+        }
+    }
+
+    suspend fun updateAllLedgerDetails(ledgerDetails:List<TblLedgerDetailIdRequest>): Boolean?{
+        return try {
+            apiService.updateAllLedgerDetails(ledgerDetails,sessionManager.getCompanyCode() ?: "").body()
+        }catch (e: Exception){
+            null
+        }
+    }
+
+    suspend fun getLedgerDetailsByLedgerId(entryNo:String):List<TblLedgerDetailsIdResponse>?{
+        return try {
+            apiService.getLedgerDetailsByEntryNo(entryNo,sessionManager.getCompanyCode() ?: "").body()
+        }catch (e: Exception){
+            null
+        }
+    }
+
     suspend fun updateLedgerDetails(ledgerDetailsId:Long,ledgerDetails:TblLedgerDetailIdRequest): Int? {
         return try {
             apiService.updateLedgerDetails(ledgerDetailsId,ledgerDetails,sessionManager.getCompanyCode()?:"").body()
@@ -41,6 +65,8 @@ class LedgerDetailsRepository @Inject constructor(
             null
         }
     }
+
+
 
     suspend fun getEntryNo():Map<String, String>{
         return try {

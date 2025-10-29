@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -156,6 +157,7 @@ import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.SplashScreen
 import com.warriortech.resb.screens.accounts.reports.DayEntryReportScreen
+import com.warriortech.resb.screens.accounts.transaction.DayEntryModifyScreen
 import com.warriortech.resb.screens.accounts.transaction.DayEntryScreen
 import com.warriortech.resb.screens.reports.UnpaidBillsScreen
 import com.warriortech.resb.screens.reports.gst.GSTRReportScreen
@@ -173,7 +175,7 @@ import com.warriortech.resb.screens.settings.VoucherTypeSettingsScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    var onVolumeUpPressed: (() -> Unit)? = null
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(LocaleHelper.onAttach(newBase ?: this))
     }
@@ -182,6 +184,15 @@ class MainActivity : ComponentActivity() {
         super.onConfigurationChanged(newConfig)
         LocaleHelper.onAttach(this)
         recreate()
+    }
+
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            onVolumeUpPressed?.invoke()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     @Inject
@@ -907,10 +918,15 @@ fun AppNavigation(
         }
         composable("day_entry_report"){
             DayEntryReportScreen(
+                drawerState = drawerState
+            )
+        }
+        composable("modify_day_entry/{entry_no}") {backStackEntry ->
+            val entry_no = backStackEntry.arguments?.getString("entry_no") ?: ""
+            DayEntryModifyScreen(
                 drawerState = drawerState,
-                onEditClick = {
-
-                }
+                navController = navController,
+                entryNo = entry_no.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
             )
         }
     }

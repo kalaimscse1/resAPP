@@ -24,6 +24,7 @@ import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblLedgerDetails
+import com.warriortech.resb.model.TblLedgerDetailsIdResponse
 import com.warriortech.resb.model.TblUnit
 import com.warriortech.resb.model.TblVoucherType
 import kotlin.collections.forEach
@@ -808,6 +809,62 @@ fun LedgerDropdown(
                 ledgers.forEach { group ->
                     DropdownMenuItem(
                         text = { Text(group.ledger_name) },
+                        onClick = {
+                            onLedgerSelected(group)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LedgerDetailsEntryDropdown(
+    ledgers: List<TblLedgerDetailsIdResponse>,
+    selectedLedger: TblLedgerDetailsIdResponse?,
+    onLedgerSelected: (TblLedgerDetailsIdResponse) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Select Entry No"
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+    ) {
+        OutlinedTextField( // Or TextField if you prefer a different style
+            value = selectedLedger?.member_id ?: "", // Display selected area name or empty
+            onValueChange = {}, // Not directly editable, selection happens via dropdown
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor() // Important: This anchors the dropdown menu
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (ledgers.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No GroupNature available") },
+                    onClick = {
+                        expanded = false
+                    },
+                    enabled = false // Disable if no GroupNatures
+                )
+            } else {
+                ledgers.forEach { group ->
+                    DropdownMenuItem(
+                        text = { Text(group.member_id) },
                         onClick = {
                             onLedgerSelected(group)
                             expanded = false
