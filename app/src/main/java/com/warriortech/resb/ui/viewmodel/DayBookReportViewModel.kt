@@ -14,18 +14,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DayEntryReportViewmodel @Inject constructor(
+class DayBookReportViewmodel @Inject constructor(
     private val ledgerDetailsRepository: LedgerDetailsRepository,
     private val ledgerRepository: LedgerRepository,
 ) : ViewModel() {
-    sealed class DayEntryUiState {
-        object Loading : DayEntryUiState()
-        data class Success(val ledgers: List<TblLedgerDetailsIdResponse>) : DayEntryUiState()
-        data class Error(val message: String) : DayEntryUiState()
+    sealed class DayBookUiState {
+        object Loading : DayBookUiState()
+        data class Success(val ledgers: List<TblLedgerDetailsIdResponse>) : DayBookUiState()
+        data class Error(val message: String) : DayBookUiState()
     }
 
-    private val _ledgerDetailsState = MutableStateFlow<DayEntryUiState>(DayEntryUiState.Loading)
-    val ledgerDetailsState : StateFlow<DayEntryUiState> = _ledgerDetailsState.asStateFlow()
+    private val _ledgerDetailsState = MutableStateFlow<DayBookUiState>(DayBookUiState.Loading)
+    val ledgerDetailsState: StateFlow<DayBookUiState> = _ledgerDetailsState.asStateFlow()
 
     private val _ledgerList = MutableStateFlow<List<TblLedgerDetails>>(emptyList())
     val ledgerList = _ledgerList.asStateFlow()
@@ -33,16 +33,15 @@ class DayEntryReportViewmodel @Inject constructor(
     val openingBalance = _openingBalance.asStateFlow()
 
 
-
-    fun loadData(ledgerId: Long,fromDate: String, toDate: String){
+    fun loadData(fromDate: String, toDate: String) {
         viewModelScope.launch {
-            try{
+            try {
                 val ledgers = ledgerRepository.getLedgers().orEmpty()
-                val ledger = ledgerDetailsRepository.getLedgerDetailsById(ledgerId,fromDate,toDate)
+                val ledger = ledgerDetailsRepository.getLedgerDetails(fromDate, toDate)!!
                 _ledgerList.value = ledgers
-                _ledgerDetailsState.value = DayEntryUiState.Success(ledgers = ledger)
-            }catch (e: Exception) {
-                _ledgerDetailsState.value = DayEntryUiState.Error(e.message ?: "Unknown error")
+                _ledgerDetailsState.value = DayBookUiState.Success(ledgers = ledger)
+            } catch (e: Exception) {
+                _ledgerDetailsState.value = DayBookUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -57,5 +56,4 @@ class DayEntryReportViewmodel @Inject constructor(
             }
         }
     }
-
 }

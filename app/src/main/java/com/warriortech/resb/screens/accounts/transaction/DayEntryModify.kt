@@ -43,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHostState
@@ -276,7 +277,6 @@ fun DayEntryModifyScreen(
                             scope.launch {
                                 try {
                                     viewModel.deleteLedgerDetailsByEntryNo(entryNo.toString())
-                                    snackbarHostState.showSnackbar("Entry deleted successfully")
                                     navController.popBackStack()
                                 } catch (e: Exception) {
                                     snackbarHostState.showSnackbar("Delete failed: ${e.message}")
@@ -313,7 +313,7 @@ fun DayEntryModifyScreen(
                 is LedgerDetailsViewModel.ModifyUiState.Success -> {
                     val res = state.ledgerDetails
                     res.forEach { item->
-                        entriesState[item.ledger.ledger_id.toLong()] = TblLedgerDetailIdRequest(
+                        entriesState[item.ledger_details_id] = TblLedgerDetailIdRequest(
                             ledger_details_id = item.ledger_details_id,
                             id = item.ledger.ledger_id.toLong(),
                             date = item.date,
@@ -336,10 +336,32 @@ fun DayEntryModifyScreen(
                             .background(SecondaryGreen)
                             .padding(vertical = 8.dp, horizontal = 4.dp)
                     ) {
-                        Text("LEDGER", modifier = Modifier.weight(3f), color = Color.White, fontWeight = FontWeight.Bold)
-                        Text("REMARKS", modifier = Modifier.weight(2f), color = Color.White, textAlign = TextAlign.Center)
-                        Text("DEBIT", modifier = Modifier.weight(2f), color = Color.White, textAlign = TextAlign.End)
-                        Text("CREDIT", modifier = Modifier.weight(2f), color = Color.White, textAlign = TextAlign.End)
+                        Text(
+                            "LEDGER",
+                            modifier = Modifier.weight(3f),
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "REMARKS",
+                            modifier = Modifier.weight(3f),
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "DEBIT",
+                            modifier = Modifier.weight(2f),
+                            color = Color.White,
+                            textAlign = TextAlign.End,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "CREDIT",
+                            modifier = Modifier.weight(2f),
+                            color = Color.White,
+                            textAlign = TextAlign.End,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
                     LazyColumn(
@@ -370,7 +392,7 @@ fun DayEntryModifyScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(ledgerName, modifier = Modifier.weight(3f), fontSize = 12.sp)
-                                Text(entry.purpose, modifier = Modifier.weight(2f), textAlign = TextAlign.End)
+                                Text(entry.purpose, modifier = Modifier.weight(3f), textAlign = TextAlign.Center)
                                 Text(
                                     entry.amount_out.toString(),
                                     modifier = Modifier.weight(2f),
@@ -396,8 +418,21 @@ fun DayEntryModifyScreen(
                             .padding(4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Rows: ${entriesState.size}", color = Color.White)
-                        Text("Total: ${totals.debit + totals.credit}", color = Color.White)
+                        Text(
+                            "Row: ${entriesState.size}",
+                            color = SurfaceLight,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "Credit: ${totals.credit}",
+                            color = SurfaceLight,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "Debit: ${totals.debit}",
+                            color = SurfaceLight,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
 
@@ -417,6 +452,7 @@ fun DayEntryModifyScreen(
             onDismissRequest = { showDeleteDialog = null },
             confirmButton = {
                 TextButton(onClick = {
+                    viewModel.deleteByLedgerDetailsId(showDeleteDialog?:0)
                     entriesState.remove(showDeleteDialog)
                     showDeleteDialog = null
                 }) { Text("Delete") }
@@ -477,7 +513,7 @@ fun DayEntryModifyScreen(
                     scope.launch { snackbarHostState.showSnackbar("Amount must be greater than zero") }
                     return@LedgerDetailEntryDialog
                 }
-                val id = selectedLedgerDetail!!.id
+                val id = selectedLedgerDetail!!.ledger_details_id
                 entriesState[id] = entriesState[id]?.copy(
                     purpose = remark,
                     amount_in = if (isPayment) 0.0 else amount,
@@ -551,11 +587,17 @@ fun LedgerDetailEntryDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = isPayment, onClick = { isPayment = true })
-                    Text("Payment")
+                    RadioButton(selected = isPayment, onClick = { isPayment = true }, colors = RadioButtonDefaults.colors(
+                        selectedColor = Color.Red,
+                        unselectedColor =  Color.White
+                    ))
+                    Text("Payment", color = Color.Red)
                     Spacer(Modifier.width(16.dp))
-                    RadioButton(selected = !isPayment, onClick = { isPayment = false })
-                    Text("Receipt")
+                    RadioButton(selected = !isPayment, onClick = { isPayment = false },colors = RadioButtonDefaults.colors(
+                        selectedColor = SecondaryGreen,
+                        unselectedColor =  Color.White
+                    ))
+                    Text("Receipt", color = SecondaryGreen)
                 }
             }
         }

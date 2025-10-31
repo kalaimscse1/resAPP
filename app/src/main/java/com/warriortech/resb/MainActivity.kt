@@ -156,6 +156,7 @@ import com.warriortech.resb.screens.reports.KotReportScreen
 import com.warriortech.resb.screens.reports.PaidBillsScreen
 import com.warriortech.resb.screens.QuickBillScreen
 import com.warriortech.resb.screens.SplashScreen
+import com.warriortech.resb.screens.accounts.reports.DayBookReportScreen
 import com.warriortech.resb.screens.accounts.reports.DayEntryReportScreen
 import com.warriortech.resb.screens.accounts.transaction.DayEntryModifyScreen
 import com.warriortech.resb.screens.accounts.transaction.DayEntryScreen
@@ -184,15 +185,6 @@ class MainActivity : ComponentActivity() {
         super.onConfigurationChanged(newConfig)
         LocaleHelper.onAttach(this)
         recreate()
-    }
-
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            onVolumeUpPressed?.invoke()
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
     }
 
     @Inject
@@ -285,7 +277,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             } else {
                                 navController.navigate(route) {
-                                    popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        inclusive = false
+                                    }
                                     launchSingleTop = true
                                 }
 //                                (context as? ComponentActivity)?.finish()
@@ -380,21 +374,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/**
- * Main navigation composable that sets up the app's navigation graph.
- * * @param drawerState The state of the navigation drawer.
- * * @param navController The NavHostController for managing navigation.
- * * This function defines the navigation structure of the app, including all screens and their transitions.
- * * It handles user authentication, table selection, menu navigation, billing, and various settings.
- * * It also manages the state of selected tables, takeaway options, order details, and user login status.
- */
-@Composable
-fun AuthNavigation(
-    navController: NavHostController,
-    sessionManager: SessionManager
-){
-
-}
 @Composable
 fun AppNavigation(
     drawerState: DrawerState,
@@ -404,11 +383,8 @@ fun AppNavigation(
     var selectedTable by remember { mutableStateOf<Table?>(null) }
     var isTakeaway by remember { mutableStateOf("") }
     var selectedItems by remember { mutableStateOf(listOf<TblOrderDetailsResponse>()) }
-    var isLoggedIn by remember { mutableStateOf(false) }
-    var selectedOrderId by remember { mutableStateOf<String?>(null) }
     var kotRes by remember { mutableStateOf<KotResponse?>(null) }
     var selecteItems by remember { mutableStateOf<Map<TblMenuItemResponse, Int>>(mutableMapOf()) }
-    val waiter = sessionManager.getUser()?.role ?: ""
 
     // Check subscription status
     LaunchedEffect(Unit) {
@@ -429,7 +405,6 @@ fun AppNavigation(
                 onSplashFinished = {
                     val isLoggedInPref = sessionManager.getUserLogin()
                     if (isLoggedInPref) {
-                        isLoggedIn = true
                         if (sessionManager.getUser()?.role == "WAITER") {
                             navController.navigate("selects") {
                                 popUpTo("splash") { inclusive = true }
@@ -451,7 +426,6 @@ fun AppNavigation(
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
-                    isLoggedIn = true
                     if (sessionManager.getUser()?.role == "WAITER") {
                         navController.navigate("selects") {
                             popUpTo("splash") { inclusive = true }
@@ -496,7 +470,6 @@ fun AppNavigation(
                 drawerState = drawerState,
                 onBillPlaced = { items, orderId ->
                     selectedItems = items
-                    selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}")
                 },
                 navController = navController,
@@ -518,7 +491,6 @@ fun AppNavigation(
                 drawerState = drawerState,
                 onBillPlaced = { items, orderId ->
                     selectedItems = items
-                    selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}")
                 },
                 navController = navController,
@@ -566,7 +538,6 @@ fun AppNavigation(
                 drawerState = drawerState,
                 onNavigateToBilling = { items, orderId ->
                     selectedItems = items
-                    selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}") {
                         popUpTo("orders") { inclusive = true }
                     }
@@ -649,7 +620,6 @@ fun AppNavigation(
                 onBackPressed = { navController.popBackStack() },
                 onProceedToBilling = { items, orderId ->
                     selectedItems = items
-                    selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}")
                 },
                 drawerState = drawerState,
@@ -662,7 +632,6 @@ fun AppNavigation(
                 onBackPressed = { navController.popBackStack() },
                 onProceedToBilling = { items, orderId ->
                     selectedItems = items
-                    selectedOrderId = orderId
                     navController.navigate("billing_screen/${orderId}")
                 },
                 drawerState = drawerState
@@ -916,12 +885,12 @@ fun AppNavigation(
                 navController = navController
             )
         }
-        composable("day_entry_report"){
+        composable("day_entry_report") {
             DayEntryReportScreen(
                 drawerState = drawerState
             )
         }
-        composable("modify_day_entry/{entry_no}") {backStackEntry ->
+        composable("modify_day_entry/{entry_no}") { backStackEntry ->
             val entry_no = backStackEntry.arguments?.getString("entry_no") ?: ""
             DayEntryModifyScreen(
                 drawerState = drawerState,
@@ -929,11 +898,17 @@ fun AppNavigation(
                 entryNo = entry_no.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
             )
         }
+
+        composable("day_book_report") {
+            DayBookReportScreen(
+                drawerState = drawerState
+            )
+        }
     }
 }
 
 enum class ExpandedMenu {
-    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS,ACCOUNTSENTRY,ACCOUNTSREPORT
+    NONE, ORDERS, BILLING, MASTERS, REPORTS, GSTREPORTS, ACCOUNTSENTRY, ACCOUNTSREPORT
 }
 
 @Composable
@@ -1493,7 +1468,6 @@ fun DrawerContent(
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                 colors = subMenuColors
                             )
-
                         }
                     }
 
@@ -1507,7 +1481,8 @@ fun DrawerContent(
                             )
                         },
                         selected = currentDestination?.route in listOf(
-                            "day_entry_report"
+                            "day_entry_report",
+                            "day_book_report"
                         ),
                         onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSREPORT) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSREPORT) },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
@@ -1517,7 +1492,7 @@ fun DrawerContent(
                         Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
 
                             NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Day Entry Report") else Text("") },
+                                label = { if (!isCollapsed) Text("Ledger Report") else Text("") },
                                 icon = {
                                     DrawerIcon(
                                         Icons.AutoMirrored.Filled.ListAlt,
@@ -1531,9 +1506,22 @@ fun DrawerContent(
                                 colors = subMenuColors
                             )
 
+                            NavigationDrawerItem(
+                                label = { if (!isCollapsed) Text("Day Book Report") else Text("") },
+                                icon = {
+                                    DrawerIcon(
+                                        Icons.AutoMirrored.Filled.ReceiptLong,
+                                        contentDescription = null,
+                                        isCollapsed
+                                    )
+                                },
+                                selected = currentDestination?.route == "day_book_report",
+                                onClick = { onDestinationClicked("day_book_report") },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                colors = subMenuColors
+                            )
                         }
                     }
-
                 }
 
                 // 🔹 Settings (admin only)

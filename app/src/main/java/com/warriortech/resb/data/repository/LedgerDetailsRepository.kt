@@ -10,9 +10,9 @@ class LedgerDetailsRepository @Inject constructor(
     private val apiService: ApiService,
     private val sessionManager: SessionManager
 ){
-    suspend fun getLedgerDetails():List<TblLedgerDetailsIdResponse>?{
+    suspend fun getLedgerDetails(fromDate: String,toDate: String):List<TblLedgerDetailsIdResponse>?{
         return try {
-            apiService.getLedgerdetails(sessionManager.getCompanyCode() ?: "").body()
+            apiService.getLedgerdetails(sessionManager.getCompanyCode() ?: "",fromDate,toDate).body()
         }catch (e:Exception){
             null
         }
@@ -66,6 +66,13 @@ class LedgerDetailsRepository @Inject constructor(
         }
     }
 
+    suspend fun deleteByEntryNo(entryNo: String):Int?{
+        return try {
+            apiService.deleteByEntryNo(entryNo,sessionManager.getCompanyCode()?:"").body()
+        }catch (e:Exception){
+            null
+        }
+    }
 
 
     suspend fun getEntryNo():Map<String, String>{
@@ -79,14 +86,28 @@ class LedgerDetailsRepository @Inject constructor(
         }
     }
 
-    suspend fun getLedgerDetailsById(ledgerId:Long) : List<TblLedgerDetailsIdResponse>{
+    suspend fun getLedgerDetailsById(ledgerId:Long,fromDate: String,toDate: String) : List<TblLedgerDetailsIdResponse>{
         return try {
             apiService.getByLedgerId(
                 ledgerId,
-                sessionManager.getCompanyCode()?:""
+                sessionManager.getCompanyCode()?:"",
+                fromDate,
+                toDate
             ).body()!!
         }catch (e: Exception){
             emptyList()
+        }
+    }
+
+    suspend fun getOpeningBalance(fromDate: String,ledgerId: Long) : Map<String, Double>{
+        return try {
+            apiService.getOpeningBalance(
+                fromDate,
+                ledgerId,
+                sessionManager.getCompanyCode()?:""
+            ).body()!!
+        }catch (e: Exception) {
+            emptyMap()
         }
     }
 }

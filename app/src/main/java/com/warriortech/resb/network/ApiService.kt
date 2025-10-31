@@ -1114,7 +1114,9 @@ interface ApiService {
 
     @GET("ledger/transaction/getLedgerDetailsId")
     suspend fun getLedgerdetails(
-        @Header("X-Tenant-ID") tenantId: String
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
     ): Response<List<TblLedgerDetailsIdResponse>>
 
     @POST("ledger/transaction/addLedgerDetailsId")
@@ -1152,7 +1154,9 @@ interface ApiService {
     @GET("ledger/transaction/findById/{id}")
     suspend fun getByLedgerId(
         @Path("id") ledgerId: Long,
-        @Header("X-Tenant-ID") tenantId: String
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
     ) : Response<List<TblLedgerDetailsIdResponse>>
 
     @POST("ledger/transaction/addAllLedgerDetailsId")
@@ -1173,4 +1177,16 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ) : Response<List<TblLedgerDetailsIdResponse>>
 
+    @DELETE("ledger/transaction/deleteByEntryNo/{entry_no}")
+    suspend fun deleteByEntryNo(
+        @Path("entry_no") entryNo: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<Int>
+
+    @GET("ledger/transaction/getOpeningBalance/{fromDate}/{ledger_id}")
+    suspend fun getOpeningBalance(
+        @Path("fromDate") counterId: String,
+        @Path("ledger_id") voucherType: Long,
+        @Header("X-Tenant-ID") tenantId: String
+    ) : Response<Map<String, Double>>
 }

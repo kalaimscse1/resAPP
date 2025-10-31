@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
@@ -46,6 +48,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHostState
@@ -88,6 +91,7 @@ import com.warriortech.resb.model.TblLedgerDetailIdRequest
 import com.warriortech.resb.model.TblLedgerDetails
 import com.warriortech.resb.screens.ActionButton
 import com.warriortech.resb.screens.ClearDialog
+import com.warriortech.resb.ui.components.GradientFloatingActionButton
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.ResbTypography
@@ -163,22 +167,8 @@ fun DayEntryScreen(
     var showLedgerDetailDialog by remember { mutableStateOf(false) }
     var selectedLedgerDetail by remember { mutableStateOf<TblLedgerDetailIdRequest?>(null) }
 
-
-    val context = LocalContext.current as? MainActivity
     var showDropdown by remember { mutableStateOf(false) }
 
-    // Register callback
-    LaunchedEffect(Unit) {
-        context?.onVolumeUpPressed = {
-            showDropdown = true
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            context?.onVolumeUpPressed = null
-        }
-    }
 
     LaunchedEffect(transactionState) {
         when (val state = transactionState) {
@@ -230,14 +220,10 @@ fun DayEntryScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showDropdown = true }
-            ) {
-                Icon(
-                    Icons.Default.Edit, contentDescription = "Modify",
-                    tint = SurfaceLight
-                )
-            }
+            GradientFloatingActionButton(
+                onClick = { showDropdown = true },
+                icon = Icons.Default.Search,
+            )
         },
         bottomBar = {
             BottomAppBar(
@@ -308,27 +294,26 @@ fun DayEntryScreen(
                     "LEDGER",
                     modifier = Modifier.weight(3f),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     "REMARKS",
-                    modifier = Modifier.weight(2f),
+                    modifier = Modifier.weight(3f),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     "DEBIT",
                     modifier = Modifier.weight(2f),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.End
                 )
                 Text(
                     "CREDIT",
                     modifier = Modifier.weight(2f),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.End
                 )
             }
@@ -373,7 +358,7 @@ fun DayEntryScreen(
                                 maxLines = 1,
                                 fontSize = 12.sp,
                                 modifier = Modifier.weight(2f),
-                                textAlign = TextAlign.End
+                                textAlign = TextAlign.Center
                             )
                             Text(
                                 entry.amount_out.toString(),
@@ -412,7 +397,12 @@ fun DayEntryScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        "Total: ${totals.debit + totals.credit}",
+                        "Credit: ${totals.credit}",
+                        color = SurfaceLight,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        "Debit: ${totals.debit}",
                         color = SurfaceLight,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -457,20 +447,21 @@ fun DayEntryScreen(
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(3),
                             modifier = Modifier
-                                .fillMaxHeight(0.5f)
-                                .padding(6.dp)
+                                .padding(6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             itemsIndexed(
                                 filtered,
-                                key = { index, product ->"${product.ledger_id}_${product.group.group_nature.g_nature_id}_$index"}
+                                key = { index, product -> "${product.ledger_id}_${product.group.group_nature.g_nature_id}_$index" }
                             ) { _, product ->
                                 Card(
                                     modifier = Modifier
-                                        .padding(4.dp)
                                         .fillMaxWidth()
+                                        .aspectRatio(1f) // makes all cards square (equal width & height)
                                         .clip(MaterialTheme.shapes.medium)
                                         .pointerInput(Unit) {
-                                            detectTapGestures { _ ->
+                                            detectTapGestures {
                                                 selectedLedger = product
                                                 showLedgerDialog = true
                                             }
@@ -480,11 +471,14 @@ fun DayEntryScreen(
                                     colors = CardDefaults.cardColors(containerColor = ghostWhite)
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(5.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                        modifier = Modifier
+                                            .padding(5.dp)
+                                            .fillMaxSize(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
                                     ) {
                                         Text(
-                                            product.ledger_name,
+                                            text = product.ledger_name,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 12.sp,
                                             maxLines = 2,
@@ -703,11 +697,17 @@ fun LedgerEntryDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = isPayment, onClick = { isPayment = true })
-                    Text("Payment")
+                    RadioButton(selected = isPayment, onClick = { isPayment = true }, colors = RadioButtonDefaults.colors(
+                        selectedColor = Color.Red,
+                        unselectedColor =  Color.White
+                    ))
+                    Text("Payment", color = Color.Red)
                     Spacer(Modifier.width(16.dp))
-                    RadioButton(selected = !isPayment, onClick = { isPayment = false })
-                    Text("Receipt")
+                    RadioButton(selected = !isPayment, onClick = { isPayment = false },colors = RadioButtonDefaults.colors(
+                        selectedColor = SecondaryGreen,
+                        unselectedColor =  Color.White
+                    ))
+                    Text("Receipt", color = SecondaryGreen)
                 }
             }
         }
@@ -760,14 +760,12 @@ fun PaymentModeRow(
                                 PaymentMode.UPI -> "UPI"
                                 else -> null
                             }
-
                             if (ledgerName != null) {
                                 val ledger = ledgerList.find { it.ledger_name == ledgerName }
                                 onPartySelected(ledger?.ledger_id ?: 1)
                             } else {
                                 onPartySelected(party ?: 1)
                             }
-
                             onModeChange(mode)
                         }
                         .padding(horizontal = 16.dp, vertical = 8.dp),

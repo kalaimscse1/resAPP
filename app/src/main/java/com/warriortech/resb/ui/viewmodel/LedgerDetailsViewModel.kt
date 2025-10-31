@@ -13,6 +13,7 @@ import com.warriortech.resb.model.TblLedgerDetails
 import com.warriortech.resb.model.TblLedgerDetailsIdResponse
 import com.warriortech.resb.model.TblVoucher
 import com.warriortech.resb.model.TblVoucherResponse
+import com.warriortech.resb.util.getCurrentDateModern
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -100,7 +101,7 @@ class LedgerDetailsViewModel @Inject constructor(
                 val groups = groupRepository.getGroupNatures().orEmpty()
                 val entry = ledgerDetailsRepository.getEntryNo()
                 val vouch = voucherRepository.getVoucherByCounterId("ACCOUNTS")
-                val entries = ledgerDetailsRepository.getLedgerDetails().orEmpty()
+                val entries = ledgerDetailsRepository.getLedgerDetails(getCurrentDateModern(),getCurrentDateModern()).orEmpty()
                 _entryNo.value = entry["entry_no"] ?: ""
                 _ledgerList.value = ledgers
                 _voucher.value = vouch
@@ -195,7 +196,43 @@ class LedgerDetailsViewModel @Inject constructor(
     }
 
     fun deleteLedgerDetailsByEntryNo(entryNo: String) {
+        viewModelScope.launch {
+            try {
+                _transactionState.value = TransactionUiState.Loading
+                val response = ledgerDetailsRepository.deleteByEntryNo(entryNo)
+                if (response != null) {
+                    _transactionState.value =
+                        TransactionUiState.Success("Ledger Details Deleted Successfully")
+                }
+                else{
+                    _transactionState.value =
+                        TransactionUiState.Error("Failed to Delete Ledger Details.")
+                }
+            }catch (e: Exception){
+                _transactionState.value =
+                    TransactionUiState.Error(e.message ?: "Error while delete Ledger Details.")
+            }
+        }
+    }
 
+    fun deleteByLedgerDetailsId(id:Long){
+        viewModelScope.launch {
+            try {
+                _transactionState.value = TransactionUiState.Loading
+                val response = ledgerDetailsRepository.deleteLedgerDetails(id)
+                if (response != null) {
+                    _transactionState.value =
+                        TransactionUiState.Success("Selected Ledger Details Deleted Successfully")
+                }
+                else{
+                    _transactionState.value =
+                        TransactionUiState.Error("Failed to Delete Selected Ledger Details.")
+                }
+            }catch (e: Exception){
+                _transactionState.value =
+                    TransactionUiState.Error(e.message ?: "Error while delete selevted Ledger Details.")
+            }
+        }
     }
 
     fun clear() {
