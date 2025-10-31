@@ -12,6 +12,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.InsertDriveFile
@@ -28,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,38 +68,37 @@ fun MenuItemSettingsScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showAddDialog by remember { mutableStateOf(false) }
-    var editingMenuItem by remember { mutableStateOf<TblMenuItemResponse?>(null) }
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val menus by viewModel.menus.collectAsStateWithLifecycle()
     val menuCategories by viewModel.menuCategories.collectAsStateWithLifecycle()
     val kitchenCategories by viewModel.kitchenCategories.collectAsStateWithLifecycle()
     val taxes by viewModel.taxes.collectAsStateWithLifecycle()
     val units by viewModel.units.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
-    var sucess by remember { mutableStateOf(false) }
-    var failed by remember { mutableStateOf(false) }
-    val currentItemCount = remember(uiState) {
-        when (val state = uiState) {
-            is MenuItemSettingsUiState.Success -> state.menuItems.size
-            else -> 0
-        }
-    }
-    var search by remember { mutableStateOf(false) }
+    val menuItems by viewModel.filteredMenuItems.collectAsStateWithLifecycle() // ✅ updated
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var showAddDialog by remember { mutableStateOf(false) }
+    var editingMenuItem by remember { mutableStateOf<TblMenuItemResponse?>(null) }
+
+    var searchMode by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    val menuItems by viewModel.menuItems.collectAsStateWithLifecycle()
 
+    var success by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
 
+    val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
     }
 
     LaunchedEffect(errorMessage) {
-        if (errorMessage!= null) {
-            if (errorMessage=="Menu item deleted successfully") {
-                sucess = true
+        if (errorMessage != null) {
+            if (errorMessage == "Menu item deleted successfully") {
+                success = true
             } else {
                 failed = true
             }
@@ -107,36 +108,39 @@ fun MenuItemSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("MenuItem Settings", color = SurfaceLight) },
+                title = { Text("Menu Item Settings", color = SurfaceLight) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
                             tint = SurfaceLight
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PrimaryGreen
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PrimaryGreen),
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(
-                            Icons.Default.Add, contentDescription = "Add MenuItem",
-                            tint = SurfaceLight
-                        )
+                        Icon(Icons.Default.Add, contentDescription = "Add", tint = SurfaceLight)
                     }
-
                     IconButton(onClick = {
-                        search = true
+                        if (searchMode) {
+                            // close search mode
+                            searchMode = false
+                            searchQuery = ""
+                            viewModel.searchMenuItems("") // reset full list
+                        } else {
+                            // open search mode
+                            searchMode = true
+                        }
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Search,
+                            imageVector = if (searchMode) Icons.Default.Close else Icons.Default.Search,
                             contentDescription = "Search",
                             tint = SurfaceLight
                         )
                     }
-                },
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -144,67 +148,56 @@ fun MenuItemSettingsScreen(
             BottomAppBar(
                 containerColor = PrimaryGreen,
                 contentColor = SurfaceLight,
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                actions = {
-                    if (uiState is MenuItemSettingsUiState.Success){
-                        Text(
-                            text = "Total: $currentItemCount",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        val menuItems = (uiState as MenuItemSettingsUiState.Success).menuItems
-                        IconButton(onClick = {
-                            ReportExport.menuItemsExportToPdf(
-                                context,
-                                menuItems,
-                                sessionManager = sessionManager
-                            )
-                        }) {
-                            Icon(Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
-                        }
-                        IconButton(onClick = { ReportExport.menuItemsExportToExcel(context, menuItems,sessionManager = sessionManager) }) {
-                            Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
-                        }
-                        IconButton(onClick = {
-                            ReportExport.viewReport(context, "MenuItemsReport.pdf", "application/pdf")
-                        }) {
-                            Icon(Icons.Default.Visibility, contentDescription = "View PDF")
-                        }
-                        IconButton(onClick = {
-                            ReportExport.viewReport(
-                                context,
-                                "MenuItemsReport.xlsx",
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            )
-                        }) {
-                            Icon(Icons.Default.InsertDriveFile, contentDescription = "View Excel")
-                        }
-                    }
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Total: ${menuItems.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = {
+                    ReportExport.menuItemsExportToPdf(context, menuItems, sessionManager)
+                }) {
+                    Icon(Icons.Default.PictureAsPdf, contentDescription = "Export PDF")
                 }
-            )
+                IconButton(onClick = {
+                    ReportExport.menuItemsExportToExcel(context, menuItems, sessionManager)
+                }) {
+                    Icon(Icons.Default.TableChart, contentDescription = "Export Excel")
+                }
+                IconButton(onClick = {
+                    ReportExport.viewReport(context, "MenuItemsReport.pdf", "application/pdf")
+                }) {
+                    Icon(Icons.Default.Visibility, contentDescription = "View PDF")
+                }
+                IconButton(onClick = {
+                    ReportExport.viewReport(
+                        context,
+                        "MenuItemsReport.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                }) {
+                    Icon(Icons.Default.InsertDriveFile, contentDescription = "View Excel")
+                }
+            }
         }
     ) { paddingValues ->
-
         when (val state = uiState) {
             is MenuItemSettingsUiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                ) { CircularProgressIndicator() }
             }
 
             is MenuItemSettingsUiState.Success -> {
-                if (state.menuItems.isEmpty()) {
+                if (menuItems.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            "No menu items available",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Text("No menu items found", style = MaterialTheme.typography.bodyLarge)
                     }
                 } else {
                     LazyColumn(
@@ -214,16 +207,17 @@ fun MenuItemSettingsScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (search){
-                            item{
+                        if (searchMode) {
+                            item {
                                 OutlinedTextField(
                                     value = searchQuery,
                                     onValueChange = {
-                                                    searchQuery = it
-                                                    viewModel.searchMenuItems(searchQuery)
-                                                    },
+                                        searchQuery = it
+                                        viewModel.searchMenuItems(it)
+                                    },
                                     modifier = Modifier
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth()
+                                        .focusRequester(focusRequester),
                                     placeholder = { Text("Search Menu Items") },
                                     leadingIcon = {
                                         Icon(
@@ -231,12 +225,13 @@ fun MenuItemSettingsScreen(
                                             contentDescription = "Search Icon"
                                         )
                                     },
-                                    singleLine = true
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
                                 )
                             }
                         }
 
-                        items(state.menuItems) { menuItem ->
+                        items(menuItems) { menuItem ->
                             MenuItemCard(
                                 menuItem = menuItem,
                                 onEdit = { editingMenuItem = menuItem },
@@ -256,16 +251,16 @@ fun MenuItemSettingsScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Show error message
                     Text(
                         text = state.message,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
         }
 
-
+        // Add/Edit Dialog
         if (showAddDialog || editingMenuItem != null) {
             MenuItemDialog(
                 menuItem = editingMenuItem,
@@ -292,20 +287,21 @@ fun MenuItemSettingsScreen(
             )
         }
 
-        if (sucess) {
+        // Success / Failure Dialogs
+        if (success) {
             SuccessDialogWithButton(
                 title = "Success",
                 description = errorMessage.toString(),
                 paddingValues = paddingValues,
                 onClick = {
-                    sucess = false
+                    success = false
                     viewModel.loadMenuItems()
                     viewModel.clearErrorMessage()
                 }
             )
         }
 
-        if (failed){
+        if (failed) {
             SuccessDialogWithButton(
                 title = "Failure",
                 description = errorMessage.toString(),

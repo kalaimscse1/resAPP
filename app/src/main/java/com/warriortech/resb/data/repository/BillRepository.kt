@@ -72,35 +72,35 @@ class BillRepository @Inject constructor(
         cash: Double = 0.0,
         card: Double = 0.0,
         upi: Double = 0.0,
-        voucherType:String
+        voucherType: String
     ): Flow<Result<TblBillingResponse>> = flow {
         if (billNo != "--") {
             apiService.resetDue(billNo, sessionManager.getCompanyCode() ?: "")
         }
-        if (paymentMethod.name=="DUE" && customer.customer_id == 1L) {
+        if (paymentMethod.name == "DUE" && customer.customer_id == 1L) {
             emit(Result.failure(Exception("Please select a customer for due payment")))
             return@flow
         }
-        val billNo =  if (paymentMethod.name=="DUE") apiService.getBillNoByCounterId(
+        val billNo = if (paymentMethod.name == "DUE") apiService.getBillNoByCounterId(
             sessionManager.getUser()?.counter_id!!,
             "DUE",
             sessionManager.getCompanyCode() ?: ""
-        )else if (voucherType=="DUE")
+        ) else if (voucherType == "DUE")
             apiService.getBillNoByCounterId(
                 sessionManager.getUser()?.counter_id!!,
                 "DUE",
                 sessionManager.getCompanyCode() ?: ""
             )
-            else apiService.getBillNoByCounterId(
+        else apiService.getBillNoByCounterId(
             sessionManager.getUser()?.counter_id!!,
             "BILL",
             sessionManager.getCompanyCode() ?: ""
         )
-        val voucher = if (paymentMethod.name=="DUE") apiService.getVoucherByCounterId(
+        val voucher = if (paymentMethod.name == "DUE") apiService.getVoucherByCounterId(
             sessionManager.getUser()?.counter_id!!,
             sessionManager.getCompanyCode() ?: "",
             "DUE"
-        ).body()else if(voucherType=="DUE")
+        ).body() else if (voucherType == "DUE")
             apiService.getVoucherByCounterId(
                 sessionManager.getUser()?.counter_id!!,
                 sessionManager.getCompanyCode() ?: "",
@@ -108,11 +108,11 @@ class BillRepository @Inject constructor(
             ).body()
         else
             apiService.getVoucherByCounterId(
-            sessionManager.getUser()?.counter_id!!,
-            sessionManager.getCompanyCode()?: "",
-            "BILL"
-        ).body()
-        var order : List<TblOrderDetailsResponse> = emptyList()
+                sessionManager.getUser()?.counter_id!!,
+                sessionManager.getCompanyCode() ?: "",
+                "BILL"
+            ).body()
+        var order: List<TblOrderDetailsResponse> = emptyList()
         val orderMaster = apiService.getOpenOrderDetailsForTable(
             orderMasterId,
             sessionManager.getCompanyCode() ?: ""

@@ -216,10 +216,6 @@ class BillingViewModel @Inject constructor(
             val order = orderRepository.getOrdersByOrderId(orderMasterId)
             if (order.body() != null) {
                 val orderDetailsResponse = order.body()!!
-
-                // This function sets billing details from an existing order response
-                // Set billing details from TblOrderDetailsResponse
-
                 _orderId.value = orderMasterId
                 _originalOrderDetails.value = orderDetailsResponse
                 _filteredOrderDetails.value = orderDetailsResponse
@@ -263,10 +259,8 @@ class BillingViewModel @Inject constructor(
                         actual_rate = it.actual_rate
                     )
                 }
-
                 val itemsMap = menuItems.associateWith { it.qty }.toMutableMap()
                 var tableStatus = "TABLE" // Default
-
                 val subtotal = orderDetailsResponse.sumOf { it.total }
                 val taxAmount = orderDetailsResponse.sumOf { it.tax_amount }
                 val cessAmount = orderDetailsResponse.sumOf { if (it.cess > 0) it.cess else 0.0 }
@@ -274,7 +268,6 @@ class BillingViewModel @Inject constructor(
                     orderDetailsResponse.sumOf { if (it.cess_specific > 0) it.cess_specific else 0.0 }
                 val totalAmount =
                     subtotal + taxAmount + cessAmount + cessSpecific + _uiState.value.otherChrages
-
                 if (cessAmount > 0.0) {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -304,12 +297,10 @@ class BillingViewModel @Inject constructor(
                         )
                     }
                 }
-
             } else {
                 _uiState.update { it.copy(errorMessage = "Order not found") }
             }
         }
-
     }
 
     fun placeOrder(item: Map<TblMenuItemResponse, Int>) {
@@ -481,8 +472,7 @@ class BillingViewModel @Inject constructor(
         }
     }
 
-
-    fun processPayment(voucherType:String) {
+    fun processPayment(voucherType: String) {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
         val amount = if (paymentMethod?.name == "OTHERS") {
@@ -498,7 +488,6 @@ class BillingViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Payment amount must be greater than zero.") }
             return
         }
-
         _uiState.update {
             it.copy(
                 paymentProcessingState = PaymentProcessingState.Processing,
@@ -506,7 +495,6 @@ class BillingViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-
             val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print == true
             val amount = if (paymentMethod.name == "CASH") {
                 if (currentState.cashAmount == 0.0)
@@ -587,7 +575,6 @@ class BillingViewModel @Inject constructor(
                         )
                         val data = currentState
                         val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
-
                         if (isReceipt) {
                             printBill(billDetails, data, amount, paymentMethod)
                         } else {
@@ -614,7 +601,6 @@ class BillingViewModel @Inject constructor(
                                     )
                                 )
                             }
-
                         }
                         Log.d("Payment", "Payment successful")
                     },

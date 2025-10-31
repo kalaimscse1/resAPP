@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -27,11 +29,10 @@ import com.warriortech.resb.util.CurrencySettings
 fun BillEditScreen(
     navController: NavHostController,
     viewModel: PaidBillsViewModel = hiltViewModel(),
-    bill_no : String
+    billNo: String
 ) {
     val selectedBill by viewModel.selectedBill.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
     var editedNote by remember { mutableStateOf("") }
     var editedDiscountAmt by remember { mutableStateOf("") }
     var editedOthersAmt by remember { mutableStateOf("") }
@@ -44,16 +45,20 @@ fun BillEditScreen(
         }
     }
 
+    LaunchedEffect(billNo) {
+        viewModel.selectBill(billNo)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Bill #$bill_no") },
+                title = { Text("Edit Bill #${billNo}") },
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.clearSelection()
                         navController.navigateUp()
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -80,125 +85,126 @@ fun BillEditScreen(
                 .background(SurfaceLight)
                 .verticalScroll(rememberScrollState())
         ) {
-            selectedBill?.let { bill ->
-                Card(
+            if (selectedBill == null) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                        .height(120.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
+                    Text("No Bill found")
+                }
+            } else {
+                selectedBill?.let { bill ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        Text(
-                            text = "Bill Information",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryGreen
-                        )
-
-                        ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                        BillInfoRow("Bill Number", bill.bill_no)
-                        BillInfoRow("Date", "${bill.bill_date} ${bill.bill_create_time}")
-                        BillInfoRow("Customer", bill.customer.customer_name)
-                        BillInfoRow("Staff", bill.staff.staff_name)
-                        BillInfoRow("Order Amount", CurrencySettings.format(bill.order_amt))
-                        BillInfoRow("Tax Amount", CurrencySettings.format(bill.tax_amt))
-                        BillInfoRow("Grand Total", CurrencySettings.format(bill.grand_total))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Bill Information",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = PrimaryGreen
+                            )
+                            ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            BillInfoRow("Bill Number", bill.bill_no)
+                            BillInfoRow("Date", "${bill.bill_date} ${bill.bill_create_time}")
+                            BillInfoRow("Customer", bill.customer.customer_name)
+                            BillInfoRow("Staff", bill.staff.staff_name)
+                            BillInfoRow("Order Amount", CurrencySettings.format(bill.order_amt))
+                            BillInfoRow("Tax Amount", CurrencySettings.format(bill.tax_amt))
+                            BillInfoRow("Grand Total", CurrencySettings.format(bill.grand_total))
+                        }
                     }
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(horizontal = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        Text(
-                            text = "Payment Details",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryGreen
-                        )
-
-                        ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                        BillInfoRow("Cash", CurrencySettings.format(bill.cash))
-                        BillInfoRow("Card", CurrencySettings.format(bill.card))
-                        BillInfoRow("UPI", CurrencySettings.format(bill.upi))
-                        BillInfoRow("Received Amount", CurrencySettings.format(bill.received_amt))
-                        BillInfoRow("Change", CurrencySettings.format(bill.change))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Payment Details",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = PrimaryGreen
+                            )
+                            ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            BillInfoRow("Cash", CurrencySettings.format(bill.cash))
+                            BillInfoRow("Card", CurrencySettings.format(bill.card))
+                            BillInfoRow("UPI", CurrencySettings.format(bill.upi))
+                            BillInfoRow(
+                                "Received Amount",
+                                CurrencySettings.format(bill.received_amt)
+                            )
+                            BillInfoRow("Change", CurrencySettings.format(bill.change))
+                        }
                     }
-                }
-
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        Text(
-                            text = "Editable Fields",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryGreen
-                        )
-
-                        ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                        OutlinedTextField(
-                            value = editedDiscountAmt,
-                            onValueChange = { editedDiscountAmt = it },
-                            label = { Text("Discount Amount") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = editedOthersAmt,
-                            onValueChange = { editedOthersAmt = it },
-                            label = { Text("Others Amount") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = editedNote,
-                            onValueChange = { editedNote = it },
-                            label = { Text("Note") },
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = 3
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Editable Fields",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = PrimaryGreen
+                            )
+                            ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            OutlinedTextField(
+                                value = editedDiscountAmt,
+                                onValueChange = { editedDiscountAmt = it },
+                                label = { Text("Discount Amount") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = editedOthersAmt,
+                                onValueChange = { editedOthersAmt = it },
+                                label = { Text("Others Amount") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = editedNote,
+                                onValueChange = { editedNote = it },
+                                label = { Text("Note") },
+                                modifier = Modifier.fillMaxWidth(),
+                                maxLines = 3
+                            )
+                        }
                     }
-                }
-
-                Button(
-                    onClick = {
-                        navController.navigateUp()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
-                ) {
-                    Text("Save Changes", color = Color.White)
+                    Button(
+                        onClick = {
+                            navController.navigateUp()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
+                    ) {
+                        Text("Save Changes", color = Color.White)
+                    }
                 }
             }
         }

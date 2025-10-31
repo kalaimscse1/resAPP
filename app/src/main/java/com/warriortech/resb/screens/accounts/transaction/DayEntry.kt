@@ -176,6 +176,7 @@ fun DayEntryScreen(
             is LedgerDetailsViewModel.TransactionUiState.Error -> {
                 scope.launch { snackbarHostState.showSnackbar("Entry Failed To Add") }
             }
+
             else -> Unit
         }
     }
@@ -412,9 +413,9 @@ fun DayEntryScreen(
             when (val state = ledgerDetailsState) {
                 is LedgerDetailsViewModel.LedgerDetailsUiState.Success -> {
                     val filtered =
-                        when{
+                        when {
                             selectedCategory == "ALL" -> state.ledgers
-                            selectedCategory.isNotEmpty()-> state.ledgers.filter { it.group.group_nature.g_nature_name == selectedCategory }
+                            selectedCategory.isNotEmpty() -> state.ledgers.filter { it.group.group_nature.g_nature_name == selectedCategory }
                             else -> state.ledgers
                         }
                     if (filtered.isEmpty()) {
@@ -430,7 +431,8 @@ fun DayEntryScreen(
                         // Category tabs
                         if (categories.isNotEmpty()) {
                             val cats = categories
-                            val selectedIndex = cats.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0
+                            val selectedIndex =
+                                cats.indexOf(selectedCategory).takeIf { it >= 0 } ?: 0
                             ScrollableTabRow(
                                 selectedTabIndex = selectedIndex,
                                 containerColor = SecondaryGreen,
@@ -440,13 +442,15 @@ fun DayEntryScreen(
                                     Tab(
                                         selected = selectedCategory == cat,
                                         onClick = { selectedCategory = cat },
-                                        text = { Text(cat) })
+                                        text = { Text(cat) }
+                                    )
                                 }
                             }
                         }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(3),
                             modifier = Modifier
+                                .fillMaxHeight(0.5f)
                                 .padding(6.dp),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -594,7 +598,7 @@ fun DayEntryScreen(
         )
     }
 
-    if (showDropdown){
+    if (showDropdown) {
         AlertDialog(
             onDismissRequest = { showDropdown = false },
             confirmButton = {
@@ -607,7 +611,7 @@ fun DayEntryScreen(
             text = {
                 StringDropdown(
                     options = ledgerDetails,
-                    selectedOption = ledgerDetails.firstOrNull() ,
+                    selectedOption = ledgerDetails.firstOrNull(),
                     onOptionSelected = {
                         navController.navigate("modify_day_entry/{$it}")
                     },
@@ -616,7 +620,7 @@ fun DayEntryScreen(
             }
         )
     }
-    if (showLedgerDetailDialog && selectedLedgerDetail != null){
+    if (showLedgerDetailDialog && selectedLedgerDetail != null) {
         LedgerDetailEntryDialog(
             ledgerList = ledgerList,
             ledger = selectedLedgerDetail!!,
@@ -697,16 +701,24 @@ fun LedgerEntryDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = isPayment, onClick = { isPayment = true }, colors = RadioButtonDefaults.colors(
-                        selectedColor = Color.Red,
-                        unselectedColor =  Color.White
-                    ))
+                    RadioButton(
+                        selected = isPayment,
+                        onClick = { isPayment = true },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color.Red,
+                            unselectedColor = Color.White
+                        )
+                    )
                     Text("Payment", color = Color.Red)
                     Spacer(Modifier.width(16.dp))
-                    RadioButton(selected = !isPayment, onClick = { isPayment = false },colors = RadioButtonDefaults.colors(
-                        selectedColor = SecondaryGreen,
-                        unselectedColor =  Color.White
-                    ))
+                    RadioButton(
+                        selected = !isPayment,
+                        onClick = { isPayment = false },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = SecondaryGreen,
+                            unselectedColor = Color.White
+                        )
+                    )
                     Text("Receipt", color = SecondaryGreen)
                 }
             }

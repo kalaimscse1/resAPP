@@ -59,8 +59,16 @@ class PaidBillsViewModel @Inject constructor(
         }
     }
 
-    fun selectBill(bill: TblBillingResponse) {
-        _selectedBill.value = bill
+    fun selectBill(bill: String) {
+        viewModelScope.launch {
+            try {
+              val res =  billRepository.getPaymentByBillNo(bill)
+                _selectedBill.value = res
+            }catch (e: Exception){
+
+            }
+        }
+
     }
 
     fun deleteBill(billNo: String) {
@@ -157,7 +165,7 @@ class PaidBillsViewModel @Inject constructor(
         }
     }
 
-    fun sendBillViaWhatsApp() {
+    fun sendBillViaWhatsApp(billNo:String) {
 
     }
 

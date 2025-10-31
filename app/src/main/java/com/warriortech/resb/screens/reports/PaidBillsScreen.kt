@@ -232,19 +232,17 @@ fun PaidBillsScreen(
                                 PaidBillItem(
                                     bill = bill,
                                     onEditClick = {
-                                        // Navigate to edit screen or show edit dialog
-                                        viewModel.selectBill(bill)
                                         navController.navigate("bill_edit/${bill.bill_no}")
                                     },
                                     onDeleteClick = {
                                         billToDelete = bill
                                         showDeleteDialog = true
                                     },
-                                    onPrintClick = { bill_no ->
-                                        viewModel.printBill( bill_no)
+                                    onPrintClick = { billNo ->
+                                        viewModel.printBill( billNo)
                                     },
-                                    onWhatsappClick = { bill_no ->
-                                        viewModel.sendBillViaWhatsApp()
+                                    onWhatsappClick = { billNo ->
+                                        viewModel.sendBillViaWhatsApp(billNo)
                                     }
                                 )
                             }

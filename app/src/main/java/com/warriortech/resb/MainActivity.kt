@@ -845,7 +845,7 @@ fun AppNavigation(
             val bill_no = backStackEntry.arguments?.getString("bill_no") ?: ""
             BillEditScreen(
                 navController = navController,
-                bill_no = bill_no
+                billNo = bill_no
             )
         }
         composable("due") {

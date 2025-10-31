@@ -108,6 +108,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.collections.indexOf
+
 @SuppressLint("ConfigurationScreenWidthHeight", "ContextCastToActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -186,6 +187,7 @@ fun DayEntryModifyScreen(
             is LedgerDetailsViewModel.TransactionUiState.Error -> {
                 scope.launch { snackbarHostState.showSnackbar("Failed: ${state.message}") }
             }
+
             else -> Unit
         }
     }
@@ -312,7 +314,7 @@ fun DayEntryModifyScreen(
 
                 is LedgerDetailsViewModel.ModifyUiState.Success -> {
                     val res = state.ledgerDetails
-                    res.forEach { item->
+                    res.forEach { item ->
                         entriesState[item.ledger_details_id] = TblLedgerDetailIdRequest(
                             ledger_details_id = item.ledger_details_id,
                             id = item.ledger.ledger_id.toLong(),
@@ -373,8 +375,8 @@ fun DayEntryModifyScreen(
                         items(entriesState.keys.toList(), key = { it }) { ledgerId ->
                             val entry = entriesState[ledgerId] ?: return@items
                             val ledgerName =
-                                ledgerList.find { it.ledger_id.toLong() == entry.id }?.ledger_name ?: ""
-
+                                ledgerList.find { it.ledger_id.toLong() == entry.id }?.ledger_name
+                                    ?: ""
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier
@@ -392,7 +394,11 @@ fun DayEntryModifyScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(ledgerName, modifier = Modifier.weight(3f), fontSize = 12.sp)
-                                Text(entry.purpose, modifier = Modifier.weight(3f), textAlign = TextAlign.Center)
+                                Text(
+                                    entry.purpose,
+                                    modifier = Modifier.weight(3f),
+                                    textAlign = TextAlign.Center
+                                )
                                 Text(
                                     entry.amount_out.toString(),
                                     modifier = Modifier.weight(2f),
@@ -409,7 +415,6 @@ fun DayEntryModifyScreen(
                             ModernDivider(color = Color.LightGray, thickness = 0.5.dp)
                         }
                     }
-
                     // Totals
                     Row(
                         modifier = Modifier
@@ -452,7 +457,7 @@ fun DayEntryModifyScreen(
             onDismissRequest = { showDeleteDialog = null },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.deleteByLedgerDetailsId(showDeleteDialog?:0)
+                    viewModel.deleteByLedgerDetailsId(showDeleteDialog ?: 0)
                     entriesState.remove(showDeleteDialog)
                     showDeleteDialog = null
                 }) { Text("Delete") }
@@ -503,7 +508,7 @@ fun DayEntryModifyScreen(
             }
         )
     }
-    if (showLedgerDetailDialog && selectedLedgerDetail != null){
+    if (showLedgerDetailDialog && selectedLedgerDetail != null) {
         LedgerDetailEntryDialog(
             ledgerList = ledgerList,
             ledger = selectedLedgerDetail!!,
@@ -528,7 +533,7 @@ fun DayEntryModifyScreen(
 
 @Composable
 fun LedgerDetailEntryDialog(
-    ledgerList : List<TblLedgerDetails>,
+    ledgerList: List<TblLedgerDetails>,
     ledger: TblLedgerDetailIdRequest,
     onDismiss: () -> Unit,
     onAdd: (remark: String, amount: Double, isPayment: Boolean) -> Unit
@@ -536,8 +541,8 @@ fun LedgerDetailEntryDialog(
     val ledgerName =
         ledgerList.find { it.ledger_id.toLong() == ledger.id }?.ledger_name ?: ""
     var remark by remember { mutableStateOf(ledger.purpose) }
-    var amount by remember { mutableStateOf(if (ledger.amount_in>0)ledger.amount_in.toString() else ledger.amount_out.toString()) }
-    var isPayment by remember { mutableStateOf(if (ledger.amount_in>0)false else true) }
+    var amount by remember { mutableStateOf(if (ledger.amount_in > 0) ledger.amount_in.toString() else ledger.amount_out.toString()) }
+    var isPayment by remember { mutableStateOf(if (ledger.amount_in > 0) false else true) }
 
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -587,16 +592,24 @@ fun LedgerDetailEntryDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = isPayment, onClick = { isPayment = true }, colors = RadioButtonDefaults.colors(
-                        selectedColor = Color.Red,
-                        unselectedColor =  Color.White
-                    ))
+                    RadioButton(
+                        selected = isPayment,
+                        onClick = { isPayment = true },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color.Red,
+                            unselectedColor = Color.White
+                        )
+                    )
                     Text("Payment", color = Color.Red)
                     Spacer(Modifier.width(16.dp))
-                    RadioButton(selected = !isPayment, onClick = { isPayment = false },colors = RadioButtonDefaults.colors(
-                        selectedColor = SecondaryGreen,
-                        unselectedColor =  Color.White
-                    ))
+                    RadioButton(
+                        selected = !isPayment,
+                        onClick = { isPayment = false },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = SecondaryGreen,
+                            unselectedColor = Color.White
+                        )
+                    )
                     Text("Receipt", color = SecondaryGreen)
                 }
             }

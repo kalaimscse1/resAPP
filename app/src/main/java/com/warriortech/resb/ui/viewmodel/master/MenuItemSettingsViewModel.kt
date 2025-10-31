@@ -6,13 +6,7 @@ import com.warriortech.resb.data.repository.MenuCategoryRepository
 import com.warriortech.resb.data.repository.MenuItemRepository
 import com.warriortech.resb.data.repository.MenuRepository
 import com.warriortech.resb.data.repository.TaxRepository
-import com.warriortech.resb.model.KitchenCategory
-import com.warriortech.resb.model.Menu
-import com.warriortech.resb.model.MenuCategory
-import com.warriortech.resb.model.Tax
-import com.warriortech.resb.model.TblMenuItemRequest
-import com.warriortech.resb.model.TblMenuItemResponse
-import com.warriortech.resb.model.TblUnit
+import com.warriortech.resb.model.*
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.screens.settings.MenuItemSettingsUiState
 import com.warriortech.resb.util.CurrencySettings
@@ -33,10 +27,11 @@ class MenuItemSettingsViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow<MenuItemSettingsUiState>(MenuItemSettingsUiState.Loading)
+    // UI state
+    private val _uiState = MutableStateFlow<MenuItemSettingsUiState>(MenuItemSettingsUiState.Loading)
     val uiState: StateFlow<MenuItemSettingsUiState> = _uiState.asStateFlow()
 
+    // Master data
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
     val menus: StateFlow<List<Menu>> = _menus.asStateFlow()
 
@@ -55,36 +50,39 @@ class MenuItemSettingsViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    // ✅ Separate state for all items and filtered items
     private val _menuItems = MutableStateFlow<List<TblMenuItemResponse>>(emptyList())
     val menuItems: StateFlow<List<TblMenuItemResponse>> = _menuItems.asStateFlow()
 
-
+    private val _filteredMenuItems = MutableStateFlow<List<TblMenuItemResponse>>(emptyList())
+    val filteredMenuItems: StateFlow<List<TblMenuItemResponse>> = _filteredMenuItems.asStateFlow()
 
     init {
         CurrencySettings.update(
             symbol = sessionManager.getRestaurantProfile()?.currency ?: "",
             decimals = sessionManager.getRestaurantProfile()?.decimal_point?.toInt() ?: 2
         )
-
     }
 
     fun clearErrorMessage() {
         _errorMessage.value = null
     }
 
+    // ✅ Improved search using full list reference
     fun searchMenuItems(query: String) {
-        val currentState = _uiState.value
-        if (currentState is MenuItemSettingsUiState.Success) {
-            val filteredItems = if (query.isEmpty())
-                currentState.menuItems
-                else
-                currentState.menuItems.filter {
+        val allItems = _menuItems.value
+        val filtered = if (query.isBlank()) {
+            allItems
+        } else {
+            allItems.filter {
                 it.menu_item_name.contains(query, ignoreCase = true)
+                        || it.menu_item_name_tamil.contains(query, ignoreCase = true)
             }
-            _uiState.value = MenuItemSettingsUiState.Success(filteredItems)
         }
+        _filteredMenuItems.value = filtered
     }
 
+    // ✅ Load all menu items and supporting data
     fun loadMenuItems() {
         viewModelScope.launch {
             try {
@@ -104,7 +102,7 @@ class MenuItemSettingsViewModel @Inject constructor(
                 val kitchenCategories = kitchenCategoriesDeferred.await()
                 val units = unitsDeferred.await()
 
-                // Update states
+                // Update master data
                 _menus.value = menus
                 _menuCategories.value = menuCategories
                 _taxes.value = taxes
@@ -112,8 +110,10 @@ class MenuItemSettingsViewModel @Inject constructor(
                 _units.value = units
 
                 // Collect menu items last
-                menuItemRepository.getAllMenuItems().collect {
-                    _uiState.value = MenuItemSettingsUiState.Success(it)
+                menuItemRepository.getAllMenuItems().collect { items ->
+                    _menuItems.value = items
+                    _filteredMenuItems.value = items // Default view = all items
+                    _uiState.value = MenuItemSettingsUiState.Success(items)
                 }
 
             } catch (e: Exception) {
@@ -123,7 +123,7 @@ class MenuItemSettingsViewModel @Inject constructor(
         }
     }
 
-
+    // ✅ Add item
     fun addMenuItem(menuItem: TblMenuItemRequest) {
         viewModelScope.launch {
             try {
@@ -136,6 +136,7 @@ class MenuItemSettingsViewModel @Inject constructor(
         }
     }
 
+    // ✅ Update item
     fun updateMenuItem(menuItem: TblMenuItemRequest) {
         viewModelScope.launch {
             try {
@@ -148,32 +149,18 @@ class MenuItemSettingsViewModel @Inject constructor(
         }
     }
 
+    // ✅ Delete item
     fun deleteMenuItem(menuItemId: Int) {
         viewModelScope.launch {
             try {
                 val response = menuItemRepository.deleteMenuItem(menuItemId)
-                when(response.code()){
-                    in 200..299 ->{
+                when (response.code()) {
+                    in 200..299 -> {
                         loadMenuItems()
                         _errorMessage.value = "Menu item deleted successfully"
                     }
-                    400 -> {
-                        _errorMessage.value = response.errorBody()?.string()
-                    }
-                    401 -> {
-                        _errorMessage.value = response.errorBody()?.string()
-                    }
-                    409 -> {
-                        _errorMessage.value = response.errorBody()?.string()
-                    }
-                    404 -> {
-                        _errorMessage.value = response.errorBody()?.string()
-                    }
-                    500 -> {
-                        _errorMessage.value = response.errorBody()?.string()
-                    }
                     else -> {
-                        _uiState.value = MenuItemSettingsUiState.Error("${response.code()} : ${response.message()}")
+                        _errorMessage.value = response.errorBody()?.string()
                     }
                 }
             } catch (e: Exception) {
