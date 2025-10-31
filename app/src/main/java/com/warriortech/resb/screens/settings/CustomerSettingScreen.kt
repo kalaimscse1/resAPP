@@ -45,7 +45,7 @@ import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.CustomerSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.setting.CustomerSettingsViewModel
 import com.warriortech.resb.util.ReusableBottomSheet
 import kotlinx.coroutines.launch
 

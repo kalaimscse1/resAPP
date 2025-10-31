@@ -34,7 +34,7 @@ import com.warriortech.resb.model.KotResponse
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.KotViewModel
+import com.warriortech.resb.ui.viewmodel.report.KotViewModel
 import com.warriortech.resb.util.CurrencySettings
 import kotlinx.coroutines.launch
 

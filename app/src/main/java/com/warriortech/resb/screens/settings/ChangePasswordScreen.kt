@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.ChangePasswordViewModel
+import com.warriortech.resb.ui.viewmodel.setting.ChangePasswordViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

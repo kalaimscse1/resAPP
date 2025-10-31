@@ -55,7 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.model.KotResponse
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.HsnReportViewModel
+import com.warriortech.resb.ui.viewmodel.report.gst.HsnReportViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

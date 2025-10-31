@@ -24,7 +24,7 @@ import com.warriortech.resb.model.CategoryReport
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.CategoryWiseViewModel
+import com.warriortech.resb.ui.viewmodel.report.CategoryWiseViewModel
 import com.warriortech.resb.util.ReportExport
 import kotlinx.coroutines.launch
 import java.time.Instant

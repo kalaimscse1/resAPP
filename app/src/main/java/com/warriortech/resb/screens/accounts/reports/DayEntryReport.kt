@@ -57,7 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.DayEntryReportViewmodel
+import com.warriortech.resb.ui.viewmodel.accounts.DayEntryReportViewmodel
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.LedgerDropdown
 import kotlinx.coroutines.launch

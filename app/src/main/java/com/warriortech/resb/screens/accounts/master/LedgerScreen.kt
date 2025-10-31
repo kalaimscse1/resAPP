@@ -48,7 +48,7 @@ import com.warriortech.resb.model.TblLedgerDetails
 import com.warriortech.resb.model.TblLedgerRequest
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.LedgerViewModel
+import com.warriortech.resb.ui.viewmodel.master.LedgerViewModel
 import com.warriortech.resb.util.GroupDropdown
 import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.SuccessDialogWithButton

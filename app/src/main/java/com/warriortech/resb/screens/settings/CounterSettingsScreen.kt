@@ -14,7 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.model.TblCounter
-import com.warriortech.resb.ui.viewmodel.CounterSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.setting.CounterSettingsViewModel
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Delete

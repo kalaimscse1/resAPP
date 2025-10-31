@@ -29,8 +29,8 @@ import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.PaidBillsUiState
-import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
+import com.warriortech.resb.ui.viewmodel.report.PaidBillsUiState
+import com.warriortech.resb.ui.viewmodel.report.PaidBillsViewModel
 import com.warriortech.resb.util.CurrencySettings
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

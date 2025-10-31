@@ -24,7 +24,7 @@ import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.ReportViewModel
+import com.warriortech.resb.ui.viewmodel.report.ReportViewModel
 import com.warriortech.resb.util.ReportExport
 import kotlinx.coroutines.launch
 import java.time.Instant

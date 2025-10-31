@@ -25,8 +25,8 @@ import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.UnpaidBillsUiState
-import com.warriortech.resb.ui.viewmodel.UnpaidBillsViewModel
+import com.warriortech.resb.ui.viewmodel.report.UnpaidBillsUiState
+import com.warriortech.resb.ui.viewmodel.report.UnpaidBillsViewModel
 import com.warriortech.resb.util.CurrencySettings
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

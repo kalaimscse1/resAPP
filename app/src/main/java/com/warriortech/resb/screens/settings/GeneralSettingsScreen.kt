@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.R
-import com.warriortech.resb.ui.viewmodel.GeneralSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.setting.GeneralSettingsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.GeneralSettings
 import com.warriortech.resb.ui.theme.PrimaryGreen

@@ -27,7 +27,7 @@ import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblGroupRequest
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.GroupDetailsViewModel
+import com.warriortech.resb.ui.viewmodel.master.GroupDetailsViewModel
 import com.warriortech.resb.util.GroupDropdown
 import com.warriortech.resb.util.GroupNatureDropdown
 import com.warriortech.resb.util.ReusableBottomSheet

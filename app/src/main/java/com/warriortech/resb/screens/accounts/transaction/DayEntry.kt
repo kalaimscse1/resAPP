@@ -98,7 +98,7 @@ import com.warriortech.resb.ui.theme.ResbTypography
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.theme.ghostWhite
-import com.warriortech.resb.ui.viewmodel.LedgerDetailsViewModel
+import com.warriortech.resb.ui.viewmodel.accounts.LedgerDetailsViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.LedgerDetailsEntryDropdown

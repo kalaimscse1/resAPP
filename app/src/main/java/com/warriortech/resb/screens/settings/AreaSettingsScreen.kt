@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -22,7 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.AreaViewModel
+import com.warriortech.resb.ui.viewmodel.master.AreaViewModel
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.util.SuccessDialogWithButton

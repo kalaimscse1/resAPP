@@ -19,7 +19,7 @@ import androidx.navigation.NavHostController
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.PaidBillsViewModel
+import com.warriortech.resb.ui.viewmodel.report.PaidBillsViewModel
 import com.warriortech.resb.util.CurrencySettings
 
 @OptIn(ExperimentalMaterial3Api::class)

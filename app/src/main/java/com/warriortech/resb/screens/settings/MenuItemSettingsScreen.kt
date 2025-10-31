@@ -11,9 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.InsertDriveFile
@@ -40,7 +38,7 @@ import com.warriortech.resb.model.Tax
 import com.warriortech.resb.model.TblMenuItemRequest
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.components.MobileOptimizedCard
-import com.warriortech.resb.ui.viewmodel.MenuItemSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.master.MenuItemSettingsViewModel
 import com.warriortech.resb.util.StringDropdown
 import kotlinx.coroutines.launch
 import com.warriortech.resb.model.TblUnit
@@ -54,7 +52,6 @@ import com.warriortech.resb.util.MenuCategoryDropdown
 import com.warriortech.resb.util.MenuDropdown
 import com.warriortech.resb.util.ReportExport
 import com.warriortech.resb.util.ReusableBottomSheet
-import com.warriortech.resb.util.SuccessDialog
 import com.warriortech.resb.util.SuccessDialogWithButton
 import com.warriortech.resb.util.TaxDropdown
 import com.warriortech.resb.util.UnitDropdown
