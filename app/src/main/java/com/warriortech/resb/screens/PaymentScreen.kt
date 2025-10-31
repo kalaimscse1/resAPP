@@ -58,9 +58,9 @@ import com.warriortech.resb.ui.components.PaymentSummaryCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
-import com.warriortech.resb.ui.viewmodel.BillingViewModel
-import com.warriortech.resb.ui.viewmodel.PaymentProcessingState
+import com.warriortech.resb.ui.viewmodel.payment.BillingPaymentUiState
+import com.warriortech.resb.ui.viewmodel.payment.BillingViewModel
+import com.warriortech.resb.ui.viewmodel.payment.PaymentProcessingState
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.StringDropdown

@@ -28,7 +28,7 @@ import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.GradientStart
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.VoucherSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.setting.VoucherSettingsViewModel
 import com.warriortech.resb.util.CounterDropdown
 import com.warriortech.resb.util.VoucherTypeDropdown
 import com.warriortech.resb.util.stringResource

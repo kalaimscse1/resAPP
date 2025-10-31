@@ -2,7 +2,7 @@ package com.warriortech.resb.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
+import com.warriortech.resb.ui.viewmodel.payment.BillingPaymentUiState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.warriortech.resb.model.TblCustomer
-import com.warriortech.resb.ui.viewmodel.BillingViewModel
+import com.warriortech.resb.ui.viewmodel.payment.BillingViewModel
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.CustomerDropdown
 

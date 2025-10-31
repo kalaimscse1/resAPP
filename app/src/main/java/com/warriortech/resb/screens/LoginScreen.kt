@@ -39,7 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.R
 import com.warriortech.resb.ui.components.*
 import com.warriortech.resb.ui.theme.Dimensions
-import com.warriortech.resb.ui.viewmodel.LoginViewModel
+import com.warriortech.resb.ui.viewmodel.login.LoginViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll

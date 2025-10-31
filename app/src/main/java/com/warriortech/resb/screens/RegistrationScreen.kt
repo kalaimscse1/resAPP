@@ -27,7 +27,7 @@ import com.warriortech.resb.R
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.components.MobilePasswordOptimizedTextField
 import com.warriortech.resb.ui.theme.GradientStart
-import com.warriortech.resb.ui.viewmodel.RegistrationViewModel
+import com.warriortech.resb.ui.viewmodel.login.RegistrationViewModel
 import com.warriortech.resb.util.MobileUtils
 import com.warriortech.resb.util.StringDropdown
 import com.warriortech.resb.util.SubscriptionManager

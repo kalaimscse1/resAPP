@@ -37,7 +37,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.ResetViewModel
+import com.warriortech.resb.ui.viewmodel.setting.ResetViewModel
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)

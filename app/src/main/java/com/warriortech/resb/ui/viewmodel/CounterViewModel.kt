@@ -16,6 +16,7 @@ import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.viewmodel.payment.PaymentMethod
 import com.warriortech.resb.util.getCurrentTimeAsFloat
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.UUID
 import javax.inject.Inject
 import kotlin.collections.component1
 import kotlin.collections.component2

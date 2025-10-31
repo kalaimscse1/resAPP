@@ -18,7 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.Modifiers
 import com.warriortech.resb.model.MenuCategory
-import com.warriortech.resb.ui.viewmodel.ModifierSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.setting.ModifierSettingsViewModel
 import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen

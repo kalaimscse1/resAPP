@@ -37,7 +37,7 @@ import com.warriortech.resb.network.RetrofitClient
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.RestaurantProfileViewModel
+import com.warriortech.resb.ui.viewmodel.setting.RestaurantProfileViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

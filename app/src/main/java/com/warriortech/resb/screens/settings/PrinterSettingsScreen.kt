@@ -22,7 +22,7 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
-import com.warriortech.resb.ui.viewmodel.PrinterSettingsViewModel
+import com.warriortech.resb.ui.viewmodel.setting.PrinterSettingsViewModel
 import com.warriortech.resb.util.KitchenGroupDropdown
 
 @OptIn(ExperimentalMaterial3Api::class)

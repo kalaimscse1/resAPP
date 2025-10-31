@@ -9,7 +9,7 @@ import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
-import com.warriortech.resb.ui.viewmodel.PaymentMethod
+import com.warriortech.resb.ui.viewmodel.payment.PaymentMethod
 import com.warriortech.resb.util.NetworkMonitor
 import com.warriortech.resb.util.PrinterHelper
 import com.warriortech.resb.util.getCurrentDateModern

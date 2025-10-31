@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,8 +17,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.ui.components.MobileOptimizedButton
-import com.warriortech.resb.ui.viewmodel.BillingViewModel
-import com.warriortech.resb.ui.viewmodel.BillingPaymentUiState
+import com.warriortech.resb.ui.viewmodel.payment.BillingViewModel
+import com.warriortech.resb.ui.viewmodel.payment.BillingPaymentUiState
 import java.text.NumberFormat
 import java.util.Locale
 import com.warriortech.resb.model.TblOrderDetailsResponse
