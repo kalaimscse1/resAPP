@@ -402,7 +402,7 @@ fun PaidBillItem(
                         )
                     }
                     IconButton(
-                        onClick = { /* View details action */ },
+                        onClick = { onWhatsappClick(bill.bill_no) },
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(

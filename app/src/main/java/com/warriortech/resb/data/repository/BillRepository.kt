@@ -6,6 +6,7 @@ import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.model.TblCustomer
+import com.warriortech.resb.model.TblLedgerDetailIdRequest
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -149,6 +150,87 @@ class BillRepository @Inject constructor(
             note = "",
             is_active = 1L
         )
+        val ledgerDetail = when (paymentMethod.name) {
+            "CASH" -> {
+                TblLedgerDetailIdRequest(
+                    id = 5,
+                    bill_no = billNo["bill_no"] ?: "",
+                    date = getCurrentDateModern(),
+                    time = getCurrentTimeModern(),
+                    party_member = voucher?.voucher_name ?: "",
+                    party_id = 1,
+                    member = voucher?.voucher_id.toString(),
+                    member_id = billNo["bill_no"] ?: "",
+                    purpose = "SALES BY CASH",
+                    amount_in = receivedAmt,
+                    amount_out = 0.0
+                )
+            }
+
+            "CARD" -> {
+                TblLedgerDetailIdRequest(
+                    id = 5,
+                    bill_no = billNo["bill_no"] ?: "",
+                    date = getCurrentDateModern(),
+                    time = getCurrentTimeModern(),
+                    party_member = voucher?.voucher_name ?: "",
+                    party_id = 2,
+                    member = voucher?.voucher_id.toString(),
+                    member_id = billNo["bill_no"] ?: "",
+                    purpose = "SALES BY CARD",
+                    amount_in = receivedAmt,
+                    amount_out = 0.0
+                )
+            }
+
+            "UPI" -> {
+                TblLedgerDetailIdRequest(
+                    id = 5,
+                    bill_no = billNo["bill_no"] ?: "",
+                    date = getCurrentDateModern(),
+                    time = getCurrentTimeModern(),
+                    party_member = voucher?.voucher_name ?: "",
+                    party_id = 3,
+                    member = voucher?.voucher_id.toString(),
+                    member_id = billNo["bill_no"] ?: "",
+                    purpose = "SALES BY UPI",
+                    amount_in = receivedAmt,
+                    amount_out = 0.0
+                )
+            }
+
+            "DUE" -> {
+                TblLedgerDetailIdRequest(
+                    id = 5,
+                    bill_no = billNo["bill_no"] ?: "",
+                    date = getCurrentDateModern(),
+                    time = getCurrentTimeModern(),
+                    party_member = voucher?.voucher_name ?: "",
+                    party_id = 4,
+                    member = voucher?.voucher_id.toString(),
+                    member_id = billNo["bill_no"] ?: "",
+                    purpose = "DUE",
+                    amount_in = receivedAmt,
+                    amount_out = 0.0
+                )
+            }
+
+            else -> {
+                TblLedgerDetailIdRequest(
+                    id = 5,
+                    bill_no = billNo["bill_no"] ?: "",
+                    date = getCurrentDateModern(),
+                    time = getCurrentTimeModern(),
+                    party_member = voucher?.voucher_name ?: "",
+                    party_id = 1,
+                    member = voucher?.voucher_id.toString(),
+                    member_id = billNo["bill_no"] ?: "",
+                    purpose = "Sales By Upi",
+                    amount_in = receivedAmt,
+                    amount_out = 0.0
+                )
+            }
+        }
         val check = apiService.checkBillExists(orderMasterId, sessionManager.getCompanyCode() ?: "")
         val checkExist = check.body()?.data == true
         if (checkExist) {
@@ -175,6 +257,7 @@ class BillRepository @Inject constructor(
                         orderMasterId,
                         sessionManager.getCompanyCode() ?: ""
                     )
+                apiService.addLedgerDetails(ledgerDetail, sessionManager.getCompanyCode() ?: "")
                 emit(Result.success(res))
             } else {
                 emit(Result.failure(Exception("Error: ${response.message()}")))
