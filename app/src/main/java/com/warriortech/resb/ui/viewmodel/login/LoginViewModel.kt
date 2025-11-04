@@ -47,7 +47,7 @@ class LoginViewModel @Inject constructor(
 
     init {
         // Pre-fill company code when ViewModel is created
-        val savedCompanyCode = sessionManager.getCompanyCode() ?: ""
+        val savedCompanyCode = sessionManager.getEmail() ?: ""
         _uiState.update { it.copy(companyCode = savedCompanyCode) }
 
         val savedUserName = sessionManager.getUser()?.user_name ?: ""
@@ -55,7 +55,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onCompanyCodeChange(companyCode: String) {
-        _uiState.update { it.copy(companyCode = companyCode.uppercase(), loginError = null) }
+        _uiState.update { it.copy(companyCode = companyCode, loginError = null) }
     }
 
     /**
@@ -101,38 +101,39 @@ class LoginViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true, loginError = null) }
         viewModelScope.launch {
             try {
-                val check = RetrofitClient.apiService.checkIsBlock(
-                    uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                val check = RetrofitClient.apiService.checkIsBlockByMailId(
+                    uiState.value.companyCode.trim(),
+                    "KTS-COMPANY_MASTER"
                 )
+                sessionManager.saveCompanyCode(
+                    check.data?.company_master_code?:""
+                )
+
                 val generalSetting = RetrofitClient.apiService.getGeneralSettings(
-                    uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
+                    sessionManager.getCompanyCode()?:""
                 )
                 val profile = RetrofitClient.apiService.getRestaurantProfile(
-                    tenantId = uiState.value.companyCode.trim()
-                        .replace(Regex("[^a-zA-Z0-9_-]"), ""),
-                    companyCode = uiState.value.companyCode.trim()
-                        .replace(Regex("[^a-zA-Z0-9_-]"), "")
+                    tenantId = sessionManager.getCompanyCode()?:"",
+                    companyCode = sessionManager.getCompanyCode()?:""
                 )
-                if (check.data!!) {
+                if (check.data !=null) {
                     val response = RetrofitClient.apiService.login(
                         request = LoginRequest(
                             companyCode = uiState.value.companyCode,
                             user_name = uiState.value.username,
                             password = uiState.value.password
                         ),
-                        tenantId = uiState.value.companyCode
+                        tenantId = sessionManager.getCompanyCode()?:""
                     )
 
                     if (response.success && response.data != null) {
+                        sessionManager.saveEmail(_uiState.value.companyCode)
                         val authResponse = response.data
                         val general = generalSetting.body()
                         Log.d("LoginViewModel", "General Settings: ${authResponse.user}")
                         sessionManager.saveUserLogin(true)
                         sessionManager.saveAuthToken(authResponse.token)
                         sessionManager.saveUser(authResponse.user)
-                        sessionManager.saveCompanyCode(
-                            uiState.value.companyCode.trim().replace(Regex("[^a-zA-Z0-9_-]"), "")
-                        )
                         sessionManager.saveGeneralSetting(
                             general?.get(0) ?: error("general setting failed")
                         )

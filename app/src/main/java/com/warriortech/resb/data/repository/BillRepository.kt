@@ -7,6 +7,8 @@ import com.warriortech.resb.model.TblBillingRequest
 import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.model.TblLedgerDetailIdRequest
+import com.warriortech.resb.model.TblLedgerDetails
+import com.warriortech.resb.model.TblLedgerRequest
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -82,6 +84,34 @@ class BillRepository @Inject constructor(
             emit(Result.failure(Exception("Please select a customer for due payment")))
             return@flow
         }
+        var ledgers: TblLedgerDetails? = null
+        if (paymentMethod.name == "DUE") {
+            val ledgerRequest = TblLedgerRequest(
+                ledger_name = customer.customer_name,
+                ledger_fullname = customer.customer_name,
+                order_by = 0,
+                group_id = 17,
+                address = customer.address,
+                address1 = "",
+                place = "",
+                pincode = 0,
+                country = "",
+                contact_no = customer.contact_no,
+                email = customer.email_address,
+                gst_no = customer.gst_no,
+                pan_no = "",
+                state_code = "",
+                state_name = "",
+                sac_code = "",
+                igst_status = if (customer.igst_status) "YES" else "NO",
+                opening_balance = "",
+                due_date = getCurrentDateModern(),
+                bank_details = "NO",
+                tamil_text = "",
+                distance = 0.0
+            )
+          ledgers =  apiService.createLedger(ledgerRequest,sessionManager.getCompanyCode()?:"").body()!!
+        }
         val billNo = if (paymentMethod.name == "DUE") apiService.getBillNoByCounterId(
             sessionManager.getUser()?.counter_id!!,
             "DUE",
@@ -150,84 +180,139 @@ class BillRepository @Inject constructor(
             note = "",
             is_active = 1L
         )
-        val ledgerDetail = when (paymentMethod.name) {
+        var ledger: List<TblLedgerDetailIdRequest> = emptyList()
+        ledger = when (paymentMethod.name) {
             "CASH" -> {
-                TblLedgerDetailIdRequest(
-                    id = 5,
-                    bill_no = billNo["bill_no"] ?: "",
-                    date = getCurrentDateModern(),
-                    time = getCurrentTimeModern(),
-                    party_member = voucher?.voucher_name ?: "",
-                    party_id = 1,
-                    member = voucher?.voucher_id.toString(),
-                    member_id = billNo["bill_no"] ?: "",
-                    purpose = "SALES BY CASH",
-                    amount_in = receivedAmt,
-                    amount_out = 0.0
+                listOf(
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 1,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "SALES BY CASH",
+                        amount_in = receivedAmt,
+                        amount_out = 0.0
+                    )
                 )
             }
 
             "CARD" -> {
-                TblLedgerDetailIdRequest(
-                    id = 5,
-                    bill_no = billNo["bill_no"] ?: "",
-                    date = getCurrentDateModern(),
-                    time = getCurrentTimeModern(),
-                    party_member = voucher?.voucher_name ?: "",
-                    party_id = 2,
-                    member = voucher?.voucher_id.toString(),
-                    member_id = billNo["bill_no"] ?: "",
-                    purpose = "SALES BY CARD",
-                    amount_in = receivedAmt,
-                    amount_out = 0.0
+                listOf(
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 2,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "SALES BY CARD",
+                        amount_in = receivedAmt,
+                        amount_out = 0.0
+                    )
                 )
             }
 
             "UPI" -> {
-                TblLedgerDetailIdRequest(
-                    id = 5,
-                    bill_no = billNo["bill_no"] ?: "",
-                    date = getCurrentDateModern(),
-                    time = getCurrentTimeModern(),
-                    party_member = voucher?.voucher_name ?: "",
-                    party_id = 3,
-                    member = voucher?.voucher_id.toString(),
-                    member_id = billNo["bill_no"] ?: "",
-                    purpose = "SALES BY UPI",
-                    amount_in = receivedAmt,
-                    amount_out = 0.0
+                listOf(
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 3,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "SALES BY UPI",
+                        amount_in = receivedAmt,
+                        amount_out = 0.0
+                    )
                 )
             }
 
             "DUE" -> {
-                TblLedgerDetailIdRequest(
-                    id = 5,
-                    bill_no = billNo["bill_no"] ?: "",
-                    date = getCurrentDateModern(),
-                    time = getCurrentTimeModern(),
-                    party_member = voucher?.voucher_name ?: "",
-                    party_id = 4,
-                    member = voucher?.voucher_id.toString(),
-                    member_id = billNo["bill_no"] ?: "",
-                    purpose = "DUE",
-                    amount_in = receivedAmt,
-                    amount_out = 0.0
+                listOf(
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = ledgers?.ledger_id?.toLong()?:0,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "DUE",
+                        amount_in = receivedAmt,
+                        amount_out = 0.0
+                    )
+                )
+            }
+
+            "OTHERS" -> {
+                listOf(
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 1,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "Sales By Upi",
+                        amount_in = cash,
+                        amount_out = 0.0
+                    ),
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 2,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "SALES BY CARD",
+                        amount_in = card,
+                        amount_out = 0.0
+                    ),
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 3,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "SALES BY UPI",
+                        amount_in = upi,
+                        amount_out = 0.0
+                    )
                 )
             }
 
             else -> {
-                TblLedgerDetailIdRequest(
-                    id = 5,
-                    bill_no = billNo["bill_no"] ?: "",
-                    date = getCurrentDateModern(),
-                    time = getCurrentTimeModern(),
-                    party_member = voucher?.voucher_name ?: "",
-                    party_id = 1,
-                    member = voucher?.voucher_id.toString(),
-                    member_id = billNo["bill_no"] ?: "",
-                    purpose = "Sales By Upi",
-                    amount_in = receivedAmt,
-                    amount_out = 0.0
+                listOf(
+                    TblLedgerDetailIdRequest(
+                        id = 5,
+                        bill_no = billNo["bill_no"] ?: "",
+                        date = getCurrentDateModern(),
+                        time = getCurrentTimeModern(),
+                        party_member = voucher?.voucher_name ?: "",
+                        party_id = 1,
+                        member = voucher?.voucher_id.toString(),
+                        member_id = billNo["bill_no"] ?: "",
+                        purpose = "Sales By Upi",
+                        amount_in = receivedAmt,
+                        amount_out = 0.0
+                    )
                 )
             }
         }
@@ -257,7 +342,7 @@ class BillRepository @Inject constructor(
                         orderMasterId,
                         sessionManager.getCompanyCode() ?: ""
                     )
-                apiService.addLedgerDetails(ledgerDetail, sessionManager.getCompanyCode() ?: "")
+                apiService.saveAllLedgerDetails(ledger, sessionManager.getCompanyCode() ?: "")
                 emit(Result.success(res))
             } else {
                 emit(Result.failure(Exception("Error: ${response.message()}")))
@@ -306,5 +391,77 @@ class BillRepository @Inject constructor(
         return if (response.isSuccessful) {
             response.body()
         } else null
+    }
+
+    suspend fun updateBill(billNo: String, orderMasterId: String) {
+        val bill =
+            apiService.getPaymentByBillNo(billNo, sessionManager.getCompanyCode() ?: "").body()!!
+        var order: List<TblOrderDetailsResponse> = emptyList()
+        val orderMaster = apiService.getOpenOrderDetailsForTable(
+            orderMasterId,
+            sessionManager.getCompanyCode() ?: ""
+        )
+        if (orderMaster.isSuccessful) {
+            order = orderMaster.body()!!
+        }
+        val request = TblBillingRequest(
+            bill_no = billNo,
+            bill_date = bill.bill_date,
+            bill_create_time = bill.bill_create_time,
+            order_master_id = orderMasterId,
+            voucher_id = bill.voucher.voucher_id,
+            staff_id = bill.staff.staff_id,
+            customer_id = bill.customer.customer_id,
+            order_amt = order.sumOf { it.total },
+            disc_amt = 0.0,
+            tax_amt = order.sumOf { it.tax_amount },
+            cess = order.sumOf { it.cess },
+            cess_specific = order.sumOf { it.cess_specific },
+            delivery_amt = 0.0,
+            grand_total = order.sumOf { it.grand_total },
+            round_off = 0.0,
+            rounded_amt = order.sumOf { it.grand_total },
+            cash = if (bill.cash > 0.0) order.sumOf { it.grand_total } else 0.0,
+            card = if (bill.card > 0.0) order.sumOf { it.grand_total } else 0.0,
+            upi = if (bill.upi > 0.0) order.sumOf { it.grand_total } else 0.0,
+            due = if (bill.due > 0.0) order.sumOf { it.grand_total } else 0.0,
+            others = 0.0,
+            received_amt = if (bill.due > 0.0) 0.0 else order.sumOf { it.grand_total },
+            pending_amt = if (bill.due > 0.0) order.sumOf { it.grand_total } else 0.0,
+//                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
+            change = 0.0,
+            note = "",
+            is_active = 1L
+        )
+        val ledgerDetails = apiService.getLedgerDetailsByEntryNo(
+            billNo, sessionManager.getCompanyCode() ?: ""
+        ).body()!!.filter { it.ledger_details_id.toInt() % 2 != 0 }
+        val ledgerRequest = ledgerDetails.map {
+            TblLedgerDetailIdRequest(
+                ledger_details_id = it.ledger_details_id,
+                id = it.ledger.ledger_id.toLong(),
+                bill_no = billNo,
+                date = it.date,
+                time = it.time,
+                party_member = it.party_member,
+                party_id = it.party.ledger_id.toLong(),
+                member = it.member,
+                member_id = it.member_id,
+                purpose = it.purpose,
+                amount_in = request.grand_total,
+                amount_out = 0.0
+            )
+        }
+        apiService.updateAllLedgerDetails(ledgerRequest, sessionManager.getCompanyCode() ?: "")
+        apiService.updateByBillNo(billNo, request, sessionManager.getCompanyCode() ?: "")
+
+    }
+
+    suspend fun deleteBill(billNo: String): Int? {
+        val response = apiService.deleteByBillNo(billNo, sessionManager.getCompanyCode() ?: "")
+        return if (response.isSuccessful) {
+            response.body()
+        } else
+            null
     }
 }

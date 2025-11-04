@@ -688,7 +688,7 @@ class OrderRepository @Inject constructor(
     suspend fun updateOrderDetails(
         orderId: String?,
         items: List<OrderItem>,
-        kotNumber: Int,
+        kotNumber: Int? = null,
         tableStatus: String
     ): Flow<Result<List<TblOrderDetailsResponse>>> = flow {
         val orderDetails = items.map { item ->
@@ -718,7 +718,7 @@ class OrderRepository @Inject constructor(
             OrderDetails(
                 order_master_id = orderId ?: "",
                 order_details_id = item.orderDetailsId ?: 0L,
-                kot_number = kotNumber.toInt(),
+                kot_number = kotNumber ?: item.kotNumber,
                 menu_item_id = item.menuItem.menu_item_id,
                 rate = if (item.menuItem.is_inventory != 1L) taxAmount.basePrice.roundTo2() else cess.basePrice.roundTo2(),
                 actual_rate = item.menuItem.actual_rate,

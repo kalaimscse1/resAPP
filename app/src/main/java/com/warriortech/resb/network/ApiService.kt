@@ -18,7 +18,15 @@ interface ApiService {
      */
 
     @GET("companyMaster/checkCompanyCode/{companyCode}")
-    suspend fun checkIsBlock(@Path("companyCode") companyCode: String): ApiResponse<Boolean>
+    suspend fun checkIsBlock(
+        @Path("companyCode") companyCode: String
+    ): ApiResponse<Boolean>
+
+    @GET("companyMaster/checkExistsOrNotByMailId/{mailId}")
+    suspend fun checkIsBlockByMailId(
+        @Path("mailId") mailId: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): ApiResponse<TblCompanyMaster?>
 
     @POST("auth/staff")
     suspend fun login(
@@ -679,6 +687,19 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Int>
 
+    @DELETE("payment/deleteBillByBillId/{bill_no}")
+    suspend fun deleteByBillNo(
+        @Path("bill_no") billNo: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
+    @PUT("payment/updatePayment/{bill_no}")
+    suspend fun updateByBillNo(
+        @Path("bill_no") billNo: String,
+        @Body bill: TblBillingRequest,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<Int>
+
     /**
      * Reports Management
      */
@@ -1008,7 +1029,7 @@ interface ApiService {
     @GET("master/ledger/getMaxOrderBy")
     suspend fun getLedgerMaxOrderBy(
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<Map<String, Long>>
+    ): Response<Map<String, Long>>
 
 
     @GET("master/ledger/checkExistsOrNot/{ledger_name}")
@@ -1055,7 +1076,7 @@ interface ApiService {
     @GET("master/group/getMaxOrderBy")
     suspend fun getMaxOrderBy(
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<Map<String, Long>>
+    ): Response<Map<String, Long>>
 
     @GET("master/group/checkExistsOrNot/{group_name}")
     suspend fun checkExistsOrNotGroup(
@@ -1101,7 +1122,7 @@ interface ApiService {
     /**
      * GroupNature Management
      */
-    
+
     @GET("master/group/getGroupNatureByIsActive")
     suspend fun getGroupNatures(
         @Header("X-Tenant-ID") tenantId: String
@@ -1149,7 +1170,7 @@ interface ApiService {
         @Path("counterId") counterId: Long,
         @Path("voucherType") voucherType: String,
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<Map<String,String>>
+    ): Response<Map<String, String>>
 
     @GET("ledger/transaction/findById/{id}")
     suspend fun getByLedgerId(
@@ -1157,7 +1178,7 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String,
         @Query("fromDate") fromDate: String,
         @Query("toDate") toDate: String
-    ) : Response<List<TblLedgerDetailsIdResponse>>
+    ): Response<List<TblLedgerDetailsIdResponse>>
 
     @POST("ledger/transaction/addAllLedgerDetailsId")
     suspend fun saveAllLedgerDetails(
@@ -1169,24 +1190,24 @@ interface ApiService {
     suspend fun updateAllLedgerDetails(
         @Body ledgerDetails: List<TblLedgerDetailIdRequest>,
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<Boolean>
+    ): Response<Boolean>
 
     @GET("ledger/transaction/getLedgerDetailsByEntryNo/{entry_no}")
     suspend fun getLedgerDetailsByEntryNo(
         @Path("entry_no") entryNo: String,
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<List<TblLedgerDetailsIdResponse>>
+    ): Response<List<TblLedgerDetailsIdResponse>>
 
     @DELETE("ledger/transaction/deleteByEntryNo/{entry_no}")
     suspend fun deleteByEntryNo(
         @Path("entry_no") entryNo: String,
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<Int>
+    ): Response<Int>
 
     @GET("ledger/transaction/getOpeningBalance/{fromDate}/{ledger_id}")
     suspend fun getOpeningBalance(
         @Path("fromDate") counterId: String,
         @Path("ledger_id") voucherType: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ) : Response<Map<String, Double>>
+    ): Response<Map<String, Double>>
 }

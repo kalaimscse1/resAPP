@@ -5,7 +5,8 @@ data class OrderItem(
     val menuItem: TblMenuItemResponse,
     val quantity: Int,
     val notes: String? = null,
-    val orderDetailsId: Long? = null
+    val orderDetailsId: Long? = null,
+    val kotNumber: Int? = null
 )
 
 /**

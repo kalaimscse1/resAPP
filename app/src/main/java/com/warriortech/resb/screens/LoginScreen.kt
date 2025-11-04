@@ -139,7 +139,7 @@ fun LoginScreen(
                 MobileOptimizedTextField(
                     value = uiState.value.companyCode,
                     onValueChange = viewModel::onCompanyCodeChange,
-                    label = "CompanyCode",
+                    label = "Email Id",
                     enabled = code.isBlank(),
                     leadingIcon = {
                         Icon(

@@ -65,7 +65,7 @@ data class TblLedgerRequest(
     val bank_details: String,
     val tamil_text: String,
     val distance: Double,
-    val is_active: Boolean
+    val is_active: Boolean = true
 )
 
 data class TblGroupDetails(

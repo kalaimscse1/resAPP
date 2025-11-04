@@ -29,6 +29,7 @@ class SessionManager @Inject constructor(
         private const val KEY_GENERAL_SETTING = "general_setting"
         private const val DECIMAL = "decimal_places"
         private const val KEY_USER_LOGIN = "user_login"
+        private const val MAIL_ID="mail_id"
     }
 
     private lateinit var prefs: SharedPreferences
@@ -113,6 +114,16 @@ class SessionManager @Inject constructor(
         } else {
             null
         }
+    }
+
+    fun saveEmail(mail:String){
+        checkInitialization()
+        prefs.edit { putString(MAIL_ID,mail) }
+    }
+
+    fun getEmail(): String?{
+        checkInitialization()
+        return prefs.getString(MAIL_ID,"")
     }
 
     fun saveDecimalPlaces(decimalPlaces: Long) {

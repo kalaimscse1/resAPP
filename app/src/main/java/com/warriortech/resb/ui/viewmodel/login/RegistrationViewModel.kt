@@ -183,6 +183,7 @@ class RegistrationViewModel @Inject constructor(
                                     upi_id = "",
                                     upi_name = ""
                                 )
+                                sessionManager.saveEmail(res.mail_id)
                                 sessionManager.saveRestaurantProfile(profile)
                                 sessionManager.saveCompanyCode(res.company_master_code)
                                 createCompany(res)

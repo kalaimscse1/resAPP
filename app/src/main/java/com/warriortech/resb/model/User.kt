@@ -67,3 +67,26 @@ data class TblStaffRequest(
     val area_id: Long,
     val is_active: Long
 )
+
+data class TblCompanyMaster(
+    var id: Long=0,
+    var company_master_code:String,
+    var company_name:String,
+    var owner_name:String,
+    var address1:String,
+    var address2:String,
+    var place:String,
+    var pincode:String,
+    var contact_no:String,
+    var mail_id:String,
+    var country:String,
+    var state:String,
+    var year:String,
+    var database_name:String,
+    var order_plan:String,
+    var install_date: String,
+    var subscription_days:Long,
+    var expiry_date:String,
+    var is_block:Boolean=false,
+    var is_active:Boolean=true
+)

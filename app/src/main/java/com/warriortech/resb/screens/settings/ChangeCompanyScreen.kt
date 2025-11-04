@@ -96,7 +96,7 @@ fun ChangeCompanyScreen(
                     MobileOptimizedTextField(
                         value = companyCode,
                         onValueChange = { companyCode = it },
-                        label = "CompanyCode",
+                        label = "Email Id",
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Person,
@@ -142,7 +142,7 @@ fun ChangeCompanyScreen(
         ChangeDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
-                sessionManager.saveCompanyCode(companyCode)
+                sessionManager.saveEmail(companyCode)
                 showDialog = false
                 navController.navigate("login") {
                     popUpTo("settings") { inclusive = true }

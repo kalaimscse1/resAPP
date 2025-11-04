@@ -325,8 +325,8 @@ class CounterViewModel @Inject constructor(
                                     val billDetails = Bill(
                                         company_code = sessionManager.getCompanyCode() ?: "",
                                         billNo = response.bill_no,
-                                        date = response.bill_date.toString(),
-                                        time = response.bill_create_time.toString(),
+                                        date = response.bill_date,
+                                        time = response.bill_create_time,
                                         orderNo = response.order_master.order_master_id,
                                         counter = counter,
                                         tableNo = response.order_master.table_name,
@@ -339,7 +339,7 @@ class CounterViewModel @Inject constructor(
                                         deliveryCharge = 0.0, // Assuming no delivery charge
                                         discount = response.disc_amt,
                                         roundOff = response.round_off,
-                                        total = response.grand_total,
+                                        total = response.grand_total
                                     )
                                     val isReceipt =
                                         sessionManager.getGeneralSetting()?.is_receipt ?: false
