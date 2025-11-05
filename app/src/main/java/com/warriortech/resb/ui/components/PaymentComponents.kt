@@ -128,11 +128,23 @@ fun PaymentMethodCard(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
+            var cashValue = remember(uiState.cashAmount) {
+                if (uiState.cashAmount == 0.0) uiState.amountToPay.toString() else uiState.cashAmount.toString()
+            }
+            var cardValue = remember(uiState.cardAmount) {
+                if (uiState.cardAmount == 0.0) uiState.amountToPay.toString() else uiState.cardAmount.toString()
+            }
+            var upiValue = remember(uiState.upiAmount) {
+                if (uiState.upiAmount == 0.0) uiState.amountToPay.toString() else uiState.upiAmount.toString()
+            }
             if (uiState.selectedPaymentMethod?.name == "CASH") {
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
-                    value = if (uiState.cashAmount == 0.0) CurrencySettings.format(uiState.amountToPay) else CurrencySettings.format(uiState.cashAmount),
-                    onValueChange = { viewModel.updateCashAmount(it.toDoubleOrNull() ?: 0.0) },
+                    value = cashValue,
+                    onValueChange = {
+                        cashValue = it
+                        viewModel.updateCashAmount(it.toDoubleOrNull() ?: 0.0)
+                    },
                     label = { Text("Cash Amount") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
@@ -141,8 +153,11 @@ fun PaymentMethodCard(
             if (uiState.selectedPaymentMethod?.name == "CARD") {
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
-                    value = if (uiState.cardAmount == 0.0) CurrencySettings.format(uiState.amountToPay) else CurrencySettings.format(uiState.cardAmount),
-                    onValueChange = { viewModel.updateCardAmount(it.toDoubleOrNull() ?: 0.0) },
+                    value = cardValue,
+                    onValueChange = {
+                        cardValue = it
+                        viewModel.updateCardAmount(it.toDoubleOrNull() ?: 0.0)
+                    },
                     label = { Text("Card Amount") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
@@ -151,8 +166,11 @@ fun PaymentMethodCard(
             if (uiState.selectedPaymentMethod?.name == "UPI") {
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
-                    value = if (uiState.upiAmount == 0.0) CurrencySettings.format(uiState.amountToPay) else CurrencySettings.format(uiState.upiAmount),
-                    onValueChange = { viewModel.updateUpiAmount(it.toDoubleOrNull() ?: 0.0) },
+                    value = upiValue,
+                    onValueChange = {
+                        upiValue = it
+                        viewModel.updateUpiAmount(it.toDoubleOrNull() ?: 0.0)
+                    },
                     label = { Text("UPI Amount") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()

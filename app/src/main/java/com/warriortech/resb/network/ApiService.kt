@@ -1038,6 +1038,12 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ApiResponse<Boolean>>
 
+    @GET("master/ledger/findByContactNo/{contact_no}")
+    suspend fun findByContactNo(
+        @Path("contact_no") contactNo: String,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<TblLedgerDetails>
+
 
     /**
      * Group Management

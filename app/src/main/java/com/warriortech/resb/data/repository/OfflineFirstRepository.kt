@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 abstract class OfflineFirstRepository(
-    protected val networkMonitor: NetworkMonitor
+    protected open val networkMonitor: NetworkMonitor
 ) {
     
     protected suspend fun isOnline(): Boolean {

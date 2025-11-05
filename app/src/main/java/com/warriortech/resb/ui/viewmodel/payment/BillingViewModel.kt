@@ -518,10 +518,9 @@ class BillingViewModel @Inject constructor(
                     igst_status = false
                 ),
                 billNo = _billNo.value,
-                cash = currentState.cashAmount,
-                card = currentState.cardAmount,
-                upi = currentState.upiAmount,
-                voucherType = voucherType
+                totals = Triple(currentState.cashAmount, currentState.cardAmount, currentState.upiAmount),
+                voucherType = voucherType,
+                total = currentState.amountToPay
             ).collect { result ->
                 result.fold(
                     onSuccess = { response ->

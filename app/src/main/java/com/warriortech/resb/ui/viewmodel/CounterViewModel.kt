@@ -288,7 +288,7 @@ class CounterViewModel @Inject constructor(
                                 email_address = "",
                                 igst_status = false
                             ),
-                            "",
+                            "--",
                             voucherType = "BILL"
                         ).collect { billResult ->
                             billResult.fold(
