@@ -173,8 +173,10 @@ import com.warriortech.resb.screens.settings.ChangeCompanyScreen
 import com.warriortech.resb.screens.settings.KitchenCategorySettingsScreen
 import com.warriortech.resb.screens.settings.UnitSettingsScreen
 import com.warriortech.resb.screens.settings.VoucherTypeSettingsScreen
+import com.warriortech.resb.util.BluetoothPrinterScreen
 
 @AndroidEntryPoint
+
 class MainActivity : ComponentActivity() {
     var onVolumeUpPressed: (() -> Unit)? = null
     override fun attachBaseContext(newBase: Context?) {
@@ -194,6 +196,7 @@ class MainActivity : ComponentActivity() {
     lateinit var syncManager: SyncManager
 
     @SuppressLint("ConfigurationScreenWidthHeight")
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -259,6 +262,7 @@ class MainActivity : ComponentActivity() {
                                     val sharedPref =
                                         context.getSharedPreferences("user_prefs", MODE_PRIVATE)
                                     sessionManager.saveUserLogin(false)
+                                    sessionManager.clearBluetoothPrinter()
                                     sharedPref.edit { clear() }
                                     Toast.makeText(
                                         context,
@@ -456,7 +460,7 @@ fun AppNavigation(
             )
         }
 
-        composable("menu") {
+        composable("menu")  {
             val tableId = selectedTable?.table_id ?: 1L
             val tableStatId = selectedTable != null || isTakeaway == "TABLE"
             val tableNumber = selectedTable?.table_name ?: ""
@@ -710,7 +714,10 @@ fun AppNavigation(
         }
 
         composable("printer_setting") {
-            PrinterSettingsScreen(onBackPressed = { navController.popBackStack() })
+            PrinterSettingsScreen(
+                onBackPressed = { navController.popBackStack() },
+                navController = navController
+            )
         }
 
         composable("tax_setting") {
@@ -764,7 +771,7 @@ fun AppNavigation(
                 navController = navController
             )
         }
-        composable("quick_bills") {
+        composable("quick_bills")  {
             ItemWiseBillScreen(
                 drawerState = drawerState,
                 navController = navController,
@@ -902,6 +909,13 @@ fun AppNavigation(
         composable("day_book_report") {
             DayBookReportScreen(
                 drawerState = drawerState
+            )
+        }
+
+        composable("bluetooth") {
+            BluetoothPrinterScreen(
+                sessionManager = sessionManager,
+                navController = navController
             )
         }
     }

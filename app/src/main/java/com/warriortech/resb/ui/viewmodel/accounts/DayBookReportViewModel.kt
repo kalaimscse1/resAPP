@@ -37,7 +37,7 @@ class DayBookReportViewmodel @Inject constructor(
         viewModelScope.launch {
             try {
                 val ledgers = ledgerRepository.getLedgers().orEmpty()
-                val ledger = ledgerDetailsRepository.getLedgerDetails(fromDate, toDate)!!
+                val ledger = ledgerDetailsRepository.getDayBook(fromDate, toDate)!!
                 _ledgerList.value = ledgers
                 _ledgerDetailsState.value = DayBookUiState.Success(ledgers = ledger)
             } catch (e: Exception) {

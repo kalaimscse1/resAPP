@@ -34,7 +34,7 @@ import com.warriortech.resb.ui.viewmodel.report.PaidBillsViewModel
 import com.warriortech.resb.util.CurrencySettings
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
+@androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaidBillsScreen(

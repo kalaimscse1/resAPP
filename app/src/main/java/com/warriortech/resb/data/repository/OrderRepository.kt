@@ -844,9 +844,10 @@ class OrderRepository @Inject constructor(
         return emptyMap()
     }
 
-
+    @SuppressLint("SuspiciousIndentation")
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     suspend fun printKOT(orderId: KOTRequest, ipAddress: String): Flow<Result<String>> =
-        flow { // Changed Flow type to Flow<Result<PrintResponse>>
+        flow  { // Changed Flow type to Flow<Result<PrintResponse>>
             try {
                 val response = apiService.printKOT(orderId, sessionManager.getCompanyCode() ?: "")
                 val result = orderId.items
@@ -855,6 +856,12 @@ class OrderRepository @Inject constructor(
 
                     var mess = ""
                     if (printResponse != null) {
+                        if (sessionManager.getBluetoothPrinter()!=null)
+                            printerHelper.printViaBluetoothMac(
+                                data = printResponse.bytes(),
+                                macAddress =  sessionManager.getBluetoothPrinter().toString()
+                            ) { _, m -> mess = m }
+                        else
                         printerHelper.printViaTcp(
                             ipAddress,
                             data = printResponse.bytes()

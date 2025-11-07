@@ -1,7 +1,10 @@
 package com.warriortech.resb.data.repository
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.annotation.RequiresPermission
 import com.warriortech.resb.model.*
 import com.warriortech.resb.network.ApiService
 import com.warriortech.resb.network.SessionManager
@@ -88,13 +91,14 @@ class BillRepository @Inject constructor(
         total: Double = 0.0
     ): Flow<Result<TblBillingResponse>> = flow {
         try {
-            var bill : TblBillingResponse?= null
+            var bill: TblBillingResponse? = null
             if (billNo != "--") {
                 apiService.resetDue(
                     billNo,
                     sessionManager.getCompanyCode() ?: ""
                 )
-              bill = apiService.getPaymentByBillNo(billNo, sessionManager.getCompanyCode() ?: "").body()!!
+                bill = apiService.getPaymentByBillNo(billNo, sessionManager.getCompanyCode() ?: "")
+                    .body()!!
             }
 
             if (paymentMethod.name == "DUE" && customer.customer_id == 1L)
@@ -102,7 +106,10 @@ class BillRepository @Inject constructor(
 
             val tenant = sessionManager.getCompanyCode() ?: ""
 
-            val ledgerDetail = apiService.findByContactNo(bill?.customer?.contact_no ?: customer.contact_no, tenant).body()
+            val ledgerDetail = apiService.findByContactNo(
+                bill?.customer?.contact_no ?: customer.contact_no,
+                tenant
+            ).body()
             val ledger: TblLedgerDetails? = if (paymentMethod.name == "DUE") {
                 val req = TblLedgerRequest(
                     ledger_name = customer.customer_name,
@@ -152,7 +159,7 @@ class BillRepository @Inject constructor(
                 order_master_id = orderMasterId,
                 voucher_id = voucher?.voucher_id ?: 0L,
                 staff_id = sessionManager.getUser()?.staff_id ?: 0L,
-                customer_id = bill?.customer?.customer_id?:customer.customer_id,
+                customer_id = bill?.customer?.customer_id ?: customer.customer_id,
                 order_amt = order.sumOf { it.total },
                 tax_amt = order.sumOf { it.tax_amount },
                 cess = order.sumOf { it.cess },
@@ -206,7 +213,8 @@ class BillRepository @Inject constructor(
             emit(Result.failure(e))
         }
     }
-
+    @SuppressLint("SupportAnnotationUsage", "SuspiciousIndentation")
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun printBill(bill: Bill, ipAddress: String): Flow<Result<String>> = flow {
         try {
             val response = apiService.printReceipt(bill, sessionManager.getCompanyCode() ?: "")
@@ -215,6 +223,12 @@ class BillRepository @Inject constructor(
             val bytes = response.body()?.bytes()
                 ?: return@flow emit(Result.failure(Exception("Empty print data")))
             var msg = ""
+            if (sessionManager.getBluetoothPrinter()!=null)
+                printerHelper.printViaBluetoothMac(
+                    data = bytes,
+                    macAddress =  sessionManager.getBluetoothPrinter().toString()
+                ) { _, m -> msg = m }
+            else
             printerHelper.printViaTcp(ipAddress, data = bytes) { _, m -> msg = m }
             emit(Result.success(msg))
         } catch (e: Exception) {
@@ -272,7 +286,7 @@ class BillRepository @Inject constructor(
             others = 0.0,
             received_amt = if (bill.due > 0.0) 0.0 else order.sumOf { it.grand_total },
             pending_amt = if (bill.due > 0.0) order.sumOf { it.grand_total } else 0.0,
-//                change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
+//          change = if (paymentMethod.name == "CASH") receivedAmt - orderMaster.sumOf { it.grand_total } else 0.0,
             change = 0.0,
             note = "",
             is_active = 1L
@@ -323,7 +337,7 @@ object LedgerEntryBuilder {
     ): List<TblLedgerDetailIdRequest> {
         val (cash, card, upi) = totals
         val base = TblLedgerDetailIdRequest(
-            id = if (voucherType == "DUE") ledgerDetail?.ledger_id?.toLong()?:0 else 5,
+            id = if (voucherType == "DUE") ledgerDetail?.ledger_id?.toLong() ?: 0 else 5,
             bill_no = billNo,
             date = getCurrentDateModern(),
             time = getCurrentTimeModern(),

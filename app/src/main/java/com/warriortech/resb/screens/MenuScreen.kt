@@ -66,7 +66,7 @@ import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.SuccessDialog
 import com.warriortech.resb.util.getDeviceInfo
 import kotlinx.coroutines.delay
-
+@androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @SuppressLint(
     "StateFlowValueCalledInComposition", "DefaultLocale", "SuspiciousIndentation",
     "ResourceAsColor"

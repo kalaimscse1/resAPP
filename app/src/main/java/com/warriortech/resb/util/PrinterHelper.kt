@@ -1,7 +1,10 @@
 package com.warriortech.resb.util
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
@@ -14,6 +17,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.RequiresPermission
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Helper class for handling communication with physical printer hardware.
@@ -359,20 +367,60 @@ class PrinterHelper(private val context: Context) {
         // Placeholder for actual printer disconnection code
     }
 
-    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-    fun printViaBluetooth(device: BluetoothDevice, data: ByteArray) {
-        Thread {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    fun printViaBluetoothMac(macAddress: String, data: ByteArray, onResult: (success: Boolean, message: String) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            var socket: BluetoothSocket? = null
             try {
+                val adapter = BluetoothAdapter.getDefaultAdapter()
+                if (adapter == null || !adapter.isEnabled) {
+                    withContext(Dispatchers.Main) { onResult(false,"❌ Bluetooth not available or disabled") }
+                    return@launch
+                }
+
+                // Get device by MAC address
+                val device: BluetoothDevice? = adapter.getRemoteDevice(macAddress)
+                if (device == null) {
+                    withContext(Dispatchers.Main) { onResult(false,"❌ Device not found for MAC: $macAddress") }
+                    return@launch
+                }
+
+                // Cancel discovery before connecting
+                if (adapter.isDiscovering) adapter.cancelDiscovery()
+
                 val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-                val socket = device.createRfcommSocketToServiceRecord(uuid)
-                socket.connect()
-                socket.outputStream.write(data)
-                socket.outputStream.flush()
-                socket.close()
+                socket = device.createRfcommSocketToServiceRecord(uuid)
+
+                try {
+                    socket.connect()
+                } catch (e: IOException) {
+                    // Some printers need the reflection fallback
+                    try {
+                        val m = device.javaClass.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
+                        socket = m.invoke(device, 1) as BluetoothSocket
+                        socket.connect()
+                    } catch (fallback: Exception) {
+                        withContext(Dispatchers.Main) { onResult(false,"❌ Connection failed: ${fallback.message}") }
+                        return@launch
+                    }
+                }
+
+                socket.outputStream.use { out ->
+                    out.write(data)
+                    out.flush()
+                }
+
+                withContext(Dispatchers.Main) {
+                    onResult(true,"✅ Print successful on ${device.name} (${device.address})")
+                }
+            } catch (e: SecurityException) {
+                withContext(Dispatchers.Main) { onResult(false,"❌ Permission denied: ${e.message}") }
             } catch (e: IOException) {
-                e.printStackTrace()
+                withContext(Dispatchers.Main) { onResult(false,"❌ I/O error: ${e.message}") }
+            } finally {
+                try { socket?.close() } catch (_: IOException) {}
             }
-        }.start()
+        }
     }
 
     fun printViaTcp(

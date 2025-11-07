@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.warriortech.resb.R
 import com.warriortech.resb.model.KitchenCategory
 import com.warriortech.resb.model.Printer
@@ -29,7 +30,8 @@ import com.warriortech.resb.util.KitchenGroupDropdown
 @Composable
 fun PrinterSettingsScreen(
     viewModel: PrinterSettingsViewModel = hiltViewModel(),
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -59,6 +61,15 @@ fun PrinterSettingsScreen(
                     }
                 },
                 actions = {
+
+                    IconButton(onClick = { navController.navigate("bluetooth") }) {
+                        Icon(
+                            Icons.Default.Bluetooth,
+                            contentDescription = "Bluetooth Printers",
+                            tint = SurfaceLight
+                        )
+                    }
+
                     IconButton(onClick = { showAddDialog = true }) {
                         Icon(
                             Icons.Default.Add,

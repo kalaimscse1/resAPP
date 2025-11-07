@@ -155,7 +155,7 @@ class PaidBillsViewModel @Inject constructor(
             }
         }
     }
-
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun printBill(billNo: String) {
         viewModelScope.launch {
             try {

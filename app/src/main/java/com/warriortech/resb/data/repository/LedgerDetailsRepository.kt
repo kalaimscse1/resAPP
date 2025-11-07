@@ -18,6 +18,15 @@ class LedgerDetailsRepository @Inject constructor(
         }
     }
 
+    suspend fun getDayBook(fromDate: String,toDate: String):List<TblLedgerDetailsIdResponse>?{
+        return try {
+            apiService.getDayBook(sessionManager.getCompanyCode() ?: "",fromDate,toDate).body()
+        }catch (e:Exception){
+            null
+        }
+    }
+
+
     suspend fun addLedgerDetails(ledgerDetails:TblLedgerDetailIdRequest): TblLedgerDetailsIdResponse?{
         return try {
             apiService.addLedgerDetails(ledgerDetails,sessionManager.getCompanyCode() ?: "").body()
@@ -88,7 +97,7 @@ class LedgerDetailsRepository @Inject constructor(
 
     suspend fun getLedgerDetailsById(ledgerId:Long,fromDate: String,toDate: String) : List<TblLedgerDetailsIdResponse>{
         return try {
-            apiService.getByLedgerId(
+            apiService.getByPartyId(
                 ledgerId,
                 sessionManager.getCompanyCode()?:"",
                 fromDate,

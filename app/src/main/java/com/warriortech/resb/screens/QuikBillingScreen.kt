@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.IntOffset
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.util.SuccessDialog
 import kotlin.math.roundToInt
-
+@androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemWiseBillScreen(

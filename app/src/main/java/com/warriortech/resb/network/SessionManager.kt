@@ -1,5 +1,6 @@
 package com.warriortech.resb.network
 
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -30,6 +31,7 @@ class SessionManager @Inject constructor(
         private const val DECIMAL = "decimal_places"
         private const val KEY_USER_LOGIN = "user_login"
         private const val MAIL_ID="mail_id"
+        private const val BLUETOOTH="bluetooth_printer"
     }
 
     private lateinit var prefs: SharedPreferences
@@ -75,6 +77,20 @@ class SessionManager @Inject constructor(
         prefs.edit { putString(KEY_USER_LOGIN, userLogin) }
     }
 
+    fun saveBluetoothPrinter(macAddress: BluetoothDevice) {
+        checkInitialization()
+        prefs.edit { putString(BLUETOOTH, macAddress.address) }
+    }
+
+    fun getBluetoothPrinter(): String? {
+        checkInitialization()
+        return prefs.getString(BLUETOOTH, null)
+    }
+
+    fun clearBluetoothPrinter() {
+        checkInitialization()
+        prefs.edit { remove(BLUETOOTH) }
+    }
 
     fun getUserLogin(): Boolean {
         checkInitialization()

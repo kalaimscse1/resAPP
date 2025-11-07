@@ -1152,6 +1152,12 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<TblLedgerDetailsIdResponse>
 
+    @POST("ledger/transaction/insertSingleLedgerDetails")
+    suspend fun insertSingleLedgerDetails(
+        @Body ledgerDetails: List<TblLedgerDetailIdRequest>,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<List<TblLedgerDetailsIdResponse>>
+
     @GET("ledger/transaction/getLedgerDetailsById/{ledger_details_id}")
     suspend fun getLedgerDetailsById(
         @Path("ledger_details_id") ledgerDetailId: Long,
@@ -1216,4 +1222,20 @@ interface ApiService {
         @Path("ledger_id") voucherType: Long,
         @Header("X-Tenant-ID") tenantId: String
     ): Response<Map<String, Double>>
+
+    @GET("ledger/transaction/getDayBookEntries")
+    suspend fun getDayBook(
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
+    ): Response<List<TblLedgerDetailsIdResponse>>
+
+    @GET("ledger/transaction/findByPartyId/{ledger_id}")
+    suspend fun getByPartyId(
+        @Path("ledger_id") ledgerId: Long,
+        @Header("X-Tenant-ID") tenantId: String,
+        @Query("fromDate") fromDate: String,
+        @Query("toDate") toDate: String
+    ): Response<List<TblLedgerDetailsIdResponse>>
+
 }

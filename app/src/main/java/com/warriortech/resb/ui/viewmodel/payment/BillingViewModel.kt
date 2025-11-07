@@ -471,7 +471,7 @@ class BillingViewModel @Inject constructor(
             _uiState.update { it.copy(upiAmount = amount) }
         }
     }
-
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun processPayment(voucherType: String) {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
@@ -613,14 +613,14 @@ class BillingViewModel @Inject constructor(
             }
         }
     }
-
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun printBill(
         bill: Bill,
         currentState: BillingPaymentUiState,
         amount: Double,
         paymentMethod: PaymentMethod
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch  {
             val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
             if (isReceipt) {
                 val ip = orderRepository.getIpAddress("COUNTER")

@@ -83,13 +83,14 @@ class CounterViewModel @Inject constructor(
 
     fun loadMenuItems(category: String? = null) {
         viewModelScope.launch {
-            try{
+            try {
                 _menuState.value = MenuUiState.Loading
                 val menus = menuRepository.getMenus().associateBy { it.menu_id }
                 menuRepository.getMenuItems(category).collect { result ->
                     result.fold(
                         onSuccess = { menuItems ->
-                            val showMenu = sessionManager.getGeneralSetting()?.menu_show_in_time == true
+                            val showMenu =
+                                sessionManager.getGeneralSetting()?.menu_show_in_time == true
                             if (showMenu) {
                                 val currentTime = getCurrentTimeAsFloat()
 
@@ -125,7 +126,7 @@ class CounterViewModel @Inject constructor(
                         }
                     )
                 }
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 MenuUiState.Error(e.message ?: "Failed to load menu items")
             }
 
@@ -251,6 +252,7 @@ class CounterViewModel @Inject constructor(
         }
     }
 
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun cashPrintBill() {
         viewModelScope.launch {
             if (_selectedItems.value.isEmpty()) {
@@ -339,7 +341,8 @@ class CounterViewModel @Inject constructor(
                                         deliveryCharge = 0.0, // Assuming no delivery charge
                                         discount = response.disc_amt,
                                         roundOff = response.round_off,
-                                        total = response.grand_total
+                                        total = response.grand_total,
+//                                        paperWidth = if (sessionManager.getBluetoothPrinter() != null) 32 else 48
                                     )
                                     val isReceipt =
                                         sessionManager.getGeneralSetting()?.is_receipt ?: false
@@ -369,11 +372,10 @@ class CounterViewModel @Inject constructor(
         }
     }
 
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun printBill(bill: Bill, amount: Double, paymentMethod: PaymentMethod) {
         viewModelScope.launch {
-
             val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
-
             if (isReceipt) {
                 val ip = orderRepository.getIpAddress("COUNTER")
                 val printResponse = billRepository.printBill(bill, ip)

@@ -64,7 +64,7 @@ import com.warriortech.resb.ui.viewmodel.payment.PaymentProcessingState
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.StringDropdown
-
+@androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(

@@ -261,7 +261,7 @@ class MenuViewModel @Inject constructor(
         _isExistingOrderLoaded.value = false
         _orderState.value = OrderUiState.Idle
     }
-
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun placeOrder(tableId: Long, tableStatus1: String?) {
         viewModelScope.launch {
             if (_selectedItems.value.isEmpty()) {
@@ -301,7 +301,7 @@ class MenuViewModel @Inject constructor(
                                 orderId = order.order_master_id,
                                 waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
-                                items = kotItem
+                                items = kotItem,
                             )
                             printKOT(kotRequest)
                         },
@@ -354,7 +354,7 @@ class MenuViewModel @Inject constructor(
             }
         }
     }
-
+    @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     private fun printKOT(orderId: KOTRequest) {
         viewModelScope.launch {
             val isKOTEnabled = sessionManager.getGeneralSetting()?.is_kot ?: false
