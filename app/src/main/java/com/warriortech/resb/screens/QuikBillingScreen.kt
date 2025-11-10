@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.util.SuccessDialog
+import com.warriortech.resb.util.getDeviceInfo
 import kotlin.math.roundToInt
 @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,6 +82,7 @@ fun ItemWiseBillScreen(
     var isProcessingOthers by remember { mutableStateOf(false) }
 
     var values by remember { mutableStateOf<PaddingValues>(PaddingValues(0.dp)) }
+    val deviceInfo = getDeviceInfo()
 
     LaunchedEffect(Unit) {
         viewModel.loadMenuItems()
@@ -373,61 +375,177 @@ fun ItemWiseBillScreen(
                                 }
                             }
                         }
-
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(3),
-                            modifier = Modifier
-                                .fillMaxHeight(0.5f)
-                                .padding(6.dp)
-                        ) {
-                            itemsIndexed(
-                                filteredMenuItems,
-                                key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" }
-                            ) { _, product ->
-                                Card(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .fillMaxWidth()
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .pointerInput(Unit) {
-                                            detectTapGestures { tapOffset ->
-                                                val start = tapOffset
-                                                val end = cartOffset
-                                                FlyToCartController.current?.invoke(
-                                                    product,
-                                                    start,
-                                                    end
-                                                )
-                                                viewModel.addItemToOrder(product)
-                                            }
-                                        },
-                                    elevation = CardDefaults.cardElevation(4.dp),
-                                    shape = RoundedCornerShape(6.dp),
-                                    colors = CardDefaults.cardColors(containerColor = ghostWhite)
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(10.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                        if (deviceInfo.isTablet){
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(10),
+                                modifier = Modifier
+                                    .fillMaxHeight(0.5f)
+                                    .padding(6.dp)
+                            ) {
+                                itemsIndexed(
+                                    filteredMenuItems,
+                                    key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" }
+                                ) { _, product ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .pointerInput(Unit) {
+                                                detectTapGestures { tapOffset ->
+                                                    val start = tapOffset
+                                                    val end = cartOffset
+                                                    FlyToCartController.current?.invoke(
+                                                        product,
+                                                        start,
+                                                        end
+                                                    )
+                                                    viewModel.addItemToOrder(product)
+                                                }
+                                            },
+                                        elevation = CardDefaults.cardElevation(4.dp),
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = CardDefaults.cardColors(containerColor = ghostWhite)
                                     ) {
-                                        Row {
-                                            Text(
-                                                product.menu_item_name,
-                                                fontWeight = FontWeight.Bold,
-                                                maxLines = 2,
-                                                textAlign = TextAlign.Center,
-                                            )
-                                        }
-                                        Row {
-                                            Text(
-                                                CurrencySettings.format(product.rate),
-                                                maxLines = 1,
-                                                textAlign = TextAlign.Center
-                                            )
+                                        Column(
+                                            modifier = Modifier.padding(10.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Row {
+                                                Text(
+                                                    product.menu_item_name,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 2,
+                                                    textAlign = TextAlign.Center,
+
+                                                )
+                                            }
+                                            Row {
+                                                Text(
+                                                    CurrencySettings.format(product.rate),
+                                                    maxLines = 1,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                        else if (deviceInfo.isLargeTablet)
+                        {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(15),
+                                modifier = Modifier
+                                    .fillMaxHeight(0.5f)
+                                    .padding(6.dp)
+                            ) {
+                                itemsIndexed(
+                                    filteredMenuItems,
+                                    key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" }
+                                ) { _, product ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .pointerInput(Unit) {
+                                                detectTapGestures { tapOffset ->
+                                                    val start = tapOffset
+                                                    val end = cartOffset
+                                                    FlyToCartController.current?.invoke(
+                                                        product,
+                                                        start,
+                                                        end
+                                                    )
+                                                    viewModel.addItemToOrder(product)
+                                                }
+                                            },
+                                        elevation = CardDefaults.cardElevation(4.dp),
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = CardDefaults.cardColors(containerColor = ghostWhite)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(10.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Row {
+                                                Text(
+                                                    product.menu_item_name,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 2,
+                                                    textAlign = TextAlign.Center,
+                                                    fontSize = 20.sp
+                                                )
+                                            }
+                                            Row {
+                                                Text(
+                                                    CurrencySettings.format(product.rate),
+                                                    maxLines = 1,
+                                                    textAlign = TextAlign.Center,
+                                                    fontSize = 20.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }else{
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(3),
+                                modifier = Modifier
+                                    .fillMaxHeight(0.5f)
+                                    .padding(6.dp)
+                            ) {
+                                itemsIndexed(
+                                    filteredMenuItems,
+                                    key = { index, product -> "${product.menu_item_id}_${product.menu_id}_$index" }
+                                ) { _, product ->
+                                    Card(
+                                        modifier = Modifier
+                                            .padding(4.dp)
+                                            .fillMaxWidth()
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .pointerInput(Unit) {
+                                                detectTapGestures { tapOffset ->
+                                                    val start = tapOffset
+                                                    val end = cartOffset
+                                                    FlyToCartController.current?.invoke(
+                                                        product,
+                                                        start,
+                                                        end
+                                                    )
+                                                    viewModel.addItemToOrder(product)
+                                                }
+                                            },
+                                        elevation = CardDefaults.cardElevation(4.dp),
+                                        shape = RoundedCornerShape(6.dp),
+                                        colors = CardDefaults.cardColors(containerColor = ghostWhite)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(10.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Row {
+                                                Text(
+                                                    product.menu_item_name,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 2,
+                                                    textAlign = TextAlign.Center,
+                                                )
+                                            }
+                                            Row {
+                                                Text(
+                                                    CurrencySettings.format(product.rate),
+                                                    maxLines = 1,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
                     }
                 }
 

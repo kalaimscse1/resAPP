@@ -207,12 +207,13 @@ class BillRepository @Inject constructor(
             else
                 apiService.updateGstForOrderDetails(orderMasterId, tenant)
 
-            apiService.saveAllLedgerDetails(ledgerEntries, tenant)
+            apiService.insertSingleLedgerDetails(ledgerEntries, tenant)
             emit(Result.success(result))
         } catch (e: Exception) {
             emit(Result.failure(e))
         }
     }
+
     @SuppressLint("SupportAnnotationUsage", "SuspiciousIndentation")
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun printBill(bill: Bill, ipAddress: String): Flow<Result<String>> = flow {
@@ -223,13 +224,13 @@ class BillRepository @Inject constructor(
             val bytes = response.body()?.bytes()
                 ?: return@flow emit(Result.failure(Exception("Empty print data")))
             var msg = ""
-            if (sessionManager.getBluetoothPrinter()!=null)
+            if (sessionManager.getBluetoothPrinter() != null)
                 printerHelper.printViaBluetoothMac(
                     data = bytes,
-                    macAddress =  sessionManager.getBluetoothPrinter().toString()
+                    macAddress = sessionManager.getBluetoothPrinter().toString()
                 ) { _, m -> msg = m }
             else
-            printerHelper.printViaTcp(ipAddress, data = bytes) { _, m -> msg = m }
+                printerHelper.printViaTcp(ipAddress, data = bytes) { _, m -> msg = m }
             emit(Result.success(msg))
         } catch (e: Exception) {
             emit(Result.failure(e))
@@ -353,9 +354,16 @@ object LedgerEntryBuilder {
             "CASH" -> listOf(
                 base.copy(
                     party_id = 1,
-                    purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY CASH" else "SALES BY CASH",
+                    purpose = if (voucherType == "DUE") "CREDIT AMOUNT TO ${ledgerDetail?.ledger_name}" else "SALES BY CASH",
                     amount_in = receivedAmt
 
+                ),
+                base.copy(
+                    id = 1,
+                    party_id = if (voucherType == "DUE") ledgerDetail?.ledger_id?.toLong()
+                        ?: 0 else 5,
+                    purpose = if (voucherType == "DUE") "CREDIT AMOUNT TO ${ledgerDetail?.ledger_name}" else "SALES BY CASH",
+                    amount_out = receivedAmt
                 )
             )
 
@@ -364,6 +372,13 @@ object LedgerEntryBuilder {
                     party_id = 2,
                     purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY CARD" else "SALES BY CARD",
                     amount_in = receivedAmt
+                ),
+                base.copy(
+                    id = 2,
+                    party_id = if (voucherType == "DUE") ledgerDetail?.ledger_id?.toLong()
+                        ?: 0 else 5,
+                    purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY CARD" else "SALES BY CARD",
+                    amount_out = receivedAmt
                 )
             )
 
@@ -372,6 +387,13 @@ object LedgerEntryBuilder {
                     party_id = 3,
                     purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY UPI" else "SALES BY UPI",
                     amount_in = receivedAmt
+                ),
+                base.copy(
+                    id = 3,
+                    party_id = if (voucherType == "DUE") ledgerDetail?.ledger_id?.toLong()
+                        ?: 0 else 5,
+                    purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY UPI" else "SALES BY UPI",
+                    amount_out = receivedAmt
                 )
             )
 
@@ -384,23 +406,67 @@ object LedgerEntryBuilder {
                 )
             )
 
-            "OTHERS" -> listOf(
-                base.copy(
-                    party_id = 1,
-                    purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY CASH" else "SALES BY CASH",
-                    amount_in = cash
-                ),
-                base.copy(
-                    party_id = 2,
-                    purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY CARD" else "SALES BY CARD",
-                    amount_in = card
-                ),
-                base.copy(
-                    party_id = 3,
-                    purpose = if (voucherType == "DUE") "SALES CREDIT AMOUNT BY UPI" else "SALES BY UPI",
-                    amount_in = upi
-                )
-            )
+            "OTHERS" ->
+                if (voucherType == "DUE") {
+                    listOfNotNull(
+                        base.copy(
+                            party_id = 1,
+                            purpose = "SALES CREDIT AMOUNT BY CASH",
+                            amount_in = cash + card + upi
+                        ),
+                        if (cash > 0.0)
+                            base.copy(
+                                id = 1,
+                                party_id = ledger?.ledger_id?.toLong() ?: 0,
+                                purpose = "SALES CREDIT AMOUNT BY CASH",
+                                amount_out = cash
+                            ) else null,
+                        if (card > 0.0)
+                            base.copy(
+                                id = 2,
+                                party_id = ledger?.ledger_id?.toLong() ?: 0,
+                                purpose = "SALES CREDIT AMOUNT BY CARD",
+                                amount_out = card
+                            ) else null,
+                        if (upi > 0.0)
+                            base.copy(
+                                id = 3,
+                                party_id = ledger?.ledger_id?.toLong() ?: 0,
+                                purpose = "SALES CREDIT AMOUNT BY UPI",
+                                amount_out = upi
+                            ) else null
+                    )
+                } else {
+                    listOfNotNull(
+                        base.copy(
+                            party_id = 1,
+                            purpose = "SALES BY CASH",
+                            amount_in = cash + card + upi
+                        ),
+                        if (cash > 0.0)
+                            base.copy(
+                                id = 1,
+                                party_id = 5,
+                                purpose = "SALES BY CASH",
+                                amount_out = cash
+                            )
+                        else null,
+                        if (card > 0.0)
+                            base.copy(
+                                id = 2,
+                                party_id = 5,
+                                purpose = "SALES BY CARD",
+                                amount_out = card
+                            ) else null,
+                        if (upi > 0.0)
+                            base.copy(
+                                id = 3,
+                                party_id = 5,
+                                purpose = "SALES BY UPI",
+                                amount_out = upi
+                            ) else null
+                    )
+                }
 
             else -> listOf(
                 base.copy(

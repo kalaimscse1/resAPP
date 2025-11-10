@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -178,7 +179,7 @@ fun MenuItemSettingsScreen(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 }) {
-                    Icon(Icons.Default.InsertDriveFile, contentDescription = "View Excel")
+                    Icon(Icons.AutoMirrored.Filled.InsertDriveFile, contentDescription = "View Excel")
                 }
             }
         }

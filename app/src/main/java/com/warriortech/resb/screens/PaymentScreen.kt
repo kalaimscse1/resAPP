@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -397,7 +399,8 @@ fun PaymentBottomBar(
                     else -> uiState.selectedPaymentMethod != null &&
                             payingAmount > 0 &&
                             uiState.paymentProcessingState == PaymentProcessingState.Idle
-                }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
             ) {
                 Text("Confirm Payment")
             }
