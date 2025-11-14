@@ -9,6 +9,7 @@ import com.warriortech.resb.util.NetworkMonitor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import okhttp3.ResponseBody
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -71,21 +72,9 @@ class ModifierRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteModifier(modifierId: Long): Result<Unit> {
-        return try {
-            if (isOnline()) {
-                val response = apiService.deleteModifier(modifierId,sessionManager.getCompanyCode()?:"")
-                if (response.isSuccessful) {
-                    Result.success(Unit)
-                } else {
-                    Result.failure(Exception("API Error: ${response.code()}"))
-                }
-            } else {
-                Result.success(Unit)
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun deleteModifier(modifierId: Long): retrofit2.Response<ResponseBody> {
+        val response = apiService.deleteModifier(modifierId,sessionManager.getCompanyCode()?:"")
+        return response
     }
 
     fun getModifierGroupsForMenuItem(menuItemId: Long): Flow<Result<List<Modifiers>>> = flow {

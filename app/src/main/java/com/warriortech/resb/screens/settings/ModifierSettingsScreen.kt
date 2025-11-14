@@ -24,6 +24,7 @@ import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.CurrencySettings
+import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,9 +39,22 @@ fun ModifierSettingsScreen(
     var editingModifier by remember { mutableStateOf<Modifiers?>(null) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    var sucess by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadModifiers()
+    }
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage!= null) {
+            if (errorMessage=="addOn deleted successfully") {
+                sucess = true
+            } else {
+                failed = true
+            }
+        }
     }
 
     Scaffold(
@@ -103,7 +117,6 @@ fun ModifierSettingsScreen(
                             onDelete = {
                                 scope.launch {
                                     viewModel.deleteModifier(modifier.add_on_id)
-                                    snackbarHostState.showSnackbar("AddOn deleted")
                                 }
                             }
                         )
@@ -151,6 +164,32 @@ fun ModifierSettingsScreen(
                     }
                 },
                 onDismiss = { editingModifier = null }
+            )
+        }
+
+        if (sucess) {
+            SuccessDialogWithButton(
+                title = "Success",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    sucess = false
+                    viewModel.loadModifiers()
+                    viewModel.clearErrorMessage()
+                }
+            )
+        }
+
+        if (failed){
+            SuccessDialogWithButton(
+                title = "Failure",
+                description = errorMessage.toString(),
+                paddingValues = paddingValues,
+                onClick = {
+                    failed = false
+                    viewModel.loadModifiers()
+                    viewModel.clearErrorMessage()
+                }
             )
         }
     }

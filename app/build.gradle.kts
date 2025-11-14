@@ -184,6 +184,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-tracing:1.0.0-beta01")
     implementation("androidx.profileinstaller:profileinstaller:1.3.1")
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -334,6 +334,13 @@ interface ApiService {
         @Header("X-Tenant-ID") tenantId: String
     ): Response<ResponseBody>
 
+    @POST("print/menuItems/{paperWidth}")
+    suspend fun printMenuItems(
+        @Path("paperWidth") paperWidth:Int,
+        @Body menuItems:List<TblMenuItemResponse>,
+        @Header("X-Tenant-ID") tenantId: String
+    ): Response<ResponseBody>
+
     @GET("order/updateOrderStatusByOrderId/{order_master_id}")
     suspend fun updateOrderStatus(
         @Path("order_master_id") orderId: String,
@@ -836,9 +843,9 @@ interface ApiService {
 
     @DELETE("menu/addOn/deleteAddOnById/{add_on_id}")
     suspend fun deleteModifier(
-        @Path("id") id: Long,
+        @Path("add_on_id") id: Long,
         @Header("X-Tenant-ID") tenantId: String
-    ): Response<Int>
+    ): Response<ResponseBody>
 
     @GET("menu/addOn/getAddOnByCategoryId/{item_cat_id}")
     suspend fun getModifierGroupsForMenuItem(

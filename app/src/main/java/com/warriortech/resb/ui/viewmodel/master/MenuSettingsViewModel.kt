@@ -1,15 +1,19 @@
 package com.warriortech.resb.ui.viewmodel.master
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.MenuRepository
 import com.warriortech.resb.model.Menu
+import com.warriortech.resb.model.TblMenuItemResponse
+import com.warriortech.resb.util.PrinterHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.forEach
 
 @HiltViewModel
 class MenuSettingsViewModel @Inject constructor(
@@ -106,7 +110,7 @@ class MenuSettingsViewModel @Inject constructor(
                 when(response.code()){
                     in 200..299 ->{
                         loadMenus()
-                        _errorMessage.value = "Menu deleted successfully"
+                        _errorMessage.value = "Menu Chart deleted successfully"
                     }
                     400 -> {
                         _errorMessage.value = response.errorBody()?.string()

@@ -134,7 +134,8 @@ fun DashboardScreen(
                         .padding(paddingValues)
                         .background(MaterialTheme.colorScheme.surface),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(16.dp)
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     /**

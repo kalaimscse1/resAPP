@@ -144,6 +144,11 @@ class MenuItemRepository @Inject constructor(
         val response = apiService.deleteMenuItem(menuItemId,sessionManager.getCompanyCode()?:"")
         return response
     }
+
+    suspend fun printMenuItemsReport(menuItems: List<TblMenuItemResponse>,paperWidth:Int): Response<ResponseBody> {
+        val response = apiService.printMenuItems(paperWidth,menuItems ,sessionManager.getCompanyCode()?:"")
+        return response
+    }
 }
 
 // Extension functions

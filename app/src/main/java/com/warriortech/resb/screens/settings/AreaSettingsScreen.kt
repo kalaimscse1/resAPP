@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +26,8 @@ import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.master.AreaViewModel
 import com.warriortech.resb.model.Area
 import com.warriortech.resb.ui.theme.BluePrimary
+import com.warriortech.resb.ui.viewmodel.master.AreaUiState
+import com.warriortech.resb.ui.viewmodel.master.MenuSettingsViewModel
 import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
 
@@ -31,7 +35,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun AreaSettingsScreen(
     onBackPressed: () -> Unit,
-    viewModel: AreaViewModel = hiltViewModel()
+    viewModel: AreaViewModel = hiltViewModel(),
+    drawerState: DrawerState,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -40,6 +45,7 @@ fun AreaSettingsScreen(
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     var sucess by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     // Handle messages
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let {
@@ -70,9 +76,16 @@ fun AreaSettingsScreen(
             TopAppBar(
                 title = { Text("Area Settings", color = SurfaceLight) },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
                             tint = SurfaceLight
                         )
                     }
@@ -90,7 +103,22 @@ fun AreaSettingsScreen(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = PrimaryGreen,
+                contentColor = SurfaceLight,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                val menuItems = uiState.areas
+                Text(
+                    text = "Total: ${menuItems.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(

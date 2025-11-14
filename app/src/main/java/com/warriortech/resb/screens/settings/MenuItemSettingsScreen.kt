@@ -17,7 +17,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.InsertDriveFile
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.Visibility
@@ -65,7 +67,8 @@ import com.warriortech.resb.util.UnitDropdown
 fun MenuItemSettingsScreen(
     onBackPressed: () -> Unit,
     viewModel: MenuItemSettingsViewModel = hiltViewModel(),
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    drawerState: DrawerState
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -111,10 +114,16 @@ fun MenuItemSettingsScreen(
             TopAppBar(
                 title = { Text("Menu Item Settings", color = SurfaceLight) },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
                             tint = SurfaceLight
                         )
                     }
@@ -157,6 +166,12 @@ fun MenuItemSettingsScreen(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.weight(1f))
+
+                IconButton(onClick = {
+                   viewModel.printMenuItems(menuItems, 48)
+                }) {
+                    Icon(Icons.Default.Print, contentDescription = "Print Menu Items")
+                }
                 IconButton(onClick = {
                     ReportExport.menuItemsExportToPdf(context, menuItems, sessionManager)
                 }) {

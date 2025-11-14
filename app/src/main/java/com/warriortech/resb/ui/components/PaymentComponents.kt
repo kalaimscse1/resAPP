@@ -75,10 +75,19 @@ fun PaymentMethodCard(
     onPaymentMethodChange: (String) -> Unit,
     viewModel: BillingViewModel,
     customers: List<TblCustomer>,
-    onCustomer: (TblCustomer) -> Unit
+    onCustomer: (TblCustomer) -> Unit,
+    voucherType: String? = null
 ) {
     // Cache the payment methods list to prevent recreation on every recomposition
     val paymentMethods = remember {
+        if (voucherType=="DUE") {
+            listOf(
+                "CASH" to Icons.Default.Money,
+                "CARD" to Icons.Default.CreditCard,
+                "UPI" to Icons.Default.QrCode,
+                "OTHERS" to Icons.Default.MoreHoriz
+            )
+        } else
         listOf(
             "CASH" to Icons.Default.Money,
             "CARD" to Icons.Default.CreditCard,

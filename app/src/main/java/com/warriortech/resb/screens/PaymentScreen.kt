@@ -41,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.warriortech.resb.model.TblCustomer
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.screens.settings.CustomerDialog
 import com.warriortech.resb.ui.components.PaymentMethodCard
 import com.warriortech.resb.ui.components.PaymentSummaryCard
 import com.warriortech.resb.ui.theme.PrimaryGreen
@@ -66,6 +68,8 @@ import com.warriortech.resb.ui.viewmodel.payment.PaymentProcessingState
 import com.warriortech.resb.util.AnimatedSnackbarDemo
 import com.warriortech.resb.util.CurrencySettings
 import com.warriortech.resb.util.StringDropdown
+import kotlinx.coroutines.launch
+
 @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +89,7 @@ fun PaymentScreen(
     val table = sessionManager.getGeneralSetting()?.is_table_allowed == true
     var showCustomerDialog by remember { mutableStateOf(false) }
     var customer by remember { mutableStateOf<TblCustomer?>(null) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.loadCustomers()
@@ -291,7 +296,8 @@ fun PaymentScreen(
                                 customer = it
                                 viewModel.setCustomer(it)
                             },
-                            customers = customers
+                            customers = customers,
+                            voucherType = voucherType
                         )
                     }
                 }
@@ -299,14 +305,14 @@ fun PaymentScreen(
         }
     }
     if (showCustomerDialog) {
-        CustomerSelectionDialog(
-            customers = customers,
-            onCustomerSelected = { it ->
-                viewModel.setCustomer(it)
-                showCustomerDialog = false
-            },
-            onDismissRequest = {
-                showCustomerDialog = false
+        CustomerDialog(
+            customer = null,
+            onDismiss = { showCustomerDialog = false },
+            onConfirm = { customer ->
+                scope.launch {
+                    viewModel.addCustomer(customer)
+                    showCustomerDialog = false
+                }
             }
         )
     }

@@ -460,7 +460,7 @@ fun AppNavigation(
             )
         }
 
-        composable("menu")  {
+        composable("menu")  @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) {
             val tableId = selectedTable?.table_id ?: 1L
             val tableStatId = selectedTable != null || isTakeaway == "TABLE"
             val tableNumber = selectedTable?.table_name ?: ""
@@ -560,21 +560,24 @@ fun AppNavigation(
 
         composable("area_setting") {
             AreaSettingsScreen(
-                onBackPressed = { navController.popBackStack() }
+                onBackPressed = { navController.popBackStack() },
+                drawerState = drawerState
             )
         }
 
         composable("table_setting") {
             TableSettingsScreen(onBackPressed = {
                 navController.popBackStack()
-            })
+            },
+                drawerState = drawerState)
         }
 
         composable("menu_setting") {
             MenuSettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
-                }
+                },
+                drawerState = drawerState
             )
         }
 
@@ -583,7 +586,8 @@ fun AppNavigation(
                 onBackPressed = {
                     navController.popBackStack()
                 },
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                drawerState = drawerState
             )
         }
 
@@ -591,7 +595,8 @@ fun AppNavigation(
             MenuCategorySettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
-                }
+                },
+                drawerState = drawerState
             )
         }
 

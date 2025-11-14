@@ -3,15 +3,18 @@ package com.warriortech.resb.screens.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,6 +24,7 @@ import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.master.MenuCategorySettingsViewModel
+import com.warriortech.resb.ui.viewmodel.master.MenuSettingsViewModel
 import com.warriortech.resb.util.ReusableBottomSheet
 import com.warriortech.resb.util.SuccessDialogWithButton
 import kotlinx.coroutines.launch
@@ -29,7 +33,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun MenuCategorySettingsScreen(
     onBackPressed: () -> Unit,
-    viewModel: MenuCategorySettingsViewModel = hiltViewModel()
+    viewModel: MenuCategorySettingsViewModel = hiltViewModel(),
+    drawerState: DrawerState
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val order by viewModel.orderBy.collectAsStateWithLifecycle()
@@ -61,9 +66,16 @@ fun MenuCategorySettingsScreen(
             TopAppBar(
                 title = { Text("MenuCategory Settings", color = SurfaceLight) },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
                             tint = SurfaceLight
                         )
                     }
@@ -81,7 +93,25 @@ fun MenuCategorySettingsScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = PrimaryGreen,
+                contentColor = SurfaceLight,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                val menuItems = when (val state = uiState) {
+                    is MenuCategorySettingsViewModel.UiState.Success -> state.categories
+                    else -> emptyList()
+                }
+                Text(
+                    text = "Total: ${menuItems.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
     ) { paddingValues ->
 
         when (val state = uiState) {

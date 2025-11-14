@@ -3,11 +3,13 @@ package com.warriortech.resb.screens.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -25,6 +27,7 @@ import com.warriortech.resb.ui.components.MobileOptimizedCard
 import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
+import com.warriortech.resb.ui.viewmodel.master.MenuSettingsViewModel
 import com.warriortech.resb.ui.viewmodel.master.TableSettingsViewModel
 import kotlinx.coroutines.launch
 import com.warriortech.resb.util.AreaDropdown
@@ -34,7 +37,8 @@ import com.warriortech.resb.util.StringDropdown
 @Composable
 fun TableSettingsScreen(
     viewModel: TableSettingsViewModel = hiltViewModel(),
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    drawerState: DrawerState
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
@@ -59,9 +63,16 @@ fun TableSettingsScreen(
             TopAppBar(
                 title = { Text("Table Settings", color = SurfaceLight) },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
                         Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
                             tint = SurfaceLight
                         )
                     }
@@ -80,7 +91,25 @@ fun TableSettingsScreen(
 
                 )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = PrimaryGreen,
+                contentColor = SurfaceLight,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                val menuItems = when (val state = uiState) {
+                    is TableSettingsUiState.Success -> state.tables
+                    else -> emptyList()
+                }
+                Text(
+                    text = "Total: ${menuItems.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
     ) { paddingValues ->
         when (val state = uiState) {
             is TableSettingsUiState.Loading -> {

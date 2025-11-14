@@ -465,5 +465,4 @@ class PrinterHelper(private val context: Context) {
         connection?.releaseInterface(usbInterface)
         connection?.close()
     }
-
 }

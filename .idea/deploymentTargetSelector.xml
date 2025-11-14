@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="Resb.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-11-10T13:48:06.246910900Z">
+        <DropdownSelection timestamp="2025-11-13T13:49:03.654591600Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Administrator\.android\avd\Tablet_15.6.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=QOLRDY9P8LNNJVQK" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,12 +15,17 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=QOLRDY9P8LNNJVQK" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
                 <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Administrator\.android\avd\Tablet_15.6.avd" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Administrator\.android\avd\Pixel_Tablet.avd" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Administrator\.android\avd\Resizable_Experimental.avd" />
               </handle>
             </Target>
           </targets>

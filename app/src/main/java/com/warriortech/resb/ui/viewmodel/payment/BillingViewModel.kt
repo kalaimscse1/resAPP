@@ -17,6 +17,7 @@ import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.service.PrintService
+import com.warriortech.resb.ui.viewmodel.setting.CustomerSettingsViewModel.UiState
 import com.warriortech.resb.util.CurrencySettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -136,6 +137,16 @@ class BillingViewModel @Inject constructor(
         }
     }
 
+    fun addCustomer(customer: TblCustomer) {
+        viewModelScope.launch {
+            try {
+                customerRepository.insertCustomer(customer)
+                loadCustomers()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = e.message ?: "Failed to add customer") }
+            }
+        }
+    }
     fun updateSelectedCustomer(customer: TblCustomer) {
         _uiState.value = _uiState.value.copy(customer = customer)
     }

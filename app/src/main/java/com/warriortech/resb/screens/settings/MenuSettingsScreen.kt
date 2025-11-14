@@ -8,17 +8,20 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,6 +41,7 @@ import kotlinx.coroutines.launch
 fun MenuSettingsScreen(
     viewModel: MenuSettingsViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
+    drawerState: DrawerState
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val order by viewModel.orderBy.collectAsStateWithLifecycle()
@@ -56,7 +60,7 @@ fun MenuSettingsScreen(
 
     LaunchedEffect(errorMessage) {
         if (errorMessage!= null) {
-            if (errorMessage=="Menu deleted successfully") {
+            if (errorMessage=="Menu Chart deleted successfully") {
                 sucess = true
             } else {
                 failed = true
@@ -67,11 +71,18 @@ fun MenuSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Menu Settings", color = SurfaceLight) },
+                title = { Text("Menu Chart Settings", color = SurfaceLight) },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
                         Icon(
-                            Icons.Default.ArrowBack, contentDescription = "Back",
+                            Icons.Default.Menu,
+                            contentDescription = "Menu",
                             tint = SurfaceLight
                         )
                     }
@@ -92,7 +103,25 @@ fun MenuSettingsScreen(
             )
         },
 
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = PrimaryGreen,
+                contentColor = SurfaceLight,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                val menuItems = when (val state = uiState) {
+                    is MenuSettingsViewModel.UiState.Success -> state.menus
+                    else -> emptyList()
+                }
+                Text(
+                    text = "Total: ${menuItems.size}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
     ) { paddingValues ->
         when (val state = uiState) {
             is MenuSettingsViewModel.UiState.Loading -> {
