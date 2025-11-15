@@ -1,6 +1,7 @@
 package com.warriortech.resb.ui.viewmodel.report
 
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.warriortech.resb.data.repository.BillRepository
@@ -16,6 +17,7 @@ import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.model.TblOrderDetailsResponse
 import com.warriortech.resb.network.SessionManager
 import com.warriortech.resb.ui.viewmodel.report.KotViewModel.KotActionState
+import com.warriortech.resb.util.ReportExport
 import com.warriortech.resb.util.getCurrentDateModern
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -210,6 +212,7 @@ class PaidBillsViewModel @Inject constructor(
                     discount = bill?.disc_amt ?: 0.0,
                     roundOff = bill?.round_off ?: 0.0,
                     total = bill?.grand_total ?: 0.0,
+                    paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80
                 )
 
                 val ip = orderRepository.getIpAddress("COUNTER")
@@ -283,8 +286,69 @@ class PaidBillsViewModel @Inject constructor(
 
     }
 
-    fun sendBillViaWhatsApp(billNo: String) {
+    fun sendBillViaWhatsApp(billNo: TblBillingResponse,context: android.content.Context) {
+        viewModelScope.launch {
+            try {
+                // Implement print logic here
+                // You would call billRepository.printBill(billNo)
+                val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print ?: false
+                val bill = billNo
+                var sn = 1
+                val orderDetails =
+                    orderRepository.getOrdersByOrderId(bill.order_master.order_master_id)
+                        .body()!!
+                val counter =
+                    sessionManager.getUser()?.counter_name ?: "Counter1"
+                val billItems = orderDetails.map { detail ->
+                    val menuItem = detail.menuItem
+                    val qty = detail.qty
+                    BillItem(
+                        sn = sn++,
+                        itemName = if (tamil) menuItem.menu_item_name_tamil else menuItem.menu_item_name,
+                        qty = qty,
+                        price = menuItem.rate,
+                        basePrice = detail.rate,
+                        amount = qty * menuItem.rate,
+                        sgstPercent = menuItem.tax_percentage.toDouble() / 2,
+                        cgstPercent = menuItem.tax_percentage.toDouble() / 2,
+                        igstPercent = if (detail.igst > 0) menuItem.tax_percentage.toDouble() else 0.0,
+                        cessPercent = if (detail.cess > 0) menuItem.cess_per.toDouble() else 0.0,
+                        sgst = detail.sgst,
+                        cgst = detail.cgst,
+                        igst = if (detail.igst > 0) detail.igst else 0.0,
+                        cess = if (detail.cess > 0) detail.cess else 0.0,
+                        cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0,
+                        taxPercent = menuItem.tax_percentage.toDouble(),
+                        taxAmount = detail.tax_amount
+                    )
+                }
+                val billDetails = Bill(
+                    company_code = sessionManager.getCompanyCode() ?: "",
+                    billNo = bill.bill_no,
+                    date = bill.bill_date.toString(),
+                    time = bill.bill_create_time.toString(),
+                    orderNo = bill.order_master.order_master_id,
+                    counter = counter,
+                    tableNo = bill.order_master.table_name,
+                    custName = bill.customer.customer_name,
+                    custNo = bill.customer.contact_no,
+                    custAddress = bill.customer.address,
+                    custGstin = bill.customer.gst_no,
+                    items = billItems,
+                    subtotal = bill.order_amt,
+                    deliveryCharge = 0.0, // Assuming no delivery charge
+                    discount = bill.disc_amt,
+                    roundOff = bill.round_off,
+                    total = bill.grand_total,
+                    paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80
+                )
+                ReportExport.generateBillPdf(billDetails, context,sessionManager)
 
+            } catch (e: Exception) {
+                _uiState.value = PaidBillsUiState.Error("Failed to print bill: ${e.message}")
+                Log.e("PaidBillsViewModel", "Error printing bill", e)
+            }
+        }
     }
 
     fun clearSelection() {

@@ -1,14 +1,18 @@
 package com.warriortech.resb.screens
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -93,7 +97,8 @@ fun BillingScreen(
     var selectedKotNumber by remember { mutableStateOf<Int?>(null) }
     var showKotSelectionDialog by remember { mutableStateOf(false) }
     val orderDetails by viewModel._originalOrderDetails.collectAsStateWithLifecycle()
-
+    var previewDialog by remember { mutableStateOf(false) }
+    val preview by viewModel.preview.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = orderDetailsResponse, key2 = orderMasterId) {
         when {
@@ -133,18 +138,22 @@ fun BillingScreen(
                             tint = SurfaceLight
                         )
                     }
+
                 },
-//                actions = {
-//                    if (orderDetailsResponse != null) {
-//                        IconButton(onClick = { showKotSelectionDialog = true }) {
-//                            Icon(
-//                                imageVector = Icons.Default.FilterList,
-//                                contentDescription = "Select KOT",
-//                                tint = SurfaceLight
-//                            )
-//                        }
-//                    }
-//                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            previewDialog = true
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Print,
+                            contentDescription = "Print",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = PrimaryGreen
                 )
@@ -172,8 +181,45 @@ fun BillingScreen(
         )
 
     }
+    if (previewDialog){
+        PreviewBillDialog(
+            preview = preview!!,
+            onDismiss = { previewDialog = false }
+        )
+    }
 }
 
+@Composable
+fun PreviewBillDialog(
+    preview: Bitmap,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            MobileOptimizedButton(
+                onClick = onDismiss,
+                text = "Close",
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        title = {
+            Text("Bill Preview", style = MaterialTheme.typography.titleLarge)
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    bitmap = preview.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    )
+}
 @Composable
 fun BillingContent(
     modifier: Modifier = Modifier,
@@ -196,14 +242,14 @@ fun BillingContent(
                 Spacer(Modifier.height(8.dp))
             }
             val filteredOrderDetails = orderDetails.groupBy { it.kot_number }
-            items(filteredOrderDetails.toList()){ it ->
+            items(filteredOrderDetails.toList()) { it ->
                 Text(
                     text = "KOT #${it.first}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
-                it.second.forEach {details->
+                it.second.forEach { details ->
                     BilledItemRow(
                         menuItem = details.menuItem,
                         quantity = details.qty,
@@ -221,28 +267,6 @@ fun BillingContent(
                 }
                 ModernDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
-//            filteredOrderDetails.forEach { (kotNumber, items) ->
-//
-//            }
-//            items(filteredOrderDetails.toList()){
-//
-//
-//            }
-//            items(uiState.billedItems.toList()) { (menuItem, quantity) ->
-//
-//                BilledItemRow(
-//                    menuItem = menuItem,
-//                    quantity = quantity,
-//                    tableStatus = uiState.tableStatus,
-//                    currencyFormatter = currencyFormatter,
-//                    onQuantityChange = { newQuantity ->
-//                        onUpdateQuantity(menuItem, newQuantity)
-//                    },
-//                    onRemoveItem = {
-//                        onRemoveItem(menuItem)
-//                    }
-//                )
-//            }
             item { ModernDivider(modifier = Modifier.padding(vertical = 8.dp)) }
         } else {
             item {

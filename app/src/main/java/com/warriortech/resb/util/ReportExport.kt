@@ -3,26 +3,34 @@ package com.warriortech.resb.util
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.itextpdf.text.BaseColor
 import com.itextpdf.text.Document
 import com.itextpdf.text.Element
 import com.itextpdf.text.Font
+import com.itextpdf.text.Image
 import com.itextpdf.text.PageSize
 import com.itextpdf.text.Paragraph
 import com.itextpdf.text.Phrase
+import com.itextpdf.text.Rectangle
 import com.itextpdf.text.pdf.PdfPCell
 import com.itextpdf.text.pdf.PdfPTable
 import com.itextpdf.text.pdf.PdfWriter
+import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.CategoryReport
 import com.warriortech.resb.model.ItemReport
 import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.model.TblMenuItemResponse
 import com.warriortech.resb.network.SessionManager
+import com.warriortech.resb.ui.theme.LightGrayPrimary
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -568,7 +576,11 @@ object ReportExport {
     }
 
     @SuppressLint("DefaultLocale")
-    fun menuItemsExportToPdf(context: Context, bills: List<TblMenuItemResponse>, sessionManager: SessionManager) {
+    fun menuItemsExportToPdf(
+        context: Context,
+        bills: List<TblMenuItemResponse>,
+        sessionManager: SessionManager
+    ) {
         try {
             val company = sessionManager.getRestaurantProfile()
             val pdfDir = File(context.getExternalFilesDir(null), "reports")
@@ -585,8 +597,12 @@ object ReportExport {
             title.alignment = Element.ALIGN_CENTER
             document.add(title)
 
-            document.add(Paragraph("Generated on: ${Date()}\n\n" +
-                    "${company?.company_name}\n${company?.address1}\nPhone: ${company?.contact_no}\n\n"))
+            document.add(
+                Paragraph(
+                    "Generated on: ${Date()}\n\n" +
+                            "${company?.company_name}\n${company?.address1}\nPhone: ${company?.contact_no}\n\n"
+                )
+            )
 
             // ✅ Define columns
             val table = PdfPTable(8)
@@ -596,7 +612,7 @@ object ReportExport {
             val headerFont = Font(Font.FontFamily.HELVETICA, 12f, Font.BOLD)
             val headers = listOf(
                 "Item Name", "Category", "Menu Chart", "Tax",
-                "Rate", "Ac Rate", "Parcel Rate","Stock"
+                "Rate", "Ac Rate", "Parcel Rate", "Stock"
             )
 
             // Add headers
@@ -659,7 +675,11 @@ object ReportExport {
         }
     }
 
-    fun menuItemsExportToExcel(context: Context, bills: List<TblMenuItemResponse>,sessionManager: SessionManager) {
+    fun menuItemsExportToExcel(
+        context: Context,
+        bills: List<TblMenuItemResponse>,
+        sessionManager: SessionManager
+    ) {
         try {
 
             val excelDir = File(context.getExternalFilesDir(null), "reports")
@@ -707,4 +727,141 @@ object ReportExport {
         }
     }
 
+    fun generateBillPdf(bill: Bill, context: Context, sessionManager: SessionManager) {
+        val pdfDir = File(context.getExternalFilesDir(null), "reports")
+        if (!pdfDir.exists()) pdfDir.mkdirs()
+
+        val file = File(pdfDir, "${bill.billNo}_3inch.pdf")
+
+        // 80mm ≈ 226 points
+        val pageWidth = 226f
+        val document = Document(Rectangle(pageWidth, PageSize.A4.height), 10f, 10f, 10f, 10f)
+        val writer = PdfWriter.getInstance(document, FileOutputStream(file))
+        document.open()
+
+        val company = sessionManager.getRestaurantProfile()!!
+        val general = sessionManager.getGeneralSetting()!!
+
+        val fontNormal = Font(Font.FontFamily.COURIER, 8f, Font.NORMAL)
+        val fontBold = Font(Font.FontFamily.COURIER, 8f, Font.BOLD)
+        val fontTitle = Font(Font.FontFamily.COURIER, 10f, Font.BOLD)
+
+        fun line() { document.add(Paragraph("------------------------------------", fontNormal)) }
+
+        // ------- LOGO -------
+//        if (general.is_logo) {
+//            try {
+//                val logoDir = Paths.get("/root/uploads/logos", bill.company_code)
+//                val f = Files.list(logoDir).findFirst().orElse(null)
+//                if (f != null) {
+//                    val img = Image.getInstance(f.toAbsolutePath().toString())
+//                    img.scaleToFit(120f, 120f)
+//                    img.alignment = Image.ALIGN_CENTER
+//                    document.add(img)
+//                }
+//            } catch (_: Exception) { }
+//            document.add(Paragraph("\n"))
+//        }
+
+        // ------- HEADER -------
+        if (general.is_company_show) {
+            val title = Paragraph(company.company_name, fontTitle)
+            title.alignment = Element.ALIGN_CENTER
+            document.add(title)
+        }
+
+        fun center(text: String) {
+            document.add(Paragraph(text, fontNormal).apply { alignment = Element.ALIGN_CENTER })
+        }
+
+        center(company.address1)
+        if (company.address2.isNotEmpty()) center(company.address2)
+        if (company.place.isNotEmpty())
+            center("${company.place}, ${company.state} - ${company.pincode}")
+        if (company.mail_id.isNotEmpty()) center("Email: ${company.mail_id}")
+        if (company.contact_no.isNotEmpty()) center("Phone: ${company.contact_no}")
+        if (company.tax_no.isNotEmpty())
+            document.add(Paragraph("GSTIN: ${company.tax_no}", fontBold).apply {
+                alignment = Element.ALIGN_CENTER
+            })
+
+        document.add(Paragraph("\n"))
+        center("INVOICE")
+        line()
+
+        // ------- BILL INFO -------
+        fun info(label: String, value: String) {
+            document.add(Paragraph("$label : $value", fontNormal))
+        }
+
+        info("Bill No", bill.billNo)
+        info("Date", bill.date)
+        info("Time", bill.time)
+        info("Table", bill.tableNo)
+        info("Order No", bill.orderNo)
+        info("Customer", bill.custName)
+        if (bill.custGstin.isNotEmpty()) info("Customer GST", bill.custGstin)
+
+        line()
+
+        // ------- ITEMS -------
+        document.add(Paragraph("Item                 Qty   Total", fontBold))
+        line()
+
+        bill.items.forEach { item ->
+            val name = item.itemName.take(18).padEnd(18, ' ')
+            val qty = item.qty.toString().padStart(3, ' ')
+            val total = "%.2f".format(item.amount).padStart(7, ' ')
+            document.add(Paragraph("$name $qty  $total", fontNormal))
+        }
+
+        line()
+
+        // ------- TOTALS -------
+        fun total(label: String, v: Double) {
+            val value = "%.2f".format(v)
+            document.add(Paragraph(label.padEnd(20, ' ') + value.padStart(10, ' '), fontBold))
+        }
+
+        total("Subtotal", bill.subtotal)
+        if (bill.discount > 0) total("Discount", bill.discount)
+
+        if (general.is_split_gst) {
+            total("SGST", bill.items.sumOf { it.sgst })
+            total("CGST", bill.items.sumOf { it.cgst })
+        } else {
+            total("Tax", bill.items.sumOf { it.taxAmount })
+        }
+
+        total("Total", bill.total)
+
+        line()
+
+        // ------- FOOTER -------
+        val footer = general.bill_footer.ifEmpty { "Thank You!" }
+        center(footer)
+
+        document.close()
+        writer.close()
+
+        shareFile(context, file, "application/pdf")
+        Toast.makeText(context, "PDF Exported Successfully!", Toast.LENGTH_LONG).show()
+
+
+    }
+
+//    private fun generateQrImage(text: String): ByteArray {
+//        val size = 250
+//        val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
+//        val image = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
+//        for (x in 0 until size)
+//            for (y in 0 until size)
+//                image.setRGB(x, y, if (matrix[x, y]) 0 else 0xFFFFFF)
+//
+//        val baos = ByteArrayOutputStream()
+//        ImageIO.write(image, "png", baos)
+//        return baos.toByteArray()
+//    }
 }
+
+

@@ -484,7 +484,8 @@ fun MenuItemDialog(
                 value = name,
                 onValueChange = { name = it.uppercase() },
                 label = { Text("Name") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .focusRequester(nameFocus),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -497,7 +498,8 @@ fun MenuItemDialog(
                 value = nameTamil,
                 onValueChange = { nameTamil = it },
                 label = { Text("Name (Tamil)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .focusRequester(nameTamilFocus),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -510,7 +512,8 @@ fun MenuItemDialog(
                 value = rate,
                 onValueChange = { rate = it },
                 label = { Text("Rate") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .focusRequester(rateFocus),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -523,7 +526,8 @@ fun MenuItemDialog(
                 value = acRate,
                 onValueChange = { acRate = it },
                 label = { Text("AC Rate") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .focusRequester(acRateFocus),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -536,7 +540,8 @@ fun MenuItemDialog(
                 value = parcelRate,
                 onValueChange = { parcelRate = it },
                 label = { Text("Parcel Rate") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .focusRequester(parcelRateFocus),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(
@@ -628,7 +633,8 @@ fun MenuItemDialog(
                     value = hsnCode,
                     onValueChange = { hsnCode = it },
                     label = { Text("HSN Code") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .focusRequester(hsnCodeFocus),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
@@ -641,7 +647,8 @@ fun MenuItemDialog(
                     value = minStock.toString(),
                     onValueChange = { minStock = it.toLong() },
                     label = { Text("Minimum Stock") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .focusRequester(minStockFocus),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(

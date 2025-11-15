@@ -364,14 +364,14 @@ fun MenuScreen(
                                     .weight(1f)
                                     .height(48.dp)
                             )
-                            MobileOptimizedButton(
-                                onClick = { showConfirmDialog = true },
-                                text = "Place Order & Bill",
-                                enabled = (selectedItems.isNotEmpty()),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp)
-                            )
+//                            MobileOptimizedButton(
+//                                onClick = { showConfirmDialog = true },
+//                                text = "Place Order & Bill",
+//                                enabled = (selectedItems.isNotEmpty()),
+//                                modifier = Modifier
+//                                    .weight(1f)
+//                                    .height(48.dp)
+//                            )
                         }
                     }
                 }

@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -157,6 +158,13 @@ fun PaymentMethodCard(
                     label = { Text("Cash Amount") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                if (cashValue == uiState.amountToPay.toString()) {
+                                    cashValue = ""
+                                }
+                            }
+                        }
                 )
             }
             if (uiState.selectedPaymentMethod?.name == "CARD") {

@@ -147,6 +147,7 @@ class BillingViewModel @Inject constructor(
             }
         }
     }
+
     fun updateSelectedCustomer(customer: TblCustomer) {
         _uiState.value = _uiState.value.copy(customer = customer)
     }
@@ -482,6 +483,7 @@ class BillingViewModel @Inject constructor(
             _uiState.update { it.copy(upiAmount = amount) }
         }
     }
+
     @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun processPayment(voucherType: String) {
         val currentState = _uiState.value
@@ -529,7 +531,11 @@ class BillingViewModel @Inject constructor(
                     igst_status = false
                 ),
                 billNo = _billNo.value,
-                totals = Triple(currentState.cashAmount, currentState.cardAmount, currentState.upiAmount),
+                totals = Triple(
+                    currentState.cashAmount,
+                    currentState.cardAmount,
+                    currentState.upiAmount
+                ),
                 voucherType = voucherType,
                 total = currentState.amountToPay
             ).collect { result ->
@@ -624,6 +630,7 @@ class BillingViewModel @Inject constructor(
             }
         }
     }
+
     @androidx.annotation.RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
     fun printBill(
         bill: Bill,
@@ -631,7 +638,7 @@ class BillingViewModel @Inject constructor(
         amount: Double,
         paymentMethod: PaymentMethod
     ) {
-        viewModelScope.launch  {
+        viewModelScope.launch {
             val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
             if (isReceipt) {
                 val ip = orderRepository.getIpAddress("COUNTER")
@@ -730,6 +737,68 @@ class BillingViewModel @Inject constructor(
 
     fun updateDiscount(discount: Double) {
         _uiState.value = _uiState.value.copy(discount = discount)
+    }
+
+    fun previewDetails(billNo: String) {
+        viewModelScope.launch {
+            val bill = billRepository.getPaymentByBillNo(billNo)
+            val response = bill!!
+            val orderDetails =
+                orderRepository.getOrdersByOrderId(bill.order_master.order_master_id)
+                    .body()!!
+            val counter = sessionManager.getUser()?.counter_name ?: "Counter1"
+            var sn = 1
+            val billItems = orderDetails.map { detail ->
+                val menuItem = detail.menuItem
+                val qty = detail.qty
+                BillItem(
+                    sn = sn++,
+                    itemName = menuItem.menu_item_name,
+                    qty = qty,
+                    price = menuItem.rate,
+                    basePrice = detail.rate,
+                    amount = qty * menuItem.rate,
+                    sgstPercent = menuItem.tax_percentage.toDouble() / 2,
+                    cgstPercent = menuItem.tax_percentage.toDouble() / 2,
+                    igstPercent = if (detail.igst > 0) menuItem.tax_percentage.toDouble() else 0.0,
+                    cessPercent = if (detail.cess > 0) menuItem.cess_per.toDouble() else 0.0,
+                    sgst = detail.sgst,
+                    cgst = detail.cgst,
+                    igst = if (detail.igst > 0) detail.igst else 0.0,
+                    cess = if (detail.cess > 0) detail.cess else 0.0,
+                    cess_specific = if (detail.cess_specific > 0) detail.cess_specific else 0.0,
+                    taxPercent = menuItem.tax_percentage.toDouble(),
+                    taxAmount = detail.tax_amount
+                )
+            }
+            val billDetails = Bill(
+                company_code = sessionManager.getCompanyCode() ?: "",
+                billNo = response.bill_no,
+                date = response.bill_date.toString(),
+                time = response.bill_create_time.toString(),
+                orderNo = response.order_master.order_master_id,
+                counter = counter,
+                tableNo = response.order_master.table_name,
+                custName = response.customer.customer_name,
+                custNo = response.customer.contact_no,
+                custAddress = response.customer.address,
+                custGstin = response.customer.gst_no,
+                items = billItems,
+                subtotal = response.order_amt,
+                deliveryCharge = 0.0, // Assuming no delivery charge
+                discount = response.disc_amt,
+                roundOff = response.round_off,
+                total = response.grand_total,
+            )
+            preview(billDetails)
+        }
+    }
+
+    fun preview(bill: Bill){
+        viewModelScope.launch {
+            val bmp = billRepository.fetchBillPreview(bill)
+            _preview.value = bmp
+        }
     }
 }
 

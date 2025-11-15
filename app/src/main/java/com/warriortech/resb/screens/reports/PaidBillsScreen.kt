@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.warriortech.resb.model.Bill
 import com.warriortech.resb.model.TblBillingResponse
 import com.warriortech.resb.ui.components.ModernDivider
 import com.warriortech.resb.ui.theme.PrimaryGreen
@@ -242,7 +243,7 @@ fun PaidBillsScreen(
                                         viewModel.printBill( billNo)
                                     },
                                     onWhatsappClick = { billNo ->
-                                        viewModel.sendBillViaWhatsApp(billNo)
+                                        viewModel.sendBillViaWhatsApp(billNo,context)
                                     }
                                 )
                             }
@@ -351,7 +352,7 @@ fun PaidBillItem(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onPrintClick:(bill_no:String)-> Unit,
-    onWhatsappClick:(bill_no:String)-> Unit
+    onWhatsappClick:(bill_no: TblBillingResponse)-> Unit
 ) {
     Card(
         modifier = Modifier
@@ -402,7 +403,7 @@ fun PaidBillItem(
                         )
                     }
                     IconButton(
-                        onClick = { onWhatsappClick(bill.bill_no) },
+                        onClick = { onWhatsappClick(bill) },
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(

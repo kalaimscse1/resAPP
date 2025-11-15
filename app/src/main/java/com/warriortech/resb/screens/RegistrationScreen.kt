@@ -92,6 +92,7 @@ fun RegistrationScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(if (isTablet) 32.dp else 16.dp)
+                .imePadding()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
