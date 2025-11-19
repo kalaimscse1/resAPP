@@ -132,7 +132,7 @@ fun LoginScreen(
             /**
              * Mobile-optimized login form
              */
-            MobileOptimizedCard(
+            MobileOptimizedCardLogin(
                 modifier = Modifier.fillMaxWidth()
                     .padding(10.dp)
             ) {
@@ -147,7 +147,7 @@ fun LoginScreen(
                             contentDescription = "CompanyCode",
                             tint = MaterialTheme.colorScheme.primary
                         )
-                    }
+                    },
                 )
                 Spacer(modifier = Modifier.height(Dimensions.spacingM))
                 MobileOptimizedTextField(

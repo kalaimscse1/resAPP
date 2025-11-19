@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -79,6 +81,55 @@ fun MobileOptimizedCard(
 }
 
 @Composable
+fun MobileOptimizedCardLogin(
+    onClick: (() -> Unit)? = null,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
+    elevated: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val deviceInfo = getDeviceInfo()
+    val cornerRadius = if (deviceInfo.isTablet) 24.dp else 20.dp
+    val elevation = if (elevated) {
+        if (deviceInfo.isTablet) 16.dp else 12.dp
+    } else {
+        if (deviceInfo.isTablet) 6.dp else 4.dp
+    }
+    val padding = if (deviceInfo.isTablet) 24.dp else 20.dp
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        indication = ripple(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onClick() }
+                } else Modifier
+            ),
+        shape = RoundedCornerShape(cornerRadius),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+                        )
+                    )
+                )
+                .padding(padding),
+            content = content
+        )
+    }
+}
+@Composable
 fun MobileOptimizedTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -127,7 +178,8 @@ fun MobileOptimizedTextField(
             unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-        )
+        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
     )
 }
 

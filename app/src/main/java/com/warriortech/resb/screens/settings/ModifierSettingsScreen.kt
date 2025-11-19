@@ -49,7 +49,7 @@ fun ModifierSettingsScreen(
 
     LaunchedEffect(errorMessage) {
         if (errorMessage!= null) {
-            if (errorMessage=="addOn deleted successfully") {
+            if (errorMessage=="AddOn deleted successfully") {
                 sucess = true
             } else {
                 failed = true

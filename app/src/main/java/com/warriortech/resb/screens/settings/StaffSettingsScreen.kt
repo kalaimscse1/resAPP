@@ -153,32 +153,33 @@ fun StaffCard(
     MobileOptimizedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = staff.staff_name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = staff.role,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = staff.address,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = staff.contact_no,
-                style = MaterialTheme.typography.bodySmall
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = staff.staff_name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = staff.role,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = staff.address,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = staff.contact_no,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Row{
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit,
                         contentDescription = "Edit",

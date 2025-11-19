@@ -63,7 +63,7 @@ fun AreaSettingsScreen(
 
     LaunchedEffect(errorMessage) {
         if (errorMessage!= null) {
-            if (errorMessage=="Menu item deleted successfully") {
+            if (errorMessage=="Area deleted successfully") {
                 sucess = true
             } else {
                 failed = true

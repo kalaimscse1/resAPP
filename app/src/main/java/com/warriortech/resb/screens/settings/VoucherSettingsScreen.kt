@@ -173,52 +173,46 @@ fun VoucherCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = voucher.voucher_name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Voucher Type:"+voucher.voucherType.voucher_type_name,
+                    text = "Voucher Type:" + voucher.voucherType.voucher_type_name,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    text = "Prefix:"+voucher.voucher_prefix,
+                    text = "Prefix:" + voucher.voucher_prefix,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "Suffix:"+voucher.voucher_suffix,
+                    text = "Suffix:" + voucher.voucher_suffix,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "Starting:"+voucher.starting_no,
+                    text = "Starting:" + voucher.starting_no,
                     style = MaterialTheme.typography.bodySmall
                 )
-
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = BluePrimary)
-                    }
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+            }
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = BluePrimary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
@@ -243,7 +237,11 @@ fun VoucherBottomSheet(
     var startingNo by remember { mutableStateOf(initialVoucher?.starting_no ?: 1) }
     var isActive by remember { mutableStateOf(initialVoucher?.is_active ?: true) }
     var counterId by remember { mutableStateOf(initialVoucher?.counter?.counter_id ?: 0L) }
-    var voucherTypeId by remember { mutableStateOf(initialVoucher?.voucherType?.voucher_Type_id ?: 1L) }
+    var voucherTypeId by remember {
+        mutableStateOf(
+            initialVoucher?.voucherType?.voucher_Type_id ?: 1L
+        )
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()

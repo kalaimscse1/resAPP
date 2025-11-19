@@ -588,6 +588,7 @@ class BillingViewModel @Inject constructor(
                             discount = response.disc_amt,
                             roundOff = response.round_off,
                             total = response.grand_total,
+                            paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80
                         )
                         val data = currentState
                         val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false

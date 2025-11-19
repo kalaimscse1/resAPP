@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblLedgerDetails
 import com.warriortech.resb.model.TblLedgerRequest
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.master.LedgerViewModel
@@ -197,12 +198,17 @@ fun LedgerScreen(
                                             editingGroup = group
                                             showDialog = true
                                         }) {
-                                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = "Edit",
+                                                tint = BluePrimary
+                                            )
                                         }
                                         IconButton(onClick = { viewModel.deleteLedger(group.ledger_id) }) {
                                             Icon(
                                                 Icons.Default.Delete,
-                                                contentDescription = "Delete"
+                                                contentDescription = "Delete",
+                                                tint = MaterialTheme.colorScheme.error
                                             )
                                         }
                                     }
@@ -231,7 +237,7 @@ fun LedgerScreen(
                 order = order.toInt()
             )
         }
-        if(showAlert){
+        if (showAlert) {
             SuccessDialogWithButton(
                 title = "Success",
                 paddingValues = paddingValues,
@@ -320,7 +326,7 @@ fun LedgerDialog(
             )
             onSave(ledger)
         },
-        isSaveEnabled = ledgerName.isNotBlank() ,
+        isSaveEnabled = ledgerName.isNotBlank(),
         buttonText = if (ledger != null) "Update" else "Add"
     ) {
         Column(

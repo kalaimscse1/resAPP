@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.warriortech.resb.model.TblGroupDetails
 import com.warriortech.resb.model.TblGroupNature
 import com.warriortech.resb.model.TblGroupRequest
+import com.warriortech.resb.ui.theme.BluePrimary
 import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.ui.viewmodel.master.GroupDetailsViewModel
@@ -174,10 +175,18 @@ fun GroupScreen(
                                         editingGroup = group
                                         showDialog = true
                                     }) {
-                                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = "Edit",
+                                            tint = BluePrimary
+                                        )
                                     }
                                     IconButton(onClick = { viewModel.deleteGroup(group.group_id) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
                                     }
                                 }
                             }
@@ -204,7 +213,7 @@ fun GroupScreen(
                 order = order.toInt()
             )
         }
-        if(showAlert){
+        if (showAlert) {
             SuccessDialogWithButton(
                 title = "Success",
                 paddingValues = padding,
@@ -226,7 +235,7 @@ fun GroupFormDialog(
     onDismiss: () -> Unit,
     onSave: (TblGroupRequest) -> Unit,
     groups: List<TblGroupDetails>,
-    order:Int
+    order: Int
 ) {
     val groupList = listOf("YES", "NO")
     var groupCode by remember { mutableStateOf(group?.group_name ?: "") }
@@ -260,31 +269,34 @@ fun GroupFormDialog(
             )
             onSave(updatedGroup)
         },
-        isSaveEnabled = groupCode.isNotBlank() ,
+        isSaveEnabled = groupCode.isNotBlank(),
         buttonText = if (group != null) "Update" else "Add"
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 400.dp) // limit dialog height
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
-        ){
+        ) {
             OutlinedTextField(
                 value = groupCode,
                 onValueChange = { groupCode = it },
                 label = { Text("Group Name") },
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth()
+            )
             OutlinedTextField(
                 value = groupCode,
                 onValueChange = { groupName = it },
                 label = { Text("Group Description") },
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth()
+            )
             OutlinedTextField(
                 value = groupOrder,
                 onValueChange = { groupOrder = it },
                 label = { Text("Order") },
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth()
+            )
             StringDropdown(
                 options = groupList,
                 selectedOption = groupList.find { it == subGroup },
@@ -310,11 +322,12 @@ fun GroupFormDialog(
                 value = tamilText,
                 onValueChange = { tamilText = it },
                 label = { Text("Tamil Text") },
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth()
+            )
             GroupDropdown(
                 groups = groups,
-                selectedGroup = groups.find{ it.group_id == groupBy},
-                onGroupSelected ={groupBy = it.group_id},
+                selectedGroup = groups.find { it.group_id == groupBy },
+                onGroupSelected = { groupBy = it.group_id },
                 modifier = Modifier.fillMaxWidth(),
                 label = "Select Group"
             )
