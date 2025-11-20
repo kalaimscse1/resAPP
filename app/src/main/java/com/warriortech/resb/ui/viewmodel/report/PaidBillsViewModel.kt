@@ -178,9 +178,9 @@ class PaidBillsViewModel @Inject constructor(
                         sn = sn++,
                         itemName = if (tamil) menuItem.menu_item_name_tamil else menuItem.menu_item_name,
                         qty = qty,
-                        price = menuItem.rate,
+                        price = detail.actual_rate,
                         basePrice = detail.rate,
-                        amount = qty * menuItem.rate,
+                        amount = qty * detail.actual_rate,
                         sgstPercent = menuItem.tax_percentage.toDouble() / 2,
                         cgstPercent = menuItem.tax_percentage.toDouble() / 2,
                         igstPercent = if (detail.igst > 0) menuItem.tax_percentage.toDouble() else 0.0,
@@ -212,7 +212,8 @@ class PaidBillsViewModel @Inject constructor(
                     discount = bill?.disc_amt ?: 0.0,
                     roundOff = bill?.round_off ?: 0.0,
                     total = bill?.grand_total ?: 0.0,
-                    paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80
+                    paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
+                    received_amt = bill?.received_amt ?: 0.0
                 )
 
                 val ip = orderRepository.getIpAddress("COUNTER")
@@ -340,7 +341,8 @@ class PaidBillsViewModel @Inject constructor(
                     discount = bill.disc_amt,
                     roundOff = bill.round_off,
                     total = bill.grand_total,
-                    paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80
+                    paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
+                    received_amt = bill.received_amt
                 )
                 ReportExport.generateBillPdf(billDetails, context,sessionManager)
 

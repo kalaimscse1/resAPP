@@ -79,9 +79,15 @@ fun PaymentMethodCard(
     onCustomer: (TblCustomer) -> Unit,
     voucherType: String? = null
 ) {
+    val paidAmount = uiState.cashAmount + uiState.cardAmount + uiState.upiAmount
+    val totalAmount = uiState.amountToPay
+
+    val showCustomerDropdown =
+        uiState.selectedPaymentMethod?.name == "DUE" ||
+                paidAmount < totalAmount
     // Cache the payment methods list to prevent recreation on every recomposition
     val paymentMethods = remember {
-        if (voucherType=="DUE") {
+        if (voucherType == "DUE") {
             listOf(
                 "CASH" to Icons.Default.Money,
                 "CARD" to Icons.Default.CreditCard,
@@ -89,13 +95,13 @@ fun PaymentMethodCard(
                 "OTHERS" to Icons.Default.MoreHoriz
             )
         } else
-        listOf(
-            "CASH" to Icons.Default.Money,
-            "CARD" to Icons.Default.CreditCard,
-            "UPI" to Icons.Default.QrCode,
-            "DUE" to Icons.Default.AccountBalanceWallet,
-            "OTHERS" to Icons.Default.MoreHoriz
-        )
+            listOf(
+                "CASH" to Icons.Default.Money,
+                "CARD" to Icons.Default.CreditCard,
+                "UPI" to Icons.Default.QrCode,
+                "DUE" to Icons.Default.AccountBalanceWallet,
+                "OTHERS" to Icons.Default.MoreHoriz
+            )
     }
     viewModel.loadCustomers()
     ModernCard(
@@ -157,7 +163,8 @@ fun PaymentMethodCard(
                     },
                     label = { Text("Cash Amount") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .onFocusChanged { focusState ->
                             if (focusState.isFocused) {
                                 if (cashValue == uiState.amountToPay.toString()) {
@@ -193,14 +200,14 @@ fun PaymentMethodCard(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            if (uiState.selectedPaymentMethod?.name == "DUE") {
+            if (showCustomerDropdown) {
                 Spacer(modifier = Modifier.height(16.dp))
                 CustomerDropdown(
                     customers = customers,
                     selectedCustomer = uiState.customer,
-                    onCustomerSelected = { selected ->
-                        viewModel.updateSelectedCustomer(selected)
-                        onCustomer(selected)
+                    onCustomerSelected = {
+                        viewModel.updateSelectedCustomer(it)
+                        onCustomer(it)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )

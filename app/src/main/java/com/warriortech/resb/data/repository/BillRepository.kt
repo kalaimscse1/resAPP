@@ -132,7 +132,7 @@ class BillRepository @Inject constructor(
             } else null
 
             val billNumber = when {
-                paymentMethod.name == "DUE" || voucherType == "DUE" -> apiService.getBillNoByCounterId(
+                paymentMethod.name == "DUE" || voucherType == "DUE" || receivedAmt < total-> apiService.getBillNoByCounterId(
                     sessionManager.getUser()?.counter_id!!, "DUE", tenant
                 )
 
@@ -144,7 +144,7 @@ class BillRepository @Inject constructor(
             val voucher = apiService.getVoucherByCounterId(
                 sessionManager.getUser()?.counter_id!!,
                 tenant,
-                if (paymentMethod.name == "DUE" || voucherType == "DUE") "DUE" else "BILL"
+                if (paymentMethod.name == "DUE" || voucherType == "DUE" || receivedAmt < total) "DUE" else "BILL"
             ).body()
 
             val orderResponse = apiService.getOpenOrderDetailsForTable(orderMasterId, tenant)
@@ -168,9 +168,9 @@ class BillRepository @Inject constructor(
                 cash = if (paymentMethod.name == "CASH") receivedAmt else totals.first,
                 card = if (paymentMethod.name == "CARD") receivedAmt else totals.second,
                 upi = if (paymentMethod.name == "UPI") receivedAmt else totals.third,
-                due = if (paymentMethod.name == "DUE") receivedAmt else if (voucherType == "DUE") total - receivedAmt else 0.0,
+                due = if (paymentMethod.name == "DUE") receivedAmt else if (voucherType == "DUE" || receivedAmt < total) total - receivedAmt else 0.0,
                 received_amt = if (paymentMethod.name == "DUE") 0.0 else receivedAmt,
-                pending_amt = if (paymentMethod.name == "DUE") receivedAmt else if (voucherType == "DUE") total - receivedAmt else 0.0,
+                pending_amt = if (paymentMethod.name == "DUE") receivedAmt else if (voucherType == "DUE" || receivedAmt < total) total - receivedAmt else 0.0,
                 note = "",
                 is_active = 1L,
                 disc_amt = 0.0,

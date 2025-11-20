@@ -99,4 +99,5 @@ data class Bill(
     val roundOff: Double,
     val total: Double,
     val paperWidth: Int = 48,
+    val received_amt: Double,
 )

@@ -376,18 +376,39 @@ fun CustomerSelectionDialog(
 @Composable
 fun PaymentBottomBar(
     uiState: BillingPaymentUiState,
-    onConfirmPayment: () -> Unit,
+    onConfirmPayment: (Boolean) -> Unit,
     customer: TblCustomer? = null
 ) {
-    val payingAmount = if (uiState.selectedPaymentMethod?.name == "OTHERS") {
-        uiState.cashAmount + uiState.cardAmount + uiState.upiAmount
-    } else {
-        uiState.amountToPay
+    val totalAmount = uiState.amountToPay
+
+
+    val paidAmount = when (uiState.selectedPaymentMethod?.name) {
+        "CASH" -> uiState.cashAmount
+        "CARD" -> uiState.cardAmount
+        "UPI" -> uiState.upiAmount
+        "OTHERS" -> uiState.cashAmount + uiState.cardAmount + uiState.upiAmount
+        else -> uiState.amountToPay
     }
 
-    BottomAppBar(
-        containerColor = SecondaryGreen
-    ) {
+
+    val method = uiState.selectedPaymentMethod?.name.orEmpty()
+    val isIdle = uiState.paymentProcessingState == PaymentProcessingState.Idle
+    val hasCustomer = customer?.customer_id != null
+
+
+    val isDue = paidAmount < totalAmount || method == "DUE"
+
+
+    val enabled = when {
+        method.isBlank() -> false
+        isDue && paidAmount > totalAmount -> false
+        isDue && !hasCustomer -> false
+        paidAmount <= 0 -> false
+        else -> isIdle
+    }
+
+
+    BottomAppBar(containerColor = SecondaryGreen) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -395,23 +416,12 @@ fun PaymentBottomBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                CurrencySettings.format(payingAmount),
-                style = MaterialTheme.typography.titleMedium
-            )
+            Text(CurrencySettings.format(paidAmount))
             Button(
-                onClick = onConfirmPayment,
-                enabled = when (uiState.selectedPaymentMethod?.name) {
-                    "DUE" -> customer?.customer_id != null &&
-                            uiState.paymentProcessingState == PaymentProcessingState.Idle
-                    else -> uiState.selectedPaymentMethod != null &&
-                            payingAmount > 0 &&
-                            uiState.paymentProcessingState == PaymentProcessingState.Idle
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryGreen)
-            ) {
-                Text("Confirm Payment")
-            }
+                onClick = { onConfirmPayment(isDue) },
+                enabled = enabled
+            ) { Text("Confirm Payment") }
         }
     }
 }
+

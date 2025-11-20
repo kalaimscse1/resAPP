@@ -554,7 +554,8 @@ fun createSampleBillData(): Bill {
         custName = "",
         custNo = "",
         custAddress = "",
-        custGstin = ""
+        custGstin = "",
+        received_amt = 0.0
     )
 }
 

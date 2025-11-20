@@ -488,10 +488,12 @@ class BillingViewModel @Inject constructor(
     fun processPayment(voucherType: String) {
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
-        val amount = if (paymentMethod?.name == "OTHERS") {
-            currentState.cashAmount + currentState.cardAmount + currentState.upiAmount
-        } else {
-            currentState.amountToPay
+        val amount = when (paymentMethod?.name) {
+            "CASH" -> currentState.cashAmount
+            "CARD" -> currentState.cardAmount
+            "UPI" -> currentState.upiAmount
+            "OTHERS" -> currentState.cashAmount + currentState.cardAmount + currentState.upiAmount
+            else -> currentState.amountToPay
         }
         if (paymentMethod == null) {
             _uiState.update { it.copy(errorMessage = "Please select a payment method.") }
@@ -509,13 +511,6 @@ class BillingViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val tamil = sessionManager.getGeneralSetting()?.tamil_receipt_print == true
-            val amount = if (paymentMethod.name == "CASH") {
-                if (currentState.cashAmount == 0.0)
-                    currentState.amountToPay
-                else
-                    currentState.cashAmount
-            } else
-                currentState.amountToPay
             billRepository.bill(
                 orderMasterId = currentState.orderMasterId ?: "",
                 paymentMethod = paymentMethod,
@@ -588,7 +583,8 @@ class BillingViewModel @Inject constructor(
                             discount = response.disc_amt,
                             roundOff = response.round_off,
                             total = response.grand_total,
-                            paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80
+                            paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
+                            received_amt = response.received_amt
                         )
                         val data = currentState
                         val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
@@ -790,6 +786,8 @@ class BillingViewModel @Inject constructor(
                 discount = response.disc_amt,
                 roundOff = response.round_off,
                 total = response.grand_total,
+                paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
+                received_amt = response.received_amt
             )
             preview(billDetails)
         }

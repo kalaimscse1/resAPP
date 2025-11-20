@@ -302,6 +302,7 @@ class MenuViewModel @Inject constructor(
                                 waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
                                 items = kotItem,
+                                paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 32 else 48
                             )
                             printKOT(kotRequest)
                         },
@@ -341,7 +342,8 @@ class MenuViewModel @Inject constructor(
                                 orderId = order.order_master_id,
                                 waiterName = sessionManager.getUser()?.user_name,
                                 orderCreatedAt = order.order_create_time,
-                                items = kotItem
+                                items = kotItem,
+                                paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 32 else 48
                             )
                             printKOT(kotRequest)
                         },
