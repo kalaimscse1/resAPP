@@ -584,7 +584,8 @@ class BillingViewModel @Inject constructor(
                             roundOff = response.round_off,
                             total = response.grand_total,
                             paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
-                            received_amt = response.received_amt
+                            received_amt = response.received_amt,
+                            pending_amt = response.pending_amt
                         )
                         val data = currentState
                         val isReceipt = sessionManager.getGeneralSetting()?.is_receipt ?: false
@@ -787,7 +788,8 @@ class BillingViewModel @Inject constructor(
                 roundOff = response.round_off,
                 total = response.grand_total,
                 paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
-                received_amt = response.received_amt
+                received_amt = response.received_amt,
+                pending_amt = response.pending_amt
             )
             preview(billDetails)
         }

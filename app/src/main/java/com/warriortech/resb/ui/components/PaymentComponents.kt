@@ -168,7 +168,7 @@ fun PaymentMethodCard(
                         .onFocusChanged { focusState ->
                             if (focusState.isFocused) {
                                 if (cashValue == uiState.amountToPay.toString()) {
-                                    cashValue = ""
+                                    cashValue = uiState.amountToPay.toString()
                                 }
                             }
                         }

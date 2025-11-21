@@ -213,7 +213,8 @@ class PaidBillsViewModel @Inject constructor(
                     roundOff = bill?.round_off ?: 0.0,
                     total = bill?.grand_total ?: 0.0,
                     paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
-                    received_amt = bill?.received_amt ?: 0.0
+                    received_amt = bill?.received_amt ?: 0.0,
+                    pending_amt = bill?.pending_amt?:0.0
                 )
 
                 val ip = orderRepository.getIpAddress("COUNTER")
@@ -342,7 +343,8 @@ class PaidBillsViewModel @Inject constructor(
                     roundOff = bill.round_off,
                     total = bill.grand_total,
                     paperWidth = if(sessionManager.getBluetoothPrinter() !=null) 58 else 80,
-                    received_amt = bill.received_amt
+                    received_amt = bill.received_amt,
+                    pending_amt = bill.pending_amt
                 )
                 ReportExport.generateBillPdf(billDetails, context,sessionManager)
 

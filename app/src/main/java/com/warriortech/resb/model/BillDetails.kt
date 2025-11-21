@@ -100,4 +100,5 @@ data class Bill(
     val total: Double,
     val paperWidth: Int = 48,
     val received_amt: Double,
+    val pending_amt: Double
 )
