@@ -681,7 +681,7 @@ fun QuickActionsSection(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        if (role == "RESBADMIN" || role == "ADMIN") {
+        if (role == "RESBADMIN" || role == "ADMIN" || role == "CASHIER") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)

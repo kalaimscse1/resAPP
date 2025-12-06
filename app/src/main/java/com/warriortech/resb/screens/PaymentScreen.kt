@@ -1,5 +1,6 @@
 package com.warriortech.resb.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -48,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -176,7 +179,7 @@ fun PaymentScreen(
                 uiState = uiState,
                 onConfirmPayment = {
                     viewModel.updateAmountToPay(amountToPayFromRoute ?: 0.0)
-                    viewModel.processPayment(voucherType = voucherType?:"BILL")
+                    viewModel.processPayment(voucherType = voucherType ?: "BILL")
                 },
                 customer = customers.find { it.customer_id == customer?.customer_id }
             )
@@ -380,33 +383,36 @@ fun PaymentBottomBar(
     customer: TblCustomer? = null
 ) {
     val totalAmount = uiState.amountToPay
-
-
-    val paidAmount = when (uiState.selectedPaymentMethod?.name) {
-        "CASH" -> uiState.cashAmount
-        "CARD" -> uiState.cardAmount
-        "UPI" -> uiState.upiAmount
+    var paidAmount = when (uiState.selectedPaymentMethod?.name) {
+        "CASH" -> if (uiState.cashAmount == 0.0) uiState.amountToPay else uiState.cashAmount
+        "CARD" -> if (uiState.cardAmount == 0.0) uiState.amountToPay else uiState.cardAmount
+        "UPI" -> if (uiState.upiAmount == 0.0) uiState.amountToPay else uiState.upiAmount
         "OTHERS" -> uiState.cashAmount + uiState.cardAmount + uiState.upiAmount
         else -> uiState.amountToPay
     }
-
-
+    val scope = rememberCoroutineScope()
     val method = uiState.selectedPaymentMethod?.name.orEmpty()
     val isIdle = uiState.paymentProcessingState == PaymentProcessingState.Idle
     val hasCustomer = customer?.customer_id != null
 
-
     val isDue = paidAmount < totalAmount || method == "DUE"
-
 
     val enabled = when {
         method.isBlank() -> false
         isDue && paidAmount > totalAmount -> false
         isDue && !hasCustomer -> false
         paidAmount <= 0 -> false
+        paidAmount > totalAmount -> false
         else -> isIdle
     }
 
+    if (paidAmount > totalAmount) {
+        Toast.makeText(
+            LocalContext.current,
+            "Paid amount exceeds total amount",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
     BottomAppBar(containerColor = SecondaryGreen) {
         Row(
@@ -419,9 +425,33 @@ fun PaymentBottomBar(
             Text(CurrencySettings.format(paidAmount))
             Button(
                 onClick = { onConfirmPayment(isDue) },
-                enabled = enabled
+                enabled = enabled,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (enabled) PrimaryGreen else Color.Gray
+                )
             ) { Text("Confirm Payment") }
         }
     }
 }
 
+@Composable
+fun PaymentConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Alert") },
+        text = { Text("Paid Amount exceeds Total Amount ") },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm() },
+                enabled = true
+            ) {
+                Text("Ok")
+            }
+        },
+        dismissButton = {
+        }
+    )
+}

@@ -489,9 +489,9 @@ class BillingViewModel @Inject constructor(
         val currentState = _uiState.value
         val paymentMethod = currentState.selectedPaymentMethod
         val amount = when (paymentMethod?.name) {
-            "CASH" -> currentState.cashAmount
-            "CARD" -> currentState.cardAmount
-            "UPI" -> currentState.upiAmount
+            "CASH" -> if (currentState.cashAmount == 0.0) currentState.amountToPay else currentState.cashAmount
+            "CARD" -> if (currentState.cardAmount == 0.0) currentState.amountToPay else currentState.cardAmount
+            "UPI" -> if (currentState.upiAmount == 0.0) currentState.amountToPay else currentState.upiAmount
             "OTHERS" -> currentState.cashAmount + currentState.cardAmount + currentState.upiAmount
             else -> currentState.amountToPay
         }
