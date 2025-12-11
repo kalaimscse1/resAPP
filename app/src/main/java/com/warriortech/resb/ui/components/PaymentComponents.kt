@@ -327,7 +327,7 @@ fun PaymentMethodCard(
                 "CASH" -> {
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = uiState.cashAmount.takeIf { it != 0.0 }?.toString() ?: "",
+                        value = CurrencySettings.formatPlain(uiState.cashAmount).takeIf { uiState.cashAmount != 0.0 } ?: "",
                         onValueChange = {
                             viewModel.updateCashAmount(it.toDoubleOrNull() ?: 0.0)
                         },
@@ -340,7 +340,7 @@ fun PaymentMethodCard(
                 "CARD" -> {
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = uiState.cardAmount.takeIf { it != 0.0 }?.toString() ?: "",
+                        value = CurrencySettings.formatPlain(uiState.cardAmount).takeIf { uiState.cardAmount != 0.0 } ?: "",
                         onValueChange = {
                             viewModel.updateCardAmount(it.toDoubleOrNull() ?: 0.0)
                         },
@@ -353,7 +353,7 @@ fun PaymentMethodCard(
                 "UPI" -> {
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = uiState.upiAmount.takeIf { it != 0.0 }?.toString() ?: "",
+                        value = CurrencySettings.formatPlain(uiState.upiAmount).takeIf { uiState.upiAmount != 0.0 } ?: "",
                         onValueChange = {
                             viewModel.updateUpiAmount(it.toDoubleOrNull() ?: 0.0)
                         },
@@ -366,7 +366,7 @@ fun PaymentMethodCard(
                 "OTHERS" -> {
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = uiState.cashAmount.takeIf { it != 0.0 }?.toString() ?: "",
+                        value = "",
                         onValueChange = {
                             viewModel.updateCashAmount(it.toDoubleOrNull() ?: 0.0)
                         },
@@ -376,7 +376,7 @@ fun PaymentMethodCard(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = uiState.cardAmount.takeIf { it != 0.0 }?.toString() ?: "",
+                        value =  "",
                         onValueChange = {
                             viewModel.updateCardAmount(it.toDoubleOrNull() ?: 0.0)
                         },
@@ -386,7 +386,7 @@ fun PaymentMethodCard(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = uiState.upiAmount.takeIf { it != 0.0 }?.toString() ?: "",
+                        value ="",
                         onValueChange = {
                             viewModel.updateUpiAmount(it.toDoubleOrNull() ?: 0.0)
                         },
