@@ -178,6 +178,9 @@ fun GeneralSettingDialog(
     var isQrShow by remember { mutableStateOf(setting?.is_qr_show ?: false) }
     var remark1 by remember { mutableStateOf(setting?.remark1 ?: "") }
     var remark2 by remember { mutableStateOf(setting?.remark2 ?: "") }
+    var businessDate by remember { mutableStateOf(setting?.business_date ?: "") }
+    var isAccounts by remember { mutableStateOf(setting?.is_accounts ?: false) }
+    var isInventory by remember { mutableStateOf(setting?.is_inventory ?: false) }
 
     Column {
         OutlinedTextField(
@@ -440,7 +443,35 @@ fun GeneralSettingDialog(
             label = { Text("Remark 2") },
             modifier = Modifier.fillMaxWidth()
         )
-
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = businessDate,
+            onValueChange = { businessDate = it },
+            label = { Text("Business Date") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isAccounts,
+                onCheckedChange = { isAccounts = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Accounts Module Enabled")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Switch(
+                checked = isInventory,
+                onCheckedChange = { isInventory = it }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Inventory Module Enabled")
+        }
 
         Spacer(modifier = Modifier.height(10.dp))
         Button(
@@ -474,6 +505,9 @@ fun GeneralSettingDialog(
                     is_qr_show = isQrShow,
                     remark1 = remark1,
                     remark2 = remark2,
+                    business_date = businessDate,
+                    is_accounts = isAccounts,
+                    is_inventory = isInventory
                 )
                 onSave(newSetting)
             }

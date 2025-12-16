@@ -123,7 +123,7 @@ class BillRepository @Inject constructor(
                     due_date = getCurrentDateModern(),
                     order_by = 0, address1 = "", place = "", pincode = 0, country = "", pan_no = "",
                     state_code = "", state_name = "", sac_code = "", opening_balance = "",
-                    bank_details = "NO", tamil_text = "", distance = 0.0
+                    bank_details = "NO", tamil_text = "", distance = 0.0, is_default = false
                 )
                 if (ledgerDetail?.contact_no != customer.contact_no)
                     apiService.createLedger(req, tenant).body()

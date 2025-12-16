@@ -38,6 +38,7 @@ data class TblLedgerDetails(
     val bank_details: String,
     val tamil_text: String,
     val distance: Double,
+    val is_default: Boolean,
     val is_active: Boolean
 )
 
@@ -65,6 +66,7 @@ data class TblLedgerRequest(
     val bank_details: String,
     val tamil_text: String,
     val distance: Double,
+    val is_default: Boolean,
     val is_active: Boolean = true
 )
 
@@ -77,6 +79,7 @@ data class TblGroupDetails(
     val group_nature: TblGroupNature,
     val gross_profit: String,
     val tamil_text: String,
+    val is_default: Boolean,
     val is_active: Boolean,
     val group_by: Int
 )
@@ -90,6 +93,7 @@ data class TblGroupRequest(
     val group_nature: Int,
     val gross_profit: String,
     val tamil_text: String,
+    val is_default: Boolean,
     val is_active: Boolean,
     val group_by: Int
 )

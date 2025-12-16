@@ -39,6 +39,7 @@ data class TblLedgerDetailsResponse(
     val bank_details: String,
     val tamil_text: String,
     val distance: Double,
+    val is_default: Boolean,
     val is_active: Boolean
 )
 

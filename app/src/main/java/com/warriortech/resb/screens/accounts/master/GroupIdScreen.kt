@@ -181,13 +181,16 @@ fun GroupScreen(
                                             tint = BluePrimary
                                         )
                                     }
-                                    IconButton(onClick = { viewModel.deleteGroup(group.group_id) }) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = "Delete",
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
+                                    if (!group.is_default){
+                                        IconButton(onClick = { viewModel.deleteGroup(group.group_id) }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete",
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
                                     }
+
                                 }
                             }
                         }
@@ -245,6 +248,7 @@ fun GroupFormDialog(
     var grossProfit by remember { mutableStateOf(group?.gross_profit ?: "") }
     var tamilText by remember { mutableStateOf(group?.tamil_text ?: "") }
     var groupBy by remember { mutableStateOf(group?.group_by ?: 1) }
+    var isDefault by remember { mutableStateOf(group?.is_default ?: false) }
     var isActive by remember { mutableStateOf(group?.is_active ?: true) }
 
     var expanded by remember { mutableStateOf(false) }
@@ -265,7 +269,8 @@ fun GroupFormDialog(
                 gross_profit = grossProfit,
                 tamil_text = tamilText,
                 is_active = isActive,
-                group_by = groupBy
+                group_by = groupBy,
+                is_default = isDefault
             )
             onSave(updatedGroup)
         },
@@ -331,6 +336,10 @@ fun GroupFormDialog(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Select Group"
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = isDefault, onCheckedChange = { isDefault = it })
+                Text("Is Default")
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = isActive, onCheckedChange = { isActive = it })
                 Text("Active")

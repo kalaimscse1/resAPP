@@ -280,6 +280,15 @@ fun PaymentMethodCard(
         }
     }
 
+    // Auto-fill on first selection (Option B)
+    LaunchedEffect(uiState.selectedPaymentMethod) {
+        when (uiState.selectedPaymentMethod?.name) {
+            "CASH" -> if (uiState.cashAmount == 0.0) viewModel.updateCashAmount(totalAmount)
+            "CARD" -> if (uiState.cardAmount == 0.0) viewModel.updateCardAmount(totalAmount)
+            "UPI" -> if (uiState.upiAmount == 0.0) viewModel.updateUpiAmount(totalAmount)
+        }
+    }
+
     ModernCard(
         modifier = Modifier.fillMaxWidth()
     ) {

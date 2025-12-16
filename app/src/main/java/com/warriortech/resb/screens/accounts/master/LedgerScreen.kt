@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -204,13 +205,16 @@ fun LedgerScreen(
                                                 tint = BluePrimary
                                             )
                                         }
-                                        IconButton(onClick = { viewModel.deleteLedger(group.ledger_id) }) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Delete",
-                                                tint = MaterialTheme.colorScheme.error
-                                            )
+                                        if (!group.is_default){
+                                            IconButton(onClick = { viewModel.deleteLedger(group.ledger_id) }) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Delete",
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
                                         }
+
                                     }
                                 }
                             }
@@ -291,6 +295,7 @@ fun LedgerDialog(
     var openingBalance by remember { mutableStateOf(ledger?.opening_balance ?: opening.first()) }
     var tamilText by remember { mutableStateOf(ledger?.tamil_text ?: "") }
     var dueDate by remember { mutableStateOf(ledger?.due_date ?: getCurrentDateModern()) }
+    var isDefault by remember { mutableStateOf(ledger?.is_default ?: false) }
     var isActive by remember { mutableStateOf(ledger?.is_active ?: true) }
 
 
@@ -322,7 +327,8 @@ fun LedgerDialog(
                 due_date = ledger?.due_date ?: dueDate,
                 bank_details = ledger?.bank_details ?: bankDetails,
                 tamil_text = ledger?.tamil_text ?: tamilText,
-                is_active = ledger?.is_active ?: isActive
+                is_active = ledger?.is_active ?: isActive,
+                is_default = ledger?.is_default ?: isDefault
             )
             onSave(ledger)
         },
@@ -365,6 +371,10 @@ fun LedgerDialog(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Select Group"
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = isDefault, onCheckedChange = { isDefault = it })
+                Text("Is Default")
+            }
 
         }
 

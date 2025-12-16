@@ -390,7 +390,10 @@ fun KotItemsContent(
             EditableBillingRow(
                 label = "Subtotal",
                 amount = uiState._subtotal.value,
-                currencyFormatter = currencyFormatter
+                currencyFormatter = currencyFormatter,
+                onValueChange = { newValue ->
+
+                }
             )
         }
         // Tax (Allow editing if needed)
@@ -398,7 +401,10 @@ fun KotItemsContent(
             EditableBillingRow(
                 label = "Tax Amount",
                 amount = uiState._taxAmount.value,
-                currencyFormatter = currencyFormatter
+                currencyFormatter = currencyFormatter,
+                onValueChange = { newValue ->
+
+                }
             )
         }
         if (uiState._cessAmount.value > 0) {
@@ -406,7 +412,10 @@ fun KotItemsContent(
                 EditableBillingRow(
                     label = "Cess Amount",
                     amount = uiState._cessAmount.value,
-                    currencyFormatter = currencyFormatter
+                    currencyFormatter = currencyFormatter,
+                    onValueChange = { newValue ->
+
+                    }
                 )
             }
         }
@@ -415,7 +424,10 @@ fun KotItemsContent(
                 EditableBillingRow(
                     label = "Cess Specific",
                     amount = uiState._cessSpecific.value,
-                    currencyFormatter = currencyFormatter
+                    currencyFormatter = currencyFormatter,
+                    onValueChange = { newValue ->
+
+                    }
                 )
             }
         }

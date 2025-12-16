@@ -943,6 +943,7 @@ fun DrawerContent(
     val role = sessionManager.getUser()?.role ?: ""
     val imageUrl = "${RetrofitClient.BASE_URL}logo/getLogo/${sessionManager.getCompanyCode()}"
     val companyName = sessionManager.getRestaurantProfile()?.company_name ?: "Resb"
+    val setting = sessionManager.getGeneralSetting()
 
     // 👇 Single state instead of 4 booleans
     val (expandedMenu, setExpandedMenu) = remember { mutableStateOf(ExpandedMenu.NONE) }
@@ -1130,37 +1131,37 @@ fun DrawerContent(
                                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                                     colors = subMenuColors
                                 )
-                                NavigationDrawerItem(
-                                    label = { if (!isCollapsed) Text("Ledger") else Text("") },
-                                    icon = {
-                                        DrawerIcon(
-                                            Icons.Default.AccountBalance,
-                                            contentDescription = null,
-                                            isCollapsed
-                                        )
-                                    },
-                                    selected = currentDestination?.route == "ledger_screen",
-                                    onClick = { onDestinationClicked("ledger_screen") },
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                    colors = subMenuColors
-                                )
+                                if (sessionManager.getGeneralSetting()?.is_accounts == true) {
+                                    NavigationDrawerItem(
+                                        label = { if (!isCollapsed) Text("Ledger") else Text("") },
+                                        icon = {
+                                            DrawerIcon(
+                                                Icons.Default.AccountBalance,
+                                                contentDescription = null,
+                                                isCollapsed
+                                            )
+                                        },
+                                        selected = currentDestination?.route == "ledger_screen",
+                                        onClick = { onDestinationClicked("ledger_screen") },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                        colors = subMenuColors
+                                    )
 
-                                NavigationDrawerItem(
-                                    label = { if (!isCollapsed) Text("Account Group") else Text("") },
-                                    icon = {
-                                        DrawerIcon(
-                                            Icons.Default.Exposure,
-                                            contentDescription = null,
-                                            isCollapsed
-                                        )
-                                    },
-                                    selected = currentDestination?.route == "group_screen",
-                                    onClick = { onDestinationClicked("group_screen") },
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                    colors = subMenuColors
-                                )
-
-
+                                    NavigationDrawerItem(
+                                        label = { if (!isCollapsed) Text("Account Group") else Text("") },
+                                        icon = {
+                                            DrawerIcon(
+                                                Icons.Default.Exposure,
+                                                contentDescription = null,
+                                                isCollapsed
+                                            )
+                                        },
+                                        selected = currentDestination?.route == "group_screen",
+                                        onClick = { onDestinationClicked("group_screen") },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                        colors = subMenuColors
+                                    )
+                                }
                             }
                         }
                     }
@@ -1226,41 +1227,45 @@ fun DrawerContent(
 
 
                 // 🔹 Billing
+
                 if (role in listOf("RESBADMIN", "ADMIN", "CASHIER")) {
-                    NavigationDrawerItem(
-                        label = { if (!isCollapsed) Text("Accounts Entry") else Text("") },
-                        icon = {
-                            DrawerIcon(
-                                Icons.Default.AccountBox,
-                                contentDescription = null,
-                                isCollapsed
-                            )
-                        },
-                        selected = currentDestination?.route in listOf("daily_entry"),
-                        onClick = {
-                            setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSENTRY) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSENTRY)
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        colors = drawerItemColors
-                    )
-                    AnimatedVisibility(expandedMenu == ExpandedMenu.ACCOUNTSENTRY) {
-                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Day Entry") else Text("") },
-                                icon = {
-                                    DrawerIcon(
-                                        Icons.Default.AccountCircle,
-                                        contentDescription = null,
-                                        isCollapsed
-                                    )
-                                },
-                                selected = currentDestination?.route == "day_entry",
-                                onClick = { onDestinationClicked("day_entry") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
+                    if(sessionManager.getGeneralSetting()?.is_table_allowed == true){
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Accounts Entry") else Text("") },
+                            icon = {
+                                DrawerIcon(
+                                    Icons.Default.AccountBox,
+                                    contentDescription = null,
+                                    isCollapsed
+                                )
+                            },
+                            selected = currentDestination?.route in listOf("daily_entry"),
+                            onClick = {
+                                setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSENTRY) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSENTRY)
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = drawerItemColors
+                        )
+                        AnimatedVisibility(expandedMenu == ExpandedMenu.ACCOUNTSENTRY) {
+                            Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Day Entry") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.Default.AccountCircle,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "day_entry",
+                                    onClick = { onDestinationClicked("day_entry") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
+                            }
                         }
                     }
+
 
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("Bills") else Text("") },
@@ -1438,6 +1443,8 @@ fun DrawerContent(
                             )
                         }
                     }
+
+
                     NavigationDrawerItem(
                         label = { if (!isCollapsed) Text("GST Reports") else Text("") },
                         icon = {
@@ -1490,57 +1497,60 @@ fun DrawerContent(
                         }
                     }
 
-                    NavigationDrawerItem(
-                        label = { if (!isCollapsed) Text("Accounts Reports") else Text("") },
-                        icon = {
-                            DrawerIcon(
-                                Icons.AutoMirrored.Filled.ReceiptLong,
-                                contentDescription = null,
-                                isCollapsed
-                            )
-                        },
-                        selected = currentDestination?.route in listOf(
-                            "day_entry_report",
-                            "day_book_report"
-                        ),
-                        onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSREPORT) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSREPORT) },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        colors = drawerItemColors
-                    )
-                    AnimatedVisibility(expandedMenu == ExpandedMenu.ACCOUNTSREPORT) {
-                        Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
+                    if (sessionManager.getGeneralSetting()?.is_accounts == true) {
+                        NavigationDrawerItem(
+                            label = { if (!isCollapsed) Text("Accounts Reports") else Text("") },
+                            icon = {
+                                DrawerIcon(
+                                    Icons.AutoMirrored.Filled.ReceiptLong,
+                                    contentDescription = null,
+                                    isCollapsed
+                                )
+                            },
+                            selected = currentDestination?.route in listOf(
+                                "day_entry_report",
+                                "day_book_report"
+                            ),
+                            onClick = { setExpandedMenu(if (expandedMenu == ExpandedMenu.ACCOUNTSREPORT) ExpandedMenu.NONE else ExpandedMenu.ACCOUNTSREPORT) },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = drawerItemColors
+                        )
+                        AnimatedVisibility(expandedMenu == ExpandedMenu.ACCOUNTSREPORT) {
+                            Column(modifier = Modifier.padding(start = if (!isCollapsed) 32.dp else 0.dp)) {
 
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Ledger Report") else Text("") },
-                                icon = {
-                                    DrawerIcon(
-                                        Icons.AutoMirrored.Filled.ListAlt,
-                                        contentDescription = null,
-                                        isCollapsed
-                                    )
-                                },
-                                selected = currentDestination?.route == "day_entry_report",
-                                onClick = { onDestinationClicked("day_entry_report") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Ledger Report") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.AutoMirrored.Filled.ListAlt,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "day_entry_report",
+                                    onClick = { onDestinationClicked("day_entry_report") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
 
-                            NavigationDrawerItem(
-                                label = { if (!isCollapsed) Text("Day Book Report") else Text("") },
-                                icon = {
-                                    DrawerIcon(
-                                        Icons.AutoMirrored.Filled.ReceiptLong,
-                                        contentDescription = null,
-                                        isCollapsed
-                                    )
-                                },
-                                selected = currentDestination?.route == "day_book_report",
-                                onClick = { onDestinationClicked("day_book_report") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                colors = subMenuColors
-                            )
+                                NavigationDrawerItem(
+                                    label = { if (!isCollapsed) Text("Day Book Report") else Text("") },
+                                    icon = {
+                                        DrawerIcon(
+                                            Icons.AutoMirrored.Filled.ReceiptLong,
+                                            contentDescription = null,
+                                            isCollapsed
+                                        )
+                                    },
+                                    selected = currentDestination?.route == "day_book_report",
+                                    onClick = { onDestinationClicked("day_book_report") },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = subMenuColors
+                                )
+                            }
                         }
                     }
+
                 }
 
                 // 🔹 Settings (admin only)

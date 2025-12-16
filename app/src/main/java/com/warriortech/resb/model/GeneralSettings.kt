@@ -29,4 +29,7 @@ data class GeneralSettings(
     var is_qr_show: Boolean,
     var remark1: String,
     var remark2: String,
+    var business_date: String,
+    var is_accounts: Boolean,
+    var is_inventory: Boolean
 )
