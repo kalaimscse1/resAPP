@@ -31,6 +31,9 @@ import com.warriortech.resb.ui.theme.PrimaryGreen
 import com.warriortech.resb.ui.theme.SecondaryGreen
 import com.warriortech.resb.ui.theme.SurfaceLight
 import com.warriortech.resb.util.CurrencySettings
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 
 
 @Composable
@@ -177,7 +180,13 @@ fun BillingScreen(
             onRemoveItem = { menuItem ->
                 viewModel.removeItem(menuItem)
             },
-            orderDetails = orderDetails
+            orderDetails = orderDetails,
+            onDiscountChange = { discount ->
+                viewModel.updateDiscountFlat(discount)
+            },
+            onOtherChargesChange = { charges ->
+                viewModel.updateOtherCharges(charges)
+            }
         )
 
     }
@@ -226,7 +235,9 @@ fun BillingContent(
     uiState: BillingPaymentUiState,
     onUpdateQuantity: (TblMenuItemResponse, Int) -> Unit,
     onRemoveItem: (TblMenuItemResponse) -> Unit,
-    orderDetails: List<TblOrderDetailsResponse>
+    orderDetails: List<TblOrderDetailsResponse>,
+    onDiscountChange: (Double) -> Unit = {},
+    onOtherChargesChange: (Double) -> Unit = {}
 ) {
     val currencyFormatter = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
 
@@ -318,7 +329,9 @@ fun BillingContent(
             EditableBillingRow(
                 label = "Discount",
                 amount = uiState.discountFlat,
-                currencyFormatter = currencyFormatter
+                currencyFormatter = currencyFormatter,
+                isEditable = true,
+                onValueChange = onDiscountChange
             )
         }
 
@@ -326,7 +339,9 @@ fun BillingContent(
             EditableBillingRow(
                 label = "Other Charges",
                 amount = uiState.otherChrages,
-                currencyFormatter = currencyFormatter
+                currencyFormatter = currencyFormatter,
+                isEditable = true,
+                onValueChange = onOtherChargesChange
             )
         }
 
@@ -438,8 +453,11 @@ fun BillingSummaryRow(
 fun EditableBillingRow(
     label: String,
     amount: Double,
-    currencyFormatter: NumberFormat
+    currencyFormatter: NumberFormat,
+    isEditable: Boolean = false,
+    onValueChange: ((Double) -> Unit)? = null
 ) {
+    var textValue by remember(amount) { mutableStateOf(if (amount == 0.0) "" else amount.toString()) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -448,13 +466,31 @@ fun EditableBillingRow(
     ) {
         Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Spacer(Modifier.width(8.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(
-            CurrencySettings.formatPlain(amount),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.width(80.dp),
-            textAlign = TextAlign.End
-        )
+        if (isEditable && onValueChange != null) {
+            OutlinedTextField(
+                value = textValue,
+                onValueChange = { newValue ->
+                    if (newValue.isEmpty() || newValue.toDoubleOrNull() != null) {
+                        textValue = newValue
+                        onValueChange(newValue.toDoubleOrNull() ?: 0.0)
+                    }
+                },
+                modifier = Modifier.width(100.dp),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.End),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal,
+                    imeAction = ImeAction.Done
+                )
+            )
+        } else {
+            Text(
+                CurrencySettings.formatPlain(amount),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.width(80.dp),
+                textAlign = TextAlign.End
+            )
+        }
     }
 }
 

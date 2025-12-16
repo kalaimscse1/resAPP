@@ -284,6 +284,7 @@ fun CategoryDialog(
                 onValueChange = { name = it.uppercase() },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -291,7 +292,9 @@ fun CategoryDialog(
                 value = orderBy,
                 onValueChange = { orderBy = it },
                 label = { Text("Order") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(

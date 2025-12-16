@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -132,6 +133,11 @@ fun MenuItemSettingsScreen(
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
                         Icon(Icons.Default.Add, contentDescription = "Add", tint = SurfaceLight)
+                    }
+                    IconButton(onClick = {
+                        ReportExport.importMenuItems(context)
+                    }) {
+                        Icon(Icons.Default.FileUpload, contentDescription = "Import", tint = SurfaceLight)
                     }
                     IconButton(onClick = {
                         if (searchMode) {

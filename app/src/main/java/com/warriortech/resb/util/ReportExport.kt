@@ -850,18 +850,13 @@ object ReportExport {
 
     }
 
-//    private fun generateQrImage(text: String): ByteArray {
-//        val size = 250
-//        val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
-//        val image = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
-//        for (x in 0 until size)
-//            for (y in 0 until size)
-//                image.setRGB(x, y, if (matrix[x, y]) 0 else 0xFFFFFF)
-//
-//        val baos = ByteArrayOutputStream()
-//        ImageIO.write(image, "png", baos)
-//        return baos.toByteArray()
-//    }
+    fun importMenuItems(context: Context) {
+        Toast.makeText(
+            context,
+            "Import feature: Please use the web dashboard to import menu items from Excel/CSV files.",
+            Toast.LENGTH_LONG
+        ).show()
+    }
 }
 
 

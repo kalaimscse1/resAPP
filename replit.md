@@ -7,6 +7,12 @@ A comprehensive Android restaurant billing system built with Kotlin, Jetpack Com
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (Latest: December 16, 2025)
+- **UI/UX FIXES**: Fixed 6 reported issues in the billing system
+  - **Bill Discount/Charges**: Made discount and other charges fields editable in BillingScreen with proper TextField inputs and ViewModel integration
+  - **Enter Key Behavior**: Added singleLine=true to dialog text fields in MenuCategorySettingsScreen, TableSettingsScreen, and AreaSettingsScreen to prevent unwanted newlines
+  - **Keyboard Visibility**: Added imePadding() modifier to ReusableBottomSheet for proper keyboard visibility in bottom sheet dialogs
+  - **Payment Proceed Button**: Fixed proceed button to only enable when user manually enters payment amount (removed auto-fill LaunchedEffect from PaymentMethodCard)
+  - **Import Feature**: Added import icon to MenuItemSettingsScreen with placeholder function for future Excel/CSV import functionality
 - **IMPORT COMPLETED**: Successfully migrated project to Replit environment
   - Installed Java GraalVM toolchain for Android development
   - Configured Android SDK with Platform 35, Build Tools 35, and Platform Tools 36

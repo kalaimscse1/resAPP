@@ -29,6 +29,7 @@ fun ReusableBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .imePadding()
                 .padding(16.dp)
         ) {
             // Sheet Title

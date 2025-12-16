@@ -298,7 +298,8 @@ fun AddAreaDialog(
                 onValueChange = { name = it.uppercase() },
                 label = { Text("Area Name") },
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
 
             // Buttons
@@ -388,7 +389,8 @@ fun EditAreaDialog(
                 onValueChange = { name = it.uppercase() },
                 label = { Text("Area Name") },
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
             )
 
             // Active checkbox

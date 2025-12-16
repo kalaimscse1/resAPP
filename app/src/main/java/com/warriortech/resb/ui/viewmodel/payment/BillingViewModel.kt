@@ -420,9 +420,21 @@ class BillingViewModel @Inject constructor(
     fun updateDiscountFlat(discount: Double) {
         _uiState.update { currentState ->
             val newTotalAmount =
-                calculateTotal(currentState.subtotal, currentState.taxAmount, discount)
+                calculateTotal(currentState.subtotal, currentState.taxAmount, discount) + currentState.otherChrages
             currentState.copy(
                 discountFlat = discount,
+                totalAmount = newTotalAmount,
+                amountToPay = newTotalAmount
+            )
+        }
+    }
+
+    fun updateOtherCharges(charges: Double) {
+        _uiState.update { currentState ->
+            val newTotalAmount =
+                calculateTotal(currentState.subtotal, currentState.taxAmount, currentState.discountFlat) + charges
+            currentState.copy(
+                otherChrages = charges,
                 totalAmount = newTotalAmount,
                 amountToPay = newTotalAmount
             )

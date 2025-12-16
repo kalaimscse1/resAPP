@@ -288,6 +288,7 @@ fun TableDialog(
                     onValueChange = { tableNumber = it.uppercase() },
                     label = { Text("Table Name") },
                     modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -306,7 +307,8 @@ fun TableDialog(
                     onValueChange = { capacity = it },
                     label = { Text("Capacity") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 StringDropdown(

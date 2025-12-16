@@ -383,6 +383,14 @@ fun PaymentBottomBar(
     customer: TblCustomer? = null
 ) {
     val totalAmount = uiState.amountToPay
+    val hasManualEntry = when (uiState.selectedPaymentMethod?.name) {
+        "CASH" -> uiState.cashAmount > 0.0
+        "CARD" -> uiState.cardAmount > 0.0
+        "UPI" -> uiState.upiAmount > 0.0
+        "OTHERS" -> (uiState.cashAmount + uiState.cardAmount + uiState.upiAmount) > 0.0
+        "DUE" -> true
+        else -> false
+    }
     var paidAmount = when (uiState.selectedPaymentMethod?.name) {
         "CASH" -> if (uiState.cashAmount == 0.0) uiState.amountToPay else uiState.cashAmount
         "CARD" -> if (uiState.cardAmount == 0.0) uiState.amountToPay else uiState.cardAmount
@@ -399,6 +407,7 @@ fun PaymentBottomBar(
 
     val enabled = when {
         method.isBlank() -> false
+        method != "DUE" && !hasManualEntry -> false
         isDue && paidAmount > totalAmount -> false
         isDue && !hasCustomer -> false
         paidAmount <= 0 -> false
