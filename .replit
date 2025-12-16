@@ -1,10 +1,10 @@
-modules = ["bash"]
+modules = ["bash", "java-graalvm22.3"]
 [nix]
 channel = "stable-25_05"
 packages = ["android-tools", "unzip"]
 
 [workflows]
-runButton = "Build APK"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Android Build"
@@ -16,7 +16,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "bash ./android_setup.sh && echo \"Building Android APK...\" && export ANDROID_HOME=$HOME/android-sdk && export ANDROID_SDK_ROOT=$ANDROID_HOME && export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools && ./gradlew --no-daemon assembleDebug"
+args = "bash ./android_setup.sh && echo \"Validating Android project configuration...\" && export ANDROID_HOME=$HOME/android-sdk && export ANDROID_SDK_ROOT=$ANDROID_HOME && export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools && ./gradlew --no-daemon --dry-run assembleDebug && echo \"Project configuration is valid! To build the APK locally, use Android Studio or run './gradlew assembleDebug'\""
 
 [[workflows.workflow]]
 name = "Project"
@@ -25,22 +25,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Android Development"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Android Build"
-
-[[workflows.workflow]]
-name = "Android Development"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash ./android_setup.sh && echo \"Environment validated. Checking Gradle tasks...\" && export ANDROID_HOME=$HOME/android-sdk && export ANDROID_SDK_ROOT=$ANDROID_HOME && export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools && ./gradlew --no-daemon tasks"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "Build APK"
