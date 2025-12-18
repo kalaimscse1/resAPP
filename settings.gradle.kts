@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Resb"
+rootProject.name = "ResBMultiplatform"
 include(":app")
- 
+include(":shared")

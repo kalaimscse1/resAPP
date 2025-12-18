@@ -1,0 +1,221 @@
+-- Menu Items Table
+CREATE TABLE MenuItem (
+    menu_item_id INTEGER PRIMARY KEY NOT NULL,
+    menu_item_code TEXT NOT NULL,
+    menu_item_name TEXT NOT NULL,
+    menu_item_name_tamil TEXT NOT NULL,
+    menu_id INTEGER NOT NULL,
+    item_cat_id INTEGER NOT NULL,
+    image TEXT NOT NULL DEFAULT '',
+    rate REAL NOT NULL,
+    ac_rate REAL NOT NULL,
+    parcel_rate REAL NOT NULL,
+    parcel_charge REAL NOT NULL,
+    tax_id INTEGER NOT NULL,
+    kitchen_cat_id INTEGER NOT NULL,
+    is_available TEXT NOT NULL,
+    is_favourite INTEGER NOT NULL DEFAULT 0,
+    stock_maintain TEXT NOT NULL,
+    preparation_time INTEGER NOT NULL DEFAULT 0,
+    rate_lock TEXT NOT NULL,
+    unit_id INTEGER NOT NULL,
+    min_stock INTEGER NOT NULL,
+    hsn_code TEXT NOT NULL,
+    order_by INTEGER NOT NULL,
+    is_inventory INTEGER NOT NULL,
+    is_raw TEXT NOT NULL,
+    cess_specific REAL NOT NULL,
+    is_active INTEGER NOT NULL
+);
+
+-- Menu Categories Table
+CREATE TABLE MenuCategory (
+    item_cat_id INTEGER PRIMARY KEY NOT NULL,
+    item_cat_name TEXT NOT NULL,
+    order_by TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- Tables Table
+CREATE TABLE RestaurantTable (
+    table_id INTEGER PRIMARY KEY NOT NULL,
+    area_id INTEGER NOT NULL,
+    table_name TEXT NOT NULL,
+    seating_capacity INTEGER NOT NULL,
+    is_ac TEXT NOT NULL,
+    table_status TEXT NOT NULL,
+    table_availability TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- Areas Table
+CREATE TABLE Area (
+    area_id INTEGER PRIMARY KEY NOT NULL,
+    area_name TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- Staff Table
+CREATE TABLE Staff (
+    staff_id INTEGER PRIMARY KEY NOT NULL,
+    staff_name TEXT NOT NULL,
+    contact_no TEXT NOT NULL,
+    address TEXT NOT NULL,
+    user_name TEXT NOT NULL,
+    password TEXT NOT NULL,
+    role_id INTEGER NOT NULL,
+    role TEXT NOT NULL,
+    last_login TEXT NOT NULL,
+    is_block INTEGER NOT NULL DEFAULT 0,
+    counter_id INTEGER NOT NULL,
+    counter_name TEXT NOT NULL,
+    area_id INTEGER NOT NULL,
+    area_name TEXT NOT NULL,
+    commission REAL NOT NULL DEFAULT 0.0,
+    is_active INTEGER NOT NULL
+);
+
+-- Customers Table
+CREATE TABLE Customer (
+    customer_id INTEGER PRIMARY KEY NOT NULL,
+    customer_name TEXT NOT NULL,
+    contact_no TEXT NOT NULL,
+    address TEXT NOT NULL DEFAULT '',
+    email_address TEXT NOT NULL DEFAULT '',
+    gst_no TEXT NOT NULL DEFAULT '',
+    igst_status INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- Order Master Table
+CREATE TABLE OrderMaster (
+    order_master_id TEXT PRIMARY KEY NOT NULL,
+    order_date TEXT NOT NULL,
+    order_create_time TEXT NOT NULL,
+    order_completed_time TEXT NOT NULL,
+    staff_id INTEGER NOT NULL,
+    is_dine_in INTEGER NOT NULL DEFAULT 0,
+    is_take_away INTEGER NOT NULL DEFAULT 0,
+    is_delivery INTEGER NOT NULL DEFAULT 0,
+    table_id INTEGER NOT NULL,
+    no_of_person INTEGER NOT NULL DEFAULT 1,
+    waiter_request_status INTEGER NOT NULL DEFAULT 0,
+    kitchen_response_status INTEGER NOT NULL DEFAULT 0,
+    order_status TEXT NOT NULL,
+    is_delivered INTEGER NOT NULL DEFAULT 0,
+    is_merge INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- Order Details Table
+CREATE TABLE OrderDetails (
+    order_details_id INTEGER PRIMARY KEY NOT NULL,
+    order_master_id TEXT NOT NULL,
+    kot_number INTEGER,
+    menu_item_id INTEGER NOT NULL,
+    rate REAL NOT NULL,
+    actual_rate REAL NOT NULL,
+    qty INTEGER NOT NULL,
+    total REAL NOT NULL,
+    tax_id INTEGER NOT NULL,
+    tax_name TEXT NOT NULL,
+    tax_amount REAL NOT NULL,
+    sgst_per REAL NOT NULL,
+    sgst REAL NOT NULL,
+    cgst_per REAL NOT NULL,
+    cgst REAL NOT NULL,
+    igst_per REAL NOT NULL,
+    igst REAL NOT NULL,
+    cess_per REAL NOT NULL,
+    cess REAL NOT NULL,
+    cess_specific REAL NOT NULL,
+    grand_total REAL NOT NULL,
+    prepare_status INTEGER NOT NULL DEFAULT 0,
+    item_add_mode INTEGER NOT NULL DEFAULT 0,
+    is_flag INTEGER NOT NULL DEFAULT 0,
+    merge_order_nos TEXT NOT NULL DEFAULT '',
+    merge_order_tables TEXT NOT NULL DEFAULT '',
+    merge_pax INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (order_master_id) REFERENCES OrderMaster(order_master_id)
+);
+
+-- Tax Table
+CREATE TABLE Tax (
+    tax_id INTEGER PRIMARY KEY NOT NULL,
+    tax_name TEXT NOT NULL,
+    tax_percentage REAL NOT NULL,
+    cess_percentage REAL NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1
+);
+
+-- Session/Auth Table
+CREATE TABLE Session (
+    id INTEGER PRIMARY KEY NOT NULL,
+    token TEXT NOT NULL,
+    staff_id INTEGER NOT NULL,
+    company_code TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
+-- Queries
+getAllMenuItems:
+SELECT * FROM MenuItem WHERE is_active = 1;
+
+getMenuItemById:
+SELECT * FROM MenuItem WHERE menu_item_id = ?;
+
+insertMenuItem:
+INSERT OR REPLACE INTO MenuItem VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteMenuItem:
+DELETE FROM MenuItem WHERE menu_item_id = ?;
+
+getAllCategories:
+SELECT * FROM MenuCategory WHERE is_active = 1;
+
+insertCategory:
+INSERT OR REPLACE INTO MenuCategory VALUES (?, ?, ?, ?);
+
+getAllTables:
+SELECT * FROM RestaurantTable WHERE is_active = 1;
+
+getTableById:
+SELECT * FROM RestaurantTable WHERE table_id = ?;
+
+insertTable:
+INSERT OR REPLACE INTO RestaurantTable VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+updateTableStatus:
+UPDATE RestaurantTable SET table_status = ?, table_availability = ? WHERE table_id = ?;
+
+getAllAreas:
+SELECT * FROM Area WHERE is_active = 1;
+
+insertArea:
+INSERT OR REPLACE INTO Area VALUES (?, ?, ?);
+
+getAllOrders:
+SELECT * FROM OrderMaster WHERE is_active = 1;
+
+getOrderById:
+SELECT * FROM OrderMaster WHERE order_master_id = ?;
+
+insertOrder:
+INSERT OR REPLACE INTO OrderMaster VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getOrderDetails:
+SELECT * FROM OrderDetails WHERE order_master_id = ? AND is_active = 1;
+
+insertOrderDetails:
+INSERT OR REPLACE INTO OrderDetails VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getCurrentSession:
+SELECT * FROM Session LIMIT 1;
+
+insertSession:
+INSERT OR REPLACE INTO Session VALUES (?, ?, ?, ?, ?, ?);
+
+clearSession:
+DELETE FROM Session;
